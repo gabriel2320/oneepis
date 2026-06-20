@@ -10,6 +10,10 @@ export function canCreatePatient(user?: AuthUser | null) {
   return hasAnyRole(user, patientWriters);
 }
 
+export function canManagePatient(user?: AuthUser | null) {
+  return hasAnyRole(user, patientWriters);
+}
+
 export function canManageClinicalEntries(user?: AuthUser | null) {
   return hasAnyRole(user, medicalWriters);
 }

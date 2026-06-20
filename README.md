@@ -42,6 +42,7 @@ Rutas principales:
 - `/login`
 - `/pacientes`
 - `/pacientes/nuevo`
+- `/pacientes/[patientId]/estado`
 - `/pacientes/[patientId]/ficha`
 - `/pacientes/[patientId]/evoluciones`
 - `/pacientes/[patientId]/evoluciones/nueva`

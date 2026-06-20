@@ -10,6 +10,14 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText(/Borrador IA/)).toBeVisible();
 });
 
+test("patient status screen renders governed edit form", async ({ page }) => {
+  await page.goto(`/pacientes/${demoPatientId}/estado`);
+
+  await expect(page.getByRole("heading", { name: "Estado clinico" })).toBeVisible();
+  await expect(page.getByText("Estado y contexto")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar estado" })).toBeDisabled();
+});
+
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 
