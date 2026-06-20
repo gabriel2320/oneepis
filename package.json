@@ -1,0 +1,24 @@
+{
+  "name": "oneepis",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ficha clinica inteligente, modular y auditable.",
+  "packageManager": "npm@11.13.0",
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "lint:web": "npm --workspace apps/web run lint",
+    "typecheck:web": "npm --workspace apps/web run typecheck",
+    "api:dev": "python -m uvicorn oneepis_api.main:app --reload --app-dir apps/api/src",
+    "api:test": "python -m pytest apps/api/tests",
+    "api:openapi": "python apps/api/scripts/export_openapi.py"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
