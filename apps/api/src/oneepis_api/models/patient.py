@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from oneepis_api.models.clinical_record import (
         ActiveProblem,
         Allergy,
+        ClinicalEncounter,
         ClinicalEntry,
         Medication,
         VitalSign,
@@ -89,6 +90,10 @@ class Patient(Base, IdMixin, TimestampMixin):
         cascade="all, delete-orphan",
     )
     active_problems: Mapped[list[ActiveProblem]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
+    encounters: Mapped[list[ClinicalEncounter]] = relationship(
         back_populates="patient",
         cascade="all, delete-orphan",
     )

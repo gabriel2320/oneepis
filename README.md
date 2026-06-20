@@ -27,6 +27,7 @@ La UI usa API real por defecto. Los datos demo quedan reservados para `NEXT_PUBL
 Dominios implementados:
 
 - pacientes
+- encuentros clinicos
 - evoluciones clinicas SOAP
 - estado de ficha, contexto asistencial y problemas activos
 - alergias
@@ -44,6 +45,8 @@ Rutas principales:
 - `/pacientes/nuevo`
 - `/pacientes/[patientId]/estado`
 - `/pacientes/[patientId]/ficha`
+- `/pacientes/[patientId]/encuentros`
+- `/pacientes/[patientId]/encuentros/nuevo`
 - `/pacientes/[patientId]/evoluciones`
 - `/pacientes/[patientId]/evoluciones/nueva`
 - `/pacientes/[patientId]/problemas`

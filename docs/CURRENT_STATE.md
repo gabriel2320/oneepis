@@ -20,6 +20,7 @@ Router principal: `apps/api/src/oneepis_api/api/v1/routes/patients.py`.
 Dominios CRUD:
 
 - pacientes
+- encuentros clinicos
 - clinical entries
 - problemas activos
 - alergias
@@ -49,6 +50,7 @@ Permisos finos:
 
 - matriz viva en `docs/PERMISSIONS.md`
 - enfermeria puede registrar signos vitales, pero no SOAP, medicacion, alergias ni IA clinica
+- encuentros clinicos requieren rol medico/admin/dev
 - problemas activos requieren rol medico/admin/dev
 - estado de ficha y contexto asistencial se editan desde UI con rol medico/admin/dev
 - solo_lectura puede leer, pero no escribir
@@ -77,7 +79,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-030
+## Programa activo PR-018 a PR-031
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -92,6 +94,7 @@ Capas:
 - PR-028: Auditoria fuerte con correlation ID y before/after.
 - PR-029: Estado de ficha, contexto asistencial y problemas activos auditados.
 - PR-030: Pantalla gobernada para editar estado clinico y contexto asistencial.
+- PR-031: Encuentros clinicos auditados como puente para consulta y hospitalizacion.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

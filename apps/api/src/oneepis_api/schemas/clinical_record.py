@@ -11,6 +11,8 @@ from oneepis_api.models.clinical_record import (
     AllergySeverity,
     ClinicalEntryKind,
     ClinicalEntryStatus,
+    EncounterStatus,
+    EncounterType,
     RecordStatus,
 )
 from oneepis_api.schemas.common import APIModel
@@ -136,6 +138,37 @@ class ActiveProblemUpdate(APIModel):
 
 
 class ActiveProblemRead(ActiveProblemBase):
+    id: uuid.UUID
+    patient_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class ClinicalEncounterBase(APIModel):
+    type: EncounterType = EncounterType.UNKNOWN
+    status: EncounterStatus = EncounterStatus.IN_PROGRESS
+    reason: str = Field(min_length=1, max_length=200)
+    started_at: datetime
+    ended_at: datetime | None = None
+    location_label: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=320)
+
+
+class ClinicalEncounterCreate(ClinicalEncounterBase):
+    pass
+
+
+class ClinicalEncounterUpdate(APIModel):
+    type: EncounterType | None = None
+    status: EncounterStatus | None = None
+    reason: str | None = Field(default=None, min_length=1, max_length=200)
+    started_at: datetime | None = None
+    ended_at: datetime | None = None
+    location_label: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=320)
+
+
+class ClinicalEncounterRead(ClinicalEncounterBase):
     id: uuid.UUID
     patient_id: uuid.UUID
     created_at: datetime

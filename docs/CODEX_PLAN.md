@@ -31,6 +31,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-028: Auditoria fuerte con correlation ID y before/after.
 - PR-029: Estado de ficha, contexto asistencial y problemas activos auditados.
 - PR-030: Pantalla gobernada para editar estado clinico y contexto asistencial.
+- PR-031: Encuentros clinicos auditados como puente para consulta y hospitalizacion.
 
 ## Reglas no negociables
 

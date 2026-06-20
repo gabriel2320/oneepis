@@ -85,6 +85,20 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     assert patient_response.status_code == 201
     patient_id = patient_response.json()["id"]
 
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Control clinico",
+            "started_at": "2026-06-20T10:00:00Z",
+            "location_label": "Consulta demo",
+        },
+    )
+    assert encounter_response.status_code == 201
+    assert encounter_response.json()["reason"] == "Control clinico"
+
     entry_response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-entries",
         headers=auth,
@@ -172,6 +186,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     actions = {item["action"] for item in audit_events}
     assert {
         "patient.created",
+        "encounter.created",
         "clinical_entry.created",
         "allergy.created",
         "medication.created",
@@ -336,6 +351,17 @@ def test_nursing_can_record_vitals_but_not_medical_actions(client: TestClient) -
     )
     assert problem_response.status_code == 403
 
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=nursing_auth,
+        json={
+            "type": "hospitalization",
+            "reason": "Ingreso hospitalario",
+            "started_at": "2026-06-20T12:10:00Z",
+        },
+    )
+    assert encounter_response.status_code == 403
+
     ai_response = client.post(
         f"/api/v1/patients/{patient_id}/ai/suggestions",
         headers=nursing_auth,
@@ -420,3 +446,68 @@ def test_patient_status_and_problem_update_are_audited(client: TestClient) -> No
         "status": "resolved",
         "resolved_on": "2026-06-20",
     }
+
+
+def test_encounter_update_and_cancel_are_audited(client: TestClient) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso hospitalario",
+            "started_at": "2026-06-20T08:00:00Z",
+            "location_label": "Sala 2",
+        },
+    )
+    assert create_response.status_code == 201
+    encounter_id = create_response.json()["id"]
+
+    list_response = client.get(f"/api/v1/patients/{patient_id}/encounters", headers=auth)
+    assert list_response.status_code == 200
+    assert list_response.json()[0]["id"] == encounter_id
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter_id}",
+        headers=auth,
+        json={
+            "status": "completed",
+            "ended_at": "2026-06-20T18:00:00Z",
+            "notes": "Cierre administrativo de desarrollo",
+        },
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["status"] == "completed"
+
+    cancel_response = client.delete(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter_id}",
+        headers=auth,
+    )
+    assert cancel_response.status_code == 204
+
+    get_response = client.get(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter_id}",
+        headers=auth,
+    )
+    assert get_response.status_code == 200
+    assert get_response.json()["status"] == "cancelled"
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    events = audit_response.json()
+    encounter_update = next(item for item in events if item["action"] == "encounter.updated")
+    assert encounter_update["extra_data"]["before"] == {
+        "status": "in_progress",
+        "ended_at": None,
+        "notes": None,
+    }
+    assert encounter_update["extra_data"]["after"] == {
+        "status": "completed",
+        "ended_at": "2026-06-20T18:00:00+00:00",
+        "notes": "Cierre administrativo de desarrollo",
+    }
+    encounter_cancel = next(item for item in events if item["action"] == "encounter.cancelled")
+    assert encounter_cancel["extra_data"]["after"] == {"status": "cancelled"}

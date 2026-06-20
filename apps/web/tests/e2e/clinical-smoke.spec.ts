@@ -18,6 +18,17 @@ test("patient status screen renders governed edit form", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Guardar estado" })).toBeDisabled();
 });
 
+test("patient encounters render list and creation screen", async ({ page }) => {
+  await page.goto(`/pacientes/${demoPatientId}/encuentros`);
+
+  await expect(page.getByText("Encuentro demo")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Nuevo" })).toBeVisible();
+
+  await page.goto(`/pacientes/${demoPatientId}/encuentros/nuevo`);
+  await expect(page.getByRole("heading", { name: "Nuevo encuentro" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar encuentro" })).toBeDisabled();
+});
+
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 

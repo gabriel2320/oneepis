@@ -24,6 +24,7 @@ import {
   AuditTimeline,
   ClinicalTimeline,
   CriticalAlerts,
+  EncounterList,
   LatestVitalsTrend,
   MedicationList,
   PatientLongitudinalSummary,
@@ -41,14 +42,16 @@ import {
   createAllergy,
   createActiveProblem,
   createClinicalEntry,
+  createClinicalEncounter,
   createMedication,
   createVitalSign,
+  listClinicalEncounters,
   listAuditEvents,
   listVitalSigns,
 } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
 import { createPatient, getPatientRecord, listPatients, updatePatient } from "@/lib/api/patients";
-import { demoRecords } from "@/lib/demo-record";
+import { demoEncounters, demoRecords } from "@/lib/demo-record";
 import {
   canCreatePatient,
   canManagePatient,
@@ -56,6 +59,7 @@ import {
   canManageClinicalEntries,
   canManageMedications,
   canManageProblems,
+  canManageEncounters,
   canRecordVitals,
   canUseClinicalAi,
 } from "@/lib/permissions";
@@ -64,6 +68,9 @@ import type {
   ActiveProblemCreate,
   AuthUser,
   CareContext,
+  ClinicalEncounterCreate,
+  EncounterStatus,
+  EncounterType,
   MedicationCreate,
   Patient,
   PatientAiSuggestionsResponse,
@@ -98,6 +105,20 @@ const soapSchema = z.object({
 
 type SoapFormValues = z.infer<typeof soapSchema>;
 
+const encounterTypeOptions: { value: EncounterType; label: string }[] = [
+  { value: "ambulatory", label: "Ambulatorio" },
+  { value: "hospitalization", label: "Hospitalizacion" },
+  { value: "emergency", label: "Urgencia" },
+  { value: "unknown", label: "No definido" },
+];
+
+const encounterStatusOptions: { value: EncounterStatus; label: string }[] = [
+  { value: "scheduled", label: "Programado" },
+  { value: "in_progress", label: "En curso" },
+  { value: "completed", label: "Completado" },
+  { value: "cancelled", label: "Cancelado" },
+];
+
 const clinicalStatusOptions: { value: PatientClinicalStatus; label: string }[] = [
   { value: "draft", label: "Borrador" },
   { value: "active", label: "Activa" },
@@ -113,6 +134,7 @@ const careContextOptions: { value: CareContext; label: string }[] = [
 
 type PatientSection =
   | "ficha"
+  | "encuentros"
   | "evoluciones"
   | "problemas"
   | "alergias"
@@ -567,6 +589,151 @@ function PatientStatusForm({
   );
 }
 
+export function NewEncounterPage() {
+  const patientId = usePatientId();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canWrite = canManageEncounters(user);
+  const [formState, setFormState] = useState({
+    type: "ambulatory" as EncounterType,
+    status: "in_progress" as EncounterStatus,
+    reason: "",
+    started_at: toDatetimeLocal(new Date()),
+    ended_at: "",
+    location_label: "",
+    notes: "",
+  });
+  const mutation = useMutation({
+    mutationFn: (payload: ClinicalEncounterCreate) => createClinicalEncounter(patientId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["clinical-encounters", patientId] });
+      router.push(`/pacientes/${patientId}/encuentros`);
+    },
+  });
+
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (!record) {
+    return <PatientLoadError />;
+  }
+
+  return (
+    <PatientClinicalShell record={record} activeSection="encuentros">
+      <div className="max-w-xl space-y-5">
+        <BackLink href={`/pacientes/${patientId}/encuentros`} label="Encuentros" />
+        <PageTitle title="Nuevo encuentro" description="Consulta, ingreso o atencion ligada al paciente." />
+        {DEMO_MODE ? (
+          <ErrorState description="El modo demo no permite crear encuentros reales." />
+        ) : null}
+        {!DEMO_MODE && !userLoading && !canWrite ? (
+          <ErrorState description="Tu rol actual no permite crear encuentros clinicos." />
+        ) : null}
+        <ClinicalSectionCard title="Encuentro">
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              mutation.mutate({
+                type: formState.type,
+                status: formState.status,
+                reason: formState.reason,
+                started_at: new Date(formState.started_at).toISOString(),
+                ended_at: formState.ended_at ? new Date(formState.ended_at).toISOString() : null,
+                location_label: emptyToNull(formState.location_label),
+                notes: emptyToNull(formState.notes),
+              });
+            }}
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Tipo">
+                <select
+                  className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                  value={formState.type}
+                  onChange={(event) =>
+                    setFormState({ ...formState, type: event.target.value as EncounterType })
+                  }
+                >
+                  {encounterTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Estado">
+                <select
+                  className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                  value={formState.status}
+                  onChange={(event) =>
+                    setFormState({ ...formState, status: event.target.value as EncounterStatus })
+                  }
+                >
+                  {encounterStatusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+            <Field label="Motivo">
+              <Input
+                value={formState.reason}
+                onChange={(event) => setFormState({ ...formState, reason: event.target.value })}
+              />
+            </Field>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Inicio">
+                <Input
+                  type="datetime-local"
+                  value={formState.started_at}
+                  onChange={(event) => setFormState({ ...formState, started_at: event.target.value })}
+                />
+              </Field>
+              <Field label="Cierre">
+                <Input
+                  type="datetime-local"
+                  value={formState.ended_at}
+                  onChange={(event) => setFormState({ ...formState, ended_at: event.target.value })}
+                />
+              </Field>
+            </div>
+            <Field label="Ubicacion">
+              <Input
+                value={formState.location_label}
+                onChange={(event) => setFormState({ ...formState, location_label: event.target.value })}
+              />
+            </Field>
+            <Field label="Notas">
+              <Textarea
+                value={formState.notes}
+                onChange={(event) => setFormState({ ...formState, notes: event.target.value })}
+              />
+            </Field>
+            <Button
+              type="submit"
+              disabled={
+                mutation.isPending ||
+                DEMO_MODE ||
+                !canWrite ||
+                !formState.reason.trim() ||
+                !formState.started_at.trim()
+              }
+            >
+              {mutation.isPending ? "Guardando..." : "Guardar encuentro"}
+            </Button>
+            {mutation.isError ? <p className="text-sm text-destructive">No se pudo crear el encuentro.</p> : null}
+          </form>
+        </ClinicalSectionCard>
+      </div>
+    </PatientClinicalShell>
+  );
+}
+
 function PatientSectionContent({
   record,
   section,
@@ -640,6 +807,10 @@ function PatientSectionContent({
     );
   }
 
+  if (section === "encuentros") {
+    return <EncounterWorkspace patientId={patientId} user={user} />;
+  }
+
   if (section === "alergias") {
     return <AllergyWorkspace patientId={patientId} record={record} user={user} />;
   }
@@ -685,6 +856,39 @@ function PatientSectionContent({
         title="Documentos sin uploads reales"
         description="Se habilitara cuando existan autenticacion, permisos y politica PHI."
       />
+    </ClinicalSectionCard>
+  );
+}
+
+function EncounterWorkspace({ patientId, user }: { patientId: string; user: AuthUser | null }) {
+  const canWrite = canManageEncounters(user);
+  const encountersQuery = useQuery({
+    queryKey: ["clinical-encounters", patientId],
+    queryFn: () => listClinicalEncounters(patientId),
+    enabled: !DEMO_MODE,
+  });
+  const encounters = DEMO_MODE
+    ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
+    : encountersQuery.data;
+
+  return (
+    <ClinicalSectionCard
+      title="Encuentros"
+      action={
+        canWrite ? (
+          <Button asChild size="sm">
+            <Link href={`/pacientes/${patientId}/encuentros/nuevo`}>Nuevo</Link>
+          </Button>
+        ) : (
+          <NoPermissionButton label="Sin permiso" />
+        )
+      }
+    >
+      {encountersQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
+      {encountersQuery.isError && !DEMO_MODE ? (
+        <ErrorState description="No se pudieron cargar los encuentros." onRetry={() => encountersQuery.refetch()} />
+      ) : null}
+      {encounters ? <EncounterList encounters={encounters} /> : null}
     </ClinicalSectionCard>
   );
 }

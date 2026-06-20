@@ -46,6 +46,20 @@ class RecordStatus(enum.StrEnum):
     ENTERED_IN_ERROR = "entered_in_error"
 
 
+class EncounterType(enum.StrEnum):
+    AMBULATORY = "ambulatory"
+    HOSPITALIZATION = "hospitalization"
+    EMERGENCY = "emergency"
+    UNKNOWN = "unknown"
+
+
+class EncounterStatus(enum.StrEnum):
+    SCHEDULED = "scheduled"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
 class ClinicalEntry(Base, IdMixin, TimestampMixin):
     __tablename__ = "clinical_entries"
 
@@ -145,6 +159,36 @@ class ActiveProblem(Base, IdMixin, TimestampMixin):
     notes: Mapped[str | None] = mapped_column(String(280), nullable=True)
 
     patient: Mapped[Patient] = relationship(back_populates="active_problems")
+
+
+class ClinicalEncounter(Base, IdMixin, TimestampMixin):
+    __tablename__ = "clinical_encounters"
+
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        index=True,
+    )
+    type: Mapped[EncounterType] = mapped_column(
+        Enum(EncounterType, values_callable=enum_values, name="encounter_type"),
+        default=EncounterType.UNKNOWN,
+        nullable=False,
+    )
+    status: Mapped[EncounterStatus] = mapped_column(
+        Enum(EncounterStatus, values_callable=enum_values, name="encounter_status"),
+        default=EncounterStatus.IN_PROGRESS,
+        nullable=False,
+    )
+    reason: Mapped[str] = mapped_column(String(200), nullable=False)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        index=True,
+        nullable=False,
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    location_label: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(320), nullable=True)
+
+    patient: Mapped[Patient] = relationship(back_populates="encounters")
 
 
 class VitalSign(Base, IdMixin, TimestampMixin):

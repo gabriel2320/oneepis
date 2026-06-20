@@ -29,6 +29,7 @@ import type {
   Allergy,
   AuditEvent,
   ClinicalEntry,
+  ClinicalEncounter,
   Medication,
   PatientRecordSnapshot,
   VitalSign,
@@ -174,6 +175,37 @@ export function ClinicalTimeline({ entries }: { entries: ClinicalEntry[] }) {
             <SoapBlock label="P" value={entry.plan} />
           </div>
         </TimelineCard>
+      ))}
+    </div>
+  );
+}
+
+export function EncounterList({ encounters }: { encounters: ClinicalEncounter[] }) {
+  if (encounters.length === 0) {
+    return <EmptyState title="Sin encuentros" description="Crea una consulta, ingreso o atencion inicial." />;
+  }
+
+  return (
+    <div className="space-y-2">
+      {encounters.map((encounter) => (
+        <div key={encounter.id} className="rounded-md border p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">{encounter.reason}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {formatDateTime(encounter.started_at)}
+                {encounter.location_label ? ` - ${encounter.location_label}` : ""}
+              </p>
+              {encounter.notes ? <p className="mt-1 text-xs text-muted-foreground">{encounter.notes}</p> : null}
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <Badge variant="outline">{encounter.type}</Badge>
+              <Badge variant={encounter.status === "in_progress" ? "safe" : "secondary"}>
+                {encounter.status}
+              </Badge>
+            </div>
+          </div>
+        </div>
       ))}
     </div>
   );

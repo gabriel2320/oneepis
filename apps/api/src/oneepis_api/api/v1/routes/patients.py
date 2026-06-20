@@ -11,6 +11,7 @@ from oneepis_api.api.deps import (
     AiAccessDep,
     AllergyActorDep,
     ClinicalEntryActorDep,
+    EncounterActorDep,
     MedicationActorDep,
     PatientActorDep,
     ProblemActorDep,
@@ -23,8 +24,10 @@ from oneepis_api.models.audit import AuditEvent
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
+    ClinicalEncounter,
     ClinicalEntry,
     ClinicalEntryStatus,
+    EncounterStatus,
     Medication,
     RecordStatus,
     VitalSign,
@@ -40,6 +43,9 @@ from oneepis_api.schemas.clinical_record import (
     AllergyCreate,
     AllergyRead,
     AllergyUpdate,
+    ClinicalEncounterCreate,
+    ClinicalEncounterRead,
+    ClinicalEncounterUpdate,
     ClinicalEntryCreate,
     ClinicalEntryRead,
     ClinicalEntryUpdate,
@@ -190,6 +196,143 @@ def create_patient_ai_suggestions(
     snapshot = get_patient_record(patient_id, session)
     provider = get_ai_provider(settings)
     return provider.create_patient_suggestions(str(patient_id), snapshot, payload)
+
+
+@router.get("/{patient_id}/encounters", response_model=list[ClinicalEncounterRead])
+def list_clinical_encounters(
+    patient_id: uuid.UUID,
+    session: SessionDep,
+    limit: LimitQuery = 50,
+    offset: OffsetQuery = 0,
+) -> list[ClinicalEncounter]:
+    require_patient(session, patient_id)
+    statement = (
+        select(ClinicalEncounter)
+        .where(ClinicalEncounter.patient_id == patient_id)
+        .order_by(ClinicalEncounter.started_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    return list(session.scalars(statement))
+
+
+@router.post(
+    "/{patient_id}/encounters",
+    response_model=ClinicalEncounterRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_clinical_encounter(
+    patient_id: uuid.UUID,
+    payload: ClinicalEncounterCreate,
+    session: SessionDep,
+    actor: EncounterActorDep,
+) -> ClinicalEncounter:
+    require_patient(session, patient_id)
+    encounter = ClinicalEncounter(patient_id=patient_id, **payload.model_dump())
+    session.add(encounter)
+    session.flush()
+    record_audit_event(
+        session,
+        action="encounter.created",
+        entity_type="encounter",
+        entity_id=encounter.id,
+        actor_id=actor,
+        metadata={
+            "patient_id": str(patient_id),
+            "type": encounter.type.value,
+            "status": encounter.status.value,
+        },
+        after=audit_snapshot(encounter),
+    )
+    session.commit()
+    session.refresh(encounter)
+    return encounter
+
+
+@router.get("/{patient_id}/encounters/{encounter_id}", response_model=ClinicalEncounterRead)
+def get_clinical_encounter(
+    patient_id: uuid.UUID,
+    encounter_id: uuid.UUID,
+    session: SessionDep,
+) -> ClinicalEncounter:
+    require_patient(session, patient_id)
+    return require_patient_child(
+        session,
+        ClinicalEncounter,
+        encounter_id,
+        patient_id,
+        "Encounter not found",
+    )
+
+
+@router.patch("/{patient_id}/encounters/{encounter_id}", response_model=ClinicalEncounterRead)
+def update_clinical_encounter(
+    patient_id: uuid.UUID,
+    encounter_id: uuid.UUID,
+    payload: ClinicalEncounterUpdate,
+    session: SessionDep,
+    actor: EncounterActorDep,
+) -> ClinicalEncounter:
+    require_patient(session, patient_id)
+    encounter = require_patient_child(
+        session,
+        ClinicalEncounter,
+        encounter_id,
+        patient_id,
+        "Encounter not found",
+    )
+    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+    before = audit_snapshot(encounter, update_fields)
+    fields = apply_update(encounter, payload)
+    before_changed, after_changed = changed_field_snapshots(
+        before=before,
+        after_model=encounter,
+        fields=fields,
+    )
+    record_audit_event(
+        session,
+        action="encounter.updated",
+        entity_type="encounter",
+        entity_id=encounter.id,
+        actor_id=actor,
+        metadata={"patient_id": str(patient_id), "fields": fields},
+        before=before_changed,
+        after=after_changed,
+    )
+    session.commit()
+    session.refresh(encounter)
+    return encounter
+
+
+@router.delete("/{patient_id}/encounters/{encounter_id}", status_code=status.HTTP_204_NO_CONTENT)
+def cancel_clinical_encounter(
+    patient_id: uuid.UUID,
+    encounter_id: uuid.UUID,
+    session: SessionDep,
+    actor: EncounterActorDep,
+) -> Response:
+    require_patient(session, patient_id)
+    encounter = require_patient_child(
+        session,
+        ClinicalEncounter,
+        encounter_id,
+        patient_id,
+        "Encounter not found",
+    )
+    before = audit_snapshot(encounter, ["status"])
+    encounter.status = EncounterStatus.CANCELLED
+    record_audit_event(
+        session,
+        action="encounter.cancelled",
+        entity_type="encounter",
+        entity_id=encounter.id,
+        actor_id=actor,
+        metadata={"patient_id": str(patient_id)},
+        before=before,
+        after=audit_snapshot(encounter, ["status"]),
+    )
+    session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/{patient_id}/clinical-entries", response_model=list[ClinicalEntryRead])

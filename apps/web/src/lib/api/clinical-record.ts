@@ -10,6 +10,9 @@ import type {
   ClinicalEntry,
   ClinicalEntryCreate,
   ClinicalEntryUpdate,
+  ClinicalEncounter,
+  ClinicalEncounterCreate,
+  ClinicalEncounterUpdate,
   Medication,
   MedicationCreate,
   MedicationUpdate,
@@ -97,6 +100,28 @@ export function updateActiveProblem(
   payload: ActiveProblemUpdate,
 ) {
   return apiFetch<ActiveProblem>(`/api/v1/patients/${patientId}/problems/${problemId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listClinicalEncounters(patientId: string) {
+  return apiFetch<ClinicalEncounter[]>(`/api/v1/patients/${patientId}/encounters?limit=50`);
+}
+
+export function createClinicalEncounter(patientId: string, payload: ClinicalEncounterCreate) {
+  return apiFetch<ClinicalEncounter>(`/api/v1/patients/${patientId}/encounters`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateClinicalEncounter(
+  patientId: string,
+  encounterId: string,
+  payload: ClinicalEncounterUpdate,
+) {
+  return apiFetch<ClinicalEncounter>(`/api/v1/patients/${patientId}/encounters/${encounterId}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });

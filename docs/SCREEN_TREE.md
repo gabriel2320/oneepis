@@ -13,6 +13,8 @@
 /pacientes/[patientId]
 /pacientes/[patientId]/estado
 /pacientes/[patientId]/ficha
+/pacientes/[patientId]/encuentros
+/pacientes/[patientId]/encuentros/nuevo
 /pacientes/[patientId]/evoluciones
 /pacientes/[patientId]/evoluciones/nueva
 /pacientes/[patientId]/problemas
@@ -30,7 +32,7 @@
 
 Estado:
 
-- `/pacientes`, `/pacientes/nuevo`, estado clinico, ficha, evoluciones, problemas activos, alergias, medicacion, signos vitales, IA y auditoria estan conectadas a la base E2E.
+- `/pacientes`, `/pacientes/nuevo`, estado clinico, ficha, encuentros, evoluciones, problemas activos, alergias, medicacion, signos vitales, IA y auditoria estan conectadas a la base E2E.
 - documentos existe como ruta preparada, sin backend definitivo.
 
 ## Hospitalizacion

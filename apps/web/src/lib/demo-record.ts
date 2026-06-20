@@ -1,4 +1,4 @@
-import type { PatientRecordSnapshot } from "@/lib/types";
+import type { ClinicalEncounter, PatientRecordSnapshot } from "@/lib/types";
 
 export const demoRecords: PatientRecordSnapshot[] = [
   {
@@ -126,5 +126,21 @@ export const demoRecords: PatientRecordSnapshot[] = [
     active_medications: [],
     active_problems: [],
     recent_entries: [],
+  },
+];
+
+export const demoEncounters: ClinicalEncounter[] = [
+  {
+    id: "81111111-1111-4111-8111-111111111111",
+    patient_id: "11111111-1111-4111-8111-111111111111",
+    type: "ambulatory",
+    status: "in_progress",
+    reason: "Encuentro demo",
+    started_at: "2026-06-20T12:00:00Z",
+    ended_at: null,
+    location_label: "Consulta demo",
+    notes: "Registro ficticio para validar UI.",
+    created_at: "2026-06-20T12:00:00Z",
+    updated_at: "2026-06-20T12:00:00Z",
   },
 ];

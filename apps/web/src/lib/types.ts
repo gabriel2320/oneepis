@@ -12,6 +12,8 @@ export type AllergySeverity = "mild" | "moderate" | "severe" | "unknown";
 export type UserRole = "admin" | "medico" | "enfermeria" | "solo_lectura" | "dev";
 export type PatientClinicalStatus = "draft" | "active" | "closed" | "archived";
 export type CareContext = "ambulatory" | "hospitalized" | "unknown";
+export type EncounterType = "ambulatory" | "hospitalization" | "emergency" | "unknown";
+export type EncounterStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
 
 export type AuthUser = {
   email: string;
@@ -214,6 +216,32 @@ export type ActiveProblem = {
 };
 
 export type ActiveProblemUpdate = Partial<ActiveProblemCreate>;
+
+export type ClinicalEncounterCreate = {
+  type?: EncounterType;
+  status?: EncounterStatus;
+  reason: string;
+  started_at: string;
+  ended_at?: string | null;
+  location_label?: string | null;
+  notes?: string | null;
+};
+
+export type ClinicalEncounter = {
+  id: string;
+  patient_id: string;
+  type: EncounterType;
+  status: EncounterStatus;
+  reason: string;
+  started_at: string;
+  ended_at?: string | null;
+  location_label?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ClinicalEncounterUpdate = Partial<ClinicalEncounterCreate>;
 
 export type PatientRecordSnapshot = {
   patient: Patient;
