@@ -1,5 +1,15 @@
 # Seguridad y Privacidad
 
+## Repositorio Publico
+
+Mientras el repositorio este publico:
+
+- no abrir issues o PRs con datos reales
+- no subir capturas con informacion clinica
+- no publicar logs, dumps, archivos `.env` ni secretos
+- no usar datos que parezcan pertenecer a una persona real
+- reportar vulnerabilidades sensibles por canal privado
+
 OneEpis maneja información clínica sensible. Este scaffold no debe considerarse listo para producción sanitaria sin revisión legal, operacional y de seguridad.
 
 ## Reglas Iniciales

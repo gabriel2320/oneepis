@@ -1,5 +1,13 @@
 # OneEpis
 
+## Aviso de Repositorio Publico
+
+Este repositorio esta publico temporalmente para desarrollo temprano. No contiene datos reales y no debe recibir informacion clinica sensible, secretos, dumps, logs con PHI ni documentos de pacientes.
+
+OneEpis no esta listo para produccion sanitaria, no es consejo medico y no debe usarse como software clinico certificado.
+
+Licencia: sin licencia open source por ahora. Ver `LICENSE.md`.
+
 Ficha clínica inteligente, bella, rápida y modular.
 
 OneEpis parte con una base limpia:
@@ -87,6 +95,8 @@ El archivo estable para revisión queda en `packages/contracts/openapi.json`.
 
 Antes de ampliar el producto, lee:
 
+- `SECURITY.md`
+- `LICENSE.md`
 - `docs/ARCHITECTURE.md`
 - `docs/GOVERNANCE.md`
 - `docs/SECURITY_PRIVACY.md`
