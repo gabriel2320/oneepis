@@ -71,6 +71,8 @@ npm run api:dev
 Web: <http://localhost:3000>  
 API: <http://localhost:8000/docs>
 
+PostgreSQL local de Docker queda expuesto en `localhost:5433` para no chocar con instalaciones locales que ya usen `5432`.
+
 ## Contrato OpenAPI
 
 Genera el contrato desde FastAPI:
