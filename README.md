@@ -33,7 +33,7 @@ Dominios implementados:
 - signos vitales
 - auth local con roles basicos
 - permisos clinicos por accion
-- auditoria por escritura con actor autenticado
+- auditoria por escritura con actor autenticado, correlation ID y before/after
 - estado y borrador IA local via Ollama
 
 Rutas principales:
@@ -170,5 +170,6 @@ python apps/api/scripts/export_openapi.py
 - `docs/PRINT_SYSTEM.md`
 - `docs/OLLAMA_AND_TOOLS.md`
 - `docs/PERMISSIONS.md`
+- `docs/AUDIT.md`
 
 Regla central: crecer por modulos clinicos bien nombrados, no por acumulacion indiscriminada de codigo.

@@ -136,7 +136,7 @@ export function ClinicalTimeline({ entries }: { entries: ClinicalEntry[] }) {
             <div>
               <p className="text-sm font-semibold">{entry.title}</p>
               <p className="text-xs text-muted-foreground">
-                {formatDateTime(entry.occurred_at)} · {entry.created_by}
+                {formatDateTime(entry.occurred_at)} - {entry.created_by}
               </p>
             </div>
             <div className="flex gap-2">
@@ -171,12 +171,41 @@ export function AuditTimeline({ events }: { events: AuditEvent[] }) {
             <Badge variant="outline">{event.actor_id}</Badge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            {event.entity_type} · {formatDateTime(event.created_at)}
+            {event.entity_type} - {formatDateTime(event.created_at)}
           </p>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+            {event.correlation_id ? <Badge variant="outline">{event.correlation_id}</Badge> : null}
+            {event.request_method && event.request_path ? (
+              <span>
+                {event.request_method} {event.request_path}
+              </span>
+            ) : null}
+          </div>
+          <AuditChangeSummary data={event.extra_data} />
         </div>
       ))}
     </div>
   );
+}
+
+function AuditChangeSummary({ data }: { data: Record<string, unknown> }) {
+  const before = isRecord(data.before) ? data.before : null;
+  const after = isRecord(data.after) ? data.after : null;
+
+  if (!before && !after) {
+    return null;
+  }
+
+  return (
+    <div className="mt-2 rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">
+      {before ? <p>Antes: {JSON.stringify(before)}</p> : null}
+      {after ? <p>Despues: {JSON.stringify(after)}</p> : null}
+    </div>
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function AiSafetyPanel() {

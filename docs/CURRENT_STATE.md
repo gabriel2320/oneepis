@@ -31,6 +31,9 @@ Auditoria:
 - actor via token local de `/api/v1/auth/login`
 - `X-OneEpis-Actor` queda solo como fallback dev si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`
 - lectura: `GET /api/v1/patients/{patient_id}/audit-events`
+- cada request recibe `correlation_id` y se expone en `X-OneEpis-Correlation-ID`
+- eventos guardan `request_method`, `request_path` y snapshots `before/after` cuando aplica
+- detalle operativo en `docs/AUDIT.md`
 
 Auth local:
 
@@ -71,7 +74,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-027
+## Programa activo PR-018 a PR-028
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -83,6 +86,7 @@ Capas:
 - PR-025: QA visual + Ollama.
 - PR-026: Auth local + roles + actor auditado.
 - PR-027: Permisos clinicos por accion.
+- PR-028: Auditoria fuerte con correlation ID y before/after.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

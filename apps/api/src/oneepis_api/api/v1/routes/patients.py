@@ -52,7 +52,7 @@ from oneepis_api.schemas.patient import (
     PatientUpdate,
 )
 from oneepis_api.services.ai.provider import get_ai_provider
-from oneepis_api.services.audit import record_audit_event
+from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 
 router = APIRouter(
     prefix="/patients",
@@ -114,6 +114,7 @@ def create_patient(payload: PatientCreate, session: SessionDep, actor: PatientAc
         entity_type="patient",
         entity_id=patient.id,
         actor_id=actor,
+        after=audit_snapshot(patient),
     )
     session.commit()
     session.refresh(patient)
@@ -133,7 +134,14 @@ def update_patient(
     actor: PatientActorDep,
 ) -> Patient:
     patient = require_patient(session, patient_id)
+    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+    before = audit_snapshot(patient, update_fields)
     fields = apply_update(patient, payload)
+    before_changed, after_changed = changed_field_snapshots(
+        before=before,
+        after_model=patient,
+        fields=fields,
+    )
 
     record_audit_event(
         session,
@@ -142,6 +150,8 @@ def update_patient(
         entity_id=patient.id,
         actor_id=actor,
         metadata={"fields": fields},
+        before=before_changed,
+        after=after_changed,
     )
     session.commit()
     session.refresh(patient)
@@ -234,6 +244,7 @@ def create_clinical_entry(
         entity_id=entry.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "kind": payload.kind.value},
+        after=audit_snapshot(entry),
     )
     session.commit()
     session.refresh(entry)
@@ -256,7 +267,14 @@ def update_clinical_entry(
         patient_id,
         "Clinical entry not found",
     )
+    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+    before = audit_snapshot(entry, update_fields)
     fields = apply_update(entry, payload)
+    before_changed, after_changed = changed_field_snapshots(
+        before=before,
+        after_model=entry,
+        fields=fields,
+    )
     record_audit_event(
         session,
         action="clinical_entry.updated",
@@ -264,6 +282,8 @@ def update_clinical_entry(
         entity_id=entry.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "fields": fields},
+        before=before_changed,
+        after=after_changed,
     )
     session.commit()
     session.refresh(entry)
@@ -290,6 +310,7 @@ def delete_draft_clinical_entry(
             status_code=status.HTTP_409_CONFLICT,
             detail="Only draft clinical entries can be deleted",
         )
+    before = audit_snapshot(entry)
     record_audit_event(
         session,
         action="clinical_entry.deleted",
@@ -297,6 +318,7 @@ def delete_draft_clinical_entry(
         entity_id=entry.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "status": entry.status.value},
+        before=before,
     )
     session.delete(entry)
     session.commit()
@@ -343,6 +365,7 @@ def create_allergy(
         entity_id=allergy.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "severity": allergy.severity.value},
+        after=audit_snapshot(allergy),
     )
     session.commit()
     session.refresh(allergy)
@@ -369,7 +392,14 @@ def update_allergy(
 ) -> Allergy:
     require_patient(session, patient_id)
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
+    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+    before = audit_snapshot(allergy, update_fields)
     fields = apply_update(allergy, payload)
+    before_changed, after_changed = changed_field_snapshots(
+        before=before,
+        after_model=allergy,
+        fields=fields,
+    )
     record_audit_event(
         session,
         action="allergy.updated",
@@ -377,6 +407,8 @@ def update_allergy(
         entity_id=allergy.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "fields": fields},
+        before=before_changed,
+        after=after_changed,
     )
     session.commit()
     session.refresh(allergy)
@@ -392,6 +424,7 @@ def delete_allergy(
 ) -> Response:
     require_patient(session, patient_id)
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
+    before = audit_snapshot(allergy, ["status"])
     allergy.status = RecordStatus.ENTERED_IN_ERROR
     record_audit_event(
         session,
@@ -400,6 +433,8 @@ def delete_allergy(
         entity_id=allergy.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id)},
+        before=before,
+        after=audit_snapshot(allergy, ["status"]),
     )
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -445,6 +480,7 @@ def create_medication(
         entity_id=medication.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "status": medication.status.value},
+        after=audit_snapshot(medication),
     )
     session.commit()
     session.refresh(medication)
@@ -483,7 +519,14 @@ def update_medication(
         patient_id,
         "Medication not found",
     )
+    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+    before = audit_snapshot(medication, update_fields)
     fields = apply_update(medication, payload)
+    before_changed, after_changed = changed_field_snapshots(
+        before=before,
+        after_model=medication,
+        fields=fields,
+    )
     record_audit_event(
         session,
         action="medication.updated",
@@ -491,6 +534,8 @@ def update_medication(
         entity_id=medication.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "fields": fields},
+        before=before_changed,
+        after=after_changed,
     )
     session.commit()
     session.refresh(medication)
@@ -512,6 +557,7 @@ def delete_medication(
         patient_id,
         "Medication not found",
     )
+    before = audit_snapshot(medication, ["status"])
     medication.status = RecordStatus.ENTERED_IN_ERROR
     record_audit_event(
         session,
@@ -520,6 +566,8 @@ def delete_medication(
         entity_id=medication.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id)},
+        before=before,
+        after=audit_snapshot(medication, ["status"]),
     )
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -565,6 +613,7 @@ def create_vital_sign(
         entity_id=vital.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "measured_at": vital.measured_at.isoformat()},
+        after=audit_snapshot(vital),
     )
     session.commit()
     session.refresh(vital)
@@ -603,7 +652,14 @@ def update_vital_sign(
         patient_id,
         "Vital sign not found",
     )
+    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+    before = audit_snapshot(vital, update_fields)
     fields = apply_update(vital, payload)
+    before_changed, after_changed = changed_field_snapshots(
+        before=before,
+        after_model=vital,
+        fields=fields,
+    )
     record_audit_event(
         session,
         action="vital_sign.updated",
@@ -611,6 +667,8 @@ def update_vital_sign(
         entity_id=vital.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "fields": fields},
+        before=before_changed,
+        after=after_changed,
     )
     session.commit()
     session.refresh(vital)
@@ -632,6 +690,7 @@ def delete_vital_sign(
         patient_id,
         "Vital sign not found",
     )
+    before = audit_snapshot(vital)
     record_audit_event(
         session,
         action="vital_sign.deleted",
@@ -639,6 +698,7 @@ def delete_vital_sign(
         entity_id=vital.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "measured_at": vital.measured_at.isoformat()},
+        before=before,
     )
     session.delete(vital)
     session.commit()

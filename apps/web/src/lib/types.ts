@@ -190,6 +190,9 @@ export type AuditEvent = {
   entity_type: string;
   entity_id?: string | null;
   actor_id: string;
+  correlation_id?: string | null;
+  request_method?: string | null;
+  request_path?: string | null;
   extra_data: Record<string, unknown>;
   created_at: string;
 };

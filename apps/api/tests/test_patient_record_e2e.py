@@ -318,3 +318,29 @@ def test_nursing_can_record_vitals_but_not_medical_actions(client: TestClient) -
         json={"focus": "summary"},
     )
     assert ai_response.status_code == 403
+
+
+def test_audit_events_include_correlation_and_before_after(client: TestClient) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    headers = {**auth, "X-OneEpis-Correlation-ID": "corr-test-001"}
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}",
+        headers=headers,
+        json={"last_name": "Auditado"},
+    )
+    assert update_response.status_code == 200
+    assert update_response.headers["X-OneEpis-Correlation-ID"] == "corr-test-001"
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    patient_update = next(
+        item for item in audit_response.json() if item["action"] == "patient.updated"
+    )
+
+    assert patient_update["correlation_id"] == "corr-test-001"
+    assert patient_update["request_method"] == "PATCH"
+    assert patient_update["request_path"] == f"/api/v1/patients/{patient_id}"
+    assert patient_update["extra_data"]["before"] == {"last_name": "Paciente"}
+    assert patient_update["extra_data"]["after"] == {"last_name": "Auditado"}
