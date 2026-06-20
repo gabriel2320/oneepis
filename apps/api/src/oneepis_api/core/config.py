@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     ai_provider: str = "disabled"
     ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2:latest"
+    ollama_timeout_seconds: float = 60.0
 
     model_config = SettingsConfigDict(
         env_file=".env",

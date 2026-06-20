@@ -75,3 +75,28 @@ export type PatientRecordSnapshot = {
   active_medications: Medication[];
   recent_entries: ClinicalEntry[];
 };
+
+export type ClinicalInsightRequest = {
+  patient_id?: string | null;
+  source_text: string;
+  focus: "summary" | "risks" | "next_steps";
+};
+
+export type ClinicalInsightResponse = {
+  provider: string;
+  status: "disabled" | "draft" | "error";
+  model?: string | null;
+  summary: string;
+  structured_points: string[];
+  safety_notes: string[];
+};
+
+export type AIProviderStatus = {
+  provider: string;
+  enabled: boolean;
+  available: boolean;
+  model?: string | null;
+  base_url?: string | null;
+  available_models: string[];
+  message: string;
+};

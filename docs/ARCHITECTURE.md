@@ -27,7 +27,7 @@ flowchart LR
   Domain --> DB["PostgreSQL"]
   Domain --> Audit["Audit events"]
   Domain --> AI["AI provider interface"]
-  AI -. futuro .-> Ollama["Ollama local"]
+  AI --> Ollama["Ollama local"]
 ```
 
 ## Dominios Iniciales
@@ -35,4 +35,4 @@ flowchart LR
 - Pacientes: datos mínimos y trazables.
 - Ficha clínica: entradas clínicas, signos vitales, alergias y medicación.
 - Auditoría: eventos de cambios relevantes.
-- IA: contratos de resumen/asistencia, inicialmente deshabilitados o determinísticos.
+- IA: contratos de resumen/asistencia con proveedor local Ollama configurable.

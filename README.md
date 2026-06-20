@@ -16,7 +16,7 @@ OneEpis parte con una base limpia:
 - **FastAPI + Pydantic** para una API validada, explícita y fácil de entender por agentes IA.
 - **PostgreSQL + SQLAlchemy + Alembic** como verdad clínica estructurada y auditable.
 - **OpenAPI** como contrato entre frontend y backend.
-- **Ollama después** mediante una interfaz de proveedores de IA local, sin acoplar la ficha clínica al modelo.
+- **Ollama local** mediante una interfaz de proveedores de IA, sin acoplar la ficha clínica al modelo.
 
 ## Estado Inicial
 
@@ -80,6 +80,8 @@ Web: <http://localhost:3000>
 API: <http://localhost:8000/docs>
 
 PostgreSQL local de Docker queda expuesto en `localhost:5433` para no chocar con instalaciones locales que ya usen `5432`.
+
+Ollama local queda activo con `ONEEPIS_AI_PROVIDER=ollama` y modelo `llama3.2:latest`. Cambia `ONEEPIS_OLLAMA_MODEL` si quieres usar otro modelo instalado.
 
 ## Contrato OpenAPI
 

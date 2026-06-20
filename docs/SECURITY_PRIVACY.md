@@ -17,7 +17,7 @@ OneEpis maneja información clínica sensible. Este scaffold no debe considerars
 - No guardar identificadores nacionales en claro. Usar hashes o identificadores internos.
 - No escribir datos clínicos en logs.
 - No enviar datos clínicos a servicios externos de IA.
-- Mantener IA local y auditable cuando se habilite Ollama.
+- Mantener IA local y auditable con Ollama.
 - Registrar eventos relevantes en auditoría.
 - Cifrado, control de acceso granular y retención documental quedan como hitos antes de producción.
 

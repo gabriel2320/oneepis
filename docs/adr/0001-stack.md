@@ -8,7 +8,7 @@ Usar:
 - FastAPI + Pydantic para backend.
 - PostgreSQL + SQLAlchemy + Alembic para persistencia.
 - OpenAPI como contrato.
-- Ollama como proveedor local futuro de IA.
+- Ollama como proveedor local de IA.
 
 ## Contexto
 

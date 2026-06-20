@@ -19,7 +19,8 @@
 
 ## Fase 2 - IA local controlada
 
-- Proveedor Ollama local.
+Estado inicial: proveedor Ollama local activado para borradores de resumen con revision humana obligatoria.
+
 - Prompts versionados.
 - Evaluaciones clínicas y de seguridad.
 - Trazabilidad de sugerencias IA.

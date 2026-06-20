@@ -16,7 +16,18 @@ class ClinicalInsightRequest(APIModel):
 
 class ClinicalInsightResponse(APIModel):
     provider: str
-    status: Literal["disabled", "draft"]
+    status: Literal["disabled", "draft", "error"]
+    model: str | None = None
     summary: str
     structured_points: list[str] = Field(default_factory=list)
     safety_notes: list[str] = Field(default_factory=list)
+
+
+class AIProviderStatus(APIModel):
+    provider: str
+    enabled: bool
+    available: bool
+    model: str | None = None
+    base_url: str | None = None
+    available_models: list[str] = Field(default_factory=list)
+    message: str

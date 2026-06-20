@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from oneepis_api.core.config import Settings, get_settings
-from oneepis_api.schemas.ai import ClinicalInsightRequest, ClinicalInsightResponse
+from oneepis_api.schemas.ai import AIProviderStatus, ClinicalInsightRequest, ClinicalInsightResponse
 from oneepis_api.services.ai.provider import get_ai_provider
 
 router = APIRouter(prefix="/ai", tags=["ai"])
@@ -17,3 +17,9 @@ def create_clinical_insight(
 ) -> ClinicalInsightResponse:
     provider = get_ai_provider(settings)
     return provider.create_insight(payload)
+
+
+@router.get("/status", response_model=AIProviderStatus)
+def get_ai_status(settings: SettingsDep) -> AIProviderStatus:
+    provider = get_ai_provider(settings)
+    return provider.status()
