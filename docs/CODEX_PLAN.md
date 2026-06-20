@@ -41,6 +41,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-038: Seguridad fail-closed fuera de development.
 - PR-039: Dieta inicial de pantallas paciente sin cambiar comportamiento.
 - PR-040: Playwright fresco por defecto para evitar servidores locales obsoletos.
+- PR-041: Doctrina anti-inflacion como regla de gobierno canonica.
 
 ## Reglas no negociables
 

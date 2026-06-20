@@ -4,6 +4,14 @@
 - Rutas/pantallas afectadas:
 - Riesgo principal:
 
+## Anti-inflacion
+
+- [ ] El cambio tiene flujo humano completo o no entra al core.
+- [ ] No agrega dashboard/lab/IA como capa paralela al paciente/ficha/papel.
+- [ ] IA, si aplica, es opcional, lateral y no escribe/firma ficha.
+- [ ] Papel, auditoria, permisos y OpenAPI fueron considerados.
+- [ ] Usa los comandos minimos necesarios para validar el cambio.
+
 ## Cambios clinicos
 
 - [ ] No usa datos reales ni PHI.
