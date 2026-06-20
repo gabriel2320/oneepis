@@ -34,6 +34,18 @@ class ClinicalEntryCreate(ClinicalEntryBase):
     pass
 
 
+class ClinicalEntryUpdate(APIModel):
+    status: ClinicalEntryStatus | None = None
+    occurred_at: datetime | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    subjective: str | None = None
+    objective: str | None = None
+    assessment: str | None = None
+    plan: str | None = None
+    tags: list[str] | None = None
+    extra_data: dict[str, Any] | None = None
+
+
 class ClinicalEntryRead(ClinicalEntryBase):
     id: uuid.UUID
     patient_id: uuid.UUID
@@ -41,42 +53,92 @@ class ClinicalEntryRead(ClinicalEntryBase):
     updated_at: datetime
 
 
-class AllergyRead(APIModel):
-    id: uuid.UUID
-    patient_id: uuid.UUID
-    substance: str
-    reaction: str | None
-    severity: AllergySeverity
-    status: RecordStatus
+class AllergyBase(APIModel):
+    substance: str = Field(min_length=1, max_length=160)
+    reaction: str | None = Field(default=None, max_length=240)
+    severity: AllergySeverity = AllergySeverity.UNKNOWN
+    status: RecordStatus = RecordStatus.ACTIVE
     recorded_at: datetime
+
+
+class AllergyCreate(AllergyBase):
+    pass
+
+
+class AllergyUpdate(APIModel):
+    substance: str | None = Field(default=None, min_length=1, max_length=160)
+    reaction: str | None = Field(default=None, max_length=240)
+    severity: AllergySeverity | None = None
+    status: RecordStatus | None = None
+    recorded_at: datetime | None = None
+
+
+class AllergyRead(AllergyBase):
+    id: uuid.UUID
+    patient_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
 
 
-class MedicationRead(APIModel):
+class MedicationBase(APIModel):
+    name: str = Field(min_length=1, max_length=160)
+    dose: str | None = Field(default=None, max_length=120)
+    route: str | None = Field(default=None, max_length=80)
+    frequency: str | None = Field(default=None, max_length=120)
+    status: RecordStatus = RecordStatus.ACTIVE
+    started_on: date | None = None
+    ended_on: date | None = None
+
+
+class MedicationCreate(MedicationBase):
+    pass
+
+
+class MedicationUpdate(APIModel):
+    name: str | None = Field(default=None, min_length=1, max_length=160)
+    dose: str | None = Field(default=None, max_length=120)
+    route: str | None = Field(default=None, max_length=80)
+    frequency: str | None = Field(default=None, max_length=120)
+    status: RecordStatus | None = None
+    started_on: date | None = None
+    ended_on: date | None = None
+
+
+class MedicationRead(MedicationBase):
     id: uuid.UUID
     patient_id: uuid.UUID
-    name: str
-    dose: str | None
-    route: str | None
-    frequency: str | None
-    status: RecordStatus
-    started_on: date | None
-    ended_on: date | None
     created_at: datetime
     updated_at: datetime
 
 
-class VitalSignRead(APIModel):
-    id: uuid.UUID
-    patient_id: uuid.UUID
+class VitalSignBase(APIModel):
     measured_at: datetime
-    temperature_c: Decimal | None
-    systolic_bp: int | None
-    diastolic_bp: int | None
-    heart_rate_bpm: int | None
-    respiratory_rate_bpm: int | None
-    oxygen_saturation_pct: Decimal | None
-    notes: str | None
+    temperature_c: Decimal | None = None
+    systolic_bp: int | None = Field(default=None, ge=40, le=300)
+    diastolic_bp: int | None = Field(default=None, ge=20, le=200)
+    heart_rate_bpm: int | None = Field(default=None, ge=20, le=260)
+    respiratory_rate_bpm: int | None = Field(default=None, ge=4, le=80)
+    oxygen_saturation_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    notes: str | None = Field(default=None, max_length=240)
+
+
+class VitalSignCreate(VitalSignBase):
+    pass
+
+
+class VitalSignUpdate(APIModel):
+    measured_at: datetime | None = None
+    temperature_c: Decimal | None = None
+    systolic_bp: int | None = Field(default=None, ge=40, le=300)
+    diastolic_bp: int | None = Field(default=None, ge=20, le=200)
+    heart_rate_bpm: int | None = Field(default=None, ge=20, le=260)
+    respiratory_rate_bpm: int | None = Field(default=None, ge=4, le=80)
+    oxygen_saturation_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    notes: str | None = Field(default=None, max_length=240)
+
+
+class VitalSignRead(VitalSignBase):
+    id: uuid.UUID
+    patient_id: uuid.UUID
     created_at: datetime
     updated_at: datetime

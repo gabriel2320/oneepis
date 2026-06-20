@@ -8,6 +8,27 @@ export type ClinicalEntryKind =
   | "note";
 export type ClinicalEntryStatus = "draft" | "signed" | "amended";
 export type RecordStatus = "active" | "inactive" | "resolved" | "entered_in_error";
+export type AllergySeverity = "mild" | "moderate" | "severe" | "unknown";
+
+export type PatientCreate = {
+  first_name: string;
+  last_name: string;
+  preferred_name?: string | null;
+  birth_date: string;
+  sex_at_birth: SexAtBirth;
+  document_id_hash?: string | null;
+  clinical_identifier?: string | null;
+  contact_phone?: string | null;
+  email?: string | null;
+  emergency_contact?: Record<string, unknown>;
+};
+
+export type PatientUpdate = Partial<
+  Pick<
+    PatientCreate,
+    "first_name" | "last_name" | "preferred_name" | "contact_phone" | "email" | "emergency_contact"
+  >
+>;
 
 export type Patient = {
   id: string;
@@ -34,6 +55,40 @@ export type ClinicalEntry = {
   plan?: string | null;
   tags: string[];
   created_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ClinicalEntryCreate = {
+  kind: ClinicalEntryKind;
+  status?: ClinicalEntryStatus;
+  occurred_at: string;
+  title: string;
+  subjective?: string | null;
+  objective?: string | null;
+  assessment?: string | null;
+  plan?: string | null;
+  tags?: string[];
+  extra_data?: Record<string, unknown>;
+  created_by?: string;
+};
+
+export type ClinicalEntryUpdate = Partial<
+  Pick<
+    ClinicalEntryCreate,
+    "status" | "occurred_at" | "title" | "subjective" | "objective" | "assessment" | "plan" | "tags"
+  >
+>;
+
+export type VitalSignCreate = {
+  measured_at: string;
+  temperature_c?: string | null;
+  systolic_bp?: number | null;
+  diastolic_bp?: number | null;
+  heart_rate_bpm?: number | null;
+  respiratory_rate_bpm?: number | null;
+  oxygen_saturation_pct?: string | null;
+  notes?: string | null;
 };
 
 export type VitalSign = {
@@ -47,6 +102,18 @@ export type VitalSign = {
   respiratory_rate_bpm?: number | null;
   oxygen_saturation_pct?: string | null;
   notes?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type VitalSignUpdate = Partial<VitalSignCreate>;
+
+export type AllergyCreate = {
+  substance: string;
+  reaction?: string | null;
+  severity?: AllergySeverity;
+  status?: RecordStatus;
+  recorded_at: string;
 };
 
 export type Allergy = {
@@ -54,8 +121,23 @@ export type Allergy = {
   patient_id: string;
   substance: string;
   reaction?: string | null;
-  severity: "mild" | "moderate" | "severe" | "unknown";
+  severity: AllergySeverity;
   status: RecordStatus;
+  recorded_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AllergyUpdate = Partial<AllergyCreate>;
+
+export type MedicationCreate = {
+  name: string;
+  dose?: string | null;
+  route?: string | null;
+  frequency?: string | null;
+  status?: RecordStatus;
+  started_on?: string | null;
+  ended_on?: string | null;
 };
 
 export type Medication = {
@@ -66,7 +148,13 @@ export type Medication = {
   route?: string | null;
   frequency?: string | null;
   status: RecordStatus;
+  started_on?: string | null;
+  ended_on?: string | null;
+  created_at: string;
+  updated_at: string;
 };
+
+export type MedicationUpdate = Partial<MedicationCreate>;
 
 export type PatientRecordSnapshot = {
   patient: Patient;
@@ -74,6 +162,16 @@ export type PatientRecordSnapshot = {
   active_allergies: Allergy[];
   active_medications: Medication[];
   recent_entries: ClinicalEntry[];
+};
+
+export type AuditEvent = {
+  id: string;
+  action: string;
+  entity_type: string;
+  entity_id?: string | null;
+  actor_id: string;
+  extra_data: Record<string, unknown>;
+  created_at: string;
 };
 
 export type ClinicalInsightRequest = {

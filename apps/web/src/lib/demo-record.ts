@@ -24,6 +24,8 @@ export const demoRecords: PatientRecordSnapshot[] = [
       respiratory_rate_bpm: 16,
       oxygen_saturation_pct: "98.00",
       notes: "Control basal demo",
+      created_at: "2026-06-20T12:10:00Z",
+      updated_at: "2026-06-20T12:10:00Z",
     },
     active_allergies: [
       {
@@ -33,6 +35,9 @@ export const demoRecords: PatientRecordSnapshot[] = [
         reaction: "Reaccion leve documentada",
         severity: "mild",
         status: "active",
+        recorded_at: "2026-06-20T10:05:00Z",
+        created_at: "2026-06-20T10:05:00Z",
+        updated_at: "2026-06-20T10:05:00Z",
       },
     ],
     active_medications: [
@@ -44,6 +49,10 @@ export const demoRecords: PatientRecordSnapshot[] = [
         route: "oral",
         frequency: "cada 24 horas",
         status: "active",
+        started_on: "2026-06-19",
+        ended_on: null,
+        created_at: "2026-06-19T10:00:00Z",
+        updated_at: "2026-06-19T10:00:00Z",
       },
     ],
     recent_entries: [
@@ -60,6 +69,8 @@ export const demoRecords: PatientRecordSnapshot[] = [
         plan: "Mantener seguimiento y registrar cambios relevantes.",
         tags: ["control", "demo"],
         created_by: "profesional.demo",
+        created_at: "2026-06-20T12:15:00Z",
+        updated_at: "2026-06-20T12:15:00Z",
       },
       {
         id: "61111111-1111-4111-8111-111111111111",
@@ -74,6 +85,8 @@ export const demoRecords: PatientRecordSnapshot[] = [
         plan: "Completar modulos clinicos por prioridad.",
         tags: ["ingreso", "demo"],
         created_by: "sistema",
+        created_at: "2026-06-18T09:20:00Z",
+        updated_at: "2026-06-18T09:20:00Z",
       },
     ],
   },

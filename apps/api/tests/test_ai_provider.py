@@ -36,6 +36,19 @@ def test_get_ai_provider_selects_ollama() -> None:
     assert provider.name == "ollama"
 
 
+def test_get_ai_provider_prefers_summary_model_for_clinical_insights() -> None:
+    settings = Settings(
+        ai_provider="ollama",
+        ollama_model="llama3.2:latest",
+        ollama_model_summary="qwen3:8b",
+    )
+
+    provider = get_ai_provider(settings)
+
+    assert provider.name == "ollama"
+    assert provider.model == "qwen3:8b"
+
+
 def test_ollama_provider_status_reports_model_available() -> None:
     provider = FakeOllamaProvider(
         base_url="http://localhost:11434",

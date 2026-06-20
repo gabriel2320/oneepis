@@ -1,0 +1,197 @@
+"use client";
+
+import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
+
+import { ClinicalTimeline, formatDateTime } from "@/components/clinical/widgets";
+import { Button } from "@/components/ui/button";
+import { getPatientRecord } from "@/lib/api/patients";
+import { DEMO_MODE } from "@/lib/api/client";
+import { demoRecords } from "@/lib/demo-record";
+import type { ClinicalEntry, PatientRecordSnapshot } from "@/lib/types";
+
+export function PrintPatientPage({ kind }: { kind: "ficha" | "resumen" | "receta" }) {
+  const params = useParams<{ patientId: string }>();
+  const patientId = params.patientId;
+  const recordQuery = useQuery({
+    queryKey: ["patient-record", patientId],
+    queryFn: () => getPatientRecord(patientId),
+    enabled: Boolean(patientId) && !DEMO_MODE,
+  });
+  const record =
+    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null) ??
+    recordQuery.data;
+
+  return (
+    <PrintPage>
+      <PrintToolbar />
+      {record ? (
+        kind === "receta" ? (
+          <ClinicalPaperSheet record={record} title="Receta">
+            <p className="text-sm text-muted-foreground">
+              Receta no habilitada en fase 1. Requiere firma, permisos y politica de prescripcion.
+            </p>
+          </ClinicalPaperSheet>
+        ) : (
+          <PatientSummaryPrintSheet record={record} title={kind === "ficha" ? "Ficha clinica" : "Resumen"} />
+        )
+      ) : (
+        <p className="p-6 text-sm">Cargando documento...</p>
+      )}
+    </PrintPage>
+  );
+}
+
+export function PrintEvolutionPage() {
+  const params = useParams<{ patientId: string; entryId: string }>();
+  const patientId = params.patientId;
+  const entryId = params.entryId;
+  const recordQuery = useQuery({
+    queryKey: ["patient-record", patientId],
+    queryFn: () => getPatientRecord(patientId),
+    enabled: Boolean(patientId) && !DEMO_MODE,
+  });
+  const record =
+    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null) ??
+    recordQuery.data;
+  const entry = record?.recent_entries.find((item) => item.id === entryId) ?? record?.recent_entries[0];
+
+  return (
+    <PrintPage>
+      <PrintToolbar />
+      {record && entry ? (
+        <SoapPrintSheet record={record} entry={entry} />
+      ) : (
+        <p className="p-6 text-sm">Cargando evolucion...</p>
+      )}
+    </PrintPage>
+  );
+}
+
+export function PrintPage({ children }: { children: ReactNode }) {
+  return <main className="min-h-screen bg-muted/40 p-4 print:bg-white print:p-0">{children}</main>;
+}
+
+export function PrintToolbar() {
+  return (
+    <div className="mx-auto mb-4 flex max-w-3xl justify-end" data-print-hidden="true">
+      <Button type="button" onClick={() => window.print()}>
+        Imprimir
+      </Button>
+    </div>
+  );
+}
+
+export function ClinicalPaperSheet({
+  record,
+  title,
+  children,
+}: {
+  record: PatientRecordSnapshot;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <article className="print-sheet mx-auto min-h-[279mm] max-w-3xl border bg-card p-8 shadow-sm">
+      <PrintHeader record={record} title={title} />
+      <div className="space-y-5 py-6">{children}</div>
+      <PrintFooter />
+    </article>
+  );
+}
+
+export function PatientSummaryPrintSheet({
+  record,
+  title,
+}: {
+  record: PatientRecordSnapshot;
+  title: string;
+}) {
+  return (
+    <ClinicalPaperSheet record={record} title={title}>
+      <section className="print-section">
+        <h2 className="text-sm font-semibold">Identificacion</h2>
+        <p className="mt-2 text-sm">
+          {record.patient.first_name} {record.patient.last_name} · {record.patient.birth_date}
+        </p>
+      </section>
+      <section className="print-section">
+        <h2 className="text-sm font-semibold">Alergias</h2>
+        <p className="mt-2 text-sm">
+          {record.active_allergies.map((item) => item.substance).join(", ") || "Sin alergias activas"}
+        </p>
+      </section>
+      <section className="print-section">
+        <h2 className="text-sm font-semibold">Medicacion activa</h2>
+        <p className="mt-2 text-sm">
+          {record.active_medications.map((item) => item.name).join(", ") || "Sin medicacion activa"}
+        </p>
+      </section>
+      <section className="print-section">
+        <h2 className="mb-3 text-sm font-semibold">Evoluciones recientes</h2>
+        <ClinicalTimeline entries={record.recent_entries} />
+      </section>
+    </ClinicalPaperSheet>
+  );
+}
+
+export function SoapPrintSheet({
+  record,
+  entry,
+}: {
+  record: PatientRecordSnapshot;
+  entry: ClinicalEntry;
+}) {
+  return (
+    <ClinicalPaperSheet record={record} title="Evolucion SOAP">
+      <section className="print-section space-y-3">
+        <div>
+          <h2 className="text-sm font-semibold">{entry.title}</h2>
+          <p className="text-xs text-muted-foreground">{formatDateTime(entry.occurred_at)}</p>
+        </div>
+        <SoapRow label="S" value={entry.subjective} />
+        <SoapRow label="O" value={entry.objective} />
+        <SoapRow label="A" value={entry.assessment} />
+        <SoapRow label="P" value={entry.plan} />
+      </section>
+    </ClinicalPaperSheet>
+  );
+}
+
+export function PrintHeader({
+  record,
+  title,
+}: {
+  record: PatientRecordSnapshot;
+  title: string;
+}) {
+  return (
+    <header className="border-b pb-4">
+      <p className="text-xs font-semibold uppercase text-muted-foreground">OneEpis</p>
+      <h1 className="mt-1 text-2xl font-semibold">{title}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {record.patient.first_name} {record.patient.last_name} ·{" "}
+        {record.patient.clinical_identifier ?? record.patient.id}
+      </p>
+    </header>
+  );
+}
+
+export function PrintFooter() {
+  return (
+    <footer className="mt-8 border-t pt-4 text-xs text-muted-foreground">
+      <p>Fecha: {new Date().toLocaleString("es-CL")} · Folio demo: ONE-DEV · Pagina 1</p>
+      <p>Documento de desarrollo / no uso clinico real.</p>
+    </footer>
+  );
+}
+
+function SoapRow({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm">{value || "Sin registro"}</p>
+    </div>
+  );
+}

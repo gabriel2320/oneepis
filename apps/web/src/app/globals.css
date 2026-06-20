@@ -2,29 +2,134 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 45 22% 97%;
-  --foreground: 220 18% 12%;
+:root,
+[data-template="clinical-sober"] {
+  --background: 210 35% 98%;
+  --foreground: 218 28% 12%;
   --card: 0 0% 100%;
-  --card-foreground: 220 18% 12%;
-  --primary: 174 76% 27%;
+  --card-foreground: 218 28% 12%;
+  --primary: 184 69% 27%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 214 32% 92%;
-  --secondary-foreground: 219 24% 20%;
-  --muted: 42 18% 92%;
-  --muted-foreground: 218 11% 42%;
-  --accent: 206 80% 94%;
-  --accent-foreground: 210 54% 28%;
+  --secondary: 215 28% 93%;
+  --secondary-foreground: 218 24% 20%;
+  --muted: 212 24% 94%;
+  --muted-foreground: 219 10% 42%;
+  --accent: 194 64% 92%;
+  --accent-foreground: 196 64% 24%;
   --destructive: 0 67% 46%;
   --destructive-foreground: 0 0% 100%;
-  --border: 214 20% 84%;
-  --input: 214 20% 84%;
-  --ring: 174 76% 27%;
+  --success: 152 58% 35%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 88% 43%;
+  --warning-foreground: 30 20% 10%;
+  --info: 210 78% 43%;
+  --info-foreground: 0 0% 100%;
+  --border: 214 18% 84%;
+  --input: 214 18% 84%;
+  --ring: 184 69% 27%;
   --radius: 8px;
+}
+
+.dark,
+.dark[data-template="clinical-sober"] {
+  --background: 218 27% 9%;
+  --foreground: 210 22% 94%;
+  --card: 219 25% 13%;
+  --card-foreground: 210 22% 94%;
+  --primary: 181 64% 42%;
+  --primary-foreground: 220 30% 8%;
+  --secondary: 219 22% 18%;
+  --secondary-foreground: 210 22% 92%;
+  --muted: 219 20% 18%;
+  --muted-foreground: 214 14% 68%;
+  --accent: 205 44% 22%;
+  --accent-foreground: 203 90% 86%;
+  --destructive: 0 63% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 152 54% 45%;
+  --success-foreground: 155 35% 8%;
+  --warning: 42 92% 55%;
+  --warning-foreground: 32 30% 9%;
+  --info: 204 78% 58%;
+  --info-foreground: 218 30% 9%;
+  --border: 218 16% 25%;
+  --input: 218 16% 25%;
+  --ring: 181 64% 42%;
+}
+
+[data-template="hospital-night"] {
+  --background: 220 30% 8%;
+  --foreground: 210 24% 96%;
+  --card: 221 28% 12%;
+  --card-foreground: 210 24% 96%;
+  --primary: 188 86% 45%;
+  --primary-foreground: 220 30% 8%;
+  --secondary: 221 22% 18%;
+  --secondary-foreground: 210 24% 92%;
+  --muted: 221 18% 17%;
+  --muted-foreground: 213 13% 70%;
+  --accent: 211 52% 24%;
+  --accent-foreground: 202 94% 88%;
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 152 59% 47%;
+  --success-foreground: 155 35% 8%;
+  --warning: 43 96% 58%;
+  --warning-foreground: 32 30% 9%;
+  --info: 205 88% 60%;
+  --info-foreground: 218 30% 9%;
+  --border: 219 18% 27%;
+  --input: 219 18% 27%;
+  --ring: 188 86% 45%;
+}
+
+[data-template="ambulatory-warm"] {
+  --background: 34 26% 97%;
+  --foreground: 220 20% 13%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 13%;
+  --primary: 172 61% 29%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 35 24% 91%;
+  --secondary-foreground: 217 20% 21%;
+  --muted: 36 20% 92%;
+  --muted-foreground: 220 9% 42%;
+  --accent: 165 44% 90%;
+  --accent-foreground: 171 58% 24%;
+  --destructive: 2 65% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 149 52% 35%;
+  --success-foreground: 0 0% 100%;
+  --warning: 36 83% 45%;
+  --warning-foreground: 30 20% 10%;
+  --info: 206 71% 42%;
+  --info-foreground: 0 0% 100%;
+  --border: 34 16% 82%;
+  --input: 34 16% 82%;
+  --ring: 172 61% 29%;
+}
+
+.dark[data-template="ambulatory-warm"] {
+  --background: 218 24% 10%;
+  --foreground: 36 22% 94%;
+  --card: 218 22% 14%;
+  --card-foreground: 36 22% 94%;
+  --secondary: 218 19% 19%;
+  --secondary-foreground: 36 18% 91%;
+  --muted: 218 18% 18%;
+  --muted-foreground: 35 12% 70%;
+  --accent: 172 35% 22%;
+  --accent-foreground: 166 68% 86%;
+  --border: 218 16% 26%;
+  --input: 218 16% 26%;
 }
 
 * {
   border-color: hsl(var(--border));
+}
+
+html {
+  background: hsl(var(--background));
 }
 
 body {
@@ -38,4 +143,32 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+@page {
+  size: letter;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  [data-print-hidden="true"] {
+    display: none !important;
+  }
+
+  .print-sheet {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border-color: #d7d7d7 !important;
+  }
+
+  .print-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }

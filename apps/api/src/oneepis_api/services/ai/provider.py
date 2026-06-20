@@ -231,7 +231,7 @@ def get_ai_provider(settings: Settings) -> ClinicalAIProvider:
     if settings.ai_provider == "ollama":
         return OllamaProvider(
             base_url=settings.ollama_base_url,
-            model=settings.ollama_model,
+            model=settings.ollama_model_summary or settings.ollama_model,
             timeout_seconds=settings.ollama_timeout_seconds,
         )
     return DisabledAIProvider(name=settings.ai_provider)

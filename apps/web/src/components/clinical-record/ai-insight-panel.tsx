@@ -13,7 +13,7 @@ import type { AIProviderStatus, ClinicalInsightResponse } from "@/lib/types";
 
 export function AiInsightPanel() {
   const [sourceText, setSourceText] = useState(
-    "Paciente demo refiere evolucion estable. Signos vitales sin alertas. Mantener seguimiento.",
+    "Paciente refiere evolucion estable. Signos vitales sin alertas. Mantener seguimiento.",
   );
   const [status, setStatus] = useState<AIProviderStatus | null>(null);
   const [insight, setInsight] = useState<ClinicalInsightResponse | null>(null);

@@ -1,5 +1,5 @@
-import { ClinicalWorkspace } from "@/components/clinical-record/clinical-workspace";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <ClinicalWorkspace />;
+  redirect("/pacientes");
 }

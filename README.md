@@ -1,6 +1,6 @@
 # OneEpis
 
-## Aviso de Repositorio Publico
+## Aviso de repositorio publico
 
 Este repositorio esta publico temporalmente para desarrollo temprano. No contiene datos reales y no debe recibir informacion clinica sensible, secretos, dumps, logs con PHI ni documentos de pacientes.
 
@@ -8,26 +8,48 @@ OneEpis no esta listo para produccion sanitaria, no es consejo medico y no debe 
 
 Licencia: sin licencia open source por ahora. Ver `LICENSE.md`.
 
-Ficha clínica inteligente, bella, rápida y modular.
+## Stack decidido
 
-OneEpis parte con una base limpia:
+- **Next.js + Tailwind + shadcn/ui**: ficha clinica bella, rapida y modular.
+- **FastAPI + Pydantic**: API clara, validada y entendible por agentes IA.
+- **PostgreSQL + SQLAlchemy + Alembic**: verdad clinica estructurada y auditable.
+- **OpenAPI**: contrato limpio entre frontend y backend.
+- **Ollama local**: IA controlada, desacoplada de la escritura clinica.
 
-- **Next.js + Tailwind + shadcn/ui** para una experiencia clínica clara y mantenible.
-- **FastAPI + Pydantic** para una API validada, explícita y fácil de entender por agentes IA.
-- **PostgreSQL + SQLAlchemy + Alembic** como verdad clínica estructurada y auditable.
-- **OpenAPI** como contrato entre frontend y backend.
-- **Ollama local** mediante una interfaz de proveedores de IA, sin acoplar la ficha clínica al modelo.
+## Estado actual
 
-## Estado Inicial
+La fase 1 ya prioriza el flujo real:
 
-Este repo contiene un primer esqueleto funcional y deliberadamente acotado:
+`paciente -> ficha -> evolucion SOAP -> PostgreSQL -> auditoria -> UI`
 
-- workspace clínico en `apps/web`
-- API clínica en `apps/api`
-- migración inicial Alembic
-- contratos exportables en `packages/contracts`
-- guía para agentes en `AGENTS.md`
-- documentos de arquitectura, seguridad, gobierno y roadmap en `docs`
+La UI usa API real por defecto. Los datos demo quedan reservados para `NEXT_PUBLIC_DEMO_MODE=true`.
+
+Dominios implementados:
+
+- pacientes
+- evoluciones clinicas SOAP
+- alergias
+- medicacion
+- signos vitales
+- auditoria por escritura con `X-OneEpis-Actor`
+- estado y borrador IA local via Ollama
+
+Rutas principales:
+
+- `/pacientes`
+- `/pacientes/nuevo`
+- `/pacientes/[patientId]/ficha`
+- `/pacientes/[patientId]/evoluciones`
+- `/pacientes/[patientId]/evoluciones/nueva`
+- `/pacientes/[patientId]/alergias`
+- `/pacientes/[patientId]/medicacion`
+- `/pacientes/[patientId]/signos-vitales`
+- `/pacientes/[patientId]/ia`
+- `/pacientes/[patientId]/auditoria`
+- `/hospitalizacion`
+- `/consulta`
+- `/configuracion`
+- `/print/pacientes/[patientId]/ficha`
 
 ## Requisitos
 
@@ -35,8 +57,9 @@ Este repo contiene un primer esqueleto funcional y deliberadamente acotado:
 - npm 10+
 - Python 3.12+
 - PostgreSQL 15+ o Docker
+- Ollama opcional para IA local
 
-## Desarrollo Local
+## Desarrollo local
 
 1. Copia variables locales:
 
@@ -50,26 +73,23 @@ cp .env.example .env
 docker compose -f infra/docker-compose.dev.yml up -d
 ```
 
-3. Instala dependencias web:
+Docker expone PostgreSQL en `localhost:5433` para no chocar con instalaciones locales en `5432`.
+
+3. Instala dependencias:
 
 ```bash
 npm install
-```
-
-4. Instala la API:
-
-```bash
 python -m venv .venv
 .venv/Scripts/python -m pip install -e "apps/api[dev]"
 ```
 
-5. Ejecuta migraciones:
+4. Ejecuta migraciones:
 
 ```bash
 .venv/Scripts/python -m alembic -c apps/api/alembic.ini upgrade head
 ```
 
-6. Inicia servicios:
+5. Inicia servicios:
 
 ```bash
 npm run dev:web
@@ -79,9 +99,30 @@ npm run api:dev
 Web: <http://localhost:3000>  
 API: <http://localhost:8000/docs>
 
-PostgreSQL local de Docker queda expuesto en `localhost:5433` para no chocar con instalaciones locales que ya usen `5432`.
+## Ollama local
 
-Ollama local queda activo con `ONEEPIS_AI_PROVIDER=ollama` y modelo `llama3.2:latest`. Cambia `ONEEPIS_OLLAMA_MODEL` si quieres usar otro modelo instalado.
+Variables recomendadas para una estacion con NVIDIA RTX 5070 12 GB:
+
+```bash
+ONEEPIS_AI_PROVIDER=ollama
+ONEEPIS_OLLAMA_BASE_URL=http://localhost:11434
+ONEEPIS_OLLAMA_MODEL=llama3.2:latest
+ONEEPIS_OLLAMA_MODEL_SUMMARY=qwen3:8b
+ONEEPIS_OLLAMA_MODEL_EMBEDDINGS=bge-m3
+```
+
+Estrategia:
+
+- `llama3.2:latest`: modelo rapido de fallback.
+- `qwen3:8b`: razonamiento/resumen clinico si latencia y VRAM son aceptables.
+- `bge-m3`: embeddings futuros para RAG; no se usa hasta existir modulo RAG.
+
+Guardrails:
+
+- la IA no diagnostica
+- la IA no firma
+- la IA no escribe ficha sin confirmacion humana
+- no se envian datos clinicos a terceros
 
 ## Contrato OpenAPI
 
@@ -91,17 +132,29 @@ Genera el contrato desde FastAPI:
 python apps/api/scripts/export_openapi.py
 ```
 
-El archivo estable para revisión queda en `packages/contracts/openapi.json`.
+El archivo estable queda en `packages/contracts/openapi.json`.
 
-## Gobierno Técnico
+## Gates
 
-Antes de ampliar el producto, lee:
+```bash
+.venv/Scripts/python -m ruff check apps/api
+.venv/Scripts/python -m pytest apps/api/tests
+npm --workspace apps/web run typecheck
+npm --workspace apps/web run lint
+npm --workspace apps/web run build
+python apps/api/scripts/export_openapi.py
+```
 
+## Documentos clave
+
+- `AGENTS.md`
 - `SECURITY.md`
-- `LICENSE.md`
 - `docs/ARCHITECTURE.md`
 - `docs/GOVERNANCE.md`
 - `docs/SECURITY_PRIVACY.md`
-- `docs/ROADMAP.md`
+- `docs/SCREEN_TREE.md`
+- `docs/VISUAL_SYSTEM.md`
+- `docs/PRINT_SYSTEM.md`
+- `docs/OLLAMA_AND_TOOLS.md`
 
-La regla central: crecer por módulos clínicos bien nombrados, no por acumulación de código.
+Regla central: crecer por modulos clinicos bien nombrados, no por acumulacion indiscriminada de codigo.
