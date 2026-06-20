@@ -31,11 +31,13 @@ Dominios implementados:
 - alergias
 - medicacion
 - signos vitales
-- auditoria por escritura con `X-OneEpis-Actor`
+- auth local con roles basicos
+- auditoria por escritura con actor autenticado
 - estado y borrador IA local via Ollama
 
 Rutas principales:
 
+- `/login`
 - `/pacientes`
 - `/pacientes/nuevo`
 - `/pacientes/[patientId]/ficha`
@@ -98,6 +100,16 @@ npm run api:dev
 
 Web: <http://localhost:3000>  
 API: <http://localhost:8000/docs>
+
+Credenciales locales iniciales:
+
+- `admin@oneepis.local` / `admin`
+- `medico@oneepis.local` / `medico`
+- `enfermeria@oneepis.local` / `enfermeria`
+- `lector@oneepis.local` / `lector`
+
+Estas credenciales son solo para desarrollo local. Cambia `ONEEPIS_AUTH_SECRET` y
+`ONEEPIS_AUTH_LOCAL_USERS` antes de cualquier entorno compartido.
 
 ## Ollama local
 

@@ -16,6 +16,16 @@ class Settings(BaseSettings):
     ollama_model_suggestions: str | None = "qwen3:8b"
     ollama_model_embeddings: str | None = "bge-m3"
     ollama_timeout_seconds: float = 60.0
+    auth_enabled: bool = True
+    auth_secret: str = "oneepis-local-dev-secret-change-me"
+    auth_token_ttl_minutes: int = 720
+    auth_allow_dev_actor_header: bool = False
+    auth_local_users: str = (
+        "admin@oneepis.local|admin|Administrador Dev|admin,dev;"
+        "medico@oneepis.local|medico|Medico Dev|medico;"
+        "enfermeria@oneepis.local|enfermeria|Enfermeria Dev|enfermeria;"
+        "lector@oneepis.local|lector|Lectura Dev|solo_lectura"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

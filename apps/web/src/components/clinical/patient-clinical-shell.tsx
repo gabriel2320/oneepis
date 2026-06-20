@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { SessionButton } from "@/components/auth/session-button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
 import { Badge } from "@/components/ui/badge";
@@ -95,6 +96,7 @@ export function PatientClinicalShell({
             })}
           </nav>
           <div className="space-y-3 border-t p-3">
+            <SessionButton />
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
               <Link href={`/print/pacientes/${patient.id}/ficha`}>
                 <Printer className="h-4 w-4" />
@@ -140,6 +142,7 @@ export function PatientClinicalShell({
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <SessionButton compact />
                 <Badge variant={aiStatus.data?.available ? "safe" : "warning"}>
                   <BrainCircuit className="mr-1 h-3 w-3" />
                   {aiStatus.data?.available ? "Ollama activo" : "Ollama pendiente"}

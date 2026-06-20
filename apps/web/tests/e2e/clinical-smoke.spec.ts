@@ -27,3 +27,11 @@ test("AI settings and print routes render", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
   await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 });
+
+test("login route renders local auth form", async ({ page }) => {
+  await page.goto("/login");
+
+  await expect(page.getByRole("heading", { name: "Ingresar" })).toBeVisible();
+  await expect(page.getByLabel("Email")).toBeVisible();
+  await expect(page.getByLabel("Clave")).toBeVisible();
+});

@@ -3,10 +3,11 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from oneepis_api.api.deps import ActorDep, AiAccessDep, require_patient_read_access
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.models.audit import AuditEvent
@@ -45,23 +46,16 @@ from oneepis_api.schemas.patient import (
 from oneepis_api.services.ai.provider import get_ai_provider
 from oneepis_api.services.audit import record_audit_event
 
-router = APIRouter(prefix="/patients", tags=["patients"])
+router = APIRouter(
+    prefix="/patients",
+    tags=["patients"],
+    dependencies=[Depends(require_patient_read_access)],
+)
 SessionDep = Annotated[Session, Depends(get_session)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 PatientSearch = Annotated[str | None, Query(min_length=2, max_length=80)]
 LimitQuery = Annotated[int, Query(ge=1, le=100)]
 OffsetQuery = Annotated[int, Query(ge=0)]
-ActorHeader = Annotated[
-    str | None,
-    Header(alias="X-OneEpis-Actor", min_length=1, max_length=120),
-]
-
-
-def get_actor(actor: ActorHeader = None) -> str:
-    return actor or "dev.system"
-
-
-ActorDep = Annotated[str, Depends(get_actor)]
 
 
 def require_patient(session: Session, patient_id: uuid.UUID) -> Patient:
@@ -167,6 +161,7 @@ def create_patient_ai_suggestions(
     payload: PatientAiSuggestionRequest,
     session: SessionDep,
     settings: SettingsDep,
+    _user: AiAccessDep,
 ) -> PatientAiSuggestionsResponse:
     snapshot = get_patient_record(patient_id, session)
     provider = get_ai_provider(settings)

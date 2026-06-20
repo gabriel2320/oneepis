@@ -12,6 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { SessionButton } from "@/components/auth/session-button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="space-y-3 border-t p-3">
+            <SessionButton />
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <TemplateSelector compact />
@@ -86,6 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             OneEpis
           </Link>
           <div className="flex items-center gap-2">
+            <SessionButton compact />
             <ThemeToggle />
             <Button asChild variant="outline" size="sm">
               <Link href="/configuracion/apariencia">Tema</Link>

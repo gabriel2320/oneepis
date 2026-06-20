@@ -16,7 +16,7 @@ sin datos reales
 
 ## Programa activo
 
-Mesa clinica viva con Ollama first-class:
+Mesa clinica viva con Ollama first-class y seguridad local:
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -26,6 +26,7 @@ Mesa clinica viva con Ollama first-class:
 - PR-023: SOAP con asistente Ollama.
 - PR-024: Modo papel v2.
 - PR-025: QA visual + Ollama.
+- PR-026: Auth local + roles + actor auditado.
 
 ## Reglas no negociables
 
@@ -38,6 +39,7 @@ Mesa clinica viva con Ollama first-class:
 - No dejar TypeScript roto.
 - No dejar endpoints sin tests.
 - Toda escritura clinica debe crear `audit_event`.
+- Toda escritura clinica debe tener actor autenticado; `X-OneEpis-Actor` es solo fallback dev explicito.
 - Todo cambio de API debe actualizar `packages/contracts/openapi.json`.
 - Frontend no debe usar `demoRecords` salvo `NEXT_PUBLIC_DEMO_MODE=true`.
 

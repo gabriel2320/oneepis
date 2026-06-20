@@ -40,11 +40,25 @@ def client() -> Iterator[TestClient]:
     Base.metadata.drop_all(engine)
 
 
+def auth_headers(
+    client: TestClient,
+    email: str = "medico@oneepis.local",
+    password: str = "medico",
+) -> dict[str, str]:
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": password},
+    )
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
 def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> None:
-    actor = {"X-OneEpis-Actor": "dev.doctor"}
+    auth = auth_headers(client)
     patient_response = client.post(
         "/api/v1/patients",
-        headers=actor,
+        headers=auth,
         json={
             "first_name": "Elena",
             "last_name": "Rojas",
@@ -58,7 +72,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
 
     entry_response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-entries",
-        headers=actor,
+        headers=auth,
         json={
             "kind": "progress",
             "occurred_at": "2026-06-20T10:30:00Z",
@@ -71,11 +85,11 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
         },
     )
     assert entry_response.status_code == 201
-    assert entry_response.json()["created_by"] == "dev.doctor"
+    assert entry_response.json()["created_by"] == "medico@oneepis.local"
 
     allergy_response = client.post(
         f"/api/v1/patients/{patient_id}/allergies",
-        headers=actor,
+        headers=auth,
         json={
             "substance": "Penicilina",
             "reaction": "Exantema",
@@ -87,7 +101,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
 
     medication_response = client.post(
         f"/api/v1/patients/{patient_id}/medications",
-        headers=actor,
+        headers=auth,
         json={
             "name": "Paracetamol",
             "dose": "1 g",
@@ -100,7 +114,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
 
     vital_response = client.post(
         f"/api/v1/patients/{patient_id}/vital-signs",
-        headers=actor,
+        headers=auth,
         json={
             "measured_at": "2026-06-20T10:40:00Z",
             "temperature_c": "36.8",
@@ -112,7 +126,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     )
     assert vital_response.status_code == 201
 
-    snapshot_response = client.get(f"/api/v1/patients/{patient_id}/record")
+    snapshot_response = client.get(f"/api/v1/patients/{patient_id}/record", headers=auth)
     assert snapshot_response.status_code == 200
     snapshot = snapshot_response.json()
     assert snapshot["patient"]["clinical_identifier"] == "ONE-001"
@@ -121,7 +135,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     assert snapshot["active_medications"][0]["name"] == "Paracetamol"
     assert snapshot["recent_entries"][0]["title"] == "Evolucion SOAP"
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events")
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
     assert audit_response.status_code == 200
     audit_events = audit_response.json()
     actions = {item["action"] for item in audit_events}
@@ -132,12 +146,14 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
         "medication.created",
         "vital_sign.created",
     }.issubset(actions)
-    assert {item["actor_id"] for item in audit_events} == {"dev.doctor"}
+    assert {item["actor_id"] for item in audit_events} == {"medico@oneepis.local"}
 
 
 def test_child_resources_return_404_for_wrong_patient(client: TestClient) -> None:
+    auth = auth_headers(client)
     first = client.post(
         "/api/v1/patients",
+        headers=auth,
         json={
             "first_name": "A",
             "last_name": "Paciente",
@@ -147,6 +163,7 @@ def test_child_resources_return_404_for_wrong_patient(client: TestClient) -> Non
     ).json()
     second = client.post(
         "/api/v1/patients",
+        headers=auth,
         json={
             "first_name": "B",
             "last_name": "Paciente",
@@ -156,6 +173,7 @@ def test_child_resources_return_404_for_wrong_patient(client: TestClient) -> Non
     ).json()
     allergy = client.post(
         f"/api/v1/patients/{first['id']}/allergies",
+        headers=auth,
         json={
             "substance": "Latex",
             "severity": "unknown",
@@ -163,14 +181,19 @@ def test_child_resources_return_404_for_wrong_patient(client: TestClient) -> Non
         },
     ).json()
 
-    response = client.get(f"/api/v1/patients/{second['id']}/allergies/{allergy['id']}")
+    response = client.get(
+        f"/api/v1/patients/{second['id']}/allergies/{allergy['id']}",
+        headers=auth,
+    )
 
     assert response.status_code == 404
 
 
 def test_patient_ai_suggestions_use_snapshot_without_persisting(client: TestClient) -> None:
+    auth = auth_headers(client)
     patient_response = client.post(
         "/api/v1/patients",
+        headers=auth,
         json={
             "first_name": "C",
             "last_name": "Paciente",
@@ -183,6 +206,7 @@ def test_patient_ai_suggestions_use_snapshot_without_persisting(client: TestClie
 
     response = client.post(
         f"/api/v1/patients/{patient_id}/ai/suggestions",
+        headers=auth,
         json={"focus": "documentation"},
     )
 
@@ -195,9 +219,34 @@ def test_patient_ai_suggestions_use_snapshot_without_persisting(client: TestClie
 
 
 def test_patient_ai_suggestions_return_404_for_missing_patient(client: TestClient) -> None:
+    auth = auth_headers(client)
     response = client.post(
         "/api/v1/patients/11111111-1111-4111-8111-111111111111/ai/suggestions",
+        headers=auth,
         json={"focus": "summary"},
     )
 
     assert response.status_code == 404
+
+
+def test_patient_routes_require_authentication(client: TestClient) -> None:
+    response = client.get("/api/v1/patients")
+
+    assert response.status_code == 401
+
+
+def test_readonly_user_cannot_write_patient(client: TestClient) -> None:
+    auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Solo",
+            "last_name": "Lectura",
+            "birth_date": "1990-01-01",
+            "sex_at_birth": "unknown",
+        },
+    )
+
+    assert response.status_code == 403

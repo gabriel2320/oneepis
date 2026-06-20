@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
+from oneepis_api.api.deps import AiAccessDep
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.schemas.ai import AIProviderStatus, ClinicalInsightRequest, ClinicalInsightResponse
 from oneepis_api.services.ai.provider import get_ai_provider
@@ -14,6 +15,7 @@ SettingsDep = Annotated[Settings, Depends(get_settings)]
 def create_clinical_insight(
     payload: ClinicalInsightRequest,
     settings: SettingsDep,
+    _user: AiAccessDep,
 ) -> ClinicalInsightResponse:
     provider = get_ai_provider(settings)
     return provider.create_insight(payload)

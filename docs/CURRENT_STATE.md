@@ -28,9 +28,18 @@ Dominios CRUD:
 Auditoria:
 
 - cada escritura usa `record_audit_event`
-- actor via `X-OneEpis-Actor`
-- fallback: `dev.system`
+- actor via token local de `/api/v1/auth/login`
+- `X-OneEpis-Actor` queda solo como fallback dev si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`
 - lectura: `GET /api/v1/patients/{patient_id}/audit-events`
+
+Auth local:
+
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
+- roles iniciales: `admin`, `medico`, `enfermeria`, `solo_lectura`, `dev`
+- rutas de paciente requieren autenticacion
+- escrituras clinicas requieren `admin`, `medico`, `enfermeria` o `dev`
+- IA clinica requiere `admin`, `medico` o `dev`
 
 IA:
 
@@ -47,13 +56,15 @@ Rutas App Router bajo `apps/web/src/app`.
 Capas:
 
 - `src/lib/api/*`: clientes API por dominio
+- `src/lib/api/auth.ts`: login local y sesion actual
 - `src/lib/types.ts`: contrato TypeScript
+- `src/components/auth/*`: login local y badge de sesion
 - `src/components/layout/app-shell.tsx`: navegacion global
 - `src/components/clinical/patient-clinical-shell.tsx`: mesa clinica por paciente
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-025
+## Programa activo PR-018 a PR-026
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -63,6 +74,7 @@ Capas:
 - PR-023: SOAP con asistente Ollama.
 - PR-024: Modo papel v2.
 - PR-025: QA visual + Ollama.
+- PR-026: Auth local + roles + actor auditado.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

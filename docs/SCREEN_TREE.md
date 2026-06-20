@@ -6,6 +6,8 @@
 /
   -> /pacientes
 
+/login
+
 /pacientes
 /pacientes/nuevo
 /pacientes/[patientId]
