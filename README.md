@@ -28,6 +28,7 @@ Dominios implementados:
 
 - pacientes
 - evoluciones clinicas SOAP
+- estado de ficha, contexto asistencial y problemas activos
 - alergias
 - medicacion
 - signos vitales
@@ -44,6 +45,8 @@ Rutas principales:
 - `/pacientes/[patientId]/ficha`
 - `/pacientes/[patientId]/evoluciones`
 - `/pacientes/[patientId]/evoluciones/nueva`
+- `/pacientes/[patientId]/problemas`
+- `/pacientes/[patientId]/problemas/nuevo`
 - `/pacientes/[patientId]/alergias`
 - `/pacientes/[patientId]/medicacion`
 - `/pacientes/[patientId]/signos-vitales`
@@ -142,7 +145,7 @@ Guardrails:
 Genera el contrato desde FastAPI:
 
 ```bash
-python apps/api/scripts/export_openapi.py
+.venv/Scripts/python apps/api/scripts/export_openapi.py
 ```
 
 El archivo estable queda en `packages/contracts/openapi.json`.
@@ -155,7 +158,7 @@ El archivo estable queda en `packages/contracts/openapi.json`.
 npm --workspace apps/web run typecheck
 npm --workspace apps/web run lint
 npm --workspace apps/web run build
-python apps/api/scripts/export_openapi.py
+.venv/Scripts/python apps/api/scripts/export_openapi.py
 ```
 
 ## Documentos clave

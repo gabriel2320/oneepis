@@ -21,6 +21,7 @@ Dominios CRUD:
 
 - pacientes
 - clinical entries
+- problemas activos
 - alergias
 - medicacion
 - signos vitales
@@ -48,6 +49,7 @@ Permisos finos:
 
 - matriz viva en `docs/PERMISSIONS.md`
 - enfermeria puede registrar signos vitales, pero no SOAP, medicacion, alergias ni IA clinica
+- problemas activos requieren rol medico/admin/dev
 - solo_lectura puede leer, pero no escribir
 - frontend deshabilita acciones sin permiso; backend las rechaza con 403
 
@@ -74,7 +76,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-028
+## Programa activo PR-018 a PR-029
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -87,6 +89,7 @@ Capas:
 - PR-026: Auth local + roles + actor auditado.
 - PR-027: Permisos clinicos por accion.
 - PR-028: Auditoria fuerte con correlation ID y before/after.
+- PR-029: Estado de ficha, contexto asistencial y problemas activos auditados.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
@@ -100,5 +103,5 @@ Comandos esperados antes de entregar cambios:
 npm --workspace apps/web run typecheck
 npm --workspace apps/web run lint
 npm --workspace apps/web run build
-python apps/api/scripts/export_openapi.py
+.venv/Scripts/python apps/api/scripts/export_openapi.py
 ```

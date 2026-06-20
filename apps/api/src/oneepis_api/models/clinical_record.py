@@ -125,6 +125,28 @@ class Medication(Base, IdMixin, TimestampMixin):
     patient: Mapped[Patient] = relationship(back_populates="medications")
 
 
+class ActiveProblem(Base, IdMixin, TimestampMixin):
+    __tablename__ = "active_problems"
+
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        index=True,
+    )
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    code_system: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    code: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    status: Mapped[RecordStatus] = mapped_column(
+        Enum(RecordStatus, values_callable=enum_values, name="record_status"),
+        default=RecordStatus.ACTIVE,
+        nullable=False,
+    )
+    onset_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    resolved_on: Mapped[date | None] = mapped_column(Date, nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(280), nullable=True)
+
+    patient: Mapped[Patient] = relationship(back_populates="active_problems")
+
+
 class VitalSign(Base, IdMixin, TimestampMixin):
     __tablename__ = "vital_signs"
 

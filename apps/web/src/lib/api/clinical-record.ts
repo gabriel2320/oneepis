@@ -1,5 +1,8 @@
 import { apiFetch } from "@/lib/api/client";
 import type {
+  ActiveProblem,
+  ActiveProblemCreate,
+  ActiveProblemUpdate,
   Allergy,
   AllergyCreate,
   AllergyUpdate,
@@ -72,6 +75,28 @@ export function updateMedication(
   payload: MedicationUpdate,
 ) {
   return apiFetch<Medication>(`/api/v1/patients/${patientId}/medications/${medicationId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listActiveProblems(patientId: string) {
+  return apiFetch<ActiveProblem[]>(`/api/v1/patients/${patientId}/problems?limit=50`);
+}
+
+export function createActiveProblem(patientId: string, payload: ActiveProblemCreate) {
+  return apiFetch<ActiveProblem>(`/api/v1/patients/${patientId}/problems`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateActiveProblem(
+  patientId: string,
+  problemId: string,
+  payload: ActiveProblemUpdate,
+) {
+  return apiFetch<ActiveProblem>(`/api/v1/patients/${patientId}/problems/${problemId}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });

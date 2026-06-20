@@ -129,7 +129,10 @@ export function PatientClinicalShell({
                   <h1 className="truncate text-xl font-semibold">
                     {patient.first_name} {patient.last_name}
                   </h1>
-                  <Badge variant="safe">Ficha activa</Badge>
+                  <Badge variant={patient.clinical_status === "active" ? "safe" : "outline"}>
+                    {patient.clinical_status}
+                  </Badge>
+                  <Badge variant="outline">{patient.current_care_context}</Badge>
                   {patient.clinical_identifier ? (
                     <Badge variant="outline">{patient.clinical_identifier}</Badge>
                   ) : null}

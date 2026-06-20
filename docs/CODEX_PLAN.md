@@ -29,6 +29,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-026: Auth local + roles + actor auditado.
 - PR-027: Permisos clinicos por accion.
 - PR-028: Auditoria fuerte con correlation ID y before/after.
+- PR-029: Estado de ficha, contexto asistencial y problemas activos auditados.
 
 ## Reglas no negociables
 

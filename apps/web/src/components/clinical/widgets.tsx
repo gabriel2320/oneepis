@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type {
+  ActiveProblem,
   Allergy,
   AuditEvent,
   ClinicalEntry,
@@ -114,12 +115,33 @@ export function MedicationList({ medications }: { medications: Medication[] }) {
   );
 }
 
-export function ProblemList() {
+export function ProblemList({ problems }: { problems: ActiveProblem[] }) {
+  if (problems.length === 0) {
+    return (
+      <EmptyState
+        title="Sin problemas activos"
+        description="No hay problemas clinicos activos registrados."
+      />
+    );
+  }
+
   return (
-    <EmptyState
-      title="Problemas pendientes de modelar"
-      description="La base E2E prioriza paciente, evoluciones, alergias, medicacion, signos vitales y auditoria."
-    />
+    <div className="space-y-2">
+      {problems.map((problem) => (
+        <div key={problem.id} className="rounded-md border p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">{problem.title}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {[problem.code_system, problem.code].filter(Boolean).join(" ") || "Sin codigo"}
+              </p>
+              {problem.notes ? <p className="mt-1 text-xs text-muted-foreground">{problem.notes}</p> : null}
+            </div>
+            <Badge variant={problem.status === "active" ? "safe" : "outline"}>{problem.status}</Badge>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -296,7 +318,9 @@ export function LatestVitalsTrend({ vitals }: { vitals: VitalSign[] }) {
 
 export function PatientLongitudinalSummary({ record }: { record: PatientRecordSnapshot }) {
   return (
-    <div className="grid gap-3 md:grid-cols-3">
+    <div className="grid gap-3 md:grid-cols-5">
+      <MetricCard label="Estado ficha" value={record.patient.clinical_status} detail={record.patient.current_care_context} />
+      <MetricCard label="Problemas" value={`${record.active_problems.length}`} />
       <MetricCard label="Evoluciones" value={`${record.recent_entries.length}`} />
       <MetricCard label="Alergias activas" value={`${record.active_allergies.length}`} />
       <MetricCard label="Medicacion activa" value={`${record.active_medications.length}`} />

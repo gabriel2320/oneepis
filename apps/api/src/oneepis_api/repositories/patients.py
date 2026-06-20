@@ -6,6 +6,7 @@ from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from oneepis_api.models.clinical_record import (
+    ActiveProblem,
     Allergy,
     ClinicalEntry,
     Medication,
@@ -75,5 +76,14 @@ def get_active_medications(session: Session, patient_id: uuid.UUID) -> list[Medi
         select(Medication)
         .where(Medication.patient_id == patient_id, Medication.status == RecordStatus.ACTIVE)
         .order_by(Medication.started_on.desc().nullslast())
+    )
+    return list(session.scalars(statement))
+
+
+def get_active_problems(session: Session, patient_id: uuid.UUID) -> list[ActiveProblem]:
+    statement = (
+        select(ActiveProblem)
+        .where(ActiveProblem.patient_id == patient_id, ActiveProblem.status == RecordStatus.ACTIVE)
+        .order_by(ActiveProblem.created_at.desc())
     )
     return list(session.scalars(statement))

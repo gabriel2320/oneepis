@@ -127,6 +127,18 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     )
     assert medication_response.status_code == 201
 
+    problem_response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=auth,
+        json={
+            "title": "Hipertension arterial",
+            "code_system": "CIE-10",
+            "code": "I10",
+            "onset_date": "2024-01-10",
+        },
+    )
+    assert problem_response.status_code == 201
+
     vital_response = client.post(
         f"/api/v1/patients/{patient_id}/vital-signs",
         headers=auth,
@@ -145,6 +157,10 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     assert snapshot_response.status_code == 200
     snapshot = snapshot_response.json()
     assert snapshot["patient"]["clinical_identifier"] == "ONE-001"
+    assert snapshot["patient"]["clinical_status"] == "active"
+    assert snapshot["patient"]["current_care_context"] == "unknown"
+    assert snapshot["active_problems"][0]["title"] == "Hipertension arterial"
+    assert snapshot["active_problems"][0]["code"] == "I10"
     assert snapshot["latest_vitals"]["heart_rate_bpm"] == 78
     assert snapshot["active_allergies"][0]["substance"] == "Penicilina"
     assert snapshot["active_medications"][0]["name"] == "Paracetamol"
@@ -159,6 +175,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
         "clinical_entry.created",
         "allergy.created",
         "medication.created",
+        "problem.created",
         "vital_sign.created",
     }.issubset(actions)
     assert {item["actor_id"] for item in audit_events} == {"medico@oneepis.local"}
@@ -312,6 +329,13 @@ def test_nursing_can_record_vitals_but_not_medical_actions(client: TestClient) -
     )
     assert medication_response.status_code == 403
 
+    problem_response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=nursing_auth,
+        json={"title": "Dolor toracico"},
+    )
+    assert problem_response.status_code == 403
+
     ai_response = client.post(
         f"/api/v1/patients/{patient_id}/ai/suggestions",
         headers=nursing_auth,
@@ -344,3 +368,55 @@ def test_audit_events_include_correlation_and_before_after(client: TestClient) -
     assert patient_update["request_path"] == f"/api/v1/patients/{patient_id}"
     assert patient_update["extra_data"]["before"] == {"last_name": "Paciente"}
     assert patient_update["extra_data"]["after"] == {"last_name": "Auditado"}
+
+
+def test_patient_status_and_problem_update_are_audited(client: TestClient) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    status_response = client.patch(
+        f"/api/v1/patients/{patient_id}",
+        headers=auth,
+        json={"clinical_status": "closed", "current_care_context": "ambulatory"},
+    )
+    assert status_response.status_code == 200
+    assert status_response.json()["clinical_status"] == "closed"
+    assert status_response.json()["current_care_context"] == "ambulatory"
+
+    problem_response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=auth,
+        json={"title": "Diabetes tipo 2", "status": "active"},
+    )
+    assert problem_response.status_code == 201
+    problem_id = problem_response.json()["id"]
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/problems/{problem_id}",
+        headers=auth,
+        json={"status": "resolved", "resolved_on": "2026-06-20"},
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["status"] == "resolved"
+
+    snapshot_response = client.get(f"/api/v1/patients/{patient_id}/record", headers=auth)
+    assert snapshot_response.status_code == 200
+    assert snapshot_response.json()["active_problems"] == []
+
+    list_response = client.get(f"/api/v1/patients/{patient_id}/problems", headers=auth)
+    assert list_response.status_code == 200
+    assert list_response.json() == []
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    problem_update = next(
+        item for item in audit_response.json() if item["action"] == "problem.updated"
+    )
+    assert problem_update["extra_data"]["before"] == {
+        "status": "active",
+        "resolved_on": None,
+    }
+    assert problem_update["extra_data"]["after"] == {
+        "status": "resolved",
+        "resolved_on": "2026-06-20",
+    }

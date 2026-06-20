@@ -22,6 +22,10 @@ export function canManageMedications(user?: AuthUser | null) {
   return hasAnyRole(user, medicalWriters);
 }
 
+export function canManageProblems(user?: AuthUser | null) {
+  return hasAnyRole(user, medicalWriters);
+}
+
 export function canRecordVitals(user?: AuthUser | null) {
   return hasAnyRole(user, vitalSignWriters);
 }

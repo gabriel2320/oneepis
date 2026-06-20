@@ -111,6 +111,37 @@ class MedicationRead(MedicationBase):
     updated_at: datetime
 
 
+class ActiveProblemBase(APIModel):
+    title: str = Field(min_length=1, max_length=160)
+    code_system: str | None = Field(default=None, max_length=80)
+    code: str | None = Field(default=None, max_length=80)
+    status: RecordStatus = RecordStatus.ACTIVE
+    onset_date: date | None = None
+    resolved_on: date | None = None
+    notes: str | None = Field(default=None, max_length=280)
+
+
+class ActiveProblemCreate(ActiveProblemBase):
+    pass
+
+
+class ActiveProblemUpdate(APIModel):
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    code_system: str | None = Field(default=None, max_length=80)
+    code: str | None = Field(default=None, max_length=80)
+    status: RecordStatus | None = None
+    onset_date: date | None = None
+    resolved_on: date | None = None
+    notes: str | None = Field(default=None, max_length=280)
+
+
+class ActiveProblemRead(ActiveProblemBase):
+    id: uuid.UUID
+    patient_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
 class VitalSignBase(APIModel):
     measured_at: datetime
     temperature_c: Decimal | None = None

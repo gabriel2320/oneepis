@@ -11,7 +11,13 @@ from oneepis_api.db.base import Base
 from oneepis_api.models.base import IdMixin, TimestampMixin
 
 if TYPE_CHECKING:
-    from oneepis_api.models.clinical_record import Allergy, ClinicalEntry, Medication, VitalSign
+    from oneepis_api.models.clinical_record import (
+        ActiveProblem,
+        Allergy,
+        ClinicalEntry,
+        Medication,
+        VitalSign,
+    )
 
 
 def enum_values(enum_class: type[enum.Enum]) -> list[str]:
@@ -25,6 +31,19 @@ class SexAtBirth(enum.StrEnum):
     UNKNOWN = "unknown"
 
 
+class PatientClinicalStatus(enum.StrEnum):
+    DRAFT = "draft"
+    ACTIVE = "active"
+    CLOSED = "closed"
+    ARCHIVED = "archived"
+
+
+class CareContext(enum.StrEnum):
+    AMBULATORY = "ambulatory"
+    HOSPITALIZED = "hospitalized"
+    UNKNOWN = "unknown"
+
+
 class Patient(Base, IdMixin, TimestampMixin):
     __tablename__ = "patients"
 
@@ -35,6 +54,20 @@ class Patient(Base, IdMixin, TimestampMixin):
     sex_at_birth: Mapped[SexAtBirth] = mapped_column(
         Enum(SexAtBirth, values_callable=enum_values, name="sex_at_birth"),
         default=SexAtBirth.UNKNOWN,
+        nullable=False,
+    )
+    clinical_status: Mapped[PatientClinicalStatus] = mapped_column(
+        Enum(
+            PatientClinicalStatus,
+            values_callable=enum_values,
+            name="patient_clinical_status",
+        ),
+        default=PatientClinicalStatus.ACTIVE,
+        nullable=False,
+    )
+    current_care_context: Mapped[CareContext] = mapped_column(
+        Enum(CareContext, values_callable=enum_values, name="care_context"),
+        default=CareContext.UNKNOWN,
         nullable=False,
     )
     document_id_hash: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
@@ -52,6 +85,10 @@ class Patient(Base, IdMixin, TimestampMixin):
         cascade="all, delete-orphan",
     )
     medications: Mapped[list[Medication]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
+    active_problems: Mapped[list[ActiveProblem]] = relationship(
         back_populates="patient",
         cascade="all, delete-orphan",
     )

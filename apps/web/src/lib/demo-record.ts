@@ -9,6 +9,8 @@ export const demoRecords: PatientRecordSnapshot[] = [
       preferred_name: "Alfa",
       birth_date: "1984-04-12",
       sex_at_birth: "unknown",
+      clinical_status: "active",
+      current_care_context: "ambulatory",
       clinical_identifier: "DEMO-001",
       created_at: "2026-06-20T10:00:00Z",
       updated_at: "2026-06-20T10:00:00Z",
@@ -55,6 +57,21 @@ export const demoRecords: PatientRecordSnapshot[] = [
         updated_at: "2026-06-19T10:00:00Z",
       },
     ],
+    active_problems: [
+      {
+        id: "71111111-1111-4111-8111-111111111111",
+        patient_id: "11111111-1111-4111-8111-111111111111",
+        title: "Problema demo activo",
+        code_system: "DEMO",
+        code: "P001",
+        status: "active",
+        onset_date: "2026-06-01",
+        resolved_on: null,
+        notes: "Problema ficticio para validar UI.",
+        created_at: "2026-06-20T10:10:00Z",
+        updated_at: "2026-06-20T10:10:00Z",
+      },
+    ],
     recent_entries: [
       {
         id: "51111111-1111-4111-8111-111111111111",
@@ -98,6 +115,8 @@ export const demoRecords: PatientRecordSnapshot[] = [
       preferred_name: "Beta",
       birth_date: "1991-09-03",
       sex_at_birth: "unknown",
+      clinical_status: "draft",
+      current_care_context: "unknown",
       clinical_identifier: "DEMO-002",
       created_at: "2026-06-20T10:00:00Z",
       updated_at: "2026-06-20T10:00:00Z",
@@ -105,6 +124,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
     latest_vitals: null,
     active_allergies: [],
     active_medications: [],
+    active_problems: [],
     recent_entries: [],
   },
 ];

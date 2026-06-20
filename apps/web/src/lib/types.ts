@@ -10,6 +10,8 @@ export type ClinicalEntryStatus = "draft" | "signed" | "amended";
 export type RecordStatus = "active" | "inactive" | "resolved" | "entered_in_error";
 export type AllergySeverity = "mild" | "moderate" | "severe" | "unknown";
 export type UserRole = "admin" | "medico" | "enfermeria" | "solo_lectura" | "dev";
+export type PatientClinicalStatus = "draft" | "active" | "closed" | "archived";
+export type CareContext = "ambulatory" | "hospitalized" | "unknown";
 
 export type AuthUser = {
   email: string;
@@ -38,6 +40,8 @@ export type PatientCreate = {
   sex_at_birth: SexAtBirth;
   document_id_hash?: string | null;
   clinical_identifier?: string | null;
+  clinical_status?: PatientClinicalStatus;
+  current_care_context?: CareContext;
   contact_phone?: string | null;
   email?: string | null;
   emergency_contact?: Record<string, unknown>;
@@ -46,7 +50,14 @@ export type PatientCreate = {
 export type PatientUpdate = Partial<
   Pick<
     PatientCreate,
-    "first_name" | "last_name" | "preferred_name" | "contact_phone" | "email" | "emergency_contact"
+    | "first_name"
+    | "last_name"
+    | "preferred_name"
+    | "contact_phone"
+    | "email"
+    | "emergency_contact"
+    | "clinical_status"
+    | "current_care_context"
   >
 >;
 
@@ -57,6 +68,8 @@ export type Patient = {
   preferred_name?: string | null;
   birth_date: string;
   sex_at_birth: SexAtBirth;
+  clinical_status: PatientClinicalStatus;
+  current_care_context: CareContext;
   clinical_identifier?: string | null;
   created_at: string;
   updated_at: string;
@@ -176,11 +189,38 @@ export type Medication = {
 
 export type MedicationUpdate = Partial<MedicationCreate>;
 
+export type ActiveProblemCreate = {
+  title: string;
+  code_system?: string | null;
+  code?: string | null;
+  status?: RecordStatus;
+  onset_date?: string | null;
+  resolved_on?: string | null;
+  notes?: string | null;
+};
+
+export type ActiveProblem = {
+  id: string;
+  patient_id: string;
+  title: string;
+  code_system?: string | null;
+  code?: string | null;
+  status: RecordStatus;
+  onset_date?: string | null;
+  resolved_on?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ActiveProblemUpdate = Partial<ActiveProblemCreate>;
+
 export type PatientRecordSnapshot = {
   patient: Patient;
   latest_vitals?: VitalSign | null;
   active_allergies: Allergy[];
   active_medications: Medication[];
+  active_problems: ActiveProblem[];
   recent_entries: ClinicalEntry[];
 };
 

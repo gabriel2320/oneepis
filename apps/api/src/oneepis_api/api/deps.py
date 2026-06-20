@@ -92,6 +92,10 @@ def require_medication_write_access(user: CurrentUserDep) -> AuthenticatedUser:
     return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
 
 
+def require_problem_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+
+
 def require_vital_sign_write_access(user: CurrentUserDep) -> AuthenticatedUser:
     return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
 
@@ -109,6 +113,7 @@ ClinicalEntryWriteAccessDep = Annotated[
 ]
 AllergyWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_allergy_write_access)]
 MedicationWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_medication_write_access)]
+ProblemWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_problem_write_access)]
 VitalSignWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_vital_sign_write_access)]
 
 
@@ -128,6 +133,10 @@ def get_medication_write_actor(user: MedicationWriteAccessDep) -> str:
     return user.actor_id
 
 
+def get_problem_write_actor(user: ProblemWriteAccessDep) -> str:
+    return user.actor_id
+
+
 def get_vital_sign_write_actor(user: VitalSignWriteAccessDep) -> str:
     return user.actor_id
 
@@ -136,6 +145,7 @@ PatientActorDep = Annotated[str, Depends(get_patient_write_actor)]
 ClinicalEntryActorDep = Annotated[str, Depends(get_clinical_entry_write_actor)]
 AllergyActorDep = Annotated[str, Depends(get_allergy_write_actor)]
 MedicationActorDep = Annotated[str, Depends(get_medication_write_actor)]
+ProblemActorDep = Annotated[str, Depends(get_problem_write_actor)]
 VitalSignActorDep = Annotated[str, Depends(get_vital_sign_write_actor)]
 
 
