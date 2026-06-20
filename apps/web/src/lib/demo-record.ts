@@ -1,4 +1,4 @@
-import type { ClinicalEncounter, PatientRecordSnapshot } from "@/lib/types";
+import type { ClinicalEncounter, HospitalBed, PatientRecordSnapshot } from "@/lib/types";
 
 export const demoRecords: PatientRecordSnapshot[] = [
   {
@@ -155,6 +155,20 @@ export const demoEncounters: ClinicalEncounter[] = [
     ended_at: null,
     location_label: "Sala demo / Cama 1",
     notes: "Registro ficticio para tablero hospitalario.",
+    created_at: "2026-06-20T08:00:00Z",
+    updated_at: "2026-06-20T08:00:00Z",
+  },
+];
+
+export const demoHospitalBeds: HospitalBed[] = [
+  {
+    id: "92222222-2222-4222-8222-222222222222",
+    ward: "Medicina",
+    room: "301",
+    bed_label: "A",
+    status: "occupied",
+    encounter_id: "82222222-2222-4222-8222-222222222222",
+    notes: "Cama demo para tablero hospitalario.",
     created_at: "2026-06-20T08:00:00Z",
     updated_at: "2026-06-20T08:00:00Z",
   },

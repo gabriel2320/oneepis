@@ -3435,6 +3435,251 @@
         }
       }
     },
+    "/api/v1/hospitalization/beds": {
+      "get": {
+        "tags": [
+          "hospitalization"
+        ],
+        "summary": "List Hospital Beds",
+        "operationId": "list_hospital_beds_api_v1_hospitalization_beds_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HospitalBedRead"
+                  },
+                  "title": "Response List Hospital Beds Api V1 Hospitalization Beds Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "hospitalization"
+        ],
+        "summary": "Create Hospital Bed",
+        "operationId": "create_hospital_bed_api_v1_hospitalization_beds_post",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HospitalBedCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HospitalBedRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hospitalization/beds/{bed_id}": {
+      "patch": {
+        "tags": [
+          "hospitalization"
+        ],
+        "summary": "Update Hospital Bed",
+        "operationId": "update_hospital_bed_api_v1_hospitalization_beds__bed_id__patch",
+        "parameters": [
+          {
+            "name": "bed_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bed Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HospitalBedUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HospitalBedRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/hospitalization/active": {
       "get": {
         "tags": [
@@ -5152,6 +5397,227 @@
         ],
         "title": "HealthCheck"
       },
+      "HospitalBedCreate": {
+        "properties": {
+          "ward": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Ward"
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Room"
+          },
+          "bed_label": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Bed Label"
+          },
+          "status": {
+            "$ref": "#/components/schemas/HospitalBedStatus",
+            "default": "available"
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ward",
+          "room",
+          "bed_label"
+        ],
+        "title": "HospitalBedCreate"
+      },
+      "HospitalBedRead": {
+        "properties": {
+          "ward": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Ward"
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Room"
+          },
+          "bed_label": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Bed Label"
+          },
+          "status": {
+            "$ref": "#/components/schemas/HospitalBedStatus",
+            "default": "available"
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ward",
+          "room",
+          "bed_label",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "HospitalBedRead"
+      },
+      "HospitalBedStatus": {
+        "type": "string",
+        "enum": [
+          "available",
+          "occupied",
+          "cleaning",
+          "blocked"
+        ],
+        "title": "HospitalBedStatus"
+      },
+      "HospitalBedUpdate": {
+        "properties": {
+          "ward": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward"
+          },
+          "room": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room"
+          },
+          "bed_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bed Label"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HospitalBedStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "HospitalBedUpdate"
+      },
       "HospitalizationBoardItem": {
         "properties": {
           "patient": {
@@ -5159,6 +5625,16 @@
           },
           "encounter": {
             "$ref": "#/components/schemas/ClinicalEncounterRead"
+          },
+          "bed": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HospitalBedRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

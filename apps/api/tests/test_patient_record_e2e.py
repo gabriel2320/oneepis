@@ -12,6 +12,7 @@ from oneepis_api.db.session import get_session
 from oneepis_api.main import app
 from oneepis_api.models import audit as _audit_models  # noqa: F401
 from oneepis_api.models import clinical_record as _clinical_models  # noqa: F401
+from oneepis_api.models import hospitalization as _hospitalization_models  # noqa: F401
 from oneepis_api.models import patient as _patient_models  # noqa: F401
 
 
@@ -592,6 +593,100 @@ def test_hospitalization_board_lists_active_hospitalizations_only(
     assert payload[0]["patient"]["id"] == active_patient_id
     assert payload[0]["encounter"]["id"] == active_encounter_id
     assert payload[0]["encounter"]["location_label"] == "Sala A / Cama 1"
+
+
+def test_hospital_bed_assignment_enriches_board_and_audit(client: TestClient) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso con cama",
+            "started_at": "2026-06-20T09:00:00Z",
+            "location_label": "Ubicacion libre",
+        },
+    )
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
+
+    bed_response = client.post(
+        "/api/v1/hospitalization/beds",
+        headers=auth,
+        json={
+            "ward": "Medicina",
+            "room": "301",
+            "bed_label": "A",
+            "status": "occupied",
+            "encounter_id": encounter_id,
+        },
+    )
+    assert bed_response.status_code == 201
+    bed_payload = bed_response.json()
+    assert bed_payload["encounter_id"] == encounter_id
+
+    beds_response = client.get("/api/v1/hospitalization/beds", headers=auth)
+    assert beds_response.status_code == 200
+    assert beds_response.json()[0]["ward"] == "Medicina"
+
+    board_response = client.get("/api/v1/hospitalization/active", headers=auth)
+    assert board_response.status_code == 200
+    board_payload = board_response.json()
+    assert board_payload[0]["bed"]["id"] == bed_payload["id"]
+    assert board_payload[0]["bed"]["room"] == "301"
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    assert any(
+        event["action"] == "hospital_bed.created"
+        and event["extra_data"]["encounter_id"] == encounter_id
+        for event in audit_response.json()
+    )
+
+
+def test_hospital_bed_assignment_requires_active_hospitalization(client: TestClient) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    missing_encounter_response = client.post(
+        "/api/v1/hospitalization/beds",
+        headers=auth,
+        json={
+            "ward": "Medicina",
+            "room": "302",
+            "bed_label": "A",
+            "status": "occupied",
+        },
+    )
+    assert missing_encounter_response.status_code == 409
+
+    ambulatory_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Consulta activa",
+            "started_at": "2026-06-20T10:00:00Z",
+        },
+    )
+    assert ambulatory_response.status_code == 201
+
+    invalid_assignment_response = client.post(
+        "/api/v1/hospitalization/beds",
+        headers=auth,
+        json={
+            "ward": "Medicina",
+            "room": "302",
+            "bed_label": "B",
+            "status": "occupied",
+            "encounter_id": ambulatory_response.json()["id"],
+        },
+    )
+    assert invalid_assignment_response.status_code == 409
 
 
 def test_hospitalization_board_requires_authentication(client: TestClient) -> None:

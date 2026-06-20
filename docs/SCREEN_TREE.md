@@ -48,6 +48,7 @@ Estado:
 Estado:
 
 - `/hospitalizacion` y `/hospitalizacion/camas` muestran encuentros `hospitalization` en curso.
+- el tablero prefiere cama estructurada `sala / habitacion / cama` cuando existe.
 - rondas, hoja diaria e indicaciones siguen preparadas, sin escrituras clinicas propias.
 
 ## Consulta

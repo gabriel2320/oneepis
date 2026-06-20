@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
 import { API_BASE_URL, DEMO_MODE } from "@/lib/api/client";
 import { listActiveHospitalizations } from "@/lib/api/hospitalization";
-import { demoEncounters, demoRecords } from "@/lib/demo-record";
+import { demoEncounters, demoHospitalBeds, demoRecords } from "@/lib/demo-record";
 import type { HospitalizationBoardItem } from "@/lib/types";
 
 export function HospitalHomePage() {
@@ -315,6 +315,7 @@ function getDemoHospitalizations(): HospitalizationBoardItem[] {
     .filter((encounter) => encounter.type === "hospitalization" && encounter.status === "in_progress")
     .flatMap((encounter) => {
       const record = demoRecords.find((item) => item.patient.id === encounter.patient_id);
-      return record ? [{ patient: record.patient, encounter }] : [];
+      const bed = demoHospitalBeds.find((item) => item.encounter_id === encounter.id) ?? null;
+      return record ? [{ patient: record.patient, encounter, bed }] : [];
     });
 }

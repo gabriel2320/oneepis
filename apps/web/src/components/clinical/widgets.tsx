@@ -388,10 +388,10 @@ export function BedBoard({ items = [] }: { items?: HospitalizationBoardItem[] })
                 {item.patient.first_name} {item.patient.last_name}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {item.encounter.location_label ?? "Ubicacion pendiente"}
+                {formatHospitalBed(item)}
               </p>
             </div>
-            <Badge variant="safe">{item.encounter.status}</Badge>
+            <Badge variant="safe">{item.bed?.status ?? item.encounter.status}</Badge>
           </div>
           <p className="mt-3 text-sm">{item.encounter.reason}</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -415,6 +415,13 @@ export function BedBoard({ items = [] }: { items?: HospitalizationBoardItem[] })
 
 export function RoundList() {
   return <EmptyState title="Rondas" description="Vista reservada para trabajo hospitalizado diario." />;
+}
+
+function formatHospitalBed(item: HospitalizationBoardItem) {
+  if (item.bed) {
+    return `${item.bed.ward} / ${item.bed.room} / Cama ${item.bed.bed_label}`;
+  }
+  return item.encounter.location_label ?? "Ubicacion pendiente";
 }
 
 export function DailySheet() {

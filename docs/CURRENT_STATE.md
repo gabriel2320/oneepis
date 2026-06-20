@@ -67,8 +67,10 @@ IA:
 Hospitalizacion:
 
 - `GET /api/v1/hospitalization/active`
+- `GET/POST/PATCH /api/v1/hospitalization/beds`
 - tablero `/hospitalizacion/camas` lee encuentros `hospitalization` en curso
-- aun no existen camas estructuradas, indicaciones ni rondas auditadas
+- camas estructuradas con sala/habitacion/cama y asignacion auditada a encuentros activos
+- aun no existen indicaciones ni rondas auditadas
 
 ## Frontend
 
@@ -85,7 +87,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-033
+## Programa activo PR-018 a PR-034
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -103,6 +105,7 @@ Capas:
 - PR-031: Encuentros clinicos auditados como puente para consulta y hospitalizacion.
 - PR-032: Evoluciones SOAP vinculables a encuentros clinicos.
 - PR-033: Tablero hospitalario simple desde encuentros de hospitalizacion activos.
+- PR-034: Camas hospitalarias estructuradas con asignacion auditada.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

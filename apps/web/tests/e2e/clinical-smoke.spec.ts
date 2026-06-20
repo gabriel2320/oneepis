@@ -34,7 +34,7 @@ test("hospitalization beds render active board", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Camas" })).toBeVisible();
   await expect(page.getByText("Hospitalizacion demo")).toBeVisible();
-  await expect(page.getByText("Sala demo / Cama 1")).toBeVisible();
+  await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
 });
 
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {

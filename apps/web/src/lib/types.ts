@@ -14,6 +14,7 @@ export type PatientClinicalStatus = "draft" | "active" | "closed" | "archived";
 export type CareContext = "ambulatory" | "hospitalized" | "unknown";
 export type EncounterType = "ambulatory" | "hospitalization" | "emergency" | "unknown";
 export type EncounterStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
+export type HospitalBedStatus = "available" | "occupied" | "cleaning" | "blocked";
 
 export type AuthUser = {
   email: string;
@@ -245,9 +246,33 @@ export type ClinicalEncounter = {
 
 export type ClinicalEncounterUpdate = Partial<ClinicalEncounterCreate>;
 
+export type HospitalBed = {
+  id: string;
+  ward: string;
+  room: string;
+  bed_label: string;
+  status: HospitalBedStatus;
+  encounter_id?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HospitalBedCreate = {
+  ward: string;
+  room: string;
+  bed_label: string;
+  status?: HospitalBedStatus;
+  encounter_id?: string | null;
+  notes?: string | null;
+};
+
+export type HospitalBedUpdate = Partial<HospitalBedCreate>;
+
 export type HospitalizationBoardItem = {
   patient: Patient;
   encounter: ClinicalEncounter;
+  bed?: HospitalBed | null;
 };
 
 export type PatientRecordSnapshot = {
