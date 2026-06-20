@@ -21,6 +21,15 @@ OneEpis maneja información clínica sensible. Este scaffold no debe considerars
 - Registrar eventos relevantes en auditoría.
 - Cifrado, control de acceso granular y retención documental quedan como hitos antes de producción.
 
+## Configuracion fuera de Desarrollo
+
+Si `ONEEPIS_ENVIRONMENT` no es `development`, la API rechaza el arranque con:
+
+- `ONEEPIS_AUTH_SECRET` default
+- usuarios locales default
+- `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`
+- `ONEEPIS_AUTH_ENABLED=false`
+
 ## IA Clínica
 
 La IA inicial solo puede:

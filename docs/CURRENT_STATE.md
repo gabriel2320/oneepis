@@ -45,6 +45,7 @@ Auth local:
 - rutas de paciente requieren autenticacion
 - escrituras clinicas requieren `admin`, `medico`, `enfermeria` o `dev`
 - IA clinica requiere `admin`, `medico` o `dev`
+- fuera de `development`, la API rechaza secreto default, usuarios default, actor dev y auth desactivada
 
 Permisos finos:
 
@@ -89,7 +90,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-036
+## Programa activo PR-018 a PR-038
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -110,6 +111,8 @@ Capas:
 - PR-034: Camas hospitalarias estructuradas con asignacion auditada.
 - PR-035: Administracion UI de camas y creacion dedicada.
 - PR-036: Asignacion de ingresos activos a camas existentes.
+- PR-037: CI real con ruff, lint, build, OpenAPI y Playwright.
+- PR-038: Seguridad fail-closed fuera de development.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
