@@ -37,6 +37,9 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-034: Camas hospitalarias estructuradas con asignacion auditada.
 - PR-035: Administracion UI de camas y creacion dedicada.
 - PR-036: Asignacion de ingresos activos a camas existentes.
+- PR-037: CI real con gates backend, frontend, OpenAPI y Playwright.
+- PR-038: Seguridad fail-closed fuera de development.
+- PR-039: Dieta inicial de pantallas paciente sin cambiar comportamiento.
 
 ## Reglas no negociables
 

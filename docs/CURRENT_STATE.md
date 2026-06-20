@@ -87,10 +87,12 @@ Capas:
 - `src/components/auth/*`: login local y badge de sesion
 - `src/components/layout/app-shell.tsx`: navegacion global
 - `src/components/clinical/patient-clinical-shell.tsx`: mesa clinica por paciente
+- `src/components/clinical/patient-pages.tsx`: barrel temporal para rutas paciente
+- `src/components/clinical/patient-*-pages.tsx`: pantallas paciente separadas por lectura, ficha y escritura
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-038
+## Programa activo PR-018 a PR-039
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -113,6 +115,7 @@ Capas:
 - PR-036: Asignacion de ingresos activos a camas existentes.
 - PR-037: CI real con ruff, lint, build, OpenAPI y Playwright.
 - PR-038: Seguridad fail-closed fuera de development.
+- PR-039: Dieta inicial de `patient-pages.tsx` con barrel compatible.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
@@ -126,5 +129,7 @@ Comandos esperados antes de entregar cambios:
 npm --workspace apps/web run typecheck
 npm --workspace apps/web run lint
 npm --workspace apps/web run build
+npm --workspace apps/web run test:e2e
 .venv/Scripts/python apps/api/scripts/export_openapi.py
+git diff --exit-code packages/contracts/openapi.json
 ```
