@@ -40,6 +40,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-037: CI real con gates backend, frontend, OpenAPI y Playwright.
 - PR-038: Seguridad fail-closed fuera de development.
 - PR-039: Dieta inicial de pantallas paciente sin cambiar comportamiento.
+- PR-040: Playwright fresco por defecto para evitar servidores locales obsoletos.
 
 ## Reglas no negociables
 

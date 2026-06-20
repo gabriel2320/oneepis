@@ -92,7 +92,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-039
+## Programa activo PR-018 a PR-040
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -116,6 +116,7 @@ Capas:
 - PR-037: CI real con ruff, lint, build, OpenAPI y Playwright.
 - PR-038: Seguridad fail-closed fuera de development.
 - PR-039: Dieta inicial de `patient-pages.tsx` con barrel compatible.
+- PR-040: Playwright inicia servidor fresco por defecto; reuse solo con `PLAYWRIGHT_REUSE_SERVER=true`.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

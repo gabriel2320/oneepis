@@ -78,6 +78,10 @@ Se agrega `@playwright/test` como devDependency para smoke visual de:
 
 Los tests usan `NEXT_PUBLIC_DEMO_MODE=true` y no requieren datos reales.
 
+Por defecto Playwright inicia un servidor Next.js fresco para evitar validar contra un proceso viejo.
+Si quieres reutilizar un servidor ya levantado manualmente, ejecuta con `PLAYWRIGHT_REUSE_SERVER=true` y
+asegura que `PLAYWRIGHT_PORT` o `PLAYWRIGHT_BASE_URL` apunten al servidor correcto.
+
 ## Fuera de fase 1
 
 - uploads reales de documentos
