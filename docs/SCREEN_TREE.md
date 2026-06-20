@@ -51,6 +51,7 @@ Estado:
 - `/hospitalizacion` y `/hospitalizacion/camas` muestran encuentros `hospitalization` en curso.
 - el tablero prefiere cama estructurada `sala / habitacion / cama` cuando existe.
 - `/hospitalizacion/camas/nueva` crea camas y puede asignar un ingreso activo sin cama.
+- `/hospitalizacion/camas` permite asignar ingresos activos sin cama a una cama disponible.
 - rondas, hoja diaria e indicaciones siguen preparadas, sin escrituras clinicas propias.
 
 ## Consulta

@@ -71,6 +71,7 @@ Hospitalizacion:
 - tablero `/hospitalizacion/camas` lee encuentros `hospitalization` en curso
 - camas estructuradas con sala/habitacion/cama y asignacion auditada a encuentros activos
 - UI `/hospitalizacion/camas` administra estados y `/hospitalizacion/camas/nueva` crea camas
+- camas disponibles pueden asignarse a ingresos activos sin cama; una cama ocupada debe liberarse antes de reasignarse
 - aun no existen indicaciones ni rondas auditadas
 
 ## Frontend
@@ -88,7 +89,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-035
+## Programa activo PR-018 a PR-036
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -108,6 +109,7 @@ Capas:
 - PR-033: Tablero hospitalario simple desde encuentros de hospitalizacion activos.
 - PR-034: Camas hospitalarias estructuradas con asignacion auditada.
 - PR-035: Administracion UI de camas y creacion dedicada.
+- PR-036: Asignacion de ingresos activos a camas existentes.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

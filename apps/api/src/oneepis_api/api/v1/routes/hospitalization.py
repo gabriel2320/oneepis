@@ -102,16 +102,30 @@ def _validate_bed_assignment(session: Session, bed: HospitalBed) -> None:
         )
 
 
+def _validate_no_direct_reassignment(bed: HospitalBed, payload: HospitalBedUpdate) -> None:
+    update_data = payload.model_dump(exclude_unset=True)
+    if "encounter_id" not in update_data:
+        return
+    next_encounter_id = update_data["encounter_id"]
+    if bed.encounter_id is not None and next_encounter_id not in (None, bed.encounter_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Release bed before assigning another encounter",
+        )
+
+
 def _bed_audit_metadata(
     session: Session,
     bed: HospitalBed,
     fields: list[str] | None = None,
+    previous_encounter_id: str | None = None,
 ) -> dict[str, object]:
     metadata = {"status": bed.status.value}
     if fields is not None:
         metadata["fields"] = fields
-    if bed.encounter_id is not None:
-        encounter = session.get(ClinicalEncounter, bed.encounter_id)
+    encounter_id = str(bed.encounter_id) if bed.encounter_id is not None else previous_encounter_id
+    if encounter_id is not None:
+        encounter = session.get(ClinicalEncounter, uuid.UUID(encounter_id))
         if encounter is not None:
             metadata["patient_id"] = str(encounter.patient_id)
             metadata["encounter_id"] = str(encounter.id)
@@ -166,6 +180,10 @@ def update_hospital_bed(
     bed = _require_bed(session, bed_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(bed, update_fields)
+    previous_encounter_id = (
+        before.get("encounter_id") if isinstance(before.get("encounter_id"), str) else None
+    )
+    _validate_no_direct_reassignment(bed, payload)
     fields = _apply_update(bed, payload)
     _validate_bed_location_unique(session, bed)
     _validate_bed_assignment(session, bed)
@@ -180,7 +198,7 @@ def update_hospital_bed(
         entity_type="hospital_bed",
         entity_id=bed.id,
         actor_id=actor,
-        metadata=_bed_audit_metadata(session, bed, fields),
+        metadata=_bed_audit_metadata(session, bed, fields, previous_encounter_id),
         before=before_changed,
         after=after_changed,
     )

@@ -1,4 +1,4 @@
-import { HospitalRoundsPage } from "@/components/clinical/module-pages";
+import { HospitalRoundsPage } from "@/components/clinical/hospitalization-pages";
 
 export default function Page() {
   return <HospitalRoundsPage />;

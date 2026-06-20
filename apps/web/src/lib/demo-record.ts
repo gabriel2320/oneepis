@@ -129,6 +129,26 @@ export const demoRecords: PatientRecordSnapshot[] = [
     active_problems: [],
     recent_entries: [],
   },
+  {
+    patient: {
+      id: "13333333-3333-4333-8333-333333333333",
+      first_name: "Paciente",
+      last_name: "Demo Gamma",
+      preferred_name: "Gamma",
+      birth_date: "1977-02-17",
+      sex_at_birth: "unknown",
+      clinical_status: "active",
+      current_care_context: "hospitalized",
+      clinical_identifier: "DEMO-003",
+      created_at: "2026-06-20T10:00:00Z",
+      updated_at: "2026-06-20T10:00:00Z",
+    },
+    latest_vitals: null,
+    active_allergies: [],
+    active_medications: [],
+    active_problems: [],
+    recent_entries: [],
+  },
 ];
 
 export const demoEncounters: ClinicalEncounter[] = [
@@ -158,6 +178,19 @@ export const demoEncounters: ClinicalEncounter[] = [
     created_at: "2026-06-20T08:00:00Z",
     updated_at: "2026-06-20T08:00:00Z",
   },
+  {
+    id: "83333333-3333-4333-8333-333333333333",
+    patient_id: "13333333-3333-4333-8333-333333333333",
+    type: "hospitalization",
+    status: "in_progress",
+    reason: "Ingreso sin cama demo",
+    started_at: "2026-06-20T09:30:00Z",
+    ended_at: null,
+    location_label: "Pendiente de cama",
+    notes: "Registro ficticio para asignacion de cama.",
+    created_at: "2026-06-20T09:30:00Z",
+    updated_at: "2026-06-20T09:30:00Z",
+  },
 ];
 
 export const demoHospitalBeds: HospitalBed[] = [
@@ -171,5 +204,16 @@ export const demoHospitalBeds: HospitalBed[] = [
     notes: "Cama demo para tablero hospitalario.",
     created_at: "2026-06-20T08:00:00Z",
     updated_at: "2026-06-20T08:00:00Z",
+  },
+  {
+    id: "93333333-3333-4333-8333-333333333333",
+    ward: "Medicina",
+    room: "302",
+    bed_label: "B",
+    status: "available",
+    encounter_id: null,
+    notes: "Disponible para asignacion demo.",
+    created_at: "2026-06-20T08:30:00Z",
+    updated_at: "2026-06-20T08:30:00Z",
   },
 ];

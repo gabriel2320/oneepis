@@ -39,6 +39,7 @@ Dominios implementados:
 - tablero hospitalario simple desde encuentros de hospitalizacion activos
 - camas hospitalarias estructuradas con asignacion auditada a encuentros activos
 - administracion UI de camas hospitalarias
+- asignacion de ingresos activos a camas existentes con liberacion previa
 - estado y borrador IA local via Ollama
 
 Rutas principales:
