@@ -54,6 +54,21 @@ def auth_headers(
     return {"Authorization": f"Bearer {token}"}
 
 
+def create_patient_for_permissions(client: TestClient, headers: dict[str, str]) -> str:
+    response = client.post(
+        "/api/v1/patients",
+        headers=headers,
+        json={
+            "first_name": "Permisos",
+            "last_name": "Paciente",
+            "birth_date": "1990-01-01",
+            "sex_at_birth": "unknown",
+        },
+    )
+    assert response.status_code == 201
+    return str(response.json()["id"])
+
+
 def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> None:
     auth = auth_headers(client)
     patient_response = client.post(
@@ -250,3 +265,56 @@ def test_readonly_user_cannot_write_patient(client: TestClient) -> None:
     )
 
     assert response.status_code == 403
+
+
+def test_readonly_user_can_read_patient_snapshot(client: TestClient) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.get(f"/api/v1/patients/{patient_id}/record", headers=readonly_auth)
+
+    assert response.status_code == 200
+    assert response.json()["patient"]["id"] == patient_id
+
+
+def test_nursing_can_record_vitals_but_not_medical_actions(client: TestClient) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    nursing_auth = auth_headers(client, email="enfermeria@oneepis.local", password="enfermeria")
+
+    vitals_response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=nursing_auth,
+        json={
+            "measured_at": "2026-06-20T12:00:00Z",
+            "systolic_bp": 120,
+            "diastolic_bp": 70,
+            "heart_rate_bpm": 80,
+        },
+    )
+    assert vitals_response.status_code == 201
+    assert vitals_response.json()["heart_rate_bpm"] == 80
+
+    entry_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=nursing_auth,
+        json={
+            "kind": "progress",
+            "occurred_at": "2026-06-20T12:05:00Z",
+            "title": "Evolucion SOAP",
+        },
+    )
+    assert entry_response.status_code == 403
+
+    medication_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=nursing_auth,
+        json={"name": "Ibuprofeno", "started_on": "2026-06-20"},
+    )
+    assert medication_response.status_code == 403
+
+    ai_response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/suggestions",
+        headers=nursing_auth,
+        json={"focus": "summary"},
+    )
+    assert ai_response.status_code == 403

@@ -7,7 +7,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import ActorDep, AiAccessDep, require_patient_read_access
+from oneepis_api.api.deps import (
+    AiAccessDep,
+    AllergyActorDep,
+    ClinicalEntryActorDep,
+    MedicationActorDep,
+    PatientActorDep,
+    VitalSignActorDep,
+    require_patient_read_access,
+)
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.models.audit import AuditEvent
@@ -96,7 +104,7 @@ def list_patients(
 
 
 @router.post("", response_model=PatientRead, status_code=status.HTTP_201_CREATED)
-def create_patient(payload: PatientCreate, session: SessionDep, actor: ActorDep) -> Patient:
+def create_patient(payload: PatientCreate, session: SessionDep, actor: PatientActorDep) -> Patient:
     patient = Patient(**payload.model_dump())
     session.add(patient)
     session.flush()
@@ -122,7 +130,7 @@ def update_patient(
     patient_id: uuid.UUID,
     payload: PatientUpdate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: PatientActorDep,
 ) -> Patient:
     patient = require_patient(session, patient_id)
     fields = apply_update(patient, payload)
@@ -211,7 +219,7 @@ def create_clinical_entry(
     patient_id: uuid.UUID,
     payload: ClinicalEntryCreate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: ClinicalEntryActorDep,
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
     entry_data = payload.model_dump()
@@ -238,7 +246,7 @@ def update_clinical_entry(
     entry_id: uuid.UUID,
     payload: ClinicalEntryUpdate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: ClinicalEntryActorDep,
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
     entry = require_patient_child(
@@ -267,7 +275,7 @@ def delete_draft_clinical_entry(
     patient_id: uuid.UUID,
     entry_id: uuid.UUID,
     session: SessionDep,
-    actor: ActorDep,
+    actor: ClinicalEntryActorDep,
 ) -> Response:
     require_patient(session, patient_id)
     entry = require_patient_child(
@@ -322,7 +330,7 @@ def create_allergy(
     patient_id: uuid.UUID,
     payload: AllergyCreate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: AllergyActorDep,
 ) -> Allergy:
     require_patient(session, patient_id)
     allergy = Allergy(patient_id=patient_id, **payload.model_dump())
@@ -357,7 +365,7 @@ def update_allergy(
     allergy_id: uuid.UUID,
     payload: AllergyUpdate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: AllergyActorDep,
 ) -> Allergy:
     require_patient(session, patient_id)
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
@@ -380,7 +388,7 @@ def delete_allergy(
     patient_id: uuid.UUID,
     allergy_id: uuid.UUID,
     session: SessionDep,
-    actor: ActorDep,
+    actor: AllergyActorDep,
 ) -> Response:
     require_patient(session, patient_id)
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
@@ -424,7 +432,7 @@ def create_medication(
     patient_id: uuid.UUID,
     payload: MedicationCreate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: MedicationActorDep,
 ) -> Medication:
     require_patient(session, patient_id)
     medication = Medication(patient_id=patient_id, **payload.model_dump())
@@ -465,7 +473,7 @@ def update_medication(
     medication_id: uuid.UUID,
     payload: MedicationUpdate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: MedicationActorDep,
 ) -> Medication:
     require_patient(session, patient_id)
     medication = require_patient_child(
@@ -494,7 +502,7 @@ def delete_medication(
     patient_id: uuid.UUID,
     medication_id: uuid.UUID,
     session: SessionDep,
-    actor: ActorDep,
+    actor: MedicationActorDep,
 ) -> Response:
     require_patient(session, patient_id)
     medication = require_patient_child(
@@ -544,7 +552,7 @@ def create_vital_sign(
     patient_id: uuid.UUID,
     payload: VitalSignCreate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: VitalSignActorDep,
 ) -> VitalSign:
     require_patient(session, patient_id)
     vital = VitalSign(patient_id=patient_id, **payload.model_dump())
@@ -585,7 +593,7 @@ def update_vital_sign(
     vital_sign_id: uuid.UUID,
     payload: VitalSignUpdate,
     session: SessionDep,
-    actor: ActorDep,
+    actor: VitalSignActorDep,
 ) -> VitalSign:
     require_patient(session, patient_id)
     vital = require_patient_child(
@@ -614,7 +622,7 @@ def delete_vital_sign(
     patient_id: uuid.UUID,
     vital_sign_id: uuid.UUID,
     session: SessionDep,
-    actor: ActorDep,
+    actor: VitalSignActorDep,
 ) -> Response:
     require_patient(session, patient_id)
     vital = require_patient_child(

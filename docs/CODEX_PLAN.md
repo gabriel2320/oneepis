@@ -27,6 +27,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-024: Modo papel v2.
 - PR-025: QA visual + Ollama.
 - PR-026: Auth local + roles + actor auditado.
+- PR-027: Permisos clinicos por accion.
 
 ## Reglas no negociables
 
@@ -40,6 +41,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - No dejar endpoints sin tests.
 - Toda escritura clinica debe crear `audit_event`.
 - Toda escritura clinica debe tener actor autenticado; `X-OneEpis-Actor` es solo fallback dev explicito.
+- Toda accion protegida debe estar en `docs/PERMISSIONS.md` y tener test backend.
 - Todo cambio de API debe actualizar `packages/contracts/openapi.json`.
 - Frontend no debe usar `demoRecords` salvo `NEXT_PUBLIC_DEMO_MODE=true`.
 

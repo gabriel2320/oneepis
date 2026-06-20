@@ -32,6 +32,7 @@ Dominios implementados:
 - medicacion
 - signos vitales
 - auth local con roles basicos
+- permisos clinicos por accion
 - auditoria por escritura con actor autenticado
 - estado y borrador IA local via Ollama
 
@@ -168,5 +169,6 @@ python apps/api/scripts/export_openapi.py
 - `docs/VISUAL_SYSTEM.md`
 - `docs/PRINT_SYSTEM.md`
 - `docs/OLLAMA_AND_TOOLS.md`
+- `docs/PERMISSIONS.md`
 
 Regla central: crecer por modulos clinicos bien nombrados, no por acumulacion indiscriminada de codigo.

@@ -76,13 +76,24 @@ def require_patient_read_access(user: CurrentUserDep) -> AuthenticatedUser:
     )(user)
 
 
-def require_clinical_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(
-        UserRole.ADMIN,
-        UserRole.MEDICO,
-        UserRole.ENFERMERIA,
-        UserRole.DEV,
-    )(user)
+def require_patient_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+
+
+def require_clinical_entry_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+
+
+def require_allergy_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+
+
+def require_medication_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+
+
+def require_vital_sign_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
 
 
 def require_ai_access(user: CurrentUserDep) -> AuthenticatedUser:
@@ -90,15 +101,42 @@ def require_ai_access(user: CurrentUserDep) -> AuthenticatedUser:
 
 
 ReadAccessDep = Annotated[AuthenticatedUser, Depends(require_patient_read_access)]
-WriteAccessDep = Annotated[AuthenticatedUser, Depends(require_clinical_write_access)]
 AiAccessDep = Annotated[AuthenticatedUser, Depends(require_ai_access)]
+PatientWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_patient_write_access)]
+ClinicalEntryWriteAccessDep = Annotated[
+    AuthenticatedUser,
+    Depends(require_clinical_entry_write_access),
+]
+AllergyWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_allergy_write_access)]
+MedicationWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_medication_write_access)]
+VitalSignWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_vital_sign_write_access)]
 
 
-def get_write_actor(user: WriteAccessDep) -> str:
+def get_patient_write_actor(user: PatientWriteAccessDep) -> str:
     return user.actor_id
 
 
-ActorDep = Annotated[str, Depends(get_write_actor)]
+def get_clinical_entry_write_actor(user: ClinicalEntryWriteAccessDep) -> str:
+    return user.actor_id
+
+
+def get_allergy_write_actor(user: AllergyWriteAccessDep) -> str:
+    return user.actor_id
+
+
+def get_medication_write_actor(user: MedicationWriteAccessDep) -> str:
+    return user.actor_id
+
+
+def get_vital_sign_write_actor(user: VitalSignWriteAccessDep) -> str:
+    return user.actor_id
+
+
+PatientActorDep = Annotated[str, Depends(get_patient_write_actor)]
+ClinicalEntryActorDep = Annotated[str, Depends(get_clinical_entry_write_actor)]
+AllergyActorDep = Annotated[str, Depends(get_allergy_write_actor)]
+MedicationActorDep = Annotated[str, Depends(get_medication_write_actor)]
+VitalSignActorDep = Annotated[str, Depends(get_vital_sign_write_actor)]
 
 
 def _extract_bearer_token(authorization: str | None) -> str | None:

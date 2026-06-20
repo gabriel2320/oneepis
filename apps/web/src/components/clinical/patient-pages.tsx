@@ -9,6 +9,7 @@ import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { z } from "zod";
 import { ArrowLeft, Plus, Save, Search } from "lucide-react";
 
+import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AppShell } from "@/components/layout/app-shell";
 import { AiInsightPanel } from "@/components/clinical-record/ai-insight-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
@@ -47,8 +48,17 @@ import {
 import { DEMO_MODE } from "@/lib/api/client";
 import { createPatient, getPatientRecord, listPatients } from "@/lib/api/patients";
 import { demoRecords } from "@/lib/demo-record";
+import {
+  canCreatePatient,
+  canManageAllergies,
+  canManageClinicalEntries,
+  canManageMedications,
+  canRecordVitals,
+  canUseClinicalAi,
+} from "@/lib/permissions";
 import type {
   AllergyCreate,
+  AuthUser,
   MedicationCreate,
   Patient,
   PatientAiSuggestionsResponse,
@@ -95,6 +105,8 @@ type PatientSection =
 
 export function PatientsIndexPage() {
   const [search, setSearch] = useState("");
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canCreate = canCreatePatient(user);
   const patientQuery = useQuery({
     queryKey: ["patients", search],
     queryFn: () => listPatients(search),
@@ -109,12 +121,16 @@ export function PatientsIndexPage() {
           title="Pacientes"
           description="Ficha clinica persistente, auditable y lista para trabajo E2E."
           action={
-            <Button asChild>
-              <Link href="/pacientes/nuevo">
-                <Plus className="h-4 w-4" />
-                Nuevo
-              </Link>
-            </Button>
+            canCreate ? (
+              <Button asChild>
+                <Link href="/pacientes/nuevo">
+                  <Plus className="h-4 w-4" />
+                  Nuevo
+                </Link>
+              </Button>
+            ) : (
+              <NoPermissionButton label={userLoading ? "Cargando rol" : "Sin permiso"} />
+            )
           }
         />
 
@@ -140,9 +156,13 @@ export function PatientsIndexPage() {
             title="Sin pacientes"
             description="Crea el primer registro para probar el flujo paciente -> ficha -> auditoria."
             action={
-              <Button asChild>
-                <Link href="/pacientes/nuevo">Crear paciente</Link>
-              </Button>
+              canCreate ? (
+                <Button asChild>
+                  <Link href="/pacientes/nuevo">Crear paciente</Link>
+                </Button>
+              ) : (
+                <NoPermissionButton label="Sin permiso" />
+              )
             }
           />
         ) : null}
@@ -154,6 +174,8 @@ export function PatientsIndexPage() {
 
 export function NewPatientPage() {
   const router = useRouter();
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canCreate = canCreatePatient(user);
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
@@ -194,6 +216,9 @@ export function NewPatientPage() {
         {DEMO_MODE ? (
           <ErrorState description="El modo demo esta activo. Desactiva NEXT_PUBLIC_DEMO_MODE para escribir en API." />
         ) : null}
+        {!DEMO_MODE && !userLoading && !canCreate ? (
+          <ErrorState description="Tu rol actual no permite crear fichas de paciente." />
+        ) : null}
         <ClinicalSectionCard title="Identificacion">
           <form className="grid gap-4 md:grid-cols-2" onSubmit={form.handleSubmit(handleSubmit)}>
             <Field label="Nombre" error={form.formState.errors.first_name?.message}>
@@ -226,7 +251,7 @@ export function NewPatientPage() {
               <Input {...form.register("email")} autoComplete="off" />
             </Field>
             <div className="md:col-span-2">
-              <Button type="submit" disabled={createMutation.isPending || DEMO_MODE}>
+              <Button type="submit" disabled={createMutation.isPending || DEMO_MODE || !canCreate}>
                 <Save className="h-4 w-4" />
                 {createMutation.isPending ? "Guardando..." : "Crear ficha"}
               </Button>
@@ -278,6 +303,9 @@ export function NewSoapEntryPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canWriteSoap = canManageClinicalEntries(user);
+  const canUseAi = canUseClinicalAi(user);
   const [aiReview, setAiReview] = useState<string | null>(null);
   const form = useForm<SoapFormValues>({
     resolver: zodResolver(soapSchema),
@@ -357,6 +385,9 @@ export function NewSoapEntryPage() {
         {DEMO_MODE ? (
           <ErrorState description="El modo demo no permite guardar evoluciones reales." />
         ) : null}
+        {!DEMO_MODE && !userLoading && !canWriteSoap ? (
+          <ErrorState description="Tu rol actual no permite crear evoluciones SOAP." />
+        ) : null}
         <ClinicalSectionCard
           title="SOAP"
           description="Editor amplio, sin guardado IA automatico."
@@ -365,10 +396,10 @@ export function NewSoapEntryPage() {
               type="button"
               variant="outline"
               size="sm"
-              disabled={reviewMutation.isPending}
+              disabled={reviewMutation.isPending || !canUseAi}
               onClick={() => reviewMutation.mutate(form.getValues())}
             >
-              {reviewMutation.isPending ? "Revisando..." : "Revisar con Ollama"}
+              {canUseAi ? (reviewMutation.isPending ? "Revisando..." : "Revisar con Ollama") : "IA no permitida"}
             </Button>
           }
         >
@@ -385,7 +416,7 @@ export function NewSoapEntryPage() {
             <SoapTextarea label="Objetivo" registration={form.register("objective")} />
             <SoapTextarea label="Analisis" registration={form.register("assessment")} />
             <SoapTextarea label="Plan" registration={form.register("plan")} />
-            <Button type="submit" disabled={mutation.isPending || DEMO_MODE}>
+            <Button type="submit" disabled={mutation.isPending || DEMO_MODE || !canWriteSoap}>
               <Save className="h-4 w-4" />
               {mutation.isPending ? "Guardando..." : "Guardar borrador"}
             </Button>
@@ -414,6 +445,10 @@ function PatientSectionContent({
   section: PatientSection;
   patientId: string;
 }) {
+  const { user } = useCurrentUser();
+  const canWriteSoap = canManageClinicalEntries(user);
+  const canUseAi = canUseClinicalAi(user);
+
   if (section === "ficha") {
     return (
       <div className="space-y-4">
@@ -423,7 +458,13 @@ function PatientSectionContent({
         <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
           <ClinicalSectionCard
             title="Linea clinica"
-            action={<QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />}
+            action={
+              canWriteSoap ? (
+                <QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />
+              ) : (
+                <NoPermissionButton label="SOAP no permitido" />
+              )
+            }
           >
             <ClinicalTimeline entries={record.recent_entries} />
           </ClinicalSectionCard>
@@ -434,7 +475,7 @@ function PatientSectionContent({
             <ClinicalSectionCard title="Medicacion activa">
               <MedicationList medications={record.active_medications} />
             </ClinicalSectionCard>
-            <PatientAiSuggestionsPanel patientId={patientId} />
+            <PatientAiSuggestionsPanel patientId={patientId} canUseAi={canUseAi} />
           </div>
         </div>
       </div>
@@ -445,7 +486,13 @@ function PatientSectionContent({
     return (
       <ClinicalSectionCard
         title="Evoluciones"
-        action={<QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />}
+        action={
+          canWriteSoap ? (
+            <QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />
+          ) : (
+            <NoPermissionButton label="SOAP no permitido" />
+          )
+        }
       >
         <ClinicalTimeline entries={record.recent_entries} />
       </ClinicalSectionCard>
@@ -453,18 +500,28 @@ function PatientSectionContent({
   }
 
   if (section === "alergias") {
-    return <AllergyWorkspace patientId={patientId} record={record} />;
+    return <AllergyWorkspace patientId={patientId} record={record} user={user} />;
   }
 
   if (section === "medicacion") {
-    return <MedicationWorkspace patientId={patientId} record={record} />;
+    return <MedicationWorkspace patientId={patientId} record={record} user={user} />;
   }
 
   if (section === "signos-vitales") {
-    return <VitalsWorkspace patientId={patientId} record={record} />;
+    return <VitalsWorkspace patientId={patientId} record={record} user={user} />;
   }
 
   if (section === "ia") {
+    if (!canUseAi) {
+      return (
+        <ClinicalSectionCard title="IA clinica">
+          <EmptyState
+            title="IA no permitida para este rol"
+            description="Las sugerencias clinicas quedan disponibles para medico, admin o dev."
+          />
+        </ClinicalSectionCard>
+      );
+    }
     return (
       <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
         <AiInsightPanel />
@@ -495,14 +552,27 @@ function PatientSectionContent({
   );
 }
 
-function AllergyWorkspace({ patientId, record }: { patientId: string; record: PatientRecordSnapshot }) {
+function AllergyWorkspace({
+  patientId,
+  record,
+  user,
+}: {
+  patientId: string;
+  record: PatientRecordSnapshot;
+  user: AuthUser | null;
+}) {
+  const canWrite = canManageAllergies(user);
   return (
     <ClinicalSectionCard
       title="Alergias registradas"
       action={
-        <Button asChild size="sm">
-          <Link href={`/pacientes/${patientId}/alergias/nueva`}>Agregar</Link>
-        </Button>
+        canWrite ? (
+          <Button asChild size="sm">
+            <Link href={`/pacientes/${patientId}/alergias/nueva`}>Agregar</Link>
+          </Button>
+        ) : (
+          <NoPermissionButton label="Sin permiso" />
+        )
       }
     >
       <AllergyList allergies={record.active_allergies} />
@@ -510,14 +580,27 @@ function AllergyWorkspace({ patientId, record }: { patientId: string; record: Pa
   );
 }
 
-function MedicationWorkspace({ patientId, record }: { patientId: string; record: PatientRecordSnapshot }) {
+function MedicationWorkspace({
+  patientId,
+  record,
+  user,
+}: {
+  patientId: string;
+  record: PatientRecordSnapshot;
+  user: AuthUser | null;
+}) {
+  const canWrite = canManageMedications(user);
   return (
     <ClinicalSectionCard
       title="Medicacion"
       action={
-        <Button asChild size="sm">
-          <Link href={`/pacientes/${patientId}/medicacion/nueva`}>Agregar</Link>
-        </Button>
+        canWrite ? (
+          <Button asChild size="sm">
+            <Link href={`/pacientes/${patientId}/medicacion/nueva`}>Agregar</Link>
+          </Button>
+        ) : (
+          <NoPermissionButton label="Sin permiso" />
+        )
       }
     >
       <MedicationList medications={record.active_medications} />
@@ -525,7 +608,16 @@ function MedicationWorkspace({ patientId, record }: { patientId: string; record:
   );
 }
 
-function VitalsWorkspace({ patientId, record }: { patientId: string; record: PatientRecordSnapshot }) {
+function VitalsWorkspace({
+  patientId,
+  record,
+  user,
+}: {
+  patientId: string;
+  record: PatientRecordSnapshot;
+  user: AuthUser | null;
+}) {
+  const canWrite = canRecordVitals(user);
   const vitalsQuery = useQuery({
     queryKey: ["vital-signs", patientId],
     queryFn: () => listVitalSigns(patientId),
@@ -544,9 +636,13 @@ function VitalsWorkspace({ patientId, record }: { patientId: string; record: Pat
           title="Nuevo control"
           description="Cada registro se captura en una pantalla dedicada."
           action={
-            <Button asChild size="sm">
-              <Link href={`/pacientes/${patientId}/signos-vitales/nuevo`}>Registrar</Link>
-            </Button>
+            canWrite ? (
+              <Button asChild size="sm">
+                <Link href={`/pacientes/${patientId}/signos-vitales/nuevo`}>Registrar</Link>
+              </Button>
+            ) : (
+              <NoPermissionButton label="Sin permiso" />
+            )
           }
         >
           <EmptyState title="Accion separada" description="Usa registrar para abrir el formulario de signos." />
@@ -561,6 +657,8 @@ export function NewAllergyPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canWrite = canManageAllergies(user);
   const [formState, setFormState] = useState({ substance: "", reaction: "", severity: "unknown" });
   const mutation = useMutation({
     mutationFn: (payload: AllergyCreate) => createAllergy(patientId, payload),
@@ -583,6 +681,9 @@ export function NewAllergyPage() {
       <div className="max-w-xl space-y-5">
         <BackLink href={`/pacientes/${patientId}/alergias`} label="Alergias" />
         <PageTitle title="Agregar alergia" description="Registro puntual, auditado y reversible." />
+        {!DEMO_MODE && !userLoading && !canWrite ? (
+          <ErrorState description="Tu rol actual no permite registrar alergias." />
+        ) : null}
         <ClinicalSectionCard title="Alergia">
           <form
             className="space-y-4"
@@ -620,7 +721,10 @@ export function NewAllergyPage() {
                 <option value="severe">Severa</option>
               </select>
             </Field>
-            <Button type="submit" disabled={mutation.isPending || !formState.substance.trim() || DEMO_MODE}>
+            <Button
+              type="submit"
+              disabled={mutation.isPending || !formState.substance.trim() || DEMO_MODE || !canWrite}
+            >
               {mutation.isPending ? "Guardando..." : "Guardar alergia"}
             </Button>
           </form>
@@ -635,6 +739,8 @@ export function NewMedicationPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canWrite = canManageMedications(user);
   const [formState, setFormState] = useState({ name: "", dose: "", route: "", frequency: "" });
   const mutation = useMutation({
     mutationFn: (payload: MedicationCreate) => createMedication(patientId, payload),
@@ -657,6 +763,9 @@ export function NewMedicationPage() {
       <div className="max-w-xl space-y-5">
         <BackLink href={`/pacientes/${patientId}/medicacion`} label="Medicacion" />
         <PageTitle title="Agregar medicamento" description="Medicacion activa del paciente." />
+        {!DEMO_MODE && !userLoading && !canWrite ? (
+          <ErrorState description="Tu rol actual no permite registrar medicacion." />
+        ) : null}
         <ClinicalSectionCard title="Medicamento">
           <form
             className="space-y-4"
@@ -679,7 +788,7 @@ export function NewMedicationPage() {
                 />
               </Field>
             ))}
-            <Button type="submit" disabled={mutation.isPending || !formState.name.trim() || DEMO_MODE}>
+            <Button type="submit" disabled={mutation.isPending || !formState.name.trim() || DEMO_MODE || !canWrite}>
               {mutation.isPending ? "Guardando..." : "Guardar medicamento"}
             </Button>
           </form>
@@ -694,6 +803,8 @@ export function NewVitalSignPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canWrite = canRecordVitals(user);
   const [formState, setFormState] = useState({
     systolic_bp: "",
     diastolic_bp: "",
@@ -725,6 +836,9 @@ export function NewVitalSignPage() {
       <div className="max-w-xl space-y-5">
         <BackLink href={`/pacientes/${patientId}/signos-vitales`} label="Signos vitales" />
         <PageTitle title="Registrar signos vitales" description="Control puntual del paciente." />
+        {!DEMO_MODE && !userLoading && !canWrite ? (
+          <ErrorState description="Tu rol actual no permite registrar signos vitales." />
+        ) : null}
         <ClinicalSectionCard title="Control">
           <form
             className="space-y-4"
@@ -751,7 +865,7 @@ export function NewVitalSignPage() {
                 </Field>
               ),
             )}
-            <Button type="submit" disabled={mutation.isPending || DEMO_MODE}>
+            <Button type="submit" disabled={mutation.isPending || DEMO_MODE || !canWrite}>
               {mutation.isPending ? "Guardando..." : "Guardar signos"}
             </Button>
           </form>
@@ -761,11 +875,11 @@ export function NewVitalSignPage() {
   );
 }
 
-function PatientAiSuggestionsPanel({ patientId }: { patientId: string }) {
+function PatientAiSuggestionsPanel({ patientId, canUseAi }: { patientId: string; canUseAi: boolean }) {
   const suggestionsQuery = useQuery({
     queryKey: ["patient-ai-suggestions", patientId],
     queryFn: () => createPatientAiSuggestions(patientId, { focus: "summary" }),
-    enabled: !DEMO_MODE,
+    enabled: !DEMO_MODE && canUseAi,
     staleTime: 60_000,
   });
 
@@ -773,6 +887,17 @@ function PatientAiSuggestionsPanel({ patientId }: { patientId: string }) {
     return (
       <ClinicalSectionCard title="Sugerencias Ollama" description="Borrador IA - requiere revision humana.">
         <EmptyState title="IA no disponible en demo" description="Usa API real para sugerencias locales." />
+      </ClinicalSectionCard>
+    );
+  }
+
+  if (!canUseAi) {
+    return (
+      <ClinicalSectionCard title="Sugerencias Ollama" description="Borrador IA - requiere revision humana.">
+        <EmptyState
+          title="IA no permitida para este rol"
+          description="Disponible para medico, admin o dev."
+        />
       </ClinicalSectionCard>
     );
   }
@@ -911,6 +1036,14 @@ function BackLink({ href, label }: { href: string; label: string }) {
       <ArrowLeft className="h-4 w-4" />
       {label}
     </Link>
+  );
+}
+
+function NoPermissionButton({ label = "Sin permiso" }: { label?: string }) {
+  return (
+    <Button type="button" variant="outline" size="sm" disabled>
+      {label}
+    </Button>
   );
 }
 

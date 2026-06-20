@@ -41,6 +41,13 @@ Auth local:
 - escrituras clinicas requieren `admin`, `medico`, `enfermeria` o `dev`
 - IA clinica requiere `admin`, `medico` o `dev`
 
+Permisos finos:
+
+- matriz viva en `docs/PERMISSIONS.md`
+- enfermeria puede registrar signos vitales, pero no SOAP, medicacion, alergias ni IA clinica
+- solo_lectura puede leer, pero no escribir
+- frontend deshabilita acciones sin permiso; backend las rechaza con 403
+
 IA:
 
 - `GET /api/v1/ai/status`
@@ -64,7 +71,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-026
+## Programa activo PR-018 a PR-027
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -75,6 +82,7 @@ Capas:
 - PR-024: Modo papel v2.
 - PR-025: QA visual + Ollama.
 - PR-026: Auth local + roles + actor auditado.
+- PR-027: Permisos clinicos por accion.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
