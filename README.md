@@ -38,6 +38,7 @@ Dominios implementados:
 - auditoria por escritura con actor autenticado, correlation ID y before/after
 - tablero hospitalario simple desde encuentros de hospitalizacion activos
 - camas hospitalarias estructuradas con asignacion auditada a encuentros activos
+- administracion UI de camas hospitalarias
 - estado y borrador IA local via Ollama
 
 Rutas principales:

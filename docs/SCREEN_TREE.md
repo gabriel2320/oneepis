@@ -40,6 +40,7 @@ Estado:
 ```text
 /hospitalizacion
 /hospitalizacion/camas
+/hospitalizacion/camas/nueva
 /hospitalizacion/rondas
 /hospitalizacion/pacientes/[patientId]/hoja-diaria
 /hospitalizacion/pacientes/[patientId]/indicaciones
@@ -49,6 +50,7 @@ Estado:
 
 - `/hospitalizacion` y `/hospitalizacion/camas` muestran encuentros `hospitalization` en curso.
 - el tablero prefiere cama estructurada `sala / habitacion / cama` cuando existe.
+- `/hospitalizacion/camas/nueva` crea camas y puede asignar un ingreso activo sin cama.
 - rondas, hoja diaria e indicaciones siguen preparadas, sin escrituras clinicas propias.
 
 ## Consulta

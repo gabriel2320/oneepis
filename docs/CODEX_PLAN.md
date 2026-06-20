@@ -35,6 +35,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-032: Evoluciones SOAP vinculables a encuentros clinicos.
 - PR-033: Tablero hospitalario simple desde encuentros de hospitalizacion activos.
 - PR-034: Camas hospitalarias estructuradas con asignacion auditada.
+- PR-035: Administracion UI de camas y creacion dedicada.
 
 ## Reglas no negociables
 

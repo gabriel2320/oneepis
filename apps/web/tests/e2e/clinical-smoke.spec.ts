@@ -32,9 +32,15 @@ test("patient encounters render list and creation screen", async ({ page }) => {
 test("hospitalization beds render active board", async ({ page }) => {
   await page.goto("/hospitalizacion/camas");
 
-  await expect(page.getByRole("heading", { name: "Camas" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Camas", exact: true })).toBeVisible();
   await expect(page.getByText("Hospitalizacion demo")).toBeVisible();
-  await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
+  await expect(page.getByText("Medicina / 301 / Cama A").first()).toBeVisible();
+  await expect(page.getByText("Administracion de camas")).toBeVisible();
+  await expect(page.getByText("Ocupada")).toBeVisible();
+
+  await page.getByRole("link", { name: "Nueva cama" }).click();
+  await expect(page.getByRole("heading", { name: "Nueva cama" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar cama" })).toBeDisabled();
 });
 
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
