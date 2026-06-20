@@ -21,7 +21,7 @@ Dominios CRUD:
 
 - pacientes
 - encuentros clinicos
-- clinical entries
+- clinical entries con vinculo opcional a encuentro
 - problemas activos
 - alergias
 - medicacion
@@ -79,7 +79,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-031
+## Programa activo PR-018 a PR-032
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -95,6 +95,7 @@ Capas:
 - PR-029: Estado de ficha, contexto asistencial y problemas activos auditados.
 - PR-030: Pantalla gobernada para editar estado clinico y contexto asistencial.
 - PR-031: Encuentros clinicos auditados como puente para consulta y hospitalizacion.
+- PR-032: Evoluciones SOAP vinculables a encuentros clinicos.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

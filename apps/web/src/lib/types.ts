@@ -80,6 +80,7 @@ export type Patient = {
 export type ClinicalEntry = {
   id: string;
   patient_id: string;
+  encounter_id?: string | null;
   kind: ClinicalEntryKind;
   status: ClinicalEntryStatus;
   occurred_at: string;
@@ -95,6 +96,7 @@ export type ClinicalEntry = {
 };
 
 export type ClinicalEntryCreate = {
+  encounter_id?: string | null;
   kind: ClinicalEntryKind;
   status?: ClinicalEntryStatus;
   occurred_at: string;

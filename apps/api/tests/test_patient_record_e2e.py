@@ -98,11 +98,13 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     )
     assert encounter_response.status_code == 201
     assert encounter_response.json()["reason"] == "Control clinico"
+    encounter_id = encounter_response.json()["id"]
 
     entry_response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-entries",
         headers=auth,
         json={
+            "encounter_id": encounter_id,
             "kind": "progress",
             "occurred_at": "2026-06-20T10:30:00Z",
             "title": "Evolucion SOAP",
@@ -179,6 +181,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(client: TestClient) -> No
     assert snapshot["active_allergies"][0]["substance"] == "Penicilina"
     assert snapshot["active_medications"][0]["name"] == "Paracetamol"
     assert snapshot["recent_entries"][0]["title"] == "Evolucion SOAP"
+    assert snapshot["recent_entries"][0]["encounter_id"] == encounter_id
 
     audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
     assert audit_response.status_code == 200
@@ -234,6 +237,29 @@ def test_child_resources_return_404_for_wrong_patient(client: TestClient) -> Non
     )
 
     assert response.status_code == 404
+
+    encounter = client.post(
+        f"/api/v1/patients/{first['id']}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "reason": "Encuentro de otro paciente",
+            "started_at": "2026-06-20T11:10:00Z",
+        },
+    ).json()
+
+    cross_entry_response = client.post(
+        f"/api/v1/patients/{second['id']}/clinical-entries",
+        headers=auth,
+        json={
+            "encounter_id": encounter["id"],
+            "kind": "progress",
+            "occurred_at": "2026-06-20T11:20:00Z",
+            "title": "SOAP cruzada",
+        },
+    )
+
+    assert cross_entry_response.status_code == 404
 
 
 def test_patient_ai_suggestions_use_snapshot_without_persisting(client: TestClient) -> None:
@@ -511,3 +537,60 @@ def test_encounter_update_and_cancel_are_audited(client: TestClient) -> None:
     }
     encounter_cancel = next(item for item in events if item["action"] == "encounter.cancelled")
     assert encounter_cancel["extra_data"]["after"] == {"status": "cancelled"}
+
+
+def test_clinical_entry_can_be_linked_and_unlinked_from_encounter(
+    client: TestClient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "reason": "Control longitudinal",
+            "started_at": "2026-06-20T09:00:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
+
+    entry_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json={
+            "kind": "progress",
+            "occurred_at": "2026-06-20T09:30:00Z",
+            "title": "SOAP sin encuentro",
+        },
+    )
+    assert entry_response.status_code == 201
+    entry_id = entry_response.json()["id"]
+    assert entry_response.json()["encounter_id"] is None
+
+    link_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-entries/{entry_id}",
+        headers=auth,
+        json={"encounter_id": encounter_id},
+    )
+    assert link_response.status_code == 200
+    assert link_response.json()["encounter_id"] == encounter_id
+
+    unlink_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-entries/{entry_id}",
+        headers=auth,
+        json={"encounter_id": None},
+    )
+    assert unlink_response.status_code == 200
+    assert unlink_response.json()["encounter_id"] is None
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    updates = [
+        item
+        for item in audit_response.json()
+        if item["action"] == "clinical_entry.updated"
+    ]
+    assert any(item["extra_data"]["after"] == {"encounter_id": encounter_id} for item in updates)
+    assert any(item["extra_data"]["after"] == {"encounter_id": None} for item in updates)

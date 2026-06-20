@@ -97,6 +97,22 @@ def require_patient_child[T](
     return entity
 
 
+def validate_encounter_for_patient(
+    session: Session,
+    patient_id: uuid.UUID,
+    encounter_id: uuid.UUID | None,
+) -> None:
+    if encounter_id is None:
+        return
+    require_patient_child(
+        session,
+        ClinicalEncounter,
+        encounter_id,
+        patient_id,
+        "Encounter not found",
+    )
+
+
 def apply_update(model: object, payload: object) -> list[str]:
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -382,6 +398,7 @@ def create_clinical_entry(
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
     entry_data = payload.model_dump()
+    validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     entry_data["created_by"] = actor
     entry = ClinicalEntry(patient_id=patient_id, **entry_data)
     session.add(entry)
@@ -416,6 +433,8 @@ def update_clinical_entry(
         patient_id,
         "Clinical entry not found",
     )
+    if "encounter_id" in payload.model_dump(exclude_unset=True):
+        validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(entry, update_fields)
     fields = apply_update(entry, payload)

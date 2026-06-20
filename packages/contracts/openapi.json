@@ -4551,6 +4551,18 @@
       },
       "ClinicalEntryCreate": {
         "properties": {
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
           "kind": {
             "$ref": "#/components/schemas/ClinicalEntryKind",
             "default": "note"
@@ -4654,6 +4666,18 @@
       },
       "ClinicalEntryRead": {
         "properties": {
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
           "kind": {
             "$ref": "#/components/schemas/ClinicalEntryKind",
             "default": "note"
@@ -4778,6 +4802,18 @@
       },
       "ClinicalEntryUpdate": {
         "properties": {
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
           "status": {
             "anyOf": [
               {

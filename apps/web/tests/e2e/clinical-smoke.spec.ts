@@ -33,6 +33,8 @@ test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 
   await expect(page.getByRole("heading", { name: "Nueva evolucion SOAP" })).toBeVisible();
+  const encounterSelect = page.locator('select[name="encounter_id"]');
+  await expect(encounterSelect).toContainText("Encuentro demo - ambulatory");
   await expect(page.getByRole("button", { name: "Revisar con Ollama" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeVisible();
 });

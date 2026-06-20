@@ -67,6 +67,11 @@ class ClinicalEntry(Base, IdMixin, TimestampMixin):
         ForeignKey("patients.id", ondelete="CASCADE"),
         index=True,
     )
+    encounter_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("clinical_encounters.id", ondelete="SET NULL"),
+        index=True,
+        nullable=True,
+    )
     kind: Mapped[ClinicalEntryKind] = mapped_column(
         Enum(ClinicalEntryKind, values_callable=enum_values, name="clinical_entry_kind"),
         nullable=False,
@@ -91,6 +96,9 @@ class ClinicalEntry(Base, IdMixin, TimestampMixin):
     created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
 
     patient: Mapped[Patient] = relationship(back_populates="clinical_entries")
+    encounter: Mapped[ClinicalEncounter | None] = relationship(
+        back_populates="clinical_entries",
+    )
 
 
 class Allergy(Base, IdMixin, TimestampMixin):
@@ -189,6 +197,10 @@ class ClinicalEncounter(Base, IdMixin, TimestampMixin):
     notes: Mapped[str | None] = mapped_column(String(320), nullable=True)
 
     patient: Mapped[Patient] = relationship(back_populates="encounters")
+    clinical_entries: Mapped[list[ClinicalEntry]] = relationship(
+        back_populates="encounter",
+        passive_deletes=True,
+    )
 
 
 class VitalSign(Base, IdMixin, TimestampMixin):

@@ -95,6 +95,7 @@ const patientSchema = z.object({
 type PatientFormValues = z.infer<typeof patientSchema>;
 
 const soapSchema = z.object({
+  encounter_id: z.string().optional(),
   title: z.string().min(1, "Titulo requerido"),
   occurred_at: z.string().min(1, "Fecha requerida"),
   subjective: z.string().optional(),
@@ -352,6 +353,7 @@ export function NewSoapEntryPage() {
     resolver: zodResolver(soapSchema),
     defaultValues: {
       title: "Evolucion SOAP",
+      encounter_id: "",
       occurred_at: toDatetimeLocal(new Date()),
       subjective: "",
       objective: "",
@@ -362,6 +364,7 @@ export function NewSoapEntryPage() {
   const mutation = useMutation({
     mutationFn: (values: SoapFormValues) =>
       createClinicalEntry(patientId, {
+        encounter_id: emptyToNull(values.encounter_id),
         kind: "progress",
         status: "draft",
         occurred_at: new Date(values.occurred_at).toISOString(),
@@ -377,6 +380,14 @@ export function NewSoapEntryPage() {
       router.push(`/pacientes/${patientId}/evoluciones`);
     },
   });
+  const encountersQuery = useQuery({
+    queryKey: ["clinical-encounters", patientId],
+    queryFn: () => listClinicalEncounters(patientId),
+    enabled: !DEMO_MODE,
+  });
+  const encounters = DEMO_MODE
+    ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
+    : (encountersQuery.data ?? []);
   const reviewMutation = useMutation({
     mutationFn: (values: SoapFormValues) =>
       createClinicalInsight({
@@ -453,6 +464,16 @@ export function NewSoapEntryPage() {
                 <Input type="datetime-local" {...form.register("occurred_at")} />
               </Field>
             </div>
+            <Field label="Encuentro">
+              <select className="h-9 w-full rounded-md border bg-background px-3 text-sm" {...form.register("encounter_id")}>
+                <option value="">Sin encuentro vinculado</option>
+                {encounters.map((encounter) => (
+                  <option key={encounter.id} value={encounter.id}>
+                    {encounter.reason} - {encounter.type}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <SoapTextarea label="Subjetivo" registration={form.register("subjective")} />
             <SoapTextarea label="Objetivo" registration={form.register("objective")} />
             <SoapTextarea label="Analisis" registration={form.register("assessment")} />

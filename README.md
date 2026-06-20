@@ -28,7 +28,7 @@ Dominios implementados:
 
 - pacientes
 - encuentros clinicos
-- evoluciones clinicas SOAP
+- evoluciones clinicas SOAP con vinculo opcional a encuentro
 - estado de ficha, contexto asistencial y problemas activos
 - alergias
 - medicacion

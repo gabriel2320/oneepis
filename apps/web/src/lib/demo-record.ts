@@ -76,6 +76,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
       {
         id: "51111111-1111-4111-8111-111111111111",
         patient_id: "11111111-1111-4111-8111-111111111111",
+        encounter_id: "81111111-1111-4111-8111-111111111111",
         kind: "progress",
         status: "signed",
         occurred_at: "2026-06-20T12:15:00Z",
@@ -92,6 +93,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
       {
         id: "61111111-1111-4111-8111-111111111111",
         patient_id: "11111111-1111-4111-8111-111111111111",
+        encounter_id: null,
         kind: "intake",
         status: "signed",
         occurred_at: "2026-06-18T09:20:00Z",

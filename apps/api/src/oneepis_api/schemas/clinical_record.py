@@ -19,6 +19,7 @@ from oneepis_api.schemas.common import APIModel
 
 
 class ClinicalEntryBase(APIModel):
+    encounter_id: uuid.UUID | None = None
     kind: ClinicalEntryKind = ClinicalEntryKind.NOTE
     status: ClinicalEntryStatus = ClinicalEntryStatus.DRAFT
     occurred_at: datetime
@@ -37,6 +38,7 @@ class ClinicalEntryCreate(ClinicalEntryBase):
 
 
 class ClinicalEntryUpdate(APIModel):
+    encounter_id: uuid.UUID | None = None
     status: ClinicalEntryStatus | None = None
     occurred_at: datetime | None = None
     title: str | None = Field(default=None, min_length=1, max_length=160)
