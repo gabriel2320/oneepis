@@ -29,6 +29,7 @@ export function AiInsightPanel() {
           enabled: false,
           available: false,
           available_models: [],
+          tasks: [],
           message: "API no disponible.",
         });
       });
@@ -66,6 +67,15 @@ export function AiInsightPanel() {
         <p className="text-sm text-muted-foreground">
           {status?.message ?? "Consultando proveedor local..."}
         </p>
+        {status?.tasks?.length ? (
+          <div className="flex flex-wrap gap-2">
+            {status.tasks.map((task) => (
+              <Badge key={task.task} variant={task.available ? "safe" : "outline"}>
+                {task.task}: {task.model}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-md border bg-background p-3">

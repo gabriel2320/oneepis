@@ -189,12 +189,47 @@ export type ClinicalInsightResponse = {
   safety_notes: string[];
 };
 
+export type AiTaskStatus = {
+  task: "summary" | "suggestions" | "fallback" | "embeddings";
+  model: string;
+  available: boolean;
+  enabled: boolean;
+};
+
 export type AIProviderStatus = {
   provider: string;
   enabled: boolean;
   available: boolean;
   model?: string | null;
+  summary_model?: string | null;
+  suggestions_model?: string | null;
+  fallback_model?: string | null;
+  embeddings_model?: string | null;
   base_url?: string | null;
   available_models: string[];
+  tasks: AiTaskStatus[];
   message: string;
+};
+
+export type PatientAiSuggestionRequest = {
+  focus: "summary" | "safety" | "documentation";
+};
+
+export type ClinicalAiSuggestion = {
+  title: string;
+  detail: string;
+  severity: "info" | "warning" | "critical";
+  source: "ollama" | "local_rules";
+  action_label?: string | null;
+};
+
+export type PatientAiSuggestionsResponse = {
+  provider: string;
+  status: "disabled" | "draft" | "error";
+  model?: string | null;
+  patient_id: string;
+  generated_at: string;
+  summary: string;
+  suggestions: ClinicalAiSuggestion[];
+  safety_notes: string[];
 };

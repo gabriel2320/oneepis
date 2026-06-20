@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.models.audit import AuditEvent
 from oneepis_api.models.clinical_record import (
@@ -19,6 +20,7 @@ from oneepis_api.models.clinical_record import (
 )
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
+from oneepis_api.schemas.ai import PatientAiSuggestionRequest, PatientAiSuggestionsResponse
 from oneepis_api.schemas.audit import AuditEventRead
 from oneepis_api.schemas.clinical_record import (
     AllergyCreate,
@@ -40,10 +42,12 @@ from oneepis_api.schemas.patient import (
     PatientRecordSnapshot,
     PatientUpdate,
 )
+from oneepis_api.services.ai.provider import get_ai_provider
 from oneepis_api.services.audit import record_audit_event
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 SessionDep = Annotated[Session, Depends(get_session)]
+SettingsDep = Annotated[Settings, Depends(get_settings)]
 PatientSearch = Annotated[str | None, Query(min_length=2, max_length=80)]
 LimitQuery = Annotated[int, Query(ge=1, le=100)]
 OffsetQuery = Annotated[int, Query(ge=0)]
@@ -155,6 +159,18 @@ def get_patient_record(
         active_medications=patient_repo.get_active_medications(session, patient_id),
         recent_entries=patient_repo.get_recent_entries(session, patient_id),
     )
+
+
+@router.post("/{patient_id}/ai/suggestions", response_model=PatientAiSuggestionsResponse)
+def create_patient_ai_suggestions(
+    patient_id: uuid.UUID,
+    payload: PatientAiSuggestionRequest,
+    session: SessionDep,
+    settings: SettingsDep,
+) -> PatientAiSuggestionsResponse:
+    snapshot = get_patient_record(patient_id, session)
+    provider = get_ai_provider(settings)
+    return provider.create_patient_suggestions(str(patient_id), snapshot, payload)
 
 
 @router.get("/{patient_id}/clinical-entries", response_model=list[ClinicalEntryRead])

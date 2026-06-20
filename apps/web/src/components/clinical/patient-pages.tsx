@@ -12,6 +12,10 @@ import { ArrowLeft, Plus, Save, Search } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { AiInsightPanel } from "@/components/clinical-record/ai-insight-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import {
+  PatientClinicalLoading,
+  PatientClinicalShell,
+} from "@/components/clinical/patient-clinical-shell";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
 import {
   AiSafetyPanel,
@@ -22,7 +26,6 @@ import {
   LatestVitalsTrend,
   MedicationList,
   PatientLongitudinalSummary,
-  PrintActions,
   ProblemList,
   QuickSoapEditor,
   VitalsStrip,
@@ -32,7 +35,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createAllergy, createClinicalEntry, createMedication, createVitalSign, listAuditEvents, listVitalSigns } from "@/lib/api/clinical-record";
+import { createClinicalInsight, createPatientAiSuggestions } from "@/lib/api/ai";
+import {
+  createAllergy,
+  createClinicalEntry,
+  createMedication,
+  createVitalSign,
+  listAuditEvents,
+  listVitalSigns,
+} from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
 import { createPatient, getPatientRecord, listPatients } from "@/lib/api/patients";
 import { demoRecords } from "@/lib/demo-record";
@@ -40,11 +51,11 @@ import type {
   AllergyCreate,
   MedicationCreate,
   Patient,
+  PatientAiSuggestionsResponse,
   PatientCreate,
   PatientRecordSnapshot,
   VitalSignCreate,
 } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
 const patientSchema = z.object({
@@ -71,19 +82,16 @@ const soapSchema = z.object({
 
 type SoapFormValues = z.infer<typeof soapSchema>;
 
-const patientSections = [
-  { key: "ficha", label: "Ficha" },
-  { key: "evoluciones", label: "Evoluciones" },
-  { key: "problemas", label: "Problemas" },
-  { key: "alergias", label: "Alergias" },
-  { key: "medicacion", label: "Medicacion" },
-  { key: "signos-vitales", label: "Signos vitales" },
-  { key: "documentos", label: "Documentos" },
-  { key: "ia", label: "IA" },
-  { key: "auditoria", label: "Auditoria" },
-] as const;
-
-type PatientSection = (typeof patientSections)[number]["key"];
+type PatientSection =
+  | "ficha"
+  | "evoluciones"
+  | "problemas"
+  | "alergias"
+  | "medicacion"
+  | "signos-vitales"
+  | "documentos"
+  | "ia"
+  | "auditoria";
 
 export function PatientsIndexPage() {
   const [search, setSearch] = useState("");
@@ -235,31 +243,33 @@ export function NewPatientPage() {
 
 export function PatientRecordScreen({ section = "ficha" }: { section?: PatientSection }) {
   const patientId = usePatientId();
-  const recordQuery = useQuery({
-    queryKey: ["patient-record", patientId],
-    queryFn: () => getPatientRecord(patientId),
-    enabled: Boolean(patientId) && !DEMO_MODE,
-  });
-  const record = useDemoRecord(patientId) ?? recordQuery.data;
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
 
-  return (
-    <AppShell>
-      <div className="mx-auto max-w-7xl space-y-5 p-4 md:p-6">
-        {recordQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
-        {recordQuery.isError && !DEMO_MODE ? (
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (recordQuery.isError && !DEMO_MODE) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-3xl p-4 md:p-6">
           <ErrorState
             description="No se pudo cargar la ficha del paciente."
             onRetry={() => recordQuery.refetch()}
           />
-        ) : null}
-        {record ? (
-          <>
-            <PatientRecordHeader record={record} section={section} />
-            <PatientSectionContent record={record} section={section} patientId={patientId} />
-          </>
-        ) : null}
-      </div>
-    </AppShell>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!record) {
+    return <PatientClinicalLoading />;
+  }
+
+  return (
+    <PatientClinicalShell record={record} activeSection={section}>
+      <PatientSectionContent record={record} section={section} patientId={patientId} />
+    </PatientClinicalShell>
   );
 }
 
@@ -267,7 +277,8 @@ export function NewSoapEntryPage() {
   const patientId = usePatientId();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const record = useDemoRecord(patientId);
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const [aiReview, setAiReview] = useState<string | null>(null);
   const form = useForm<SoapFormValues>({
     resolver: zodResolver(soapSchema),
     defaultValues: {
@@ -297,10 +308,47 @@ export function NewSoapEntryPage() {
       router.push(`/pacientes/${patientId}/evoluciones`);
     },
   });
+  const reviewMutation = useMutation({
+    mutationFn: (values: SoapFormValues) =>
+      createClinicalInsight({
+        patient_id: patientId,
+        focus: "summary",
+        source_text: [
+          `Titulo: ${values.title}`,
+          `S: ${values.subjective || "Sin registro"}`,
+          `O: ${values.objective || "Sin registro"}`,
+          `A: ${values.assessment || "Sin registro"}`,
+          `P: ${values.plan || "Sin registro"}`,
+        ].join("\n"),
+      }),
+    onSuccess: (response) => {
+      setAiReview(
+        [
+          response.summary,
+          ...response.structured_points.map((point) => `- ${point}`),
+          "Borrador IA - requiere revision humana.",
+        ].join("\n"),
+      );
+    },
+  });
+
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (!record) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-3xl p-4 md:p-6">
+          <ErrorState description="No se pudo cargar el paciente para crear la evolucion." />
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6">
+    <PatientClinicalShell record={record} activeSection="evoluciones">
+      <div className="space-y-5">
         <BackLink href={`/pacientes/${patientId}/evoluciones`} label="Evoluciones" />
         <PageTitle
           title="Nueva evolucion SOAP"
@@ -309,7 +357,21 @@ export function NewSoapEntryPage() {
         {DEMO_MODE ? (
           <ErrorState description="El modo demo no permite guardar evoluciones reales." />
         ) : null}
-        <ClinicalSectionCard title="SOAP">
+        <ClinicalSectionCard
+          title="SOAP"
+          description="Editor amplio, sin guardado IA automatico."
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={reviewMutation.isPending}
+              onClick={() => reviewMutation.mutate(form.getValues())}
+            >
+              {reviewMutation.isPending ? "Revisando..." : "Revisar con Ollama"}
+            </Button>
+          }
+        >
           <form className="space-y-4" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Titulo" error={form.formState.errors.title?.message}>
@@ -330,8 +392,16 @@ export function NewSoapEntryPage() {
             {mutation.isError ? <p className="text-sm text-destructive">No se pudo guardar.</p> : null}
           </form>
         </ClinicalSectionCard>
+        {reviewMutation.isError ? (
+          <ErrorState description="Ollama no pudo revisar el borrador. La evolucion sigue editable." />
+        ) : null}
+        {aiReview ? (
+          <ClinicalSectionCard title="Revision Ollama" description="Borrador IA - requiere revision humana.">
+            <pre className="whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-sm">{aiReview}</pre>
+          </ClinicalSectionCard>
+        ) : null}
       </div>
-    </AppShell>
+    </PatientClinicalShell>
   );
 }
 
@@ -350,7 +420,7 @@ function PatientSectionContent({
         <CriticalAlerts record={record} />
         <VitalsStrip vital={record.latest_vitals} />
         <PatientLongitudinalSummary record={record} />
-        <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
+        <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
           <ClinicalSectionCard
             title="Linea clinica"
             action={<QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />}
@@ -364,6 +434,7 @@ function PatientSectionContent({
             <ClinicalSectionCard title="Medicacion activa">
               <MedicationList medications={record.active_medications} />
             </ClinicalSectionCard>
+            <PatientAiSuggestionsPanel patientId={patientId} />
           </div>
         </div>
       </div>
@@ -425,139 +496,40 @@ function PatientSectionContent({
 }
 
 function AllergyWorkspace({ patientId, record }: { patientId: string; record: PatientRecordSnapshot }) {
-  const queryClient = useQueryClient();
-  const [formState, setFormState] = useState({ substance: "", reaction: "", severity: "unknown" });
-  const mutation = useMutation({
-    mutationFn: (payload: AllergyCreate) => createAllergy(patientId, payload),
-    onSuccess: async () => {
-      setFormState({ substance: "", reaction: "", severity: "unknown" });
-      await queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] });
-    },
-  });
-
   return (
-    <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
-      <ClinicalSectionCard title="Alergias registradas">
-        <AllergyList allergies={record.active_allergies} />
-      </ClinicalSectionCard>
-      <ClinicalSectionCard title="Agregar alergia">
-        <form
-          className="space-y-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            mutation.mutate({
-              substance: formState.substance,
-              reaction: emptyToNull(formState.reaction),
-              severity: formState.severity as AllergyCreate["severity"],
-              recorded_at: new Date().toISOString(),
-            });
-          }}
-        >
-          <Input
-            placeholder="Sustancia"
-            value={formState.substance}
-            onChange={(event) => setFormState({ ...formState, substance: event.target.value })}
-          />
-          <Input
-            placeholder="Reaccion"
-            value={formState.reaction}
-            onChange={(event) => setFormState({ ...formState, reaction: event.target.value })}
-          />
-          <select
-            className="h-9 w-full rounded-md border bg-background px-3 text-sm"
-            value={formState.severity}
-            onChange={(event) => setFormState({ ...formState, severity: event.target.value })}
-          >
-            <option value="unknown">Severidad desconocida</option>
-            <option value="mild">Leve</option>
-            <option value="moderate">Moderada</option>
-            <option value="severe">Severa</option>
-          </select>
-          <Button type="submit" disabled={mutation.isPending || !formState.substance.trim() || DEMO_MODE}>
-            {mutation.isPending ? "Guardando..." : "Guardar alergia"}
-          </Button>
-        </form>
-      </ClinicalSectionCard>
-    </div>
+    <ClinicalSectionCard
+      title="Alergias registradas"
+      action={
+        <Button asChild size="sm">
+          <Link href={`/pacientes/${patientId}/alergias/nueva`}>Agregar</Link>
+        </Button>
+      }
+    >
+      <AllergyList allergies={record.active_allergies} />
+    </ClinicalSectionCard>
   );
 }
 
 function MedicationWorkspace({ patientId, record }: { patientId: string; record: PatientRecordSnapshot }) {
-  const queryClient = useQueryClient();
-  const [formState, setFormState] = useState({ name: "", dose: "", route: "", frequency: "" });
-  const mutation = useMutation({
-    mutationFn: (payload: MedicationCreate) => createMedication(patientId, payload),
-    onSuccess: async () => {
-      setFormState({ name: "", dose: "", route: "", frequency: "" });
-      await queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] });
-    },
-  });
-
   return (
-    <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
-      <ClinicalSectionCard title="Medicacion">
-        <MedicationList medications={record.active_medications} />
-      </ClinicalSectionCard>
-      <ClinicalSectionCard title="Agregar medicamento">
-        <form
-          className="space-y-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            mutation.mutate({
-              name: formState.name,
-              dose: emptyToNull(formState.dose),
-              route: emptyToNull(formState.route),
-              frequency: emptyToNull(formState.frequency),
-              started_on: new Date().toISOString().slice(0, 10),
-            });
-          }}
-        >
-          {(["name", "dose", "route", "frequency"] as const).map((field) => (
-            <Input
-              key={field}
-              placeholder={fieldLabels[field]}
-              value={formState[field]}
-              onChange={(event) => setFormState({ ...formState, [field]: event.target.value })}
-            />
-          ))}
-          <Button type="submit" disabled={mutation.isPending || !formState.name.trim() || DEMO_MODE}>
-            {mutation.isPending ? "Guardando..." : "Guardar medicamento"}
-          </Button>
-        </form>
-      </ClinicalSectionCard>
-    </div>
+    <ClinicalSectionCard
+      title="Medicacion"
+      action={
+        <Button asChild size="sm">
+          <Link href={`/pacientes/${patientId}/medicacion/nueva`}>Agregar</Link>
+        </Button>
+      }
+    >
+      <MedicationList medications={record.active_medications} />
+    </ClinicalSectionCard>
   );
 }
 
 function VitalsWorkspace({ patientId, record }: { patientId: string; record: PatientRecordSnapshot }) {
-  const queryClient = useQueryClient();
   const vitalsQuery = useQuery({
     queryKey: ["vital-signs", patientId],
     queryFn: () => listVitalSigns(patientId),
     enabled: !DEMO_MODE,
-  });
-  const [formState, setFormState] = useState({
-    systolic_bp: "",
-    diastolic_bp: "",
-    heart_rate_bpm: "",
-    oxygen_saturation_pct: "",
-    temperature_c: "",
-  });
-  const mutation = useMutation({
-    mutationFn: (payload: VitalSignCreate) => createVitalSign(patientId, payload),
-    onSuccess: async () => {
-      setFormState({
-        systolic_bp: "",
-        diastolic_bp: "",
-        heart_rate_bpm: "",
-        oxygen_saturation_pct: "",
-        temperature_c: "",
-      });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] }),
-        queryClient.invalidateQueries({ queryKey: ["vital-signs", patientId] }),
-      ]);
-    },
   });
   const vitals = DEMO_MODE ? (record.latest_vitals ? [record.latest_vitals] : []) : (vitalsQuery.data ?? []);
 
@@ -568,9 +540,194 @@ function VitalsWorkspace({ patientId, record }: { patientId: string; record: Pat
         <ClinicalSectionCard title="Tendencia">
           <LatestVitalsTrend vitals={vitals} />
         </ClinicalSectionCard>
-        <ClinicalSectionCard title="Nuevo control">
+        <ClinicalSectionCard
+          title="Nuevo control"
+          description="Cada registro se captura en una pantalla dedicada."
+          action={
+            <Button asChild size="sm">
+              <Link href={`/pacientes/${patientId}/signos-vitales/nuevo`}>Registrar</Link>
+            </Button>
+          }
+        >
+          <EmptyState title="Accion separada" description="Usa registrar para abrir el formulario de signos." />
+        </ClinicalSectionCard>
+      </div>
+    </div>
+  );
+}
+
+export function NewAllergyPage() {
+  const patientId = usePatientId();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const [formState, setFormState] = useState({ substance: "", reaction: "", severity: "unknown" });
+  const mutation = useMutation({
+    mutationFn: (payload: AllergyCreate) => createAllergy(patientId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] });
+      router.push(`/pacientes/${patientId}/alergias`);
+    },
+  });
+
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (!record) {
+    return <PatientLoadError />;
+  }
+
+  return (
+    <PatientClinicalShell record={record} activeSection="alergias">
+      <div className="max-w-xl space-y-5">
+        <BackLink href={`/pacientes/${patientId}/alergias`} label="Alergias" />
+        <PageTitle title="Agregar alergia" description="Registro puntual, auditado y reversible." />
+        <ClinicalSectionCard title="Alergia">
           <form
-            className="grid gap-3"
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              mutation.mutate({
+                substance: formState.substance,
+                reaction: emptyToNull(formState.reaction),
+                severity: formState.severity as AllergyCreate["severity"],
+                recorded_at: new Date().toISOString(),
+              });
+            }}
+          >
+            <Field label="Sustancia">
+              <Input
+                value={formState.substance}
+                onChange={(event) => setFormState({ ...formState, substance: event.target.value })}
+              />
+            </Field>
+            <Field label="Reaccion">
+              <Input
+                value={formState.reaction}
+                onChange={(event) => setFormState({ ...formState, reaction: event.target.value })}
+              />
+            </Field>
+            <Field label="Severidad">
+              <select
+                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                value={formState.severity}
+                onChange={(event) => setFormState({ ...formState, severity: event.target.value })}
+              >
+                <option value="unknown">Desconocida</option>
+                <option value="mild">Leve</option>
+                <option value="moderate">Moderada</option>
+                <option value="severe">Severa</option>
+              </select>
+            </Field>
+            <Button type="submit" disabled={mutation.isPending || !formState.substance.trim() || DEMO_MODE}>
+              {mutation.isPending ? "Guardando..." : "Guardar alergia"}
+            </Button>
+          </form>
+        </ClinicalSectionCard>
+      </div>
+    </PatientClinicalShell>
+  );
+}
+
+export function NewMedicationPage() {
+  const patientId = usePatientId();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const [formState, setFormState] = useState({ name: "", dose: "", route: "", frequency: "" });
+  const mutation = useMutation({
+    mutationFn: (payload: MedicationCreate) => createMedication(patientId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] });
+      router.push(`/pacientes/${patientId}/medicacion`);
+    },
+  });
+
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (!record) {
+    return <PatientLoadError />;
+  }
+
+  return (
+    <PatientClinicalShell record={record} activeSection="medicacion">
+      <div className="max-w-xl space-y-5">
+        <BackLink href={`/pacientes/${patientId}/medicacion`} label="Medicacion" />
+        <PageTitle title="Agregar medicamento" description="Medicacion activa del paciente." />
+        <ClinicalSectionCard title="Medicamento">
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              mutation.mutate({
+                name: formState.name,
+                dose: emptyToNull(formState.dose),
+                route: emptyToNull(formState.route),
+                frequency: emptyToNull(formState.frequency),
+                started_on: new Date().toISOString().slice(0, 10),
+              });
+            }}
+          >
+            {(["name", "dose", "route", "frequency"] as const).map((field) => (
+              <Field key={field} label={fieldLabels[field]}>
+                <Input
+                  value={formState[field]}
+                  onChange={(event) => setFormState({ ...formState, [field]: event.target.value })}
+                />
+              </Field>
+            ))}
+            <Button type="submit" disabled={mutation.isPending || !formState.name.trim() || DEMO_MODE}>
+              {mutation.isPending ? "Guardando..." : "Guardar medicamento"}
+            </Button>
+          </form>
+        </ClinicalSectionCard>
+      </div>
+    </PatientClinicalShell>
+  );
+}
+
+export function NewVitalSignPage() {
+  const patientId = usePatientId();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const [formState, setFormState] = useState({
+    systolic_bp: "",
+    diastolic_bp: "",
+    heart_rate_bpm: "",
+    oxygen_saturation_pct: "",
+    temperature_c: "",
+  });
+  const mutation = useMutation({
+    mutationFn: (payload: VitalSignCreate) => createVitalSign(patientId, payload),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] }),
+        queryClient.invalidateQueries({ queryKey: ["vital-signs", patientId] }),
+      ]);
+      router.push(`/pacientes/${patientId}/signos-vitales`);
+    },
+  });
+
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (!record) {
+    return <PatientLoadError />;
+  }
+
+  return (
+    <PatientClinicalShell record={record} activeSection="signos-vitales">
+      <div className="max-w-xl space-y-5">
+        <BackLink href={`/pacientes/${patientId}/signos-vitales`} label="Signos vitales" />
+        <PageTitle title="Registrar signos vitales" description="Control puntual del paciente." />
+        <ClinicalSectionCard title="Control">
+          <form
+            className="space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
               mutation.mutate({
@@ -585,13 +742,13 @@ function VitalsWorkspace({ patientId, record }: { patientId: string; record: Pat
           >
             {(["systolic_bp", "diastolic_bp", "heart_rate_bpm", "oxygen_saturation_pct", "temperature_c"] as const).map(
               (field) => (
-                <Input
-                  key={field}
-                  inputMode="decimal"
-                  placeholder={fieldLabels[field]}
-                  value={formState[field]}
-                  onChange={(event) => setFormState({ ...formState, [field]: event.target.value })}
-                />
+                <Field key={field} label={fieldLabels[field]}>
+                  <Input
+                    inputMode="decimal"
+                    value={formState[field]}
+                    onChange={(event) => setFormState({ ...formState, [field]: event.target.value })}
+                  />
+                </Field>
               ),
             )}
             <Button type="submit" disabled={mutation.isPending || DEMO_MODE}>
@@ -600,6 +757,81 @@ function VitalsWorkspace({ patientId, record }: { patientId: string; record: Pat
           </form>
         </ClinicalSectionCard>
       </div>
+    </PatientClinicalShell>
+  );
+}
+
+function PatientAiSuggestionsPanel({ patientId }: { patientId: string }) {
+  const suggestionsQuery = useQuery({
+    queryKey: ["patient-ai-suggestions", patientId],
+    queryFn: () => createPatientAiSuggestions(patientId, { focus: "summary" }),
+    enabled: !DEMO_MODE,
+    staleTime: 60_000,
+  });
+
+  if (DEMO_MODE) {
+    return (
+      <ClinicalSectionCard title="Sugerencias Ollama" description="Borrador IA - requiere revision humana.">
+        <EmptyState title="IA no disponible en demo" description="Usa API real para sugerencias locales." />
+      </ClinicalSectionCard>
+    );
+  }
+
+  return (
+    <ClinicalSectionCard
+      title="Sugerencias Ollama"
+      description="Borrador IA - requiere revision humana."
+      action={
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={suggestionsQuery.isFetching}
+          onClick={() => suggestionsQuery.refetch()}
+        >
+          {suggestionsQuery.isFetching ? "Revisando..." : "Actualizar"}
+        </Button>
+      }
+    >
+      {suggestionsQuery.isLoading ? <LoadingRows rows={2} /> : null}
+      {suggestionsQuery.isError ? (
+        <ErrorState description="No se pudo obtener sugerencias. La ficha sigue operativa." />
+      ) : null}
+      {suggestionsQuery.data ? <PatientAiSuggestionList response={suggestionsQuery.data} /> : null}
+    </ClinicalSectionCard>
+  );
+}
+
+function PatientAiSuggestionList({ response }: { response: PatientAiSuggestionsResponse }) {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-md border bg-muted/30 p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={response.status === "draft" ? "safe" : "warning"}>{response.status}</Badge>
+          <Badge variant="outline">{response.provider}</Badge>
+          {response.model ? <Badge variant="outline">{response.model}</Badge> : null}
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">{response.summary}</p>
+      </div>
+      <div className="space-y-2">
+        {response.suggestions.map((suggestion) => (
+          <div key={`${suggestion.title}-${suggestion.detail}`} className="rounded-md border p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">{suggestion.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{suggestion.detail}</p>
+              </div>
+              <Badge variant={suggestion.severity === "critical" ? "warning" : "outline"}>
+                {suggestion.severity}
+              </Badge>
+            </div>
+            {suggestion.action_label ? (
+              <p className="mt-2 text-xs text-muted-foreground">{suggestion.action_label}</p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">Borrador IA - requiere revision humana.</p>
     </div>
   );
 }
@@ -645,49 +877,6 @@ function PatientList({ patients }: { patients: Patient[] }) {
           </div>
         </Link>
       ))}
-    </div>
-  );
-}
-
-function PatientRecordHeader({
-  record,
-  section,
-}: {
-  record: PatientRecordSnapshot;
-  section: PatientSection;
-}) {
-  const patient = record.patient;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 rounded-md border bg-card p-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <BackLink href="/pacientes" label="Pacientes" />
-          <h1 className="mt-3 text-2xl font-semibold">
-            {patient.first_name} {patient.last_name}
-          </h1>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
-            <span>{patient.birth_date}</span>
-            <span>{patient.sex_at_birth}</span>
-            {patient.clinical_identifier ? <Badge variant="outline">{patient.clinical_identifier}</Badge> : null}
-          </div>
-        </div>
-        <PrintActions patientId={patient.id} />
-      </div>
-      <nav className="flex gap-2 overflow-x-auto pb-1" data-print-hidden="true">
-        {patientSections.map((item) => (
-          <Link
-            key={item.key}
-            href={`/pacientes/${patient.id}/${item.key}`}
-            className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-medium text-muted-foreground",
-              section === item.key && "border-primary bg-accent text-accent-foreground",
-            )}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
     </div>
   );
 }
@@ -763,10 +952,30 @@ function usePatientId() {
   return params.patientId;
 }
 
+function usePatientRecordQuery(patientId: string) {
+  const recordQuery = useQuery({
+    queryKey: ["patient-record", patientId],
+    queryFn: () => getPatientRecord(patientId),
+    enabled: Boolean(patientId) && !DEMO_MODE,
+  });
+  const demoRecord = useDemoRecord(patientId);
+  return { record: demoRecord ?? recordQuery.data, recordQuery };
+}
+
 function useDemoRecord(patientId: string) {
   return useMemo(
     () => (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null),
     [patientId],
+  );
+}
+
+function PatientLoadError() {
+  return (
+    <AppShell>
+      <div className="mx-auto max-w-3xl p-4 md:p-6">
+        <ErrorState description="No se pudo cargar el paciente." />
+      </div>
+    </AppShell>
   );
 }
 

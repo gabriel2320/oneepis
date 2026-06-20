@@ -6,8 +6,8 @@ import type { ReactNode } from "react";
 
 import { ClinicalTimeline, formatDateTime } from "@/components/clinical/widgets";
 import { Button } from "@/components/ui/button";
-import { getPatientRecord } from "@/lib/api/patients";
 import { DEMO_MODE } from "@/lib/api/client";
+import { getPatientRecord } from "@/lib/api/patients";
 import { demoRecords } from "@/lib/demo-record";
 import type { ClinicalEntry, PatientRecordSnapshot } from "@/lib/types";
 
@@ -28,11 +28,7 @@ export function PrintPatientPage({ kind }: { kind: "ficha" | "resumen" | "receta
       <PrintToolbar />
       {record ? (
         kind === "receta" ? (
-          <ClinicalPaperSheet record={record} title="Receta">
-            <p className="text-sm text-muted-foreground">
-              Receta no habilitada en fase 1. Requiere firma, permisos y politica de prescripcion.
-            </p>
-          </ClinicalPaperSheet>
+          <PrescriptionA5Sheet record={record} />
         ) : (
           <PatientSummaryPrintSheet record={record} title={kind === "ficha" ? "Ficha clinica" : "Resumen"} />
         )
@@ -93,7 +89,7 @@ export function ClinicalPaperSheet({
   children: ReactNode;
 }) {
   return (
-    <article className="print-sheet mx-auto min-h-[279mm] max-w-3xl border bg-card p-8 shadow-sm">
+    <article className="print-sheet mx-auto min-h-[279mm] max-w-3xl border bg-card p-8 shadow-sm print:min-h-[250mm]">
       <PrintHeader record={record} title={title} />
       <div className="space-y-5 py-6">{children}</div>
       <PrintFooter />
@@ -113,7 +109,7 @@ export function PatientSummaryPrintSheet({
       <section className="print-section">
         <h2 className="text-sm font-semibold">Identificacion</h2>
         <p className="mt-2 text-sm">
-          {record.patient.first_name} {record.patient.last_name} · {record.patient.birth_date}
+          {record.patient.first_name} {record.patient.last_name} - {record.patient.birth_date}
         </p>
       </section>
       <section className="print-section">
@@ -132,7 +128,42 @@ export function PatientSummaryPrintSheet({
         <h2 className="mb-3 text-sm font-semibold">Evoluciones recientes</h2>
         <ClinicalTimeline entries={record.recent_entries} />
       </section>
+      <section className="print-section rounded-md border border-info/30 bg-info/10 p-3">
+        <h2 className="text-sm font-semibold">Resumen IA</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          No se imprime contenido IA persistido. Las sugerencias Ollama son borradores y no sustituyen
+          texto clinico firmado.
+        </p>
+      </section>
     </ClinicalPaperSheet>
+  );
+}
+
+export function PrescriptionA5Sheet({ record }: { record: PatientRecordSnapshot }) {
+  return (
+    <article className="print-sheet mx-auto min-h-[210mm] max-w-[148mm] border bg-card p-6 shadow-sm">
+      <PrintHeader record={record} title="Receta" />
+      <div className="space-y-5 py-6">
+        <section className="print-section rounded-md border border-warning/40 bg-warning/10 p-3">
+          <h2 className="text-sm font-semibold">Prescripcion no habilitada</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Requiere autenticacion, permisos, firma profesional y politica de prescripcion.
+          </p>
+        </section>
+        <section className="print-section">
+          <h2 className="text-sm font-semibold">Paciente</h2>
+          <p className="mt-2 text-sm">
+            {record.patient.first_name} {record.patient.last_name}
+          </p>
+        </section>
+        <section className="print-section min-h-32 border-t pt-4">
+          <p className="text-sm text-muted-foreground">
+            Firma profesional: _________________________
+          </p>
+        </section>
+      </div>
+      <PrintFooter />
+    </article>
   );
 }
 
@@ -171,7 +202,7 @@ export function PrintHeader({
       <p className="text-xs font-semibold uppercase text-muted-foreground">OneEpis</p>
       <h1 className="mt-1 text-2xl font-semibold">{title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        {record.patient.first_name} {record.patient.last_name} ·{" "}
+        {record.patient.first_name} {record.patient.last_name} -{" "}
         {record.patient.clinical_identifier ?? record.patient.id}
       </p>
     </header>
@@ -181,7 +212,10 @@ export function PrintHeader({
 export function PrintFooter() {
   return (
     <footer className="mt-8 border-t pt-4 text-xs text-muted-foreground">
-      <p>Fecha: {new Date().toLocaleString("es-CL")} · Folio demo: ONE-DEV · Pagina 1</p>
+      <p>
+        Fecha: <span suppressHydrationWarning>{new Date().toLocaleString("es-CL")}</span> - Folio demo:
+        ONE-DEV - Pagina 1
+      </p>
       <p>Documento de desarrollo / no uso clinico real.</p>
     </footer>
   );

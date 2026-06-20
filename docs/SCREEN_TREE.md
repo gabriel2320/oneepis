@@ -14,8 +14,11 @@
 /pacientes/[patientId]/evoluciones/nueva
 /pacientes/[patientId]/problemas
 /pacientes/[patientId]/alergias
+/pacientes/[patientId]/alergias/nueva
 /pacientes/[patientId]/medicacion
+/pacientes/[patientId]/medicacion/nueva
 /pacientes/[patientId]/signos-vitales
+/pacientes/[patientId]/signos-vitales/nuevo
 /pacientes/[patientId]/documentos
 /pacientes/[patientId]/ia
 /pacientes/[patientId]/auditoria

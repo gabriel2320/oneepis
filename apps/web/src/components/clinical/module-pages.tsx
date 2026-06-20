@@ -183,6 +183,21 @@ export function AiSettingsPage() {
               {aiQuery.data.model ? <Badge variant="outline">{aiQuery.data.model}</Badge> : null}
             </div>
             <p className="text-sm text-muted-foreground">{aiQuery.data.message}</p>
+            {aiQuery.data.tasks.length > 0 ? (
+              <div className="grid gap-2 md:grid-cols-2">
+                {aiQuery.data.tasks.map((task) => (
+                  <div key={task.task} className="rounded-md border p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold">{task.task}</p>
+                      <Badge variant={task.available ? "safe" : "outline"}>
+                        {task.available ? "instalado" : "pendiente"}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">{task.model}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </ClinicalSectionCard>

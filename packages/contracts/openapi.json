@@ -319,6 +319,59 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/ai/suggestions": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Create Patient Ai Suggestions",
+        "operationId": "create_patient_ai_suggestions_api_v1_patients__patient_id__ai_suggestions_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientAiSuggestionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientAiSuggestionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/clinical-entries": {
       "get": {
         "tags": [
@@ -1800,6 +1853,50 @@
             ],
             "title": "Model"
           },
+          "summary_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Model"
+          },
+          "suggestions_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestions Model"
+          },
+          "fallback_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback Model"
+          },
+          "embeddings_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embeddings Model"
+          },
           "base_url": {
             "anyOf": [
               {
@@ -1818,6 +1915,13 @@
             "type": "array",
             "title": "Available Models"
           },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/AiTaskStatus"
+            },
+            "type": "array",
+            "title": "Tasks"
+          },
           "message": {
             "type": "string",
             "title": "Message"
@@ -1831,6 +1935,40 @@
           "message"
         ],
         "title": "AIProviderStatus"
+      },
+      "AiTaskStatus": {
+        "properties": {
+          "task": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "suggestions",
+              "fallback",
+              "embeddings"
+            ],
+            "title": "Task"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "task",
+          "model",
+          "available"
+        ],
+        "title": "AiTaskStatus"
       },
       "AllergyCreate": {
         "properties": {
@@ -2064,6 +2202,59 @@
           "created_at"
         ],
         "title": "AuditEventRead"
+      },
+      "ClinicalAiSuggestion": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "detail": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Detail"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ],
+            "title": "Severity",
+            "default": "info"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ollama",
+              "local_rules"
+            ],
+            "title": "Source",
+            "default": "local_rules"
+          },
+          "action_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "detail"
+        ],
+        "title": "ClinicalAiSuggestion"
       },
       "ClinicalEntryCreate": {
         "properties": {
@@ -2799,6 +2990,87 @@
         },
         "type": "object",
         "title": "MedicationUpdate"
+      },
+      "PatientAiSuggestionRequest": {
+        "properties": {
+          "focus": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "safety",
+              "documentation"
+            ],
+            "title": "Focus",
+            "default": "summary"
+          }
+        },
+        "type": "object",
+        "title": "PatientAiSuggestionRequest"
+      },
+      "PatientAiSuggestionsResponse": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "disabled",
+              "draft",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalAiSuggestion"
+            },
+            "type": "array",
+            "title": "Suggestions"
+          },
+          "safety_notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Safety Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider",
+          "status",
+          "patient_id",
+          "generated_at",
+          "summary"
+        ],
+        "title": "PatientAiSuggestionsResponse"
       },
       "PatientCreate": {
         "properties": {

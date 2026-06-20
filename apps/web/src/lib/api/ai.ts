@@ -3,6 +3,8 @@ import type {
   AIProviderStatus,
   ClinicalInsightRequest,
   ClinicalInsightResponse,
+  PatientAiSuggestionRequest,
+  PatientAiSuggestionsResponse,
 } from "@/lib/types";
 
 export function getAiStatus() {
@@ -11,6 +13,13 @@ export function getAiStatus() {
 
 export function createClinicalInsight(payload: ClinicalInsightRequest) {
   return apiFetch<ClinicalInsightResponse>("/api/v1/ai/clinical-insights", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createPatientAiSuggestions(patientId: string, payload: PatientAiSuggestionRequest) {
+  return apiFetch<PatientAiSuggestionsResponse>(`/api/v1/patients/${patientId}/ai/suggestions`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
