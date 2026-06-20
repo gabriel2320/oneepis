@@ -53,6 +53,7 @@ Estado:
 - `/hospitalizacion/camas/nueva` crea camas y puede asignar un ingreso activo sin cama.
 - `/hospitalizacion/camas` permite asignar ingresos activos sin cama a una cama disponible.
 - rondas, hoja diaria e indicaciones siguen preparadas, sin escrituras clinicas propias.
+- proximo crecimiento permitido: hoja diaria o indicaciones, una sola pieza, con PostgreSQL, API, permisos, auditoria, OpenAPI, UI minima y print si corresponde.
 
 ## Consulta
 

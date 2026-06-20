@@ -87,12 +87,11 @@ Capas:
 - `src/components/auth/*`: login local y badge de sesion
 - `src/components/layout/app-shell.tsx`: navegacion global
 - `src/components/clinical/patient-clinical-shell.tsx`: mesa clinica por paciente
-- `src/components/clinical/patient-pages.tsx`: barrel temporal para rutas paciente
-- `src/components/clinical/patient-*-pages.tsx`: pantallas paciente separadas por lectura, ficha y escritura
+- `src/components/clinical/patient-*-pages.tsx`: pantallas paciente importadas directo por App Router
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-041
+## Programa activo PR-018 a PR-046
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -118,6 +117,11 @@ Capas:
 - PR-039: Dieta inicial de `patient-pages.tsx` con barrel compatible.
 - PR-040: Playwright inicia servidor fresco por defecto; reuse solo con `PLAYWRIGHT_REUSE_SERVER=true`.
 - PR-041: Doctrina anti-inflacion canonica en `docs/GOVERNANCE.md`.
+- PR-042: Gates oficiales como pocos comandos raiz.
+- PR-043: Dieta backend de pacientes sin cambiar OpenAPI.
+- PR-044: Retiro del barrel temporal frontend de paciente.
+- PR-045: Papel serio con smoke print dedicado.
+- PR-046: Criterio para proximo crecimiento clinico minimo.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
@@ -126,12 +130,9 @@ Regla IA: todo output de Ollama es borrador, requiere revision humana y no escri
 Comandos esperados antes de entregar cambios:
 
 ```bash
-.venv/Scripts/python -m ruff check apps/api
-.venv/Scripts/python -m pytest apps/api/tests
-npm --workspace apps/web run typecheck
-npm --workspace apps/web run lint
-npm --workspace apps/web run build
-npm --workspace apps/web run test:e2e
-.venv/Scripts/python apps/api/scripts/export_openapi.py
-git diff --exit-code packages/contracts/openapi.json
+npm run check:api
+npm run check:web
+npm run check:contract
+npm run check:e2e
+npm run check
 ```

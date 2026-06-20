@@ -1,4 +1,4 @@
-import { NewSoapEntryPage } from "@/components/clinical/patient-pages";
+import { NewSoapEntryPage } from "@/components/clinical/patient-write-pages";
 
 export default function Page() {
   return <NewSoapEntryPage />;

@@ -1,4 +1,4 @@
-import { PatientRecordScreen } from "@/components/clinical/patient-pages";
+import { PatientRecordScreen } from "@/components/clinical/patient-record-pages";
 
 export default function Page() {
   return <PatientRecordScreen section="auditoria" />;

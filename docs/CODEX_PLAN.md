@@ -42,6 +42,11 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-039: Dieta inicial de pantallas paciente sin cambiar comportamiento.
 - PR-040: Playwright fresco por defecto para evitar servidores locales obsoletos.
 - PR-041: Doctrina anti-inflacion como regla de gobierno canonica.
+- PR-042: Gates oficiales y pocos comandos raiz.
+- PR-043: Dieta backend de pacientes sin cambiar OpenAPI.
+- PR-044: Retiro del barrel temporal frontend de paciente.
+- PR-045: Papel serio como gate clinico con smoke print.
+- PR-046: Preparar proximo crecimiento clinico minimo.
 
 ## Reglas no negociables
 
@@ -80,3 +85,15 @@ OneEpis debe sentirse como mesa clinica viva:
 - auditoria visible
 - modo papel serio
 - IA local silenciosa, util y trazable
+
+## Proximo crecimiento clinico
+
+Despues del core sobrio, hospitalizacion puede crecer solo con una pieza por vez:
+
+- hoja diaria o indicaciones, no ambas juntas
+- PostgreSQL antes que estado inventado en UI
+- API, permisos, auditoria y OpenAPI en el mismo PR
+- UI minima con estados loading/error/empty
+- print si el flujo clinico naturalmente termina en papel
+
+Si una pieza no cumple ese flujo completo, queda fuera del core.

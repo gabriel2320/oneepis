@@ -1,4 +1,4 @@
-import { PatientsIndexPage } from "@/components/clinical/patient-pages";
+import { PatientsIndexPage } from "@/components/clinical/patient-list-pages";
 
 export default function Page() {
   return <PatientsIndexPage />;

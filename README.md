@@ -97,6 +97,9 @@ python -m venv .venv
 .venv/Scripts/python -m pip install -e "apps/api[dev]"
 ```
 
+Los scripts `dev:api` y `check:*` asumen que `python` apunta a la venv local. En PowerShell
+puedes dejarla disponible con `$env:PATH = "$PWD\.venv\Scripts;$env:PATH"` antes de correrlos.
+
 4. Ejecuta migraciones:
 
 ```bash
@@ -107,7 +110,7 @@ python -m venv .venv
 
 ```bash
 npm run dev:web
-npm run api:dev
+npm run dev:api
 ```
 
 Web: <http://localhost:3000>  
@@ -161,12 +164,16 @@ El archivo estable queda en `packages/contracts/openapi.json`.
 ## Gates
 
 ```bash
-.venv/Scripts/python -m ruff check apps/api
-.venv/Scripts/python -m pytest apps/api/tests
-npm --workspace apps/web run typecheck
-npm --workspace apps/web run lint
-npm --workspace apps/web run build
-.venv/Scripts/python apps/api/scripts/export_openapi.py
+npm run check:api
+npm run check:web
+npm run check:contract
+npm run check:e2e
+```
+
+El gate completo local es:
+
+```bash
+npm run check
 ```
 
 ## Documentos clave
