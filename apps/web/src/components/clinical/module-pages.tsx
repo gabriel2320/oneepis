@@ -20,9 +20,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
-import { API_BASE_URL } from "@/lib/api/client";
+import { API_BASE_URL, DEMO_MODE } from "@/lib/api/client";
+import { listActiveHospitalizations } from "@/lib/api/hospitalization";
+import { demoEncounters, demoRecords } from "@/lib/demo-record";
+import type { HospitalizationBoardItem } from "@/lib/types";
 
 export function HospitalHomePage() {
+  const board = useHospitalizationBoard();
+
   return (
     <ModulePage
       title="Hospitalizacion"
@@ -34,7 +39,7 @@ export function HospitalHomePage() {
     >
       <div className="grid gap-4 xl:grid-cols-2">
         <ClinicalSectionCard title="Camas">
-          <BedBoard />
+          <HospitalizationBoardContent board={board} />
         </ClinicalSectionCard>
         <ClinicalSectionCard title="Rondas">
           <RoundList />
@@ -45,10 +50,12 @@ export function HospitalHomePage() {
 }
 
 export function HospitalBedsPage() {
+  const board = useHospitalizationBoard();
+
   return (
-    <ModulePage title="Camas" description="Tablero hospitalario preparado para fase 2.">
-      <ClinicalSectionCard title="BedBoard">
-        <BedBoard />
+    <ModulePage title="Camas" description="Tablero hospitalario desde encuentros activos.">
+      <ClinicalSectionCard title="Pacientes hospitalizados">
+        <HospitalizationBoardContent board={board} />
       </ClinicalSectionCard>
     </ModulePage>
   );
@@ -270,4 +277,44 @@ function ConfigLink({ href, label }: { href: string; label: string }) {
       <ArrowRight className="h-4 w-4 text-muted-foreground" />
     </Link>
   );
+}
+
+function HospitalizationBoardContent({
+  board,
+}: {
+  board: ReturnType<typeof useHospitalizationBoard>;
+}) {
+  if (board.isLoading) {
+    return <LoadingRows rows={3} />;
+  }
+  if (board.isError) {
+    return <ErrorState description="No se pudo cargar el tablero hospitalario." onRetry={board.refetch} />;
+  }
+  return <BedBoard items={board.items} />;
+}
+
+function useHospitalizationBoard() {
+  const boardQuery = useQuery({
+    queryKey: ["hospitalization-board"],
+    queryFn: listActiveHospitalizations,
+    enabled: !DEMO_MODE,
+  });
+  const demoItems = DEMO_MODE ? getDemoHospitalizations() : [];
+  return {
+    items: DEMO_MODE ? demoItems : (boardQuery.data ?? []),
+    isLoading: !DEMO_MODE && boardQuery.isLoading,
+    isError: !DEMO_MODE && boardQuery.isError,
+    refetch: () => {
+      void boardQuery.refetch();
+    },
+  };
+}
+
+function getDemoHospitalizations(): HospitalizationBoardItem[] {
+  return demoEncounters
+    .filter((encounter) => encounter.type === "hospitalization" && encounter.status === "in_progress")
+    .flatMap((encounter) => {
+      const record = demoRecords.find((item) => item.patient.id === encounter.patient_id);
+      return record ? [{ patient: record.patient, encounter }] : [];
+    });
 }

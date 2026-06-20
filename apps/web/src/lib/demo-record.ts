@@ -145,4 +145,17 @@ export const demoEncounters: ClinicalEncounter[] = [
     created_at: "2026-06-20T12:00:00Z",
     updated_at: "2026-06-20T12:00:00Z",
   },
+  {
+    id: "82222222-2222-4222-8222-222222222222",
+    patient_id: "12222222-2222-4222-8222-222222222222",
+    type: "hospitalization",
+    status: "in_progress",
+    reason: "Hospitalizacion demo",
+    started_at: "2026-06-20T08:00:00Z",
+    ended_at: null,
+    location_label: "Sala demo / Cama 1",
+    notes: "Registro ficticio para tablero hospitalario.",
+    created_at: "2026-06-20T08:00:00Z",
+    updated_at: "2026-06-20T08:00:00Z",
+  },
 ];

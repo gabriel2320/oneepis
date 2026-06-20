@@ -29,6 +29,14 @@ test("patient encounters render list and creation screen", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Guardar encuentro" })).toBeDisabled();
 });
 
+test("hospitalization beds render active board", async ({ page }) => {
+  await page.goto("/hospitalizacion/camas");
+
+  await expect(page.getByRole("heading", { name: "Camas" })).toBeVisible();
+  await expect(page.getByText("Hospitalizacion demo")).toBeVisible();
+  await expect(page.getByText("Sala demo / Cama 1")).toBeVisible();
+});
+
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 

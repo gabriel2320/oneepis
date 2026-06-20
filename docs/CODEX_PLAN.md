@@ -33,6 +33,7 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-030: Pantalla gobernada para editar estado clinico y contexto asistencial.
 - PR-031: Encuentros clinicos auditados como puente para consulta y hospitalizacion.
 - PR-032: Evoluciones SOAP vinculables a encuentros clinicos.
+- PR-033: Tablero hospitalario simple desde encuentros de hospitalizacion activos.
 
 ## Reglas no negociables
 

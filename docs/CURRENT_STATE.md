@@ -64,6 +64,12 @@ IA:
 - provider desacoplado en `services/ai/provider.py`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
 
+Hospitalizacion:
+
+- `GET /api/v1/hospitalization/active`
+- tablero `/hospitalizacion/camas` lee encuentros `hospitalization` en curso
+- aun no existen camas estructuradas, indicaciones ni rondas auditadas
+
 ## Frontend
 
 Rutas App Router bajo `apps/web/src/app`.
@@ -79,7 +85,7 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-032
+## Programa activo PR-018 a PR-033
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -96,6 +102,7 @@ Capas:
 - PR-030: Pantalla gobernada para editar estado clinico y contexto asistencial.
 - PR-031: Encuentros clinicos auditados como puente para consulta y hospitalizacion.
 - PR-032: Evoluciones SOAP vinculables a encuentros clinicos.
+- PR-033: Tablero hospitalario simple desde encuentros de hospitalizacion activos.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

@@ -47,8 +47,8 @@ Estado:
 
 Estado:
 
-- rutas creadas con widgets base: `BedBoard`, `RoundList`, `DailySheet`.
-- no escriben datos clinicos todavia.
+- `/hospitalizacion` y `/hospitalizacion/camas` muestran encuentros `hospitalization` en curso.
+- rondas, hoja diaria e indicaciones siguen preparadas, sin escrituras clinicas propias.
 
 ## Consulta
 

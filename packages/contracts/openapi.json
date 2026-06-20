@@ -3435,6 +3435,89 @@
         }
       }
     },
+    "/api/v1/hospitalization/active": {
+      "get": {
+        "tags": [
+          "hospitalization"
+        ],
+        "summary": "List Active Hospitalizations",
+        "operationId": "list_active_hospitalizations_api_v1_hospitalization_active_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HospitalizationBoardItem"
+                  },
+                  "title": "Response List Active Hospitalizations Api V1 Hospitalization Active Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ai/clinical-insights": {
       "post": {
         "tags": [
@@ -5068,6 +5151,22 @@
           "environment"
         ],
         "title": "HealthCheck"
+      },
+      "HospitalizationBoardItem": {
+        "properties": {
+          "patient": {
+            "$ref": "#/components/schemas/PatientRead"
+          },
+          "encounter": {
+            "$ref": "#/components/schemas/ClinicalEncounterRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient",
+          "encounter"
+        ],
+        "title": "HospitalizationBoardItem"
       },
       "LoginRequest": {
         "properties": {

@@ -245,6 +245,11 @@ export type ClinicalEncounter = {
 
 export type ClinicalEncounterUpdate = Partial<ClinicalEncounterCreate>;
 
+export type HospitalizationBoardItem = {
+  patient: Patient;
+  encounter: ClinicalEncounter;
+};
+
 export type PatientRecordSnapshot = {
   patient: Patient;
   latest_vitals?: VitalSign | null;

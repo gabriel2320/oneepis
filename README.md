@@ -36,6 +36,7 @@ Dominios implementados:
 - auth local con roles basicos
 - permisos clinicos por accion
 - auditoria por escritura con actor autenticado, correlation ID y before/after
+- tablero hospitalario simple desde encuentros de hospitalizacion activos
 - estado y borrador IA local via Ollama
 
 Rutas principales:
