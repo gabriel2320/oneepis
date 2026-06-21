@@ -57,19 +57,13 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-054: Estado `draft/closed` y bloqueo de edicion en hoja diaria.
 - PR-055: Reglas de fecha/encuentro para hoja diaria hospitalizada.
 - PR-056: Rondas hospitalarias de lectura desde datos existentes.
+- PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-056: rondas ya existe como vista de lectura desde ingresos activos,
-camas y ultimas hojas diarias. No crea tablas, endpoints ni escritura clinica nueva.
-`npm run check` pasa completo: API, web, OpenAPI y E2E.
-El siguiente paso no debe ser indicaciones todavia si no se resuelve firma/permisos/reglas
-clinicas de ordenes.
+Auditoria posterior a PR-057: tests de hospitalizacion quedaron separados por board,
+camas y hoja diaria. No cambia API, producto ni OpenAPI.
 
-- PR-057: Dieta tests hospitalizacion.
-  - Dividir `apps/api/tests/test_hospitalization.py` en board, camas y hoja diaria.
-  - No cambiar endpoints, OpenAPI ni comportamiento.
-  - Mantener cobertura de permisos, auditoria, cierre y reglas de fecha.
 - PR-058: Papel hospitalario de ronda.
   - Crear impresion de ronda diaria desde ingresos activos, camas y ultimas hojas diarias.
   - No crear escritura clinica ni endpoint nuevo si puede leerse desde datos existentes.

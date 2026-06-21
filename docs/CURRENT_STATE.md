@@ -100,12 +100,12 @@ Capas:
 Tests API:
 
 - fixtures compartidas en `apps/api/tests/conftest.py`
-- cobertura paciente separada por dominios: ficha, permisos, auditoria, IA, encuentros y hospitalizacion
+- cobertura paciente separada por dominios: ficha, permisos, auditoria, IA y encuentros
+- cobertura hospitalizacion separada por board, camas y hoja diaria
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - no agregar nueva clinica core sin flujo completo PostgreSQL/API/permisos/auditoria/OpenAPI/UI
-- `apps/api/tests/test_hospitalization.py` ya concentra board, camas y hoja diaria; dividirlo antes de sumar mas hospitalizacion.
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
 - `/consulta/*`, documentos, receta e indicaciones siguen como bordes preparados; no expandir todos a la vez.
@@ -117,7 +117,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `main` limpio y alineado con `origin/main`.
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha y rondas de lectura.
 - `npm run check` pasa completo: API 40 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 19 passed / 1 skip esperado.
-- Siguiente paso recomendado: PR-057 dieta de tests de hospitalizacion.
+- Siguiente paso recomendado: PR-058 papel hospitalario de ronda.
 
 ## Programa activo PR-018 a PR-052
 
@@ -160,6 +160,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-054: Estado `draft/closed` y bloqueo de edicion en hoja diaria.
 - PR-055: Reglas de fecha/encuentro para hoja diaria hospitalizada.
 - PR-056: Rondas hospitalarias de lectura desde datos existentes.
+- PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
