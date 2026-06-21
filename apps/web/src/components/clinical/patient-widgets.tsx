@@ -1,23 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Activity,
-  AlertTriangle,
-  FileText,
-  Pill,
-  Printer,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Activity, AlertTriangle, Pill, Sparkles } from "lucide-react";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { MetricCard, TimelineCard } from "@/components/clinical/cards";
 import { EmptyState } from "@/components/clinical/states";
@@ -27,14 +12,14 @@ import { Separator } from "@/components/ui/separator";
 import type {
   ActiveProblem,
   Allergy,
-  AuditEvent,
   ClinicalEntry,
   ClinicalEncounter,
-  HospitalizationBoardItem,
   Medication,
   PatientRecordSnapshot,
   VitalSign,
 } from "@/lib/types";
+
+import { formatDateTime } from "./date-format";
 
 export function VitalsStrip({ vital }: { vital?: VitalSign | null }) {
   if (!vital) {
@@ -119,12 +104,7 @@ export function MedicationList({ medications }: { medications: Medication[] }) {
 
 export function ProblemList({ problems }: { problems: ActiveProblem[] }) {
   if (problems.length === 0) {
-    return (
-      <EmptyState
-        title="Sin problemas activos"
-        description="No hay problemas clinicos activos registrados."
-      />
-    );
+    return <EmptyState title="Sin problemas activos" description="No hay problemas clinicos activos registrados." />;
   }
 
   return (
@@ -213,91 +193,6 @@ export function EncounterList({ encounters }: { encounters: ClinicalEncounter[] 
   );
 }
 
-export function AuditTimeline({ events }: { events: AuditEvent[] }) {
-  if (events.length === 0) {
-    return <EmptyState title="Sin eventos de auditoria" description="Las escrituras quedaran trazadas aqui." />;
-  }
-
-  return (
-    <div className="space-y-2">
-      {events.map((event) => (
-        <div key={event.id} className="rounded-md border p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold">{event.action}</p>
-            <Badge variant="outline">{event.actor_id}</Badge>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {event.entity_type} - {formatDateTime(event.created_at)}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            {event.correlation_id ? <Badge variant="outline">{event.correlation_id}</Badge> : null}
-            {event.request_method && event.request_path ? (
-              <span>
-                {event.request_method} {event.request_path}
-              </span>
-            ) : null}
-          </div>
-          <AuditChangeSummary data={event.extra_data} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function AuditChangeSummary({ data }: { data: Record<string, unknown> }) {
-  const before = isRecord(data.before) ? data.before : null;
-  const after = isRecord(data.after) ? data.after : null;
-
-  if (!before && !after) {
-    return null;
-  }
-
-  return (
-    <div className="mt-2 rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">
-      {before ? <p>Antes: {JSON.stringify(before)}</p> : null}
-      {after ? <p>Despues: {JSON.stringify(after)}</p> : null}
-    </div>
-  );
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export function AiSafetyPanel() {
-  return (
-    <div className="rounded-md border bg-card p-4">
-      <div className="flex items-center gap-2 text-sm font-semibold">
-        <ShieldCheck className="h-4 w-4 text-success" />
-        IA local gobernada
-      </div>
-      <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-        <p>No diagnostica, no firma y no escribe ficha sin confirmacion humana.</p>
-        <p>Modelo rapido: llama3.2:latest. Resumen clinico: qwen3:8b si la latencia es aceptable.</p>
-      </div>
-    </div>
-  );
-}
-
-export function PrintActions({ patientId }: { patientId: string }) {
-  return (
-    <div className="flex flex-wrap gap-2" data-print-hidden="true">
-      <Button asChild variant="outline" size="sm">
-        <Link href={`/print/pacientes/${patientId}/ficha`}>
-          <Printer className="h-4 w-4" />
-          Ficha
-        </Link>
-      </Button>
-      <Button asChild variant="outline" size="sm">
-        <Link href={`/print/pacientes/${patientId}/resumen`}>
-          <FileText className="h-4 w-4" />
-          Resumen
-        </Link>
-      </Button>
-    </div>
-  );
-}
-
 export function CriticalAlerts({ record }: { record: PatientRecordSnapshot }) {
   const severeAllergies = record.active_allergies.filter((item) => item.severity === "severe");
 
@@ -373,69 +268,6 @@ export function QuickSoapEditor({ href }: { href: string }) {
   );
 }
 
-export function BedBoard({ items = [] }: { items?: HospitalizationBoardItem[] }) {
-  if (items.length === 0) {
-    return <EmptyState title="Sin hospitalizaciones activas" description="No hay encuentros hospitalarios en curso." />;
-  }
-
-  return (
-    <div className="grid gap-3 md:grid-cols-2">
-      {items.map((item) => (
-        <div key={item.encounter.id} className="rounded-md border p-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">
-                {item.patient.first_name} {item.patient.last_name}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {formatHospitalBed(item)}
-              </p>
-            </div>
-            <Badge variant="safe">{item.bed?.status ?? item.encounter.status}</Badge>
-          </div>
-          <p className="mt-3 text-sm">{item.encounter.reason}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Ingreso: {formatDateTime(item.encounter.started_at)}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/pacientes/${item.patient.id}/ficha`}>Ficha</Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/hospitalizacion/pacientes/${item.patient.id}/hoja-diaria`}>
-                Hoja diaria
-              </Link>
-            </Button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function RoundList() {
-  return <EmptyState title="Rondas" description="Vista reservada para trabajo hospitalizado diario." />;
-}
-
-function formatHospitalBed(item: HospitalizationBoardItem) {
-  if (item.bed) {
-    return `${item.bed.ward} / ${item.bed.room} / Cama ${item.bed.bed_label}`;
-  }
-  return item.encounter.location_label ?? "Ubicacion pendiente";
-}
-
-export function DailySheet() {
-  return <EmptyState title="Hoja diaria" description="Se conectara al resumen por paciente hospitalizado." />;
-}
-
-export function AppointmentList() {
-  return <EmptyState title="Agenda ambulatoria" description="Agenda lista para integracion posterior." />;
-}
-
-export function VisitWorkspace() {
-  return <EmptyState title="Atencion ambulatoria" description="Workspace preparado para consulta longitudinal." />;
-}
-
 function SoapBlock({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
@@ -443,13 +275,6 @@ function SoapBlock({ label, value }: { label: string; value?: string | null }) {
       <p className="mt-1 text-sm">{value || "Sin registro"}</p>
     </div>
   );
-}
-
-export function formatDateTime(value: string) {
-  return new Date(value).toLocaleString("es-CL", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
 }
 
 export function VitalsIcon() {

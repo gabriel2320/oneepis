@@ -93,7 +93,7 @@ Capas:
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
-- `patient-record-pages.tsx`, `patient-write-pages.tsx`, `hospitalization-pages.tsx` y `widgets.tsx` deben dividirse sin cambiar conducta.
+- `services/ai/provider.py` concentra contrato, Ollama, reglas locales y parsing.
 - `test_patient_record_e2e.py` concentra demasiada cobertura API y debe separarse por dominio.
 
 ## Programa activo PR-018 a PR-052

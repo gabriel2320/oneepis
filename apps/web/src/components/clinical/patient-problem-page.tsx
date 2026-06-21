@@ -1,0 +1,122 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { useCurrentUser } from "@/components/auth/use-current-user";
+import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { ErrorState } from "@/components/clinical/states";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { createActiveProblem } from "@/lib/api/clinical-record";
+import { DEMO_MODE } from "@/lib/api/client";
+import { canManageProblems } from "@/lib/permissions";
+import type { ActiveProblemCreate } from "@/lib/types";
+
+import {
+  BackLink,
+  Field,
+  PageTitle,
+  PatientLoadError,
+  emptyToNull,
+  usePatientId,
+  usePatientRecordQuery,
+} from "./patient-page-shared";
+
+export function NewProblemPage() {
+  const patientId = usePatientId();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canWrite = canManageProblems(user);
+  const [formState, setFormState] = useState({
+    title: "",
+    code_system: "",
+    code: "",
+    onset_date: "",
+    notes: "",
+  });
+  const mutation = useMutation({
+    mutationFn: (payload: ActiveProblemCreate) => createActiveProblem(patientId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] });
+      router.push(`/pacientes/${patientId}/problemas`);
+    },
+  });
+
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (!record) {
+    return <PatientLoadError />;
+  }
+
+  return (
+    <PatientClinicalShell record={record} activeSection="problemas">
+      <div className="max-w-xl space-y-5">
+        <BackLink href={`/pacientes/${patientId}/problemas`} label="Problemas" />
+        <PageTitle title="Agregar problema activo" description="Problema clinico longitudinal." />
+        {!DEMO_MODE && !userLoading && !canWrite ? (
+          <ErrorState description="Tu rol actual no permite registrar problemas activos." />
+        ) : null}
+        <ClinicalSectionCard title="Problema">
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              mutation.mutate({
+                title: formState.title,
+                code_system: emptyToNull(formState.code_system),
+                code: emptyToNull(formState.code),
+                onset_date: emptyToNull(formState.onset_date),
+                notes: emptyToNull(formState.notes),
+              });
+            }}
+          >
+            <Field label="Problema">
+              <Input
+                value={formState.title}
+                onChange={(event) => setFormState({ ...formState, title: event.target.value })}
+              />
+            </Field>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Sistema codigo">
+                <Input
+                  value={formState.code_system}
+                  onChange={(event) => setFormState({ ...formState, code_system: event.target.value })}
+                />
+              </Field>
+              <Field label="Codigo">
+                <Input
+                  value={formState.code}
+                  onChange={(event) => setFormState({ ...formState, code: event.target.value })}
+                />
+              </Field>
+            </div>
+            <Field label="Inicio">
+              <Input
+                type="date"
+                value={formState.onset_date}
+                onChange={(event) => setFormState({ ...formState, onset_date: event.target.value })}
+              />
+            </Field>
+            <Field label="Notas">
+              <Textarea
+                value={formState.notes}
+                onChange={(event) => setFormState({ ...formState, notes: event.target.value })}
+              />
+            </Field>
+            <Button type="submit" disabled={mutation.isPending || DEMO_MODE || !canWrite || !formState.title.trim()}>
+              {mutation.isPending ? "Guardando..." : "Guardar problema"}
+            </Button>
+          </form>
+        </ClinicalSectionCard>
+      </div>
+    </PatientClinicalShell>
+  );
+}

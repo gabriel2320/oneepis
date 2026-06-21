@@ -49,16 +49,13 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-046: Preparar proximo crecimiento clinico minimo.
 - PR-047: Alinear guias y gates oficiales.
 - PR-048: Retiro de legacy demo frontend.
+- PR-049: Dieta UI sin cambiar conducta.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-048: el core esta sano para seguir, pero antes de sumar mas
+Auditoria posterior a PR-049: el core esta sano para seguir, pero antes de sumar mas
 clinica conviene retirar deuda temprana y evitar capas preparadas sin flujo completo.
 
-- PR-049: Dieta UI sin cambiar conducta.
-  - Dividir `patient-record-pages.tsx`, `patient-write-pages.tsx`,
-    `hospitalization-pages.tsx` y `widgets.tsx` por dominio.
-  - Mantener rutas, textos visibles, permisos y comportamiento.
 - PR-050: Dieta IA backend.
   - Separar contrato, provider Ollama, reglas locales, parsing y sugerencias snapshot.
   - Mantener endpoints, guardrails y tests mockeados.

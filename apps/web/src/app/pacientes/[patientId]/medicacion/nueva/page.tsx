@@ -1,4 +1,4 @@
-import { NewMedicationPage } from "@/components/clinical/patient-entity-write-pages";
+import { NewMedicationPage } from "@/components/clinical/patient-medication-page";
 
 export default function Page() {
   return <NewMedicationPage />;

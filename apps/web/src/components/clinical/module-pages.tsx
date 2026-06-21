@@ -10,7 +10,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
-import { AppointmentList, VisitWorkspace } from "@/components/clinical/widgets";
+import { AppointmentList, VisitWorkspace } from "@/components/clinical/ambulatory-widgets";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";

@@ -4,7 +4,8 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
-import { ClinicalTimeline, formatDateTime } from "@/components/clinical/widgets";
+import { formatDateTime } from "@/components/clinical/date-format";
+import { ClinicalTimeline } from "@/components/clinical/patient-widgets";
 import { Button } from "@/components/ui/button";
 import { DEMO_MODE } from "@/lib/api/client";
 import { getPatientRecord } from "@/lib/api/patients";
