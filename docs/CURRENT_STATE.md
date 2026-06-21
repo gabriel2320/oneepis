@@ -80,6 +80,7 @@ Hospitalizacion:
 - fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado usando fecha clinica local `America/Santiago`, no el dia UTC crudo
 - `/hospitalizacion/rondas` es vista de lectura: ingresos activos, cama, ultima hoja diaria y accesos a ficha/papel
 - `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos activos, cama y ultima hoja diaria
+- indicaciones y receta ya tienen politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tienen modelo, endpoint ni firma real
 - aun no existen indicaciones ni rondas con escritura clinica propia
 
 ## Frontend
@@ -110,16 +111,17 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
 - `/consulta/*`, documentos, receta e indicaciones siguen como bordes preparados; no expandir todos a la vez.
+- receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
 ## Auditoria rapida 2026-06-21
 
 - `main` limpio y alineado con `origin/main`.
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura y fecha clinica local.
+- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local y politica de indicaciones/receta.
 - `npm run check` pasa completo: API 41 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 19 passed / 1 skip esperado.
-- Siguiente paso recomendado: PR-060 politica de indicaciones y receta.
+- Siguiente paso recomendado: PR-061 indicacion minima como borrador gobernado.
 
-## Programa activo PR-018 a PR-059
+## Programa activo PR-018 a PR-060
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -163,6 +165,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
 - PR-058: Papel hospitalario de ronda desde datos existentes.
 - PR-059: Fecha clinica local para hoja diaria hospitalizada.
+- PR-060: Politica de indicaciones y receta sin producto nuevo.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

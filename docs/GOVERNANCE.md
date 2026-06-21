@@ -42,6 +42,40 @@ Antes de crear una feature, pantalla, endpoint, dependencia o documento, respond
 
 Si una respuesta es "no" o "todavia no", no lo agregues al core. Dejale una nota breve en el plan vivo si realmente importa.
 
+## Politica de Indicaciones y Receta
+
+Indicaciones y recetas son escritura clinica de alto riesgo. No entran al core como pantalla suelta, laboratorio IA ni impresion decorativa.
+
+Reglas base:
+
+- Una indicacion debe pertenecer a un paciente y, si aplica, a un encuentro clinico.
+- La fuente de verdad debe ser PostgreSQL via API; la UI y el papel son proyecciones.
+- Toda escritura debe tener permisos, actor autenticado, auditoria, `correlation_id` y OpenAPI.
+- IA puede ayudar a revisar texto como borrador, pero no crea, firma ni activa indicaciones o recetas.
+- Una receta no se genera automaticamente desde medicacion activa.
+
+Estados permitidos:
+
+- `draft`: borrador editable, no ejecutable, no firmado y visible como tal en UI y papel.
+- `closed`: bloquea edicion posterior para preservar trazabilidad, pero no equivale a firma legal.
+- `signed`: estado futuro; requiere regla explicita de firma, identidad del profesional, sello temporal, folio y documento inmutable.
+
+Hasta implementar firma real, OneEpis solo puede aceptar indicaciones como borrador gobernado. La ruta de receta puede existir como papel bloqueado de desarrollo, pero no debe emitir receta clinica valida.
+
+Permisos futuros minimos:
+
+- `admin`, `medico` y `dev` pueden crear/editar borradores si existe backend.
+- `enfermeria` puede leer indicaciones cuando el flujo lo necesite, pero no crearlas ni firmarlas.
+- `solo_lectura` solo lee.
+- Nadie firma recetas o indicaciones mientras no exista modulo de firma gobernado.
+
+Papel obligatorio:
+
+- Todo papel de indicacion o receta debe mostrar estado (`draft`, `closed` o `signed` futuro).
+- Todo papel no firmado debe decir `Documento de desarrollo / no uso clinico real.`
+- El papel no puede ocultar que una indicacion es borrador.
+- Si no hay folio, actor, fecha clinica y permisos claros, no se imprime como documento clinico valido.
+
 ## Reglas de Crecimiento
 
 - Agrega dependencias solo si remueven complejidad real y no duplican capacidades existentes.

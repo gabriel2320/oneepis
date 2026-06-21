@@ -44,6 +44,13 @@ Cada documento debe incluir:
 - pagina
 - texto: `Documento de desarrollo / no uso clinico real.`
 
+## Indicaciones y Receta
+
+- `/print/pacientes/[patientId]/receta` existe como ruta bloqueada de desarrollo.
+- Una receta no puede imprimirse como documento clinico valido hasta tener firma, folio, actor, fecha clinica y permisos claros.
+- Una indicacion futura solo puede imprimirse como `draft` o `closed` mientras no exista firma real.
+- El papel debe mostrar el estado del documento y no puede ocultar que un texto viene de borrador o revision IA.
+
 ## Pendiente
 
 - soporte A5 real por ruta o preferencia.

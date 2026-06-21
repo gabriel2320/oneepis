@@ -60,18 +60,17 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
 - PR-058: Papel hospitalario de ronda desde datos existentes.
 - PR-059: Fecha clinica local para hoja diaria hospitalizada.
+- PR-060: Politica de indicaciones y receta sin producto nuevo.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-059: hoja diaria ya valida su ventana contra fecha clinica
-local `America/Santiago`, no contra el dia UTC crudo del timestamp.
+Auditoria posterior a PR-060: indicaciones y receta ya tienen regla de gobierno
+en docs existentes. No hay modelo, endpoint ni firma real todavia.
 
-- PR-060: Politica de indicaciones y receta.
-  - Documento corto en docs existentes: orden, borrador, firma, cierre, permisos y papel.
-  - Sin modelos ni endpoints todavia.
 - PR-061: Indicacion minima solo si PR-060 queda cerrado.
   - Entraria como borrador gobernado, no orden firmada.
   - Debe incluir PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel si corresponde.
+  - Debe usar estados `draft` y `closed`; `signed` queda fuera hasta modulo de firma.
 - PR-062: Consulta ambulatoria minima.
   - Elegir una pieza: atencion vinculada a encuentro, no agenda completa.
   - Mantener paciente/ficha/papel como centro.
@@ -82,6 +81,7 @@ local `America/Santiago`, no contra el dia UTC crudo del timestamp.
 - No crear datos demo realistas.
 - No implementar diagnostico autonomo.
 - No firmar ni escribir ficha desde IA.
+- No imprimir receta clinica valida sin firma, folio, actor, fecha clinica y permisos claros.
 - No agregar dependencias sin justificacion.
 - No hacer PR gigante.
 - No dejar TypeScript roto.
