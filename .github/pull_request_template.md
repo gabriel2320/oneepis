@@ -39,9 +39,8 @@
 
 ## Pruebas
 
-- [ ] `.venv/Scripts/python -m ruff check apps/api`
-- [ ] `.venv/Scripts/python -m pytest apps/api/tests`
-- [ ] `npm --workspace apps/web run typecheck`
-- [ ] `npm --workspace apps/web run lint`
-- [ ] `npm --workspace apps/web run build`
-- [ ] `python apps/api/scripts/export_openapi.py` si cambia API
+- [ ] `npm run check:api`
+- [ ] `npm run check:web`
+- [ ] `npm run check:contract` si cambia API/OpenAPI
+- [ ] `npm run check:e2e` si toca UI/rutas/print
+- [ ] `npm run check` para cambios transversales

@@ -91,7 +91,13 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
-## Programa activo PR-018 a PR-046
+Deuda visible a resolver antes de nuevo crecimiento clinico:
+
+- `components/clinical-record` aun contiene piezas demo antiguas; conservar solo lo util y moverlo al core actual.
+- `patient-record-pages.tsx`, `patient-write-pages.tsx`, `hospitalization-pages.tsx` y `widgets.tsx` deben dividirse sin cambiar conducta.
+- `test_patient_record_e2e.py` concentra demasiada cobertura API y debe separarse por dominio.
+
+## Programa activo PR-018 a PR-052
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -122,6 +128,12 @@ Capas:
 - PR-044: Retiro del barrel temporal frontend de paciente.
 - PR-045: Papel serio con smoke print dedicado.
 - PR-046: Criterio para proximo crecimiento clinico minimo.
+- PR-047: Alinear guias y gates oficiales.
+- PR-048: Retirar legacy demo frontend.
+- PR-049: Dieta UI sin cambiar conducta.
+- PR-050: Dieta IA backend.
+- PR-051: Dieta tests API.
+- PR-052: Elegir crecimiento clinico minimo, recomendado hoja diaria hospitalizada.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
