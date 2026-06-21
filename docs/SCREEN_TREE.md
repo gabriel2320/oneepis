@@ -57,7 +57,8 @@ Estado:
 - estado `closed` bloquea edicion posterior, pero no equivale a firma legal.
 - la fecha de hoja diaria debe pertenecer a la ventana del ingreso hospitalario usando fecha clinica local `America/Santiago`.
 - `/hospitalizacion/rondas` muestra una ronda de lectura desde ingresos activos, camas y ultimas hojas diarias.
-- indicaciones siguen preparadas; solo pueden entrar como borrador gobernado con PostgreSQL, API, permisos, auditoria, OpenAPI y papel si corresponde.
+- indicaciones ya entraron como borrador gobernado con PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel.
+- no existen indicaciones firmadas ni ejecucion de orden hospitalaria.
 
 ## Consulta
 
@@ -96,6 +97,7 @@ Estado:
 /print/pacientes/[patientId]/receta
 /print/hospitalizacion/rondas
 /print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]
+/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]
 ```
 
 Estado:
@@ -103,4 +105,5 @@ Estado:
 - ficha, resumen y evolucion renderizan hoja imprimible.
 - ronda hospitalaria renderiza hoja imprimible desde ingresos activos y ultimas hojas diarias.
 - hoja diaria hospitalizada renderiza hoja imprimible con footer de desarrollo.
+- indicacion hospitalaria renderiza borrador imprimible y explicita que no es orden firmada.
 - receta existe, pero queda bloqueada funcionalmente hasta firma, folio, actor, fecha clinica, permisos y reglas de prescripcion.

@@ -5,7 +5,6 @@ import { HospitalizationBoardContent } from "@/components/clinical/hospital-bed-
 import { RoundList } from "@/components/clinical/hospitalization-widgets";
 import { useHospitalizationBoard } from "@/components/clinical/hospitalization-data";
 import { ModulePage } from "@/components/clinical/module-pages";
-import { EmptyState } from "@/components/clinical/states";
 
 export function HospitalHomePage() {
   const board = useHospitalizationBoard();
@@ -45,16 +44,6 @@ export function HospitalRoundsPage() {
         description="Pacientes, cama, ultimo registro diario y accesos a ficha/papel."
       >
         <RoundList board={board} />
-      </ClinicalSectionCard>
-    </ModulePage>
-  );
-}
-
-export function OrdersPage() {
-  return (
-    <ModulePage title="Indicaciones" description="Base para indicaciones hospitalarias auditadas.">
-      <ClinicalSectionCard title="Indicaciones">
-        <EmptyState title="Indicaciones pendientes" description="Requiere permisos y firma clinica." />
       </ClinicalSectionCard>
     </ModulePage>
   );

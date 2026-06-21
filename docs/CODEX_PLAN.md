@@ -61,19 +61,20 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-058: Papel hospitalario de ronda desde datos existentes.
 - PR-059: Fecha clinica local para hoja diaria hospitalizada.
 - PR-060: Politica de indicaciones y receta sin producto nuevo.
+- PR-061: Indicacion hospitalaria minima como borrador gobernado.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-060: indicaciones y receta ya tienen regla de gobierno
-en docs existentes. No hay modelo, endpoint ni firma real todavia.
+Auditoria posterior a PR-061: indicacion hospitalaria minima ya tiene
+PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel de borrador. No hay
+firma real ni receta clinica valida todavia.
 
-- PR-061: Indicacion minima solo si PR-060 queda cerrado.
-  - Entraria como borrador gobernado, no orden firmada.
-  - Debe incluir PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel si corresponde.
-  - Debe usar estados `draft` y `closed`; `signed` queda fuera hasta modulo de firma.
 - PR-062: Consulta ambulatoria minima.
   - Elegir una pieza: atencion vinculada a encuentro, no agenda completa.
   - Mantener paciente/ficha/papel como centro.
+- PR-063: Evaluar read-model hospitalario.
+  - Solo si rondas o indicaciones empiezan a duplicar consultas desde frontend.
+  - No crear dashboard nuevo.
 
 ## Reglas no negociables
 

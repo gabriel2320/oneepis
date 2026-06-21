@@ -25,7 +25,7 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 | Crear/editar medicacion | si | si | no | no | si |
 | Registrar signos vitales | si | si | si | no | si |
 | Usar IA clinica contextual | si | si | no | no | si |
-| Crear/editar borrador de indicacion futura | si | si | no | no | si |
+| Crear/editar/cerrar borrador de indicacion hospitalaria | si | si | no | no | si |
 | Firmar indicacion o receta | no | no | no | no | no |
 
 ## Reglas
@@ -36,5 +36,5 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 - `X-OneEpis-Actor` solo puede usarse si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`.
 - Ningun permiso habilita diagnostico autonomo, firma automatica ni escritura IA directa.
 - Cerrar una hoja diaria bloquea edicion posterior, pero no equivale a firma legal.
-- Indicaciones y recetas no tienen firma valida todavia; cualquier implementacion inicial debe ser borrador auditable.
+- Las indicaciones hospitalarias actuales son borradores auditables con estado `draft` o `closed`; no son orden firmada.
 - La receta impresa queda bloqueada hasta tener firma, folio, actor, fecha clinica y politica de prescripcion.

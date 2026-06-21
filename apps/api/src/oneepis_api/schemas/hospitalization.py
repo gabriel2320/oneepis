@@ -5,7 +5,11 @@ from datetime import date, datetime
 
 from pydantic import Field
 
-from oneepis_api.models.hospitalization import HospitalBedStatus, HospitalDailySheetStatus
+from oneepis_api.models.hospitalization import (
+    HospitalBedStatus,
+    HospitalDailySheetStatus,
+    HospitalIndicationStatus,
+)
 from oneepis_api.schemas.clinical_record import ClinicalEncounterRead
 from oneepis_api.schemas.common import APIModel
 from oneepis_api.schemas.patient import PatientRead
@@ -70,6 +74,37 @@ class HospitalDailySheetUpdate(APIModel):
 
 
 class HospitalDailySheetRead(HospitalDailySheetBase):
+    id: uuid.UUID
+    patient_id: uuid.UUID
+    encounter_id: uuid.UUID
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class HospitalIndicationBase(APIModel):
+    status: HospitalIndicationStatus = HospitalIndicationStatus.DRAFT
+    indicated_at: datetime
+    title: str = Field(min_length=1, max_length=160)
+    indication_text: str = Field(min_length=1, max_length=2000)
+    rationale: str | None = Field(default=None, max_length=1200)
+    safety_notes: str | None = Field(default=None, max_length=1200)
+
+
+class HospitalIndicationCreate(HospitalIndicationBase):
+    pass
+
+
+class HospitalIndicationUpdate(APIModel):
+    status: HospitalIndicationStatus | None = None
+    indicated_at: datetime | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    indication_text: str | None = Field(default=None, min_length=1, max_length=2000)
+    rationale: str | None = Field(default=None, max_length=1200)
+    safety_notes: str | None = Field(default=None, max_length=1200)
+
+
+class HospitalIndicationRead(HospitalIndicationBase):
     id: uuid.UUID
     patient_id: uuid.UUID
     encounter_id: uuid.UUID

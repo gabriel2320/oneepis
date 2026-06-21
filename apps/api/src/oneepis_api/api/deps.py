@@ -104,6 +104,10 @@ def require_hospital_daily_sheet_write_access(user: CurrentUserDep) -> Authentic
     return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
 
 
+def require_hospital_indication_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+
+
 def require_vital_sign_write_access(user: CurrentUserDep) -> AuthenticatedUser:
     return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
 
@@ -129,6 +133,10 @@ EncounterWriteAccessDep = Annotated[
 HospitalDailySheetWriteAccessDep = Annotated[
     AuthenticatedUser,
     Depends(require_hospital_daily_sheet_write_access),
+]
+HospitalIndicationWriteAccessDep = Annotated[
+    AuthenticatedUser,
+    Depends(require_hospital_indication_write_access),
 ]
 VitalSignWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_vital_sign_write_access)]
 
@@ -161,6 +169,10 @@ def get_hospital_daily_sheet_write_actor(user: HospitalDailySheetWriteAccessDep)
     return user.actor_id
 
 
+def get_hospital_indication_write_actor(user: HospitalIndicationWriteAccessDep) -> str:
+    return user.actor_id
+
+
 def get_vital_sign_write_actor(user: VitalSignWriteAccessDep) -> str:
     return user.actor_id
 
@@ -172,6 +184,7 @@ MedicationActorDep = Annotated[str, Depends(get_medication_write_actor)]
 ProblemActorDep = Annotated[str, Depends(get_problem_write_actor)]
 EncounterActorDep = Annotated[str, Depends(get_encounter_write_actor)]
 HospitalDailySheetActorDep = Annotated[str, Depends(get_hospital_daily_sheet_write_actor)]
+HospitalIndicationActorDep = Annotated[str, Depends(get_hospital_indication_write_actor)]
 VitalSignActorDep = Annotated[str, Depends(get_vital_sign_write_actor)]
 
 

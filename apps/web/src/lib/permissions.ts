@@ -38,6 +38,10 @@ export function canManageHospitalDailySheets(user?: AuthUser | null) {
   return hasAnyRole(user, medicalWriters);
 }
 
+export function canManageHospitalIndications(user?: AuthUser | null) {
+  return hasAnyRole(user, medicalWriters);
+}
+
 export function canRecordVitals(user?: AuthUser | null) {
   return hasAnyRole(user, vitalSignWriters);
 }

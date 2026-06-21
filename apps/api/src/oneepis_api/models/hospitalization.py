@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import enum
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, Enum, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from oneepis_api.db.base import Base
@@ -25,6 +25,11 @@ class HospitalBedStatus(enum.StrEnum):
 
 
 class HospitalDailySheetStatus(enum.StrEnum):
+    DRAFT = "draft"
+    CLOSED = "closed"
+
+
+class HospitalIndicationStatus(enum.StrEnum):
     DRAFT = "draft"
     CLOSED = "closed"
 
@@ -85,6 +90,41 @@ class HospitalDailySheet(Base, IdMixin, TimestampMixin):
     overnight_events: Mapped[str | None] = mapped_column(Text, nullable=True)
     active_plan: Mapped[str | None] = mapped_column(Text, nullable=True)
     pending_tasks: Mapped[str | None] = mapped_column(Text, nullable=True)
+    safety_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
+
+    patient: Mapped[Patient] = relationship()
+    encounter: Mapped[ClinicalEncounter] = relationship()
+
+
+class HospitalIndication(Base, IdMixin, TimestampMixin):
+    __tablename__ = "hospital_indications"
+
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        index=True,
+    )
+    encounter_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("clinical_encounters.id", ondelete="CASCADE"),
+        index=True,
+    )
+    status: Mapped[HospitalIndicationStatus] = mapped_column(
+        Enum(
+            HospitalIndicationStatus,
+            values_callable=enum_values,
+            name="hospital_indication_status",
+        ),
+        default=HospitalIndicationStatus.DRAFT,
+        nullable=False,
+    )
+    indicated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        index=True,
+        nullable=False,
+    )
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    indication_text: Mapped[str] = mapped_column(Text, nullable=False)
+    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
     safety_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
 

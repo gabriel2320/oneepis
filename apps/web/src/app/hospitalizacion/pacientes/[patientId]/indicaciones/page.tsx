@@ -1,5 +1,5 @@
-import { OrdersPage } from "@/components/clinical/hospitalization-pages";
+import { HospitalIndicationsPage } from "@/components/clinical/hospital-indication-pages";
 
 export default function Page() {
-  return <OrdersPage />;
+  return <HospitalIndicationsPage />;
 }

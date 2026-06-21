@@ -71,6 +71,7 @@ Hospitalizacion:
 - `GET /api/v1/hospitalization/active`
 - `GET/POST/PATCH /api/v1/hospitalization/beds`
 - `GET/POST/PATCH /api/v1/hospitalization/patients/{patient_id}/daily-sheets`
+- `GET/POST/PATCH /api/v1/hospitalization/patients/{patient_id}/indications`
 - tablero `/hospitalizacion/camas` lee encuentros `hospitalization` en curso
 - camas estructuradas con sala/habitacion/cama y asignacion auditada a encuentros activos
 - UI `/hospitalizacion/camas` administra estados y `/hospitalizacion/camas/nueva` crea camas
@@ -80,8 +81,10 @@ Hospitalizacion:
 - fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado usando fecha clinica local `America/Santiago`, no el dia UTC crudo
 - `/hospitalizacion/rondas` es vista de lectura: ingresos activos, cama, ultima hoja diaria y accesos a ficha/papel
 - `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos activos, cama y ultima hoja diaria
-- indicaciones y receta ya tienen politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tienen modelo, endpoint ni firma real
-- aun no existen indicaciones ni rondas con escritura clinica propia
+- indicacion hospitalaria minima tiene PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel
+- estado de indicacion hospitalaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
+- receta ya tiene politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tiene modelo, endpoint ni firma real
+- aun no existen indicaciones firmadas, recetas validas ni rondas con escritura clinica propia
 
 ## Frontend
 
@@ -117,11 +120,11 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 ## Auditoria rapida 2026-06-21
 
 - `main` limpio y alineado con `origin/main`.
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local y politica de indicaciones/receta.
-- `npm run check` pasa completo: API 41 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 19 passed / 1 skip esperado.
-- Siguiente paso recomendado: PR-061 indicacion minima como borrador gobernado.
+- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta e indicacion minima.
+- `npm run check` pasa completo: API 44 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 21 passed / 1 skip esperado.
+- Siguiente paso recomendado: PR-062 consulta ambulatoria minima.
 
-## Programa activo PR-018 a PR-060
+## Programa activo PR-018 a PR-061
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -166,6 +169,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-058: Papel hospitalario de ronda desde datos existentes.
 - PR-059: Fecha clinica local para hoja diaria hospitalizada.
 - PR-060: Politica de indicaciones y receta sin producto nuevo.
+- PR-061: Indicacion hospitalaria minima como borrador gobernado.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

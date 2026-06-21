@@ -2,6 +2,7 @@ import type {
   ClinicalEncounter,
   HospitalBed,
   HospitalDailySheet,
+  HospitalIndication,
   PatientRecordSnapshot,
 } from "@/lib/types";
 
@@ -238,5 +239,22 @@ export const demoHospitalDailySheets: HospitalDailySheet[] = [
     created_by: "profesional.demo",
     created_at: "2026-06-20T09:00:00Z",
     updated_at: "2026-06-20T09:00:00Z",
+  },
+];
+
+export const demoHospitalIndications: HospitalIndication[] = [
+  {
+    id: "b2222222-2222-4222-8222-222222222222",
+    patient_id: "12222222-2222-4222-8222-222222222222",
+    encounter_id: "82222222-2222-4222-8222-222222222222",
+    status: "draft",
+    indicated_at: "2026-06-20T10:30:00Z",
+    title: "Borrador de indicacion demo",
+    indication_text: "Mantener observacion documentada y revisar cambios relevantes.",
+    rationale: "Contenido ficticio para validar flujo de indicacion hospitalaria.",
+    safety_notes: "No corresponde a orden firmada ni a uso clinico real.",
+    created_by: "profesional.demo",
+    created_at: "2026-06-20T10:30:00Z",
+    updated_at: "2026-06-20T10:30:00Z",
   },
 ];

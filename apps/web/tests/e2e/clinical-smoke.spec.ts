@@ -80,6 +80,18 @@ test("hospital daily sheet renders patient workspace", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Guardar cambios" })).toBeDisabled();
 });
 
+test("hospital indications render governed draft workspace", async ({ page }) => {
+  await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicaciones`);
+
+  await expect(page.getByRole("heading", { name: "Indicaciones hospitalarias" })).toBeVisible();
+  await expect(page.getByText("Borradores registrados")).toBeVisible();
+  await expect(page.getByText("Borrador de indicacion demo")).toBeVisible();
+  await expect(page.getByText("Borrador hospitalario; no sustituye firma")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Imprimir", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Cerrar borrador" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeDisabled();
+});
+
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 

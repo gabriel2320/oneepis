@@ -7,11 +7,13 @@ import {
   listActiveHospitalizations,
   listHospitalBeds,
   listHospitalDailySheets,
+  listHospitalIndications,
 } from "@/lib/api/hospitalization";
 import {
   demoEncounters,
   demoHospitalBeds,
   demoHospitalDailySheets,
+  demoHospitalIndications,
   demoRecords,
 } from "@/lib/demo-record";
 import type { HospitalBedStatus, HospitalizationBoardItem } from "@/lib/types";
@@ -68,9 +70,29 @@ export function useHospitalDailySheets(patientId: string) {
   };
 }
 
+export function useHospitalIndications(patientId: string) {
+  const indicationsQuery = useQuery({
+    queryKey: ["hospital-indications", patientId],
+    queryFn: () => listHospitalIndications(patientId),
+    enabled: Boolean(patientId) && !DEMO_MODE,
+  });
+  const demoItems = DEMO_MODE
+    ? demoHospitalIndications.filter((item) => item.patient_id === patientId)
+    : [];
+  return {
+    items: DEMO_MODE ? demoItems : (indicationsQuery.data ?? []),
+    isLoading: !DEMO_MODE && indicationsQuery.isLoading,
+    isError: !DEMO_MODE && indicationsQuery.isError,
+    refetch: () => {
+      void indicationsQuery.refetch();
+    },
+  };
+}
+
 export type HospitalizationBoardState = ReturnType<typeof useHospitalizationBoard>;
 export type HospitalBedsState = ReturnType<typeof useHospitalBeds>;
 export type HospitalDailySheetsState = ReturnType<typeof useHospitalDailySheets>;
+export type HospitalIndicationsState = ReturnType<typeof useHospitalIndications>;
 
 export function formatBedLabel(bed: { ward: string; room: string; bed_label: string }) {
   return `${bed.ward} / ${bed.room} / Cama ${bed.bed_label}`;

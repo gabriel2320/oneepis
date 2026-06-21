@@ -4,6 +4,7 @@ const demoPatientId = "11111111-1111-4111-8111-111111111111";
 const demoEntryId = "51111111-1111-4111-8111-111111111111";
 const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
 const demoDailySheetId = "a2222222-2222-4222-8222-222222222222";
+const demoHospitalIndicationId = "b2222222-2222-4222-8222-222222222222";
 
 test.describe("print routes", () => {
   test.beforeEach(({}, testInfo) => {
@@ -37,6 +38,14 @@ test.describe("print routes", () => {
     );
     await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
     await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
+    await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+
+    await page.goto(
+      `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicacion/${demoHospitalIndicationId}`,
+    );
+    await expect(page.getByRole("heading", { name: "Indicacion hospitalaria" })).toBeVisible();
+    await expect(page.getByText("Borrador no firmado")).toBeVisible();
+    await expect(page.getByText("Borrador de indicacion demo")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 
     await page.goto("/print/hospitalizacion/rondas");

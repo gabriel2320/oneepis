@@ -6,6 +6,7 @@ from oneepis_api.api.v1.routes import (
     health,
     hospitalization,
     hospitalization_daily_sheets,
+    hospitalization_indications,
     patients,
 )
 
@@ -15,4 +16,5 @@ api_router.include_router(auth.router)
 api_router.include_router(patients.router)
 api_router.include_router(hospitalization.router)
 api_router.include_router(hospitalization_daily_sheets.router)
+api_router.include_router(hospitalization_indications.router)
 api_router.include_router(ai.router)

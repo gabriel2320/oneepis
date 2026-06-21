@@ -16,6 +16,7 @@ export type EncounterType = "ambulatory" | "hospitalization" | "emergency" | "un
 export type EncounterStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
 export type HospitalBedStatus = "available" | "occupied" | "cleaning" | "blocked";
 export type HospitalDailySheetStatus = "draft" | "closed";
+export type HospitalIndicationStatus = "draft" | "closed";
 
 export type AuthUser = {
   email: string;
@@ -303,6 +304,32 @@ export type HospitalDailySheetCreate = {
 };
 
 export type HospitalDailySheetUpdate = Partial<HospitalDailySheetCreate>;
+
+export type HospitalIndication = {
+  id: string;
+  patient_id: string;
+  encounter_id: string;
+  status: HospitalIndicationStatus;
+  indicated_at: string;
+  title: string;
+  indication_text: string;
+  rationale?: string | null;
+  safety_notes?: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HospitalIndicationCreate = {
+  status?: HospitalIndicationStatus;
+  indicated_at: string;
+  title: string;
+  indication_text: string;
+  rationale?: string | null;
+  safety_notes?: string | null;
+};
+
+export type HospitalIndicationUpdate = Partial<HospitalIndicationCreate>;
 
 export type PatientRecordSnapshot = {
   patient: Patient;

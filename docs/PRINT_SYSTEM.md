@@ -8,12 +8,14 @@
 - `/print/pacientes/[patientId]/receta`
 - `/print/hospitalizacion/rondas`
 - `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]`
+- `/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]`
 
 ## Componentes
 
 Ubicaciones:
 
 - `apps/web/src/components/print/clinical-print.tsx`
+- `apps/web/src/components/print/hospital-indication-print.tsx`
 - `apps/web/src/components/print/hospital-round-print.tsx`
 
 - `PrintPage`
@@ -22,6 +24,7 @@ Ubicaciones:
 - `ClinicalPaperSheet`
 - `SoapPrintSheet`
 - `PatientSummaryPrintSheet`
+- `PrintHospitalIndicationPage`
 - `PrintHospitalRoundPage`
 
 ## CSS
@@ -48,7 +51,7 @@ Cada documento debe incluir:
 
 - `/print/pacientes/[patientId]/receta` existe como ruta bloqueada de desarrollo.
 - Una receta no puede imprimirse como documento clinico valido hasta tener firma, folio, actor, fecha clinica y permisos claros.
-- Una indicacion futura solo puede imprimirse como `draft` o `closed` mientras no exista firma real.
+- Una indicacion hospitalaria solo puede imprimirse como `draft` o `closed` mientras no exista firma real.
 - El papel debe mostrar el estado del documento y no puede ocultar que un texto viene de borrador o revision IA.
 
 ## Pendiente
