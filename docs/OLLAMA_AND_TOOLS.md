@@ -35,7 +35,7 @@ No cargar varios modelos grandes al mismo tiempo en 12 GB VRAM salvo pruebas con
 
 ## API usada
 
-El provider actual usa:
+La implementacion Ollama usa:
 
 - `/api/tags` para disponibilidad local de modelos.
 - `/api/chat` con `stream=false` y `format=json`.

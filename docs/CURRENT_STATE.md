@@ -62,7 +62,8 @@ IA:
 - `GET /api/v1/ai/status`
 - `POST /api/v1/ai/clinical-insights`
 - `POST /api/v1/patients/{patient_id}/ai/suggestions`
-- provider desacoplado en `services/ai/provider.py`
+- factory compatible en `services/ai/provider.py`
+- contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
 
 Hospitalizacion:
@@ -93,7 +94,6 @@ Capas:
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
-- `services/ai/provider.py` concentra contrato, Ollama, reglas locales y parsing.
 - `test_patient_record_e2e.py` concentra demasiada cobertura API y debe separarse por dominio.
 
 ## Programa activo PR-018 a PR-052

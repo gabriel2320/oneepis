@@ -50,15 +50,13 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-047: Alinear guias y gates oficiales.
 - PR-048: Retiro de legacy demo frontend.
 - PR-049: Dieta UI sin cambiar conducta.
+- PR-050: Dieta IA backend sin cambiar endpoints.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-049: el core esta sano para seguir, pero antes de sumar mas
-clinica conviene retirar deuda temprana y evitar capas preparadas sin flujo completo.
+Auditoria posterior a PR-050: el core esta sano para seguir, pero antes de sumar mas
+clinica conviene retirar deuda temprana de tests y evitar capas preparadas sin flujo completo.
 
-- PR-050: Dieta IA backend.
-  - Separar contrato, provider Ollama, reglas locales, parsing y sugerencias snapshot.
-  - Mantener endpoints, guardrails y tests mockeados.
 - PR-051: Dieta tests API.
   - Dividir `test_patient_record_e2e.py` por dominio: paciente, permisos, auditoria,
     IA, encuentros y hospitalizacion.
