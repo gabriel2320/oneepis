@@ -94,6 +94,9 @@ export function EditHospitalDailySheetPage() {
         {!DEMO_MODE && !userLoading && !canWrite ? (
           <ErrorState description="Tu rol actual no permite editar hoja diaria hospitalizada." />
         ) : null}
+        {sheet?.status === "closed" ? (
+          <ErrorState description="Esta hoja diaria esta cerrada. Puede revisarse e imprimirse, pero no editarse." />
+        ) : null}
         {sheet ? (
           <EditDailySheetForm patientId={patientId} sheet={sheet} canWrite={canWrite} />
         ) : null}
@@ -114,6 +117,7 @@ function EditDailySheetForm({
   const router = useRouter();
   const queryClient = useQueryClient();
   const [formState, setFormState] = useState<DailySheetFormState>(() => toDailySheetForm(sheet));
+  const isClosed = sheet.status === "closed";
   const mutation = useMutation({
     mutationFn: (payload: HospitalDailySheetUpdate) =>
       updateHospitalDailySheet(patientId, sheet.id, payload),
@@ -129,7 +133,7 @@ function EditDailySheetForm({
         formState={formState}
         setFormState={setFormState}
         submitLabel={mutation.isPending ? "Guardando..." : "Guardar cambios"}
-        disabled={mutation.isPending || DEMO_MODE || !canWrite}
+        disabled={mutation.isPending || DEMO_MODE || !canWrite || isClosed}
         onSubmit={() => mutation.mutate(toDailySheetPayload(formState))}
       />
       {mutation.isError ? (

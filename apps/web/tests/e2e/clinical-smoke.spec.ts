@@ -52,7 +52,9 @@ test("hospital daily sheet renders patient workspace", async ({ page }) => {
   await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria`);
 
   await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
-  await expect(page.getByText("Hoja diaria 2026-06-20")).toBeVisible();
+  const dailySheetCard = page.getByRole("article").filter({ hasText: "Hoja diaria 2026-06-20" });
+  await expect(dailySheetCard).toBeVisible();
+  await expect(dailySheetCard.getByText("Borrador")).toBeVisible();
   await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
   await expect(page.getByRole("link", { name: "Editar" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar hoja diaria" })).toBeDisabled();

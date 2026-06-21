@@ -5900,6 +5900,10 @@
             "format": "date",
             "title": "Sheet Date"
           },
+          "status": {
+            "$ref": "#/components/schemas/HospitalDailySheetStatus",
+            "default": "draft"
+          },
           "clinical_summary": {
             "type": "string",
             "maxLength": 2000,
@@ -5968,6 +5972,10 @@
             "type": "string",
             "format": "date",
             "title": "Sheet Date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/HospitalDailySheetStatus",
+            "default": "draft"
           },
           "clinical_summary": {
             "type": "string",
@@ -6066,6 +6074,14 @@
         ],
         "title": "HospitalDailySheetRead"
       },
+      "HospitalDailySheetStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "closed"
+        ],
+        "title": "HospitalDailySheetStatus"
+      },
       "HospitalDailySheetUpdate": {
         "properties": {
           "sheet_date": {
@@ -6079,6 +6095,16 @@
               }
             ],
             "title": "Sheet Date"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HospitalDailySheetStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "clinical_summary": {
             "anyOf": [

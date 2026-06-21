@@ -228,6 +228,7 @@ export const demoHospitalDailySheets: HospitalDailySheet[] = [
     id: "a2222222-2222-4222-8222-222222222222",
     patient_id: "12222222-2222-4222-8222-222222222222",
     encounter_id: "82222222-2222-4222-8222-222222222222",
+    status: "draft",
     sheet_date: "2026-06-20",
     clinical_summary: "Hoja diaria demo para validar flujo hospitalizado sin datos reales.",
     overnight_events: "Sin eventos criticos en esta muestra ficticia.",

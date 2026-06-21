@@ -54,15 +54,17 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-051: Dieta tests API por dominio sin reducir cobertura.
 - PR-052: Hoja diaria hospitalizada minima con PostgreSQL, API, auditoria, UI y print.
 - PR-053: Edicion UI dedicada para hoja diaria hospitalizada.
+- PR-054: Estado `draft/closed` y bloqueo de edicion en hoja diaria.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-053: la hoja diaria ya no tiene una accion PATCH solo en API;
-crear, listar, editar e imprimir tienen flujo humano visible. El siguiente paso no debe
-ser indicaciones todavia si no se resuelve firma/permisos/reglas clinicas de ordenes.
+Auditoria posterior a PR-054: hoja diaria ya tiene ciclo minimo crear, editar, cerrar,
+listar e imprimir. Cerrar bloquea edicion posterior, pero no equivale a firma legal.
+El siguiente paso no debe ser indicaciones todavia si no se resuelve firma/permisos/reglas
+clinicas de ordenes.
 
-- PR-054: Decidir siguiente endurecimiento hospitalario.
-  - Opcion preferida: estados/validaciones de hoja diaria antes de rondas.
+- PR-055: Decidir siguiente endurecimiento hospitalario.
+  - Opcion preferida: revisar reglas de fecha/encuentro de hoja diaria antes de rondas.
   - Alternativa: rondas de lectura sin escritura clinica nueva.
   - No introducir indicaciones hasta tener politica clara de firma y orden clinica.
 

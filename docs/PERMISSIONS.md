@@ -18,7 +18,7 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 | Crear/editar paciente | si | si | no | no | si |
 | Editar estado ficha/contexto | si | si | no | no | si |
 | Crear/editar encuentros clinicos | si | si | no | no | si |
-| Crear/editar hoja diaria hospitalizada | si | si | no | no | si |
+| Crear/editar/cerrar hoja diaria hospitalizada | si | si | no | no | si |
 | Crear/editar evolucion SOAP | si | si | no | no | si |
 | Crear/editar problemas activos | si | si | no | no | si |
 | Crear/editar alergias | si | si | no | no | si |
@@ -33,3 +33,4 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 - Toda escritura permitida debe registrar `audit_event` con actor autenticado.
 - `X-OneEpis-Actor` solo puede usarse si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`.
 - Ningun permiso habilita diagnostico autonomo, firma automatica ni escritura IA directa.
+- Cerrar una hoja diaria bloquea edicion posterior, pero no equivale a firma legal.

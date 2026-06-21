@@ -15,7 +15,7 @@ from oneepis_api.models.clinical_record import (
     EncounterStatus,
     EncounterType,
 )
-from oneepis_api.models.hospitalization import HospitalDailySheet
+from oneepis_api.models.hospitalization import HospitalDailySheet, HospitalDailySheetStatus
 from oneepis_api.schemas.hospitalization import (
     HospitalDailySheetCreate,
     HospitalDailySheetRead,
@@ -99,6 +99,7 @@ def update_hospital_daily_sheet(
     actor: HospitalDailySheetActorDep,
 ) -> HospitalDailySheet:
     sheet = _require_daily_sheet(session, patient_id, sheet_id)
+    _validate_daily_sheet_editable(sheet)
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(sheet, fields)
     changed_fields = apply_update(sheet, payload)
@@ -174,6 +175,14 @@ def _validate_daily_sheet_unique(session: Session, sheet: HospitalDailySheet) ->
         )
 
 
+def _validate_daily_sheet_editable(sheet: HospitalDailySheet) -> None:
+    if sheet.status == HospitalDailySheetStatus.CLOSED:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Closed daily sheets cannot be edited",
+        )
+
+
 def _daily_sheet_audit_metadata(
     sheet: HospitalDailySheet,
     fields: list[str] | None = None,
@@ -182,6 +191,7 @@ def _daily_sheet_audit_metadata(
         "patient_id": str(sheet.patient_id),
         "encounter_id": str(sheet.encounter_id),
         "sheet_date": sheet.sheet_date.isoformat(),
+        "status": sheet.status.value,
     }
     if fields is not None:
         metadata["fields"] = fields

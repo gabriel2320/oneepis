@@ -15,6 +15,7 @@ export type CareContext = "ambulatory" | "hospitalized" | "unknown";
 export type EncounterType = "ambulatory" | "hospitalization" | "emergency" | "unknown";
 export type EncounterStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
 export type HospitalBedStatus = "available" | "occupied" | "cleaning" | "blocked";
+export type HospitalDailySheetStatus = "draft" | "closed";
 
 export type AuthUser = {
   email: string;
@@ -279,6 +280,7 @@ export type HospitalDailySheet = {
   id: string;
   patient_id: string;
   encounter_id: string;
+  status: HospitalDailySheetStatus;
   sheet_date: string;
   clinical_summary: string;
   overnight_events?: string | null;
@@ -292,6 +294,7 @@ export type HospitalDailySheet = {
 
 export type HospitalDailySheetCreate = {
   sheet_date: string;
+  status?: HospitalDailySheetStatus;
   clinical_summary: string;
   overnight_events?: string | null;
   active_plan?: string | null;

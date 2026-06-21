@@ -24,6 +24,11 @@ class HospitalBedStatus(enum.StrEnum):
     BLOCKED = "blocked"
 
 
+class HospitalDailySheetStatus(enum.StrEnum):
+    DRAFT = "draft"
+    CLOSED = "closed"
+
+
 class HospitalBed(Base, IdMixin, TimestampMixin):
     __tablename__ = "hospital_beds"
     __table_args__ = (
@@ -65,6 +70,15 @@ class HospitalDailySheet(Base, IdMixin, TimestampMixin):
     encounter_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("clinical_encounters.id", ondelete="CASCADE"),
         index=True,
+    )
+    status: Mapped[HospitalDailySheetStatus] = mapped_column(
+        Enum(
+            HospitalDailySheetStatus,
+            values_callable=enum_values,
+            name="hospital_daily_sheet_status",
+        ),
+        default=HospitalDailySheetStatus.DRAFT,
+        nullable=False,
     )
     sheet_date: Mapped[date] = mapped_column(Date, index=True, nullable=False)
     clinical_summary: Mapped[str] = mapped_column(Text, nullable=False)

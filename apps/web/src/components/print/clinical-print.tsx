@@ -241,6 +241,9 @@ export function HospitalDailyPrintSheet({
           <p className="text-xs text-muted-foreground">
             Registrada por {sheet.created_by} - {formatDateTime(sheet.created_at)}
           </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Estado: {sheet.status === "closed" ? "Cerrada" : "Borrador"}
+          </p>
         </div>
         <PrintTextBlock label="Resumen clinico" value={sheet.clinical_summary} />
         <PrintTextBlock label="Eventos relevantes" value={sheet.overnight_events} />

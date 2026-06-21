@@ -4,16 +4,22 @@ import Link from "next/link";
 import { Pencil, Printer, Save } from "lucide-react";
 
 import { EmptyState } from "@/components/clinical/states";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { HospitalDailySheet, HospitalDailySheetCreate } from "@/lib/types";
+import type {
+  HospitalDailySheet,
+  HospitalDailySheetCreate,
+  HospitalDailySheetStatus,
+} from "@/lib/types";
 
 import { formatDateTime } from "./date-format";
 import { Field, emptyToNull } from "./patient-page-shared";
 
 export type DailySheetFormState = {
   sheet_date: string;
+  status: HospitalDailySheetStatus;
   clinical_summary: string;
   overnight_events: string;
   active_plan: string;
@@ -23,6 +29,7 @@ export type DailySheetFormState = {
 
 export const emptyDailySheetForm = (): DailySheetFormState => ({
   sheet_date: new Date().toISOString().slice(0, 10),
+  status: "draft",
   clinical_summary: "",
   overnight_events: "",
   active_plan: "",
@@ -54,13 +61,31 @@ export function DailySheetForm({
       <Field label="Fecha">
         <Input
           type="date"
+          disabled={disabled}
           value={formState.sheet_date}
           onChange={(event) => setFormState({ ...formState, sheet_date: event.target.value })}
         />
       </Field>
+      <Field label="Estado">
+        <select
+          className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+          disabled={disabled}
+          value={formState.status}
+          onChange={(event) =>
+            setFormState({
+              ...formState,
+              status: event.target.value as HospitalDailySheetStatus,
+            })
+          }
+        >
+          <option value="draft">Borrador</option>
+          <option value="closed">Cerrada</option>
+        </select>
+      </Field>
       <Field label="Resumen clinico del dia">
         <Textarea
           className="min-h-28"
+          disabled={disabled}
           value={formState.clinical_summary}
           onChange={(event) =>
             setFormState({ ...formState, clinical_summary: event.target.value })
@@ -69,6 +94,7 @@ export function DailySheetForm({
       </Field>
       <Field label="Eventos relevantes">
         <Textarea
+          disabled={disabled}
           value={formState.overnight_events}
           onChange={(event) =>
             setFormState({ ...formState, overnight_events: event.target.value })
@@ -77,18 +103,21 @@ export function DailySheetForm({
       </Field>
       <Field label="Plan activo">
         <Textarea
+          disabled={disabled}
           value={formState.active_plan}
           onChange={(event) => setFormState({ ...formState, active_plan: event.target.value })}
         />
       </Field>
       <Field label="Pendientes">
         <Textarea
+          disabled={disabled}
           value={formState.pending_tasks}
           onChange={(event) => setFormState({ ...formState, pending_tasks: event.target.value })}
         />
       </Field>
       <Field label="Notas de seguridad">
         <Textarea
+          disabled={disabled}
           value={formState.safety_notes}
           onChange={(event) => setFormState({ ...formState, safety_notes: event.target.value })}
         />
@@ -130,6 +159,9 @@ export function DailySheetList({
               <p className="mt-1 text-xs text-muted-foreground">
                 Registrada por {sheet.created_by} - {formatDateTime(sheet.created_at)}
               </p>
+              <Badge className="mt-2" variant={sheet.status === "closed" ? "safe" : "outline"}>
+                {dailySheetStatusLabel[sheet.status]}
+              </Badge>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button asChild variant="outline" size="sm">
@@ -137,7 +169,7 @@ export function DailySheetList({
                   href={`/hospitalizacion/pacientes/${patientId}/hoja-diaria/${sheet.id}/editar`}
                 >
                   <Pencil className="h-4 w-4" />
-                  Editar
+                  {sheet.status === "closed" ? "Ver" : "Editar"}
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
@@ -164,6 +196,7 @@ export function DailySheetList({
 export function toDailySheetForm(sheet: HospitalDailySheet): DailySheetFormState {
   return {
     sheet_date: sheet.sheet_date,
+    status: sheet.status,
     clinical_summary: sheet.clinical_summary,
     overnight_events: sheet.overnight_events ?? "",
     active_plan: sheet.active_plan ?? "",
@@ -175,6 +208,7 @@ export function toDailySheetForm(sheet: HospitalDailySheet): DailySheetFormState
 export function toDailySheetPayload(formState: DailySheetFormState): HospitalDailySheetCreate {
   return {
     sheet_date: formState.sheet_date,
+    status: formState.status,
     clinical_summary: formState.clinical_summary,
     overnight_events: emptyToNull(formState.overnight_events),
     active_plan: emptyToNull(formState.active_plan),
@@ -182,6 +216,11 @@ export function toDailySheetPayload(formState: DailySheetFormState): HospitalDai
     safety_notes: emptyToNull(formState.safety_notes),
   };
 }
+
+export const dailySheetStatusLabel: Record<HospitalDailySheetStatus, string> = {
+  draft: "Borrador",
+  closed: "Cerrada",
+};
 
 function DailySheetText({ label, value }: { label: string; value?: string | null }) {
   if (!value) {

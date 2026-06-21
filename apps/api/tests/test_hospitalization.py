@@ -312,6 +312,7 @@ def test_hospital_daily_sheet_create_list_update_and_audit(
     created = create_response.json()
     assert created["patient_id"] == patient_id
     assert created["encounter_id"] == encounter_id
+    assert created["status"] == "draft"
     assert created["created_by"] == "medico@oneepis.local"
 
     duplicate_response = client.post(
@@ -339,21 +340,49 @@ def test_hospital_daily_sheet_create_list_update_and_audit(
     assert update_response.status_code == 200
     assert update_response.json()["active_plan"] == "Mantener plan y preparar reevaluacion."
 
+    close_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{created['id']}",
+        headers=auth,
+        json={"status": "closed"},
+    )
+    assert close_response.status_code == 200
+    assert close_response.json()["status"] == "closed"
+
+    locked_update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{created['id']}",
+        headers=auth,
+        json={"active_plan": "No debe permitir edicion posterior."},
+    )
+    assert locked_update_response.status_code == 409
+
     audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
     assert audit_response.status_code == 200
     events = audit_response.json()
     assert any(item["action"] == "hospital_daily_sheet.created" for item in events)
     update_event = next(
-        item for item in events if item["action"] == "hospital_daily_sheet.updated"
+        item
+        for item in events
+        if item["action"] == "hospital_daily_sheet.updated"
+        and item["extra_data"]["after"].get("active_plan")
+        == "Mantener plan y preparar reevaluacion."
     )
     assert update_event["extra_data"]["patient_id"] == patient_id
     assert update_event["extra_data"]["encounter_id"] == encounter_id
+    assert update_event["extra_data"]["status"] == "draft"
     assert update_event["extra_data"]["before"] == {
         "active_plan": "Continuar observacion clinica."
     }
     assert update_event["extra_data"]["after"] == {
         "active_plan": "Mantener plan y preparar reevaluacion."
     }
+    close_event = next(
+        item
+        for item in events
+        if item["action"] == "hospital_daily_sheet.updated"
+        and item["extra_data"]["after"].get("status") == "closed"
+    )
+    assert close_event["extra_data"]["before"] == {"status": "draft"}
+    assert close_event["extra_data"]["after"] == {"status": "closed"}
 
 
 def test_hospital_daily_sheet_requires_active_hospitalization(

@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 from pydantic import Field
 
-from oneepis_api.models.hospitalization import HospitalBedStatus
+from oneepis_api.models.hospitalization import HospitalBedStatus, HospitalDailySheetStatus
 from oneepis_api.schemas.clinical_record import ClinicalEncounterRead
 from oneepis_api.schemas.common import APIModel
 from oneepis_api.schemas.patient import PatientRead
@@ -47,6 +47,7 @@ class HospitalizationBoardItem(APIModel):
 
 class HospitalDailySheetBase(APIModel):
     sheet_date: date
+    status: HospitalDailySheetStatus = HospitalDailySheetStatus.DRAFT
     clinical_summary: str = Field(min_length=1, max_length=2000)
     overnight_events: str | None = Field(default=None, max_length=2000)
     active_plan: str | None = Field(default=None, max_length=2000)
@@ -60,6 +61,7 @@ class HospitalDailySheetCreate(HospitalDailySheetBase):
 
 class HospitalDailySheetUpdate(APIModel):
     sheet_date: date | None = None
+    status: HospitalDailySheetStatus | None = None
     clinical_summary: str | None = Field(default=None, min_length=1, max_length=2000)
     overnight_events: str | None = Field(default=None, max_length=2000)
     active_plan: str | None = Field(default=None, max_length=2000)
