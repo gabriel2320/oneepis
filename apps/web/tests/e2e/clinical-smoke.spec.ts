@@ -54,7 +54,15 @@ test("hospital daily sheet renders patient workspace", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
   await expect(page.getByText("Hoja diaria 2026-06-20")).toBeVisible();
   await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Editar" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar hoja diaria" })).toBeDisabled();
+
+  await page.getByRole("link", { name: "Editar" }).click();
+  await expect(page.getByRole("heading", { name: "Editar hoja diaria" })).toBeVisible();
+  await expect(page.locator("textarea").first()).toHaveValue(
+    "Hoja diaria demo para validar flujo hospitalizado sin datos reales.",
+  );
+  await expect(page.getByRole("button", { name: "Guardar cambios" })).toBeDisabled();
 });
 
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {

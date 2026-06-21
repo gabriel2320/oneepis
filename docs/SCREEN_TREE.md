@@ -43,6 +43,7 @@ Estado:
 /hospitalizacion/camas/nueva
 /hospitalizacion/rondas
 /hospitalizacion/pacientes/[patientId]/hoja-diaria
+/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar
 /hospitalizacion/pacientes/[patientId]/indicaciones
 ```
 
@@ -52,7 +53,7 @@ Estado:
 - el tablero prefiere cama estructurada `sala / habitacion / cama` cuando existe.
 - `/hospitalizacion/camas/nueva` crea camas y puede asignar un ingreso activo sin cama.
 - `/hospitalizacion/camas` permite asignar ingresos activos sin cama a una cama disponible.
-- hoja diaria hospitalizada ya tiene escritura clinica propia con PostgreSQL, API, permisos, auditoria, OpenAPI, UI minima y print.
+- hoja diaria hospitalizada ya tiene escritura clinica propia con PostgreSQL, API, permisos, auditoria, OpenAPI, crear/listar/editar UI y print.
 - rondas e indicaciones siguen preparadas; indicaciones no deben entrar sin firma, permisos y reglas clinicas claras.
 
 ## Consulta
@@ -90,9 +91,11 @@ Estado:
 /print/pacientes/[patientId]/evolucion/[entryId]
 /print/pacientes/[patientId]/resumen
 /print/pacientes/[patientId]/receta
+/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]
 ```
 
 Estado:
 
 - ficha, resumen y evolucion renderizan hoja imprimible.
+- hoja diaria hospitalizada renderiza hoja imprimible con footer de desarrollo.
 - receta existe, pero queda bloqueada funcionalmente hasta firma, permisos y reglas de prescripcion.

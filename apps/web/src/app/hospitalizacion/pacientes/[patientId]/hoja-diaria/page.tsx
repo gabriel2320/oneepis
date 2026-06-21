@@ -1,4 +1,4 @@
-import { DailySheetPage } from "@/components/clinical/hospitalization-pages";
+import { DailySheetPage } from "@/components/clinical/hospital-daily-sheet-pages";
 
 export default function Page() {
   return <DailySheetPage />;
