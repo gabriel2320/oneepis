@@ -48,16 +48,13 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-045: Papel serio como gate clinico con smoke print.
 - PR-046: Preparar proximo crecimiento clinico minimo.
 - PR-047: Alinear guias y gates oficiales.
+- PR-048: Retiro de legacy demo frontend.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-047: el core esta sano para seguir, pero antes de sumar mas
+Auditoria posterior a PR-048: el core esta sano para seguir, pero antes de sumar mas
 clinica conviene retirar deuda temprana y evitar capas preparadas sin flujo completo.
 
-- PR-048: Retirar legacy demo frontend.
-  - Mover lo util de `components/clinical-record` al core clinico actual.
-  - Eliminar pantallas demo antiguas sin ruta activa.
-  - Retirar barrels API obsoletos si quedan sin consumidores.
 - PR-049: Dieta UI sin cambiar conducta.
   - Dividir `patient-record-pages.tsx`, `patient-write-pages.tsx`,
     `hospitalization-pages.tsx` y `widgets.tsx` por dominio.

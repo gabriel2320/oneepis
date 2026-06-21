@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AppShell } from "@/components/layout/app-shell";
-import { AiInsightPanel } from "@/components/clinical-record/ai-insight-panel";
+import { AiInsightPanel } from "@/components/clinical/ai-insight-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";

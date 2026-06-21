@@ -19,4 +19,3 @@ npm run check:e2e
 - Keep patient and module screens in `src/components/clinical`.
 - Keep printable sheets in `src/components/print`.
 - Keep API access in focused clients under `src/lib/api`.
-- Use `components/clinical-record` only as legacy code being retired.

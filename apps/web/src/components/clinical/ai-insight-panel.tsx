@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { createClinicalInsight, getAiStatus } from "@/lib/api";
+import { createClinicalInsight, getAiStatus } from "@/lib/api/ai";
 import type { AIProviderStatus, ClinicalInsightResponse } from "@/lib/types";
 
 export function AiInsightPanel() {

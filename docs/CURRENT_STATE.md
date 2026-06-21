@@ -93,7 +93,6 @@ Capas:
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
-- `components/clinical-record` aun contiene piezas demo antiguas; conservar solo lo util y moverlo al core actual.
 - `patient-record-pages.tsx`, `patient-write-pages.tsx`, `hospitalization-pages.tsx` y `widgets.tsx` deben dividirse sin cambiar conducta.
 - `test_patient_record_e2e.py` concentra demasiada cobertura API y debe separarse por dominio.
 
@@ -129,7 +128,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-045: Papel serio con smoke print dedicado.
 - PR-046: Criterio para proximo crecimiento clinico minimo.
 - PR-047: Alinear guias y gates oficiales.
-- PR-048: Retirar legacy demo frontend.
+- PR-048: Retiro de legacy demo frontend.
 - PR-049: Dieta UI sin cambiar conducta.
 - PR-050: Dieta IA backend.
 - PR-051: Dieta tests API.
