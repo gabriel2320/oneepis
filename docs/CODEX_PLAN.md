@@ -58,16 +58,13 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-055: Reglas de fecha/encuentro para hoja diaria hospitalizada.
 - PR-056: Rondas hospitalarias de lectura desde datos existentes.
 - PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
+- PR-058: Papel hospitalario de ronda desde datos existentes.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-057: tests de hospitalizacion quedaron separados por board,
-camas y hoja diaria. No cambia API, producto ni OpenAPI.
+Auditoria posterior a PR-058: ronda hospitalaria ya tiene vista de lectura y papel serio
+desde ingresos activos, camas y ultimas hojas diarias. No crea escritura clinica ni endpoint nuevo.
 
-- PR-058: Papel hospitalario de ronda.
-  - Crear impresion de ronda diaria desde ingresos activos, camas y ultimas hojas diarias.
-  - No crear escritura clinica ni endpoint nuevo si puede leerse desde datos existentes.
-  - Footer dev obligatorio y smoke Playwright.
 - PR-059: Fecha clinica local.
   - Definir regla de fecha hospitalaria local para hoja diaria.
   - Aclarar UTC vs fecha operacional Chile antes de sumar mas reglas temporales.

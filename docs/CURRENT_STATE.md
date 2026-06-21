@@ -79,6 +79,7 @@ Hospitalizacion:
 - estado de hoja diaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
 - fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado
 - `/hospitalizacion/rondas` es vista de lectura: ingresos activos, cama, ultima hoja diaria y accesos a ficha/papel
+- `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos activos, cama y ultima hoja diaria
 - aun no existen indicaciones ni rondas con escritura clinica propia
 
 ## Frontend
@@ -117,7 +118,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `main` limpio y alineado con `origin/main`.
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha y rondas de lectura.
 - `npm run check` pasa completo: API 40 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 19 passed / 1 skip esperado.
-- Siguiente paso recomendado: PR-058 papel hospitalario de ronda.
+- Siguiente paso recomendado: PR-059 fecha clinica local.
 
 ## Programa activo PR-018 a PR-052
 
@@ -161,6 +162,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-055: Reglas de fecha/encuentro para hoja diaria hospitalizada.
 - PR-056: Rondas hospitalarias de lectura desde datos existentes.
 - PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
+- PR-058: Papel hospitalario de ronda desde datos existentes.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

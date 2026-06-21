@@ -38,5 +38,13 @@ test.describe("print routes", () => {
     await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
     await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+
+    await page.goto("/print/hospitalizacion/rondas");
+    await expect(page.getByRole("heading", { name: "Ronda hospitalaria" })).toBeVisible();
+    await expect(page.getByText("Paciente Demo Beta")).toBeVisible();
+    await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
+    await expect(page.getByText("Ultima hoja diaria 2026-06-20 - Borrador")).toBeVisible();
+    await expect(page.getByText("Sin hoja diaria para este ingreso")).toBeVisible();
+    await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
   });
 });

@@ -101,7 +101,7 @@ export const hospitalBedTransitionOptions: {
   { value: "blocked", label: "Bloquear" },
 ];
 
-function getDemoHospitalizations(): HospitalizationBoardItem[] {
+export function getDemoHospitalizations(): HospitalizationBoardItem[] {
   return demoEncounters
     .filter((encounter) => encounter.type === "hospitalization" && encounter.status === "in_progress")
     .flatMap((encounter) => {

@@ -6,10 +6,15 @@
 - `/print/pacientes/[patientId]/evolucion/[entryId]`
 - `/print/pacientes/[patientId]/resumen`
 - `/print/pacientes/[patientId]/receta`
+- `/print/hospitalizacion/rondas`
+- `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]`
 
 ## Componentes
 
-Ubicacion: `apps/web/src/components/print/clinical-print.tsx`.
+Ubicaciones:
+
+- `apps/web/src/components/print/clinical-print.tsx`
+- `apps/web/src/components/print/hospital-round-print.tsx`
 
 - `PrintPage`
 - `PrintHeader`
@@ -17,6 +22,7 @@ Ubicacion: `apps/web/src/components/print/clinical-print.tsx`.
 - `ClinicalPaperSheet`
 - `SoapPrintSheet`
 - `PatientSummaryPrintSheet`
+- `PrintHospitalRoundPage`
 
 ## CSS
 

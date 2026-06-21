@@ -35,7 +35,11 @@ export function HospitalRoundsPage() {
   const board = useHospitalizationBoard();
 
   return (
-    <ModulePage title="Rondas" description="Lectura diaria de pacientes hospitalizados activos.">
+    <ModulePage
+      title="Rondas"
+      description="Lectura diaria de pacientes hospitalizados activos."
+      actions={[{ href: "/print/hospitalizacion/rondas", label: "Imprimir ronda" }]}
+    >
       <ClinicalSectionCard
         title="Ronda activa"
         description="Pacientes, cama, ultimo registro diario y accesos a ficha/papel."

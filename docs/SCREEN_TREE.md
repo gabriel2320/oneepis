@@ -94,11 +94,13 @@ Estado:
 /print/pacientes/[patientId]/evolucion/[entryId]
 /print/pacientes/[patientId]/resumen
 /print/pacientes/[patientId]/receta
+/print/hospitalizacion/rondas
 /print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]
 ```
 
 Estado:
 
 - ficha, resumen y evolucion renderizan hoja imprimible.
+- ronda hospitalaria renderiza hoja imprimible desde ingresos activos y ultimas hojas diarias.
 - hoja diaria hospitalizada renderiza hoja imprimible con footer de desarrollo.
 - receta existe, pero queda bloqueada funcionalmente hasta firma, permisos y reglas de prescripcion.
