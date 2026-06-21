@@ -77,7 +77,7 @@ Hospitalizacion:
 - camas disponibles pueden asignarse a ingresos activos sin cama; una cama ocupada debe liberarse antes de reasignarse
 - hoja diaria hospitalizada tiene PostgreSQL, API, permisos, auditoria, OpenAPI, crear/listar/editar/cerrar UI y print
 - estado de hoja diaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
-- fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado
+- fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado usando fecha clinica local `America/Santiago`, no el dia UTC crudo
 - `/hospitalizacion/rondas` es vista de lectura: ingresos activos, cama, ultima hoja diaria y accesos a ficha/papel
 - `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos activos, cama y ultima hoja diaria
 - aun no existen indicaciones ni rondas con escritura clinica propia
@@ -110,17 +110,16 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
 - `/consulta/*`, documentos, receta e indicaciones siguen como bordes preparados; no expandir todos a la vez.
-- definir fecha clinica local para hospitalizacion antes de endurecer mas reglas temporales.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
 ## Auditoria rapida 2026-06-21
 
 - `main` limpio y alineado con `origin/main`.
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha y rondas de lectura.
-- `npm run check` pasa completo: API 40 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 19 passed / 1 skip esperado.
-- Siguiente paso recomendado: PR-059 fecha clinica local.
+- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura y fecha clinica local.
+- `npm run check` pasa completo: API 41 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 19 passed / 1 skip esperado.
+- Siguiente paso recomendado: PR-060 politica de indicaciones y receta.
 
-## Programa activo PR-018 a PR-052
+## Programa activo PR-018 a PR-059
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -163,6 +162,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-056: Rondas hospitalarias de lectura desde datos existentes.
 - PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
 - PR-058: Papel hospitalario de ronda desde datos existentes.
+- PR-059: Fecha clinica local para hoja diaria hospitalizada.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

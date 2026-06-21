@@ -26,6 +26,7 @@ from oneepis_api.services.audit import (
     changed_field_snapshots,
     record_audit_event,
 )
+from oneepis_api.services.clinical_dates import clinical_local_date
 
 router = APIRouter(
     prefix="/hospitalization",
@@ -181,12 +182,16 @@ def _validate_daily_sheet_date_for_encounter(
     sheet: HospitalDailySheet,
     encounter: ClinicalEncounter,
 ) -> None:
-    if sheet.sheet_date < encounter.started_at.date():
+    encounter_started_on = clinical_local_date(encounter.started_at)
+    if sheet.sheet_date < encounter_started_on:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Daily sheet date cannot be before hospitalization start",
         )
-    if encounter.ended_at is not None and sheet.sheet_date > encounter.ended_at.date():
+    if encounter.ended_at is None:
+        return
+    encounter_ended_on = clinical_local_date(encounter.ended_at)
+    if sheet.sheet_date > encounter_ended_on:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Daily sheet date cannot be after hospitalization end",

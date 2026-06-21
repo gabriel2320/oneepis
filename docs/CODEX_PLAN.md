@@ -59,16 +59,13 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-056: Rondas hospitalarias de lectura desde datos existentes.
 - PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
 - PR-058: Papel hospitalario de ronda desde datos existentes.
+- PR-059: Fecha clinica local para hoja diaria hospitalizada.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-058: ronda hospitalaria ya tiene vista de lectura y papel serio
-desde ingresos activos, camas y ultimas hojas diarias. No crea escritura clinica ni endpoint nuevo.
+Auditoria posterior a PR-059: hoja diaria ya valida su ventana contra fecha clinica
+local `America/Santiago`, no contra el dia UTC crudo del timestamp.
 
-- PR-059: Fecha clinica local.
-  - Definir regla de fecha hospitalaria local para hoja diaria.
-  - Aclarar UTC vs fecha operacional Chile antes de sumar mas reglas temporales.
-  - Ajustar tests si la decision cambia el comportamiento.
 - PR-060: Politica de indicaciones y receta.
   - Documento corto en docs existentes: orden, borrador, firma, cierre, permisos y papel.
   - Sin modelos ni endpoints todavia.

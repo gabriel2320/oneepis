@@ -55,7 +55,7 @@ Estado:
 - `/hospitalizacion/camas` permite asignar ingresos activos sin cama a una cama disponible.
 - hoja diaria hospitalizada ya tiene escritura clinica propia con PostgreSQL, API, permisos, auditoria, OpenAPI, crear/listar/editar/cerrar UI y print.
 - estado `closed` bloquea edicion posterior, pero no equivale a firma legal.
-- la fecha de hoja diaria debe pertenecer a la ventana del ingreso hospitalario.
+- la fecha de hoja diaria debe pertenecer a la ventana del ingreso hospitalario usando fecha clinica local `America/Santiago`.
 - `/hospitalizacion/rondas` muestra una ronda de lectura desde ingresos activos, camas y ultimas hojas diarias.
 - indicaciones siguen preparadas; no deben entrar sin firma, permisos y reglas clinicas claras.
 

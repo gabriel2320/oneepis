@@ -177,6 +177,66 @@ def test_hospital_daily_sheet_date_must_match_hospitalization_window(
     )
 
 
+def test_hospital_daily_sheet_uses_chile_clinical_local_date(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso nocturno con borde UTC",
+            "started_at": "2026-06-20T02:30:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
+
+    create_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": "2026-06-19",
+            "clinical_summary": "Fecha local valida para ingreso nocturno.",
+        },
+    )
+    assert create_response.status_code == 201
+    sheet_id = create_response.json()["id"]
+
+    close_encounter_response = client.patch(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter_id}",
+        headers=auth,
+        json={
+            "status": "completed",
+            "ended_at": "2026-06-22T02:30:00Z",
+        },
+    )
+    assert close_encounter_response.status_code == 200
+
+    local_end_date_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{sheet_id}",
+        headers=auth,
+        json={"sheet_date": "2026-06-21"},
+    )
+    assert local_end_date_response.status_code == 200
+
+    after_local_end_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{sheet_id}",
+        headers=auth,
+        json={"sheet_date": "2026-06-22"},
+    )
+    assert after_local_end_response.status_code == 409
+    assert after_local_end_response.json()["detail"] == (
+        "Daily sheet date cannot be after hospitalization end"
+    )
+
+
 def test_hospital_daily_sheet_requires_active_hospitalization(
     client: TestClient,
     auth_headers,
