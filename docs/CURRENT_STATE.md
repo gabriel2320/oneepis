@@ -70,10 +70,12 @@ Hospitalizacion:
 
 - `GET /api/v1/hospitalization/active`
 - `GET/POST/PATCH /api/v1/hospitalization/beds`
+- `GET/POST/PATCH /api/v1/hospitalization/patients/{patient_id}/daily-sheets`
 - tablero `/hospitalizacion/camas` lee encuentros `hospitalization` en curso
 - camas estructuradas con sala/habitacion/cama y asignacion auditada a encuentros activos
 - UI `/hospitalizacion/camas` administra estados y `/hospitalizacion/camas/nueva` crea camas
 - camas disponibles pueden asignarse a ingresos activos sin cama; una cama ocupada debe liberarse antes de reasignarse
+- hoja diaria hospitalizada tiene PostgreSQL, API, permisos, auditoria, OpenAPI, UI minima y print
 - aun no existen indicaciones ni rondas auditadas
 
 ## Frontend
@@ -137,7 +139,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-049: Dieta UI sin cambiar conducta.
 - PR-050: Dieta IA backend.
 - PR-051: Dieta tests API.
-- PR-052: Elegir crecimiento clinico minimo, recomendado hoja diaria hospitalizada.
+- PR-052: Hoja diaria hospitalizada minima y auditable.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

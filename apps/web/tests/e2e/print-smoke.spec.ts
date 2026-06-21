@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 const demoPatientId = "11111111-1111-4111-8111-111111111111";
 const demoEntryId = "51111111-1111-4111-8111-111111111111";
+const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
+const demoDailySheetId = "a2222222-2222-4222-8222-222222222222";
 
 test.describe("print routes", () => {
   test.beforeEach(({}, testInfo) => {
@@ -29,5 +31,12 @@ test.describe("print routes", () => {
     await expect(page.getByRole("heading", { name: "Receta" })).toBeVisible();
     await expect(page.getByText("Prescripcion no habilitada")).toBeVisible();
     await expect(page.getByText("Requiere autenticacion, permisos, firma profesional")).toBeVisible();
+
+    await page.goto(
+      `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria/${demoDailySheetId}`,
+    );
+    await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
+    await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
+    await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
   });
 });

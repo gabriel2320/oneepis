@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import Field
 
@@ -43,3 +43,34 @@ class HospitalizationBoardItem(APIModel):
     patient: PatientRead
     encounter: ClinicalEncounterRead
     bed: HospitalBedRead | None = None
+
+
+class HospitalDailySheetBase(APIModel):
+    sheet_date: date
+    clinical_summary: str = Field(min_length=1, max_length=2000)
+    overnight_events: str | None = Field(default=None, max_length=2000)
+    active_plan: str | None = Field(default=None, max_length=2000)
+    pending_tasks: str | None = Field(default=None, max_length=2000)
+    safety_notes: str | None = Field(default=None, max_length=2000)
+
+
+class HospitalDailySheetCreate(HospitalDailySheetBase):
+    pass
+
+
+class HospitalDailySheetUpdate(APIModel):
+    sheet_date: date | None = None
+    clinical_summary: str | None = Field(default=None, min_length=1, max_length=2000)
+    overnight_events: str | None = Field(default=None, max_length=2000)
+    active_plan: str | None = Field(default=None, max_length=2000)
+    pending_tasks: str | None = Field(default=None, max_length=2000)
+    safety_notes: str | None = Field(default=None, max_length=2000)
+
+
+class HospitalDailySheetRead(HospitalDailySheetBase):
+    id: uuid.UUID
+    patient_id: uuid.UUID
+    encounter_id: uuid.UUID
+    created_by: str
+    created_at: datetime
+    updated_at: datetime

@@ -3,8 +3,17 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { DEMO_MODE } from "@/lib/api/client";
-import { listActiveHospitalizations, listHospitalBeds } from "@/lib/api/hospitalization";
-import { demoEncounters, demoHospitalBeds, demoRecords } from "@/lib/demo-record";
+import {
+  listActiveHospitalizations,
+  listHospitalBeds,
+  listHospitalDailySheets,
+} from "@/lib/api/hospitalization";
+import {
+  demoEncounters,
+  demoHospitalBeds,
+  demoHospitalDailySheets,
+  demoRecords,
+} from "@/lib/demo-record";
 import type { HospitalBedStatus, HospitalizationBoardItem } from "@/lib/types";
 
 export function useHospitalizationBoard() {
@@ -40,8 +49,28 @@ export function useHospitalBeds() {
   };
 }
 
+export function useHospitalDailySheets(patientId: string) {
+  const dailySheetsQuery = useQuery({
+    queryKey: ["hospital-daily-sheets", patientId],
+    queryFn: () => listHospitalDailySheets(patientId),
+    enabled: Boolean(patientId) && !DEMO_MODE,
+  });
+  const demoItems = DEMO_MODE
+    ? demoHospitalDailySheets.filter((item) => item.patient_id === patientId)
+    : [];
+  return {
+    items: DEMO_MODE ? demoItems : (dailySheetsQuery.data ?? []),
+    isLoading: !DEMO_MODE && dailySheetsQuery.isLoading,
+    isError: !DEMO_MODE && dailySheetsQuery.isError,
+    refetch: () => {
+      void dailySheetsQuery.refetch();
+    },
+  };
+}
+
 export type HospitalizationBoardState = ReturnType<typeof useHospitalizationBoard>;
 export type HospitalBedsState = ReturnType<typeof useHospitalBeds>;
+export type HospitalDailySheetsState = ReturnType<typeof useHospitalDailySheets>;
 
 export function formatBedLabel(bed: { ward: string; room: string; bed_label: string }) {
   return `${bed.ward} / ${bed.room} / Cama ${bed.bed_label}`;

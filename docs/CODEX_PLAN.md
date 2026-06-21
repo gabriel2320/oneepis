@@ -52,17 +52,18 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-049: Dieta UI sin cambiar conducta.
 - PR-050: Dieta IA backend sin cambiar endpoints.
 - PR-051: Dieta tests API por dominio sin reducir cobertura.
+- PR-052: Hoja diaria hospitalizada minima con PostgreSQL, API, auditoria, UI y print.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-051: el core esta sano para seguir, y las dietas principales
-de frontend, backend, IA y tests ya quedaron hechas. El proximo paso debe ser una sola
-pieza clinica completa, no un modulo a medias.
+Auditoria posterior a PR-052: el core ya tiene una primera pieza hospitalaria completa
+despues de camas. El siguiente paso no debe ser indicaciones todavia si no se resuelve
+firma/permisos/reglas clinicas de ordenes.
 
-- PR-052: Elegir crecimiento clinico minimo.
-  - Recomendacion: hoja diaria hospitalizada antes que indicaciones.
-  - Indicaciones quedan postergadas por riesgo de orden clinica, firma y reglas medicas.
-  - Si entra, debe incluir PostgreSQL, API, permisos, auditoria, OpenAPI, UI minima y print.
+- PR-053: Endurecer hoja diaria antes de crecer.
+  - Revisar edicion UI de hojas existentes o mantener solo crear/listar.
+  - Agregar smoke print si cambia contenido impreso.
+  - No introducir indicaciones hasta tener politica clara de firma y orden clinica.
 
 ## Reglas no negociables
 

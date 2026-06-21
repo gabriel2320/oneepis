@@ -18,6 +18,7 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 | Crear/editar paciente | si | si | no | no | si |
 | Editar estado ficha/contexto | si | si | no | no | si |
 | Crear/editar encuentros clinicos | si | si | no | no | si |
+| Crear/editar hoja diaria hospitalizada | si | si | no | no | si |
 | Crear/editar evolucion SOAP | si | si | no | no | si |
 | Crear/editar problemas activos | si | si | no | no | si |
 | Crear/editar alergias | si | si | no | no | si |

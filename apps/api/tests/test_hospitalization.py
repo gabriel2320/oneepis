@@ -273,3 +273,145 @@ def test_hospitalization_board_requires_authentication(client: TestClient) -> No
     response = client.get("/api/v1/hospitalization/active")
 
     assert response.status_code == 401
+
+
+def test_hospital_daily_sheet_create_list_update_and_audit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso para hoja diaria",
+            "started_at": "2026-06-20T07:00:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
+
+    create_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": "2026-06-20",
+            "clinical_summary": "Evolucion hospitalaria estable.",
+            "overnight_events": "Sin eventos nocturnos criticos.",
+            "active_plan": "Continuar observacion clinica.",
+            "pending_tasks": "Revisar signos vitales de control.",
+            "safety_notes": "Documento de desarrollo.",
+        },
+    )
+    assert create_response.status_code == 201
+    created = create_response.json()
+    assert created["patient_id"] == patient_id
+    assert created["encounter_id"] == encounter_id
+    assert created["created_by"] == "medico@oneepis.local"
+
+    duplicate_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": "2026-06-20",
+            "clinical_summary": "Duplicada",
+        },
+    )
+    assert duplicate_response.status_code == 409
+
+    list_response = client.get(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+    )
+    assert list_response.status_code == 200
+    assert list_response.json()[0]["id"] == created["id"]
+
+    update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{created['id']}",
+        headers=auth,
+        json={"active_plan": "Mantener plan y preparar reevaluacion."},
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["active_plan"] == "Mantener plan y preparar reevaluacion."
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    events = audit_response.json()
+    assert any(item["action"] == "hospital_daily_sheet.created" for item in events)
+    update_event = next(
+        item for item in events if item["action"] == "hospital_daily_sheet.updated"
+    )
+    assert update_event["extra_data"]["patient_id"] == patient_id
+    assert update_event["extra_data"]["encounter_id"] == encounter_id
+    assert update_event["extra_data"]["before"] == {
+        "active_plan": "Continuar observacion clinica."
+    }
+    assert update_event["extra_data"]["after"] == {
+        "active_plan": "Mantener plan y preparar reevaluacion."
+    }
+
+
+def test_hospital_daily_sheet_requires_active_hospitalization(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": "2026-06-20",
+            "clinical_summary": "Intento sin ingreso activo.",
+        },
+    )
+
+    assert response.status_code == 409
+
+
+def test_hospital_daily_sheet_write_requires_medical_role(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso activo",
+            "started_at": "2026-06-20T07:00:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+
+    list_response = client.get(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=nursing_auth,
+    )
+    assert list_response.status_code == 200
+
+    create_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=nursing_auth,
+        json={
+            "sheet_date": "2026-06-20",
+            "clinical_summary": "Enfermeria no debe crear hoja medica.",
+        },
+    )
+    assert create_response.status_code == 403

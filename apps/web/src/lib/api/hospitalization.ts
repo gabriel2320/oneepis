@@ -3,6 +3,9 @@ import type {
   HospitalBed,
   HospitalBedCreate,
   HospitalBedUpdate,
+  HospitalDailySheet,
+  HospitalDailySheetCreate,
+  HospitalDailySheetUpdate,
   HospitalizationBoardItem,
 } from "@/lib/types";
 
@@ -26,4 +29,34 @@ export function updateHospitalBed(bedId: string, payload: HospitalBedUpdate) {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
+}
+
+export function listHospitalDailySheets(patientId: string) {
+  return apiFetch<HospitalDailySheet[]>(
+    `/api/v1/hospitalization/patients/${patientId}/daily-sheets?limit=30`,
+  );
+}
+
+export function createHospitalDailySheet(patientId: string, payload: HospitalDailySheetCreate) {
+  return apiFetch<HospitalDailySheet>(
+    `/api/v1/hospitalization/patients/${patientId}/daily-sheets`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateHospitalDailySheet(
+  patientId: string,
+  sheetId: string,
+  payload: HospitalDailySheetUpdate,
+) {
+  return apiFetch<HospitalDailySheet>(
+    `/api/v1/hospitalization/patients/${patientId}/daily-sheets/${sheetId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
 }

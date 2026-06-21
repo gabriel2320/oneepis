@@ -49,10 +49,6 @@ export function RoundList() {
   return <EmptyState title="Rondas" description="Vista reservada para trabajo hospitalizado diario." />;
 }
 
-export function DailySheet() {
-  return <EmptyState title="Hoja diaria" description="Se conectara al resumen por paciente hospitalizado." />;
-}
-
 function formatHospitalBed(item: HospitalizationBoardItem) {
   if (item.bed) {
     return `${item.bed.ward} / ${item.bed.room} / Cama ${item.bed.bed_label}`;

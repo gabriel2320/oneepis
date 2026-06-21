@@ -275,6 +275,32 @@ export type HospitalizationBoardItem = {
   bed?: HospitalBed | null;
 };
 
+export type HospitalDailySheet = {
+  id: string;
+  patient_id: string;
+  encounter_id: string;
+  sheet_date: string;
+  clinical_summary: string;
+  overnight_events?: string | null;
+  active_plan?: string | null;
+  pending_tasks?: string | null;
+  safety_notes?: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HospitalDailySheetCreate = {
+  sheet_date: string;
+  clinical_summary: string;
+  overnight_events?: string | null;
+  active_plan?: string | null;
+  pending_tasks?: string | null;
+  safety_notes?: string | null;
+};
+
+export type HospitalDailySheetUpdate = Partial<HospitalDailySheetCreate>;
+
 export type PatientRecordSnapshot = {
   patient: Patient;
   latest_vitals?: VitalSign | null;

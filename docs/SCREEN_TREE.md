@@ -52,8 +52,8 @@ Estado:
 - el tablero prefiere cama estructurada `sala / habitacion / cama` cuando existe.
 - `/hospitalizacion/camas/nueva` crea camas y puede asignar un ingreso activo sin cama.
 - `/hospitalizacion/camas` permite asignar ingresos activos sin cama a una cama disponible.
-- rondas, hoja diaria e indicaciones siguen preparadas, sin escrituras clinicas propias.
-- proximo crecimiento permitido: hoja diaria o indicaciones, una sola pieza, con PostgreSQL, API, permisos, auditoria, OpenAPI, UI minima y print si corresponde.
+- hoja diaria hospitalizada ya tiene escritura clinica propia con PostgreSQL, API, permisos, auditoria, OpenAPI, UI minima y print.
+- rondas e indicaciones siguen preparadas; indicaciones no deben entrar sin firma, permisos y reglas clinicas claras.
 
 ## Consulta
 

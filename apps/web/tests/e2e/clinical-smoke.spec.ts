@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const demoPatientId = "11111111-1111-4111-8111-111111111111";
+const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
 
 test("patient ficha renders clinical shell and AI draft area", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
@@ -45,6 +46,15 @@ test("hospitalization beds render active board", async ({ page }) => {
   await page.getByRole("link", { name: "Nueva cama" }).click();
   await expect(page.getByRole("heading", { name: "Nueva cama" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar cama" })).toBeDisabled();
+});
+
+test("hospital daily sheet renders patient workspace", async ({ page }) => {
+  await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria`);
+
+  await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
+  await expect(page.getByText("Hoja diaria 2026-06-20")).toBeVisible();
+  await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar hoja diaria" })).toBeDisabled();
 });
 
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
