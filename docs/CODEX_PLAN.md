@@ -51,16 +51,14 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-048: Retiro de legacy demo frontend.
 - PR-049: Dieta UI sin cambiar conducta.
 - PR-050: Dieta IA backend sin cambiar endpoints.
+- PR-051: Dieta tests API por dominio sin reducir cobertura.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-050: el core esta sano para seguir, pero antes de sumar mas
-clinica conviene retirar deuda temprana de tests y evitar capas preparadas sin flujo completo.
+Auditoria posterior a PR-051: el core esta sano para seguir, y las dietas principales
+de frontend, backend, IA y tests ya quedaron hechas. El proximo paso debe ser una sola
+pieza clinica completa, no un modulo a medias.
 
-- PR-051: Dieta tests API.
-  - Dividir `test_patient_record_e2e.py` por dominio: paciente, permisos, auditoria,
-    IA, encuentros y hospitalizacion.
-  - No reducir cobertura.
 - PR-052: Elegir crecimiento clinico minimo.
   - Recomendacion: hoja diaria hospitalizada antes que indicaciones.
   - Indicaciones quedan postergadas por riesgo de orden clinica, firma y reglas medicas.

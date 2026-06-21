@@ -92,9 +92,14 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
+Tests API:
+
+- fixtures compartidas en `apps/api/tests/conftest.py`
+- cobertura paciente separada por dominios: ficha, permisos, auditoria, IA, encuentros y hospitalizacion
+
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
-- `test_patient_record_e2e.py` concentra demasiada cobertura API y debe separarse por dominio.
+- no agregar nueva clinica core sin flujo completo PostgreSQL/API/permisos/auditoria/OpenAPI/UI
 
 ## Programa activo PR-018 a PR-052
 
