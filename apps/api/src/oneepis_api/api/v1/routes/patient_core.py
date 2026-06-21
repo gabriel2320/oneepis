@@ -26,6 +26,7 @@ from .patient_shared import (
     SettingsDep,
     apply_update,
     require_patient,
+    validate_development_patient_data,
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
@@ -41,7 +42,13 @@ def list_patients(
 
 
 @router.post("", response_model=PatientRead, status_code=status.HTTP_201_CREATED)
-def create_patient(payload: PatientCreate, session: SessionDep, actor: PatientActorDep) -> Patient:
+def create_patient(
+    payload: PatientCreate,
+    session: SessionDep,
+    actor: PatientActorDep,
+    settings: SettingsDep,
+) -> Patient:
+    validate_development_patient_data(settings, payload)
     patient = Patient(**payload.model_dump())
     session.add(patient)
     session.flush()
@@ -69,7 +76,9 @@ def update_patient(
     payload: PatientUpdate,
     session: SessionDep,
     actor: PatientActorDep,
+    settings: SettingsDep,
 ) -> Patient:
+    validate_development_patient_data(settings, payload)
     patient = require_patient(session, patient_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(patient, update_fields)

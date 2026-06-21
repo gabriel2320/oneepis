@@ -47,6 +47,12 @@ Auth local:
 - IA clinica requiere `admin`, `medico` o `dev`
 - fuera de `development`, la API rechaza secreto default, usuarios default, actor dev y auth desactivada
 
+Higiene local:
+
+- en `development`, la API rechaza escrituras de paciente con terminos de fixtures externos conocidos
+- esta guardia evita recontaminar PostgreSQL local con datos de proyectos previos
+- no reemplaza permisos, auditoria ni limpieza manual de bases ya contaminadas
+
 Permisos finos:
 
 - matriz viva en `docs/PERMISSIONS.md`
@@ -118,6 +124,7 @@ Tests API:
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - no agregar nueva clinica core sin flujo completo PostgreSQL/API/permisos/auditoria/OpenAPI/UI
+- sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
@@ -128,8 +135,9 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - `main` limpio y alineado con `origin/main`.
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima y atencion ambulatoria minima.
+- Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - `npm run check` pasa completo: API 44 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 23 passed / 1 skip esperado.
-- Siguiente paso recomendado: PR-063 evaluar read-model hospitalario.
+- Siguiente paso recomendado: fortalecer temas visuales v2 sin crear dashboards ni nuevas dependencias.
 
 ## Programa activo PR-018 a PR-062
 
@@ -178,6 +186,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-060: Politica de indicaciones y receta sin producto nuevo.
 - PR-061: Indicacion hospitalaria minima como borrador gobernado.
 - PR-062: Consulta ambulatoria minima sobre encuentro y SOAP existentes.
+- PR-063: Guardia local anti-contaminacion y entrada `/pacientes` como mesa clinica sobria.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

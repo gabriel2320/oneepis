@@ -87,6 +87,13 @@ OneEpis ya tiene una base clinica E2E real:
   crea encuentro ambulatorio y evolucion SOAP vinculada.
 - No se creo agenda productiva ni API nueva para consulta.
 
+### PR-063: limpieza de identidad local
+
+- Se detecto contaminacion de datos de desarrollo con fixtures externos en PostgreSQL local.
+- Se limpio la base local y se agrego una guardia `development` para rechazar nombres de paciente con terminos de proyectos previos conocidos.
+- La entrada `/pacientes` se reafirmo como mesa clinica sobria, no como dashboard ni landing page.
+- El siguiente bloque debe mejorar temas visuales sin sumar dependencias ni capas nuevas.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
@@ -98,11 +105,11 @@ OneEpis ya tiene una base clinica E2E real:
 
 ## Proximo rumbo
 
-El siguiente crecimiento recomendado es PR-063:
+El siguiente crecimiento recomendado despues de PR-063:
 
-- evaluar si hospitalizacion necesita un read-model backend para rondas/indicaciones;
-- hacerlo solo si reduce duplicacion real de consultas frontend;
-- no crear dashboard nuevo;
+- fortalecer temas visuales v2 con tokens clinicos reales;
+- sostener `/pacientes` como mesa clinica de entrada;
+- no crear dashboard nuevo ni laboratorio visual pegado al core;
 - mantener paciente, ficha y papel como centro.
 
 Despues de eso, cualquier expansion debe pasar por la escalera OneEpis:

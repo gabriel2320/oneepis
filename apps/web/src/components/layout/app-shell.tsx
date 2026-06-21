@@ -7,7 +7,6 @@ import {
   BedDouble,
   CalendarDays,
   ClipboardList,
-  LayoutDashboard,
   Settings,
   UserRound,
 } from "lucide-react";
@@ -42,7 +41,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               <span>
                 <span className="block text-sm font-semibold">OneEpis</span>
-                <span className="block text-xs text-muted-foreground">Ficha clinica</span>
+                <span className="block text-xs text-muted-foreground">Paciente / ficha / papel</span>
               </span>
             </Link>
           </div>
@@ -84,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       >
         <div className="flex items-center justify-between gap-3">
           <Link href="/pacientes" className="flex items-center gap-2 text-sm font-semibold">
-            <LayoutDashboard className="h-4 w-4" />
+            <ClipboardList className="h-4 w-4" />
             OneEpis
           </Link>
           <div className="flex items-center gap-2">

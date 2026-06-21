@@ -82,6 +82,7 @@ Papel obligatorio:
 - Manten los modulos enfocados en una responsabilidad clinica o tecnica.
 - Evita abstracciones genericas hasta que haya dos usos reales.
 - No aceptes fixtures con datos sensibles o realistas.
+- No aceptes fixtures, seeds o pacientes de desarrollo con nombres de proyectos previos.
 - No crees un documento nuevo si puedes actualizar uno existente.
 - No agregues scripts nuevos si un comando existente puede expresar el gate.
 - Actualiza OpenAPI cuando cambie la API.

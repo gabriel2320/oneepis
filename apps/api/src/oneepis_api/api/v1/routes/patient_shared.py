@@ -23,6 +23,7 @@ PATIENT_ROUTER_OPTIONS = {
     "tags": ["patients"],
     "dependencies": [Depends(require_patient_read_access)],
 }
+FOREIGN_PROJECT_PATIENT_TERMS = ("evolab", "pacmed")
 
 
 def require_patient(session: Session, patient_id: uuid.UUID) -> Patient:
@@ -66,3 +67,26 @@ def apply_update(model: object, payload: object) -> list[str]:
     for field, value in update_data.items():
         setattr(model, field, value)
     return sorted(update_data.keys())
+
+
+def validate_development_patient_data(settings: Settings, payload: object) -> None:
+    if settings.environment.strip().lower() != "development":
+        return
+
+    data = payload.model_dump(exclude_unset=True)
+    values = [
+        str(data.get(field) or "")
+        for field in ("first_name", "last_name", "preferred_name", "clinical_identifier")
+    ]
+    normalized = " ".join(values).lower()
+    matches = [term for term in FOREIGN_PROJECT_PATIENT_TERMS if term in normalized]
+    if not matches:
+        return
+
+    raise HTTPException(
+        status_code=422,
+        detail=(
+            "Local development patient data appears to contain foreign project "
+            f"fixture terms: {', '.join(matches)}"
+        ),
+    )
