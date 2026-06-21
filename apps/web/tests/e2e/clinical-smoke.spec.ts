@@ -48,6 +48,19 @@ test("hospitalization beds render active board", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Guardar cama" })).toBeDisabled();
 });
 
+test("hospital rounds render active read-only worklist", async ({ page }) => {
+  await page.goto("/hospitalizacion/rondas");
+
+  await expect(page.getByRole("heading", { name: "Rondas" })).toBeVisible();
+  await expect(page.getByText("Ronda activa")).toBeVisible();
+  await expect(page.getByText("Paciente Demo Beta")).toBeVisible();
+  await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
+  await expect(page.getByText("Ultima hoja diaria 2026-06-20")).toBeVisible();
+  await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
+  await expect(page.getByText("Ingreso sin cama demo")).toBeVisible();
+  await expect(page.getByText("Sin hoja diaria para este ingreso")).toBeVisible();
+});
+
 test("hospital daily sheet renders patient workspace", async ({ page }) => {
   await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria`);
 

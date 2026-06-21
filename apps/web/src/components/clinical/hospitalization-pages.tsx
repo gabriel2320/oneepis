@@ -24,7 +24,7 @@ export function HospitalHomePage() {
           <HospitalizationBoardContent board={board} />
         </ClinicalSectionCard>
         <ClinicalSectionCard title="Rondas">
-          <RoundList />
+          <RoundList board={board} />
         </ClinicalSectionCard>
       </div>
     </ModulePage>
@@ -32,10 +32,15 @@ export function HospitalHomePage() {
 }
 
 export function HospitalRoundsPage() {
+  const board = useHospitalizationBoard();
+
   return (
-    <ModulePage title="Rondas" description="Lista de rondas para pacientes hospitalizados.">
-      <ClinicalSectionCard title="RoundList">
-        <RoundList />
+    <ModulePage title="Rondas" description="Lectura diaria de pacientes hospitalizados activos.">
+      <ClinicalSectionCard
+        title="Ronda activa"
+        description="Pacientes, cama, ultimo registro diario y accesos a ficha/papel."
+      >
+        <RoundList board={board} />
       </ClinicalSectionCard>
     </ModulePage>
   );
