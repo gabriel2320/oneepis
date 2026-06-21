@@ -1,5 +1,5 @@
-import { VisitPage } from "@/components/clinical/module-pages";
+import { AmbulatoryVisitPage } from "@/components/clinical/ambulatory-visit-pages";
 
 export default function Page() {
-  return <VisitPage />;
+  return <AmbulatoryVisitPage />;
 }

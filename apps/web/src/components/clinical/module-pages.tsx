@@ -45,16 +45,6 @@ export function AppointmentPage() {
   );
 }
 
-export function VisitPage() {
-  return (
-    <ModulePage title="Atencion" description="Workspace de consulta ambulatoria por paciente.">
-      <ClinicalSectionCard title="VisitWorkspace">
-        <VisitWorkspace />
-      </ClinicalSectionCard>
-    </ModulePage>
-  );
-}
-
 export function AmbulatorySummaryPage() {
   return (
     <ModulePage title="Resumen ambulatorio" description="Vista longitudinal por paciente.">

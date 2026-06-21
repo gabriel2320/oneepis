@@ -92,6 +92,16 @@ test("hospital indications render governed draft workspace", async ({ page }) =>
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeDisabled();
 });
 
+test("ambulatory visit renders linked encounter workspace", async ({ page }) => {
+  await page.goto(`/consulta/pacientes/${demoPatientId}/atencion`);
+
+  await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
+  await expect(page.getByText("Encuentro ambulatorio y evolucion SOAP vinculada.")).toBeVisible();
+  await expect(page.getByText("Encuentro demo")).toBeVisible();
+  await expect(page.getByText("Control clinico demo")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
+});
+
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 

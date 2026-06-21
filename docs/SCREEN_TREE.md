@@ -71,7 +71,9 @@ Estado:
 
 Estado:
 
-- rutas creadas con widgets base: `AppointmentList`, `VisitWorkspace`, resumen longitudinal preparado.
+- `/consulta/pacientes/[patientId]/atencion` crea atencion ambulatoria minima usando encuentro y SOAP vinculada.
+- `/consulta/agenda` sigue preparada, sin agenda productiva.
+- `/consulta/pacientes/[patientId]/resumen` sigue preparado; la ficha paciente mantiene el resumen longitudinal principal.
 
 ## Configuracion
 

@@ -86,6 +86,12 @@ Hospitalizacion:
 - receta ya tiene politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tiene modelo, endpoint ni firma real
 - aun no existen indicaciones firmadas, recetas validas ni rondas con escritura clinica propia
 
+Consulta:
+
+- `/consulta/pacientes/{patient_id}/atencion` usa endpoints existentes para crear encuentro ambulatorio y evolucion SOAP vinculada
+- no hay agenda productiva todavia; `/consulta/agenda` sigue como borde preparado
+- resumen ambulatorio dedicado sigue preparado; la ficha paciente continua siendo el centro longitudinal
+
 ## Frontend
 
 Rutas App Router bajo `apps/web/src/app`.
@@ -99,6 +105,7 @@ Capas:
 - `src/components/layout/app-shell.tsx`: navegacion global
 - `src/components/clinical/patient-clinical-shell.tsx`: mesa clinica por paciente
 - `src/components/clinical/patient-*-pages.tsx`: pantallas paciente importadas directo por App Router
+- `src/components/clinical/ambulatory-visit-pages.tsx`: atencion ambulatoria minima sobre encuentros y SOAP
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 
@@ -113,18 +120,18 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - no agregar nueva clinica core sin flujo completo PostgreSQL/API/permisos/auditoria/OpenAPI/UI
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
-- `/consulta/*`, documentos, receta e indicaciones siguen como bordes preparados; no expandir todos a la vez.
+- `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
 ## Auditoria rapida 2026-06-21
 
 - `main` limpio y alineado con `origin/main`.
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta e indicacion minima.
-- `npm run check` pasa completo: API 44 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 21 passed / 1 skip esperado.
-- Siguiente paso recomendado: PR-062 consulta ambulatoria minima.
+- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima y atencion ambulatoria minima.
+- `npm run check` pasa completo: API 44 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 23 passed / 1 skip esperado.
+- Siguiente paso recomendado: PR-063 evaluar read-model hospitalario.
 
-## Programa activo PR-018 a PR-061
+## Programa activo PR-018 a PR-062
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -170,6 +177,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-059: Fecha clinica local para hoja diaria hospitalizada.
 - PR-060: Politica de indicaciones y receta sin producto nuevo.
 - PR-061: Indicacion hospitalaria minima como borrador gobernado.
+- PR-062: Consulta ambulatoria minima sobre encuentro y SOAP existentes.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
