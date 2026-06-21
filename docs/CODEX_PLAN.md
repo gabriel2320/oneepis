@@ -55,17 +55,19 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-052: Hoja diaria hospitalizada minima con PostgreSQL, API, auditoria, UI y print.
 - PR-053: Edicion UI dedicada para hoja diaria hospitalizada.
 - PR-054: Estado `draft/closed` y bloqueo de edicion en hoja diaria.
+- PR-055: Reglas de fecha/encuentro para hoja diaria hospitalizada.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-054: hoja diaria ya tiene ciclo minimo crear, editar, cerrar,
+Auditoria posterior a PR-055: hoja diaria ya tiene ciclo minimo crear, editar, cerrar,
 listar e imprimir. Cerrar bloquea edicion posterior, pero no equivale a firma legal.
+La fecha de hoja diaria debe quedar dentro de la ventana del ingreso hospitalario.
 El siguiente paso no debe ser indicaciones todavia si no se resuelve firma/permisos/reglas
 clinicas de ordenes.
 
-- PR-055: Decidir siguiente endurecimiento hospitalario.
-  - Opcion preferida: revisar reglas de fecha/encuentro de hoja diaria antes de rondas.
-  - Alternativa: rondas de lectura sin escritura clinica nueva.
+- PR-056: Rondas de lectura hospitalaria, si entra como vista sin nueva escritura clinica.
+  - Preferir lectura de ingresos activos, ultimas hojas diarias y alertas existentes.
+  - No crear tablas ni endpoints nuevos si el flujo puede leerse desde lo ya auditado.
   - No introducir indicaciones hasta tener politica clara de firma y orden clinica.
 
 ## Reglas no negociables

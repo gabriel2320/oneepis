@@ -77,6 +77,7 @@ Hospitalizacion:
 - camas disponibles pueden asignarse a ingresos activos sin cama; una cama ocupada debe liberarse antes de reasignarse
 - hoja diaria hospitalizada tiene PostgreSQL, API, permisos, auditoria, OpenAPI, crear/listar/editar/cerrar UI y print
 - estado de hoja diaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
+- fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado
 - aun no existen indicaciones ni rondas auditadas
 
 ## Frontend
@@ -143,6 +144,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-052: Hoja diaria hospitalizada minima y auditable.
 - PR-053: Edicion UI dedicada para hoja diaria hospitalizada.
 - PR-054: Estado `draft/closed` y bloqueo de edicion en hoja diaria.
+- PR-055: Reglas de fecha/encuentro para hoja diaria hospitalizada.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

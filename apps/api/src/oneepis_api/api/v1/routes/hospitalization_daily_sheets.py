@@ -70,6 +70,7 @@ def create_hospital_daily_sheet(
         encounter_id=encounter.id,
         created_by=actor,
     )
+    _validate_daily_sheet_date_for_encounter(sheet, encounter)
     _validate_daily_sheet_unique(session, sheet)
     session.add(sheet)
     session.flush()
@@ -103,6 +104,7 @@ def update_hospital_daily_sheet(
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(sheet, fields)
     changed_fields = apply_update(sheet, payload)
+    _validate_daily_sheet_date_for_encounter(sheet, sheet.encounter)
     _validate_daily_sheet_unique(session, sheet)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
@@ -172,6 +174,22 @@ def _validate_daily_sheet_unique(session: Session, sheet: HospitalDailySheet) ->
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Daily sheet already exists for this hospitalization date",
+        )
+
+
+def _validate_daily_sheet_date_for_encounter(
+    sheet: HospitalDailySheet,
+    encounter: ClinicalEncounter,
+) -> None:
+    if sheet.sheet_date < encounter.started_at.date():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Daily sheet date cannot be before hospitalization start",
+        )
+    if encounter.ended_at is not None and sheet.sheet_date > encounter.ended_at.date():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Daily sheet date cannot be after hospitalization end",
         )
 
 
