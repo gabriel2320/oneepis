@@ -62,12 +62,31 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 
 Auditoria posterior a PR-056: rondas ya existe como vista de lectura desde ingresos activos,
 camas y ultimas hojas diarias. No crea tablas, endpoints ni escritura clinica nueva.
+`npm run check` pasa completo: API, web, OpenAPI y E2E.
 El siguiente paso no debe ser indicaciones todavia si no se resuelve firma/permisos/reglas
 clinicas de ordenes.
 
-- PR-057: Decidir si el siguiente bloque es print/lectura hospitalaria o politica de indicaciones.
-  - Preferir mejorar lectura/papel sobre nueva escritura clinica.
-  - No introducir indicaciones hasta tener politica clara de firma y orden clinica.
+- PR-057: Dieta tests hospitalizacion.
+  - Dividir `apps/api/tests/test_hospitalization.py` en board, camas y hoja diaria.
+  - No cambiar endpoints, OpenAPI ni comportamiento.
+  - Mantener cobertura de permisos, auditoria, cierre y reglas de fecha.
+- PR-058: Papel hospitalario de ronda.
+  - Crear impresion de ronda diaria desde ingresos activos, camas y ultimas hojas diarias.
+  - No crear escritura clinica ni endpoint nuevo si puede leerse desde datos existentes.
+  - Footer dev obligatorio y smoke Playwright.
+- PR-059: Fecha clinica local.
+  - Definir regla de fecha hospitalaria local para hoja diaria.
+  - Aclarar UTC vs fecha operacional Chile antes de sumar mas reglas temporales.
+  - Ajustar tests si la decision cambia el comportamiento.
+- PR-060: Politica de indicaciones y receta.
+  - Documento corto en docs existentes: orden, borrador, firma, cierre, permisos y papel.
+  - Sin modelos ni endpoints todavia.
+- PR-061: Indicacion minima solo si PR-060 queda cerrado.
+  - Entraria como borrador gobernado, no orden firmada.
+  - Debe incluir PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel si corresponde.
+- PR-062: Consulta ambulatoria minima.
+  - Elegir una pieza: atencion vinculada a encuentro, no agenda completa.
+  - Mantener paciente/ficha/papel como centro.
 
 ## Reglas no negociables
 
