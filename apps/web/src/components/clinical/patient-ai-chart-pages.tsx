@@ -349,6 +349,7 @@ function DraftSoapPaper({
 }) {
   const providerStatus = draft.ai_available ? "IA generativa activa" : "Modo estructurado sin IA";
   const certainty = draft.sources.length > 0 ? "moderada" : "baja";
+  const [humanReviewed, setHumanReviewed] = useState(false);
   return (
     <ClinicalSectionCard
       title="Hoja carta SOAP"
@@ -357,7 +358,7 @@ function DraftSoapPaper({
         <Button
           type="button"
           size="sm"
-          disabled={isSaving || DEMO_MODE || !canWriteSoap}
+          disabled={isSaving || DEMO_MODE || !canWriteSoap || !humanReviewed}
           onClick={onSave}
         >
           <Save className="h-4 w-4" />
@@ -455,9 +456,18 @@ function DraftSoapPaper({
             )}
           </SmartMarginBlock>
           <SmartMarginBlock title="Acciones humanas">
-            <ul className="space-y-1">
+            <label className="flex gap-2">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={humanReviewed}
+                onChange={(event) => setHumanReviewed(event.target.checked)}
+              />
+              <span>Revise y asumo guardar este texto como borrador clinico.</span>
+            </label>
+            <ul className="mt-2 space-y-1">
               <li>Editar texto antes de guardar.</li>
-              <li>Guardar como borrador clinico.</li>
+              <li>Guardar solo como borrador no firmado.</li>
               <li>Firmar solo en flujo humano futuro.</li>
             </ul>
           </SmartMarginBlock>

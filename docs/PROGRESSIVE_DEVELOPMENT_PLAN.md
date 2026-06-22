@@ -64,6 +64,7 @@ Implementado hasta ahora:
 - intencion `draft_soap` genera hoja SOAP editable desde fuentes de eventos sin guardar
 - panel compacto de cambios 24 h visible antes del margen detallado
 - reglas de examenes aceptan payload estructurado `results[]` sin leer texto libre
+- guardado de SOAP generado exige marca visual de revision humana
 
 Siguiente incremento:
 

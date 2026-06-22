@@ -73,6 +73,7 @@ OneEpis ya muestra en AI-Chart:
 - barra conversacional dirigida que mueve el AI-Chart al ejecutar intenciones
 - intencion de evolucion abre hoja SOAP editable desde fuentes visibles
 - panel compacto de cambios 24 h en el cuerpo principal de la respuesta
+- guardado de hoja SOAP generado bloqueado hasta revision humana explicita
 - estado IA generativa activa/degradada/apagada
 
 ## Pendiente visual inmediato
