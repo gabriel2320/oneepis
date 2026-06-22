@@ -90,6 +90,40 @@ Antes de crear una feature, pantalla, endpoint, dependencia o documento, respond
 
 Si una respuesta es "no" o "todavia no", no lo agregues al core. Dejale una nota breve en el plan vivo si realmente importa.
 
+## Algoritmo Anti-Engorda
+
+Usa este algoritmo antes de cualquier avance automatico de fase:
+
+1. Identifica la fase activa en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`.
+2. Elige un solo incremento que mejore esa fase sin abrir otra superficie.
+3. Rechaza el incremento si necesita dashboard, chat libre, RAG, IA externa, documento nuevo o modulo nuevo.
+4. Rechaza el incremento si no puede verse, revisarse o auditarse en una pantalla existente.
+5. Reusa API, componentes, servicios y tests existentes antes de crear archivos.
+6. Si un archivo existente supera el presupuesto, extrae primero una pieza pequena y luego agrega comportamiento.
+7. Si la feature escribe ficha, debe pasar por API, permisos, auditoria, OpenAPI y confirmacion humana.
+8. Si la feature solo infiere, debe mostrar fuente, razon, faltante o limite.
+9. Si no hay prueba enfocada posible, reduce el alcance hasta que exista.
+10. Actualiza solo los documentos canonicos afectados.
+
+Salida obligatoria de cada incremento:
+
+- un cambio funcional pequeno
+- una prueba o gate que cubra el comportamiento
+- diff sin archivos ajenos
+- contrato actualizado solo si cambio la API
+- plan vivo actualizado solo si cambia el estado real
+
+Reglas duras de no engorda:
+
+- No crear carpeta nueva para una sola funcion.
+- No crear componente nuevo si el bloque entra limpio en un componente existente.
+- No crear endpoint nuevo si una intencion o ruta existente puede expresar el caso.
+- No crear documento nuevo si `CURRENT_STATE`, `GOVERNANCE`, `PROGRESSIVE_DEVELOPMENT_PLAN` o `AI_CHART_CORE` pueden absorber la decision.
+- No sumar dependencia para reglas, parsing o UI que el stack actual ya resuelve.
+- No mover codigo a paquete compartido hasta que existan dos consumidores reales.
+- No dejar placeholders, pantallas puente ni rutas vacias.
+- No mezclar refactor grande con feature clinica.
+
 ## Politica de Indicaciones y Receta
 
 Indicaciones y recetas son escritura clinica de alto riesgo. No entran al core como pantalla suelta, laboratorio IA ni impresion decorativa.

@@ -30,6 +30,49 @@ No se avanza a una fase si la anterior no conserva:
 - degradacion sin Ollama
 - correlato visual editable o confirmable
 
+## Algoritmo de Complejizacion
+
+Cada ciclo automatico de desarrollo debe complejizar solo una dimension:
+
+```text
+leer estado -> elegir fase activa -> escoger una brecha -> reducir alcance
+-> implementar en superficie existente -> validar -> documentar estado real
+```
+
+Selector de brecha:
+
+1. Toma el primer item de `Trabajo` de la fase activa que pueda resolverse sin nueva superficie.
+2. Si requiere API nueva, verifica antes que no quepa en una ruta existente.
+3. Si requiere UI nueva, verifica antes que no quepa en un panel existente.
+4. Si requiere modelo nuevo, verifica antes que no pueda expresarse como evento, patch, evidencia, pendiente o fuente.
+5. Si requiere dependencia nueva, detente y registra la justificacion en el PR antes de implementar.
+
+Reglas de alcance por ciclo:
+
+- maximo una conducta clinica nueva
+- maximo una superficie UI tocada
+- maximo una familia de tests tocada
+- cero rutas placeholder
+- cero documentos nuevos salvo decision arquitectonica imposible de absorber
+- cero escritura clinica sin `ClinicalPatch` o endpoint canonico con auditoria
+
+Orden de preferencia para complejizar:
+
+1. Mejorar explicacion de inferencias existentes.
+2. Vincular inferencias con fuentes visibles.
+3. Reducir falsos positivos o ambiguedad clinica.
+4. Agregar faltantes contextuales por dominio.
+5. Ampliar reglas deterministicas con datos ya modelados.
+6. Solo despues agregar nuevo contrato API.
+
+Condiciones de cierre:
+
+- la fase activa queda mas explicable o mas segura
+- no aumenta el numero de modulos conceptuales
+- el usuario clinico ve el cambio en una pantalla existente
+- los gates relevantes pasan
+- `CURRENT_STATE` y este plan coinciden con lo que realmente existe
+
 ## Estado Actual
 
 OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La base ya permite:
