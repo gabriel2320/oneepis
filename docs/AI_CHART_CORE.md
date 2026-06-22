@@ -20,6 +20,7 @@ paciente -> encuentro -> eventos clinicos -> contexto -> borrador SOAP
 - Todo borrador expone fuentes, faltantes, certeza y auditoria.
 - Todo borrador SOAP expone trazabilidad por seccion S/O/A/P.
 - El contexto por problema debe explicar por que una fuente fue asociada o quedo pendiente.
+- Si existen codigos SNOMED CT, el contexto puede usar payloads derivados de un repositorio terminologico externo licenciado; no se versionan releases completos en este repo.
 - Ollama es opcional; Nivel 0 debe funcionar con reglas locales.
 - Toda inteligencia debe tener representacion visual y accion humana.
 - Next Route Handlers pueden transmitir vistas previas de interaccion, pero no son autoridad clinica.

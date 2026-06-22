@@ -46,6 +46,7 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La ba
 - mostrar faltantes contextualizados por atencion ambulatoria, hospitalizada o desconocida
 - detectar curso clinico narrativo como mejora o empeoramiento desde eventos recientes
 - asociar evidencia a problemas por vocabulario clinico local explicable, no solo texto literal
+- usar codigos SNOMED CT y payloads derivados de repositorios terminologicos externos cuando existan
 
 El proximo trabajo puede preparar Fase 2 solo si conserva esta base. No agregar
 chat libre, RAG, documentos o IA externa como atajo.
@@ -234,10 +235,12 @@ Implementado inicial:
 - `missing_data` describe por que falta el dato y ajusta baseline/signos vitales segun contexto asistencial
 - eventos recientes con lenguaje de mejoria o empeoramiento generan reglas locales visibles en `Curso clinico`
 - asociaciones por problema usan vocabulario local inicial por dominios respiratorio, dolor, fiebre, hipertension y diabetes
+- si un problema tiene `code_system=SNOMED-CT` y el evento trae conceptos/ancestros SNOMED desde un repositorio externo, el Context Builder prioriza esa asociacion explicable
 
 Trabajo:
 
 - ampliar vocabulario local por problema y revisar falsos positivos
+- conectar un repositorio RF2/terminology server SNOMED CT licenciado como fuente externa, sin versionar releases completos
 - ampliar reglas explicitas de mejoria/empeoramiento por dominio
 - ampliar faltantes por tipo de atencion a dominios especificos
 - comparacion 24 h con datos estructurados

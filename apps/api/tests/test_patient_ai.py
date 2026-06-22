@@ -60,6 +60,8 @@ def _create_problem(
     *,
     title: str,
     notes: str | None = None,
+    code_system: str | None = None,
+    code: str | None = None,
 ) -> str:
     response = client.post(
         f"/api/v1/patients/{patient_id}/problems",
@@ -68,6 +70,8 @@ def _create_problem(
             "title": title,
             "onset_date": "2026-06-01",
             "notes": notes,
+            "code_system": code_system,
+            "code": code,
         },
     )
     assert response.status_code == 201
@@ -81,6 +85,7 @@ def _create_event(
     *,
     summary: str,
     occurred_at: str = "2026-06-20T12:00:00Z",
+    payload: dict | None = None,
 ) -> str:
     response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-events",
@@ -90,6 +95,7 @@ def _create_event(
             "occurred_at": occurred_at,
             "summary": summary,
             "source_type": "manual",
+            "payload": payload or {},
         },
     )
     assert response.status_code == 201
@@ -233,6 +239,53 @@ def test_context_builder_links_problem_by_local_clinical_vocabulary(
         "Evento asociado por vocabulario clinico local: respiratorio."
     )
     assert any("vocabulario clinico local" in item for item in structured["explanations"])
+    assert not any(context["status"] == "unlinked" for context in contexts)
+
+
+def test_context_builder_links_problem_by_snomed_repository_payload(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = _create_patient(client, auth, first_name="Contexto", last_name="Snomed")
+    problem_id = _create_problem(
+        client,
+        auth,
+        patient_id,
+        title="Neumonia adquirida en comunidad",
+        code_system="SNOMED-CT",
+        code="233604007",
+    )
+    event_id = _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Disnea en disminucion.",
+        payload={
+            "snomed_concepts": [
+                {
+                    "concept_id": "267036007",
+                    "term": "Dyspnea",
+                    "ancestor_ids": ["233604007"],
+                    "repository": "external-rf2-or-terminology-server",
+                }
+            ]
+        },
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert response.status_code == 200
+    contexts = response.json()["problem_contexts"]
+    structured = next(context for context in contexts if context["problem_id"] == problem_id)
+    assert structured["evidence"][0]["source_id"] == event_id
+    assert structured["evidence"][0]["detail"] == (
+        "Evento asociado por ancestro SNOMED CT desde repositorio terminologico."
+    )
     assert not any(context["status"] == "unlinked" for context in contexts)
 
 

@@ -131,6 +131,7 @@ Papel obligatorio:
 - Evita abstracciones genericas hasta que haya dos usos reales.
 - No aceptes fixtures con datos sensibles o realistas.
 - No aceptes fixtures, seeds o pacientes de desarrollo con nombres de proyectos previos.
+- No copies releases completos de SNOMED CT dentro del repo; usa codigos en ficha y repositorios/servidores terminologicos externos licenciados.
 - No crees un documento nuevo si puedes actualizar uno existente.
 - No agregues scripts nuevos si un comando existente puede expresar el gate.
 - Actualiza OpenAPI cuando cambie la API.

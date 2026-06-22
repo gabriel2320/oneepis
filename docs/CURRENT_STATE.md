@@ -132,6 +132,7 @@ Capas:
 - AI-Chart muestra faltantes con razon y contexto asistencial, no solo nombres de datos ausentes
 - AI-Chart agrupa reglas narrativas de mejoria/empeoramiento como `Curso clinico`
 - AI-Chart asocia problemas con eventos por vocabulario clinico local explicable cuando no hay coincidencia literal
+- AI-Chart prioriza asociaciones SNOMED CT cuando el problema trae codigo y el evento incluye conceptos/ancestros derivados de repositorios terminologicos externos licenciados
 - AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia
 - Propuestas desde evolucion muestran estado visible `pendiente`, `registrando`, `registrada en ficha` o `rechazada` antes y despues de confirmar el `ClinicalPatch`
 - Las decisiones de propuesta se consideran durables via auditoria; la UI mantiene estado local de sesion para operacion inmediata
