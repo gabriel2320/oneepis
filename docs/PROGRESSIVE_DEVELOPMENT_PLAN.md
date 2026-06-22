@@ -235,6 +235,7 @@ Implementado inicial:
 - `missing_data` describe por que falta el dato y ajusta baseline/signos vitales segun contexto asistencial
 - eventos recientes con lenguaje de mejoria o empeoramiento generan reglas locales visibles en `Curso clinico`
 - el curso clinico identifica dominios iniciales cuando hay senal textual suficiente: respiratorio, dolor, infeccioso, hemodinamico, metabolico o digestivo
+- el curso clinico evita negaciones obvias y puede corroborar dominios respiratorio, infeccioso o hemodinamico con signos vitales recientes
 - asociaciones por problema usan vocabulario local inicial por dominios respiratorio, dolor, fiebre, hipertension y diabetes
 - si un problema tiene `code_system=SNOMED-CT` y el evento trae conceptos/ancestros SNOMED desde un repositorio externo, el Context Builder prioriza esa asociacion explicable
 
@@ -242,7 +243,7 @@ Trabajo:
 
 - ampliar vocabulario local por problema y revisar falsos positivos
 - conectar un repositorio RF2/terminology server SNOMED CT licenciado como fuente externa, sin versionar releases completos
-- ampliar reglas explicitas de mejoria/empeoramiento por dominio y contrastarlas contra datos estructurados
+- ampliar reglas explicitas de mejoria/empeoramiento por dominio y sumar mas contrastes estructurados
 - ampliar faltantes por tipo de atencion a dominios especificos
 - comparacion 24 h con datos estructurados
 - evidencia vinculada a fuente

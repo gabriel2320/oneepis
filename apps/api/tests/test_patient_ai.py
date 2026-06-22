@@ -102,6 +102,34 @@ def _create_event(
     return response.json()["id"]
 
 
+def _create_vitals(
+    client: TestClient,
+    auth: dict[str, str],
+    patient_id: str,
+    *,
+    measured_at: str,
+    temperature_c: str | None = None,
+    systolic_bp: int | None = None,
+    heart_rate_bpm: int | None = None,
+    respiratory_rate_bpm: int | None = None,
+    oxygen_saturation_pct: str | None = None,
+) -> str:
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": measured_at,
+            "temperature_c": temperature_c,
+            "systolic_bp": systolic_bp,
+            "heart_rate_bpm": heart_rate_bpm,
+            "respiratory_rate_bpm": respiratory_rate_bpm,
+            "oxygen_saturation_pct": oxygen_saturation_pct,
+        },
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
 def _audit_events(client: TestClient, auth: dict[str, str], patient_id: str) -> list[dict]:
     response = client.get(
         f"/api/v1/patients/{patient_id}/audit-events",
@@ -357,6 +385,35 @@ def test_context_builder_flags_clinical_course_from_recent_events(
         summary="Disnea empeora durante la tarde.",
         occurred_at="2026-06-20T14:00:00Z",
     )
+    _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Sin empeoramiento respiratorio en reevaluacion.",
+        occurred_at="2026-06-20T15:00:00Z",
+    )
+    _create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T12:30:00Z",
+        temperature_c="37.0",
+        systolic_bp=120,
+        heart_rate_bpm=86,
+        respiratory_rate_bpm=18,
+        oxygen_saturation_pct="96.0",
+    )
+    _create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T14:30:00Z",
+        temperature_c="37.2",
+        systolic_bp=122,
+        heart_rate_bpm=92,
+        respiratory_rate_bpm=24,
+        oxygen_saturation_pct="92.0",
+    )
 
     response = client.post(
         f"/api/v1/patients/{patient_id}/ai/clinical-intent",
@@ -370,6 +427,11 @@ def test_context_builder_flags_clinical_course_from_recent_events(
     assert any("Empeoramiento clinico sugerido" in finding for finding in rule_findings)
     assert any("dominio dolor" in finding for finding in rule_findings)
     assert any("dominio respiratorio" in finding for finding in rule_findings)
+    assert any("Corroborado por signos vitales" in finding for finding in rule_findings)
+    assert any("saturacion O2 bajo de 96 a 92 %" in finding for finding in rule_findings)
+    assert not any(
+        "Sin empeoramiento respiratorio" in finding for finding in rule_findings
+    )
 
 
 def test_event_proposals_from_entry_are_reviewable_and_do_not_persist(
