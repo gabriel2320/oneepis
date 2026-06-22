@@ -61,8 +61,22 @@ No construir ahora:
 - IA externa identificada
 - importador PDF completo
 
-El proximo avance debe consolidar AI-Chart Nivel 0: fuentes por frase del
-borrador SOAP y propuestas explicitas confirmables, sin crear modulo nuevo.
+El proximo avance debe consolidar AI-Chart Nivel 0 con permisos y estados
+visuales mas claros, sin crear modulo nuevo.
+
+Trabajo permitido inmediato:
+
+- explicar acciones bloqueadas por rol, modo demo o falta de revision humana
+- mostrar estado de propuesta y destino del patch antes de confirmar
+- mejorar textos de auditoria y trazabilidad en pantallas existentes
+
+Trabajo no permitido inmediato:
+
+- nuevo dashboard
+- chat libre
+- RAG
+- editor generico de patches
+- agentes o paquetes IA nuevos
 
 ## Escalera OneEpis
 
@@ -120,6 +134,8 @@ Papel obligatorio:
 - No crees un documento nuevo si puedes actualizar uno existente.
 - No agregues scripts nuevos si un comando existente puede expresar el gate.
 - Actualiza OpenAPI cuando cambie la API.
+- Route Handlers de Next pueden actuar como BFF de interaccion/streaming IA, pero no deben duplicar permisos, auditoria ni escritura clinica de FastAPI.
+- Toda propuesta IA que pueda escribir ficha debe pasar por `ClinicalPatch` y confirmacion backend.
 
 ## Nuevas Dependencias
 

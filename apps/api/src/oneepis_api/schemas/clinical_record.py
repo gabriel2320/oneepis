@@ -128,6 +128,82 @@ class DraftSoapFromEventsResponse(APIModel):
     requires_human_confirmation: bool = True
 
 
+class EventProposalFromEntryRequest(APIModel):
+    entry_id: uuid.UUID
+    max_proposals: int = Field(default=6, ge=1, le=12)
+
+
+ClinicalPatchTarget = Literal[
+    "clinical_event",
+    "evolution",
+    "problem",
+    "medication",
+    "document",
+]
+ClinicalPatchMode = Literal["draft", "suggestion"]
+ClinicalPatchOperationType = Literal["add", "replace", "annotate"]
+
+
+class ClinicalPatchSource(APIModel):
+    source_type: str
+    source_id: uuid.UUID | None = None
+    label: str
+
+
+class ClinicalPatchOperation(APIModel):
+    op: ClinicalPatchOperationType
+    path: str = Field(min_length=1, max_length=120)
+    value: Any = None
+    reason: str = Field(min_length=1, max_length=320)
+
+
+class ClinicalPatch(APIModel):
+    patch_id: str = Field(min_length=1, max_length=180)
+    target: ClinicalPatchTarget
+    mode: ClinicalPatchMode = "suggestion"
+    operations: list[ClinicalPatchOperation] = Field(min_length=1, max_length=20)
+    sources: list[ClinicalPatchSource] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    requires_human_confirmation: bool = True
+
+
+class ConfirmClinicalPatchRequest(APIModel):
+    decision: Literal["accepted", "rejected"]
+    patch: ClinicalPatch
+    note: str | None = Field(default=None, max_length=600)
+
+
+class ConfirmClinicalPatchResponse(APIModel):
+    decision: Literal["accepted", "rejected"]
+    audited: bool = True
+    applies_changes: bool
+    clinical_event: ClinicalEventRead | None = None
+    clinical_entry: ClinicalEntryRead | None = None
+    message: str
+
+
+class EventProposalFromEntry(APIModel):
+    proposal_id: str
+    event_type: ClinicalEventType
+    occurred_at: datetime
+    summary: str = Field(min_length=1, max_length=280)
+    source_type: ClinicalEventSourceType = ClinicalEventSourceType.CLINICAL_ENTRY
+    source_ref: str
+    payload: dict[str, Any] = Field(default_factory=dict)
+    evidence_label: str
+    patch: ClinicalPatch
+    requires_human_confirmation: bool = True
+
+
+class EventProposalsFromEntryResponse(APIModel):
+    entry_id: uuid.UUID
+    entry_title: str
+    proposals: list[EventProposalFromEntry] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    applies_changes: bool = False
+    requires_human_confirmation: bool = True
+
+
 ClinicalIntentType = Literal[
     "summarize_patient",
     "daily_changes",

@@ -194,6 +194,65 @@ export type DraftSoapFromEventsResponse = {
   requires_human_confirmation: true;
 };
 
+export type EventProposalFromEntryRequest = {
+  entry_id: string;
+  max_proposals?: number;
+};
+
+export type ClinicalPatchOperation = {
+  op: "add" | "replace" | "annotate";
+  path: string;
+  value?: unknown;
+  reason: string;
+};
+
+export type ClinicalPatch = {
+  patch_id: string;
+  target: "clinical_event" | "evolution" | "problem" | "medication" | "document";
+  mode: "draft" | "suggestion";
+  operations: ClinicalPatchOperation[];
+  sources: { source_type: string; source_id?: string | null; label: string }[];
+  warnings: string[];
+  requires_human_confirmation: true;
+};
+
+export type ConfirmClinicalPatchRequest = {
+  decision: "accepted" | "rejected";
+  patch: ClinicalPatch;
+  note?: string | null;
+};
+
+export type ConfirmClinicalPatchResponse = {
+  decision: "accepted" | "rejected";
+  audited: boolean;
+  applies_changes: boolean;
+  clinical_event?: ClinicalEvent | null;
+  clinical_entry?: ClinicalEntry | null;
+  message: string;
+};
+
+export type EventProposalFromEntry = {
+  proposal_id: string;
+  event_type: ClinicalEventType;
+  occurred_at: string;
+  summary: string;
+  source_type: "clinical_entry";
+  source_ref: string;
+  payload: Record<string, unknown>;
+  evidence_label: string;
+  patch: ClinicalPatch;
+  requires_human_confirmation: true;
+};
+
+export type EventProposalsFromEntryResponse = {
+  entry_id: string;
+  entry_title: string;
+  proposals: EventProposalFromEntry[];
+  warnings: string[];
+  applies_changes: false;
+  requires_human_confirmation: true;
+};
+
 export type ClinicalIntentType =
   | "summarize_patient"
   | "daily_changes"
@@ -240,6 +299,14 @@ export type ClinicalIntentRouteResponse = {
     requires_confirmation: boolean;
   }[];
 };
+
+export type AIStreamEvent =
+  | { type: "status"; message: string }
+  | { type: "source"; sourceId?: string | null; label: string }
+  | { type: "warning"; message: string }
+  | { type: "proposal"; data: ClinicalIntentRouteResponse }
+  | { type: "done" }
+  | { type: "error"; message: string };
 
 export type ClinicalReviewItem = {
   item_type:

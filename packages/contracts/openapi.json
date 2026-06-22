@@ -2008,6 +2008,180 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/ai/event-proposals-from-entry": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Create Event Proposals From Entry",
+        "operationId": "create_event_proposals_from_entry_api_v1_patients__patient_id__ai_event_proposals_from_entry_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventProposalFromEntryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventProposalsFromEntryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/ai/confirm-clinical-patch": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Confirm Clinical Patch",
+        "operationId": "confirm_clinical_patch_api_v1_patients__patient_id__ai_confirm_clinical_patch_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmClinicalPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmClinicalPatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/ai/clinical-intent": {
       "post": {
         "tags": [
@@ -7543,6 +7717,136 @@
         ],
         "title": "ClinicalIntentSource"
       },
+      "ClinicalPatch": {
+        "properties": {
+          "patch_id": {
+            "type": "string",
+            "maxLength": 180,
+            "minLength": 1,
+            "title": "Patch Id"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "clinical_event",
+              "evolution",
+              "problem",
+              "medication",
+              "document"
+            ],
+            "title": "Target"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "suggestion"
+            ],
+            "title": "Mode",
+            "default": "suggestion"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalPatchOperation"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Operations"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalPatchSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "requires_human_confirmation": {
+            "type": "boolean",
+            "title": "Requires Human Confirmation",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "patch_id",
+          "target",
+          "operations"
+        ],
+        "title": "ClinicalPatch"
+      },
+      "ClinicalPatchOperation": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "add",
+              "replace",
+              "annotate"
+            ],
+            "title": "Op"
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Path"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "path",
+          "reason"
+        ],
+        "title": "ClinicalPatchOperation"
+      },
+      "ClinicalPatchSource": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_type",
+          "label"
+        ],
+        "title": "ClinicalPatchSource"
+      },
       "ClinicalProblemContext": {
         "properties": {
           "problem_id": {
@@ -7821,6 +8125,91 @@
         ],
         "title": "ClinicalTimelineRead"
       },
+      "ConfirmClinicalPatchRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "patch": {
+            "$ref": "#/components/schemas/ClinicalPatch"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 600
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "patch"
+        ],
+        "title": "ConfirmClinicalPatchRequest"
+      },
+      "ConfirmClinicalPatchResponse": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "audited": {
+            "type": "boolean",
+            "title": "Audited",
+            "default": true
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes"
+          },
+          "clinical_event": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClinicalEventRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clinical_entry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClinicalEntryRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "applies_changes",
+          "message"
+        ],
+        "title": "ConfirmClinicalPatchResponse"
+      },
       "DraftSoapFromEventsRequest": {
         "properties": {
           "clinical_event_ids": {
@@ -7987,6 +8376,128 @@
           "unknown"
         ],
         "title": "EncounterType"
+      },
+      "EventProposalFromEntry": {
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/ClinicalEventType"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 280,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "source_type": {
+            "$ref": "#/components/schemas/ClinicalEventSourceType",
+            "default": "clinical_entry"
+          },
+          "source_ref": {
+            "type": "string",
+            "title": "Source Ref"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "evidence_label": {
+            "type": "string",
+            "title": "Evidence Label"
+          },
+          "patch": {
+            "$ref": "#/components/schemas/ClinicalPatch"
+          },
+          "requires_human_confirmation": {
+            "type": "boolean",
+            "title": "Requires Human Confirmation",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "proposal_id",
+          "event_type",
+          "occurred_at",
+          "summary",
+          "source_ref",
+          "evidence_label",
+          "patch"
+        ],
+        "title": "EventProposalFromEntry"
+      },
+      "EventProposalFromEntryRequest": {
+        "properties": {
+          "entry_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Entry Id"
+          },
+          "max_proposals": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 1.0,
+            "title": "Max Proposals",
+            "default": 6
+          }
+        },
+        "type": "object",
+        "required": [
+          "entry_id"
+        ],
+        "title": "EventProposalFromEntryRequest"
+      },
+      "EventProposalsFromEntryResponse": {
+        "properties": {
+          "entry_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Entry Id"
+          },
+          "entry_title": {
+            "type": "string",
+            "title": "Entry Title"
+          },
+          "proposals": {
+            "items": {
+              "$ref": "#/components/schemas/EventProposalFromEntry"
+            },
+            "type": "array",
+            "title": "Proposals"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          },
+          "requires_human_confirmation": {
+            "type": "boolean",
+            "title": "Requires Human Confirmation",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "entry_id",
+          "entry_title"
+        ],
+        "title": "EventProposalsFromEntryResponse"
       },
       "HTTPValidationError": {
         "properties": {

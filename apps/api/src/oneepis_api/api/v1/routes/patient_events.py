@@ -20,14 +20,20 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalReviewItemDecisionRequest,
     ClinicalReviewItemDecisionResponse,
     ClinicalTimelineRead,
+    ConfirmClinicalPatchRequest,
+    ConfirmClinicalPatchResponse,
     DraftSoapFromEventsRequest,
     DraftSoapFromEventsResponse,
+    EventProposalFromEntryRequest,
+    EventProposalsFromEntryResponse,
 )
 from oneepis_api.services.ai.provider import get_ai_provider
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 from oneepis_api.services.clinical_context import build_event_context
 from oneepis_api.services.clinical_intent import resolve_clinical_intent, route_clinical_intent
+from oneepis_api.services.clinical_patch import confirm_clinical_patch as confirm_patch_service
 from oneepis_api.services.document_drafter import draft_soap_from_events
+from oneepis_api.services.event_proposals import propose_events_from_entry
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -210,6 +216,67 @@ def create_draft_soap_from_events(
     )
     session.commit()
     return response
+
+
+@router.post(
+    "/{patient_id}/ai/event-proposals-from-entry",
+    response_model=EventProposalsFromEntryResponse,
+)
+def create_event_proposals_from_entry(
+    patient_id: uuid.UUID,
+    payload: EventProposalFromEntryRequest,
+    session: SessionDep,
+    user: AiAccessDep,
+) -> EventProposalsFromEntryResponse:
+    require_patient(session, patient_id)
+    entry = require_patient_child(
+        session,
+        ClinicalEntry,
+        payload.entry_id,
+        patient_id,
+        "Clinical entry not found",
+    )
+    response = propose_events_from_entry(entry, max_proposals=payload.max_proposals)
+    record_audit_event(
+        session,
+        action="ai.entry_event_proposals.created",
+        entity_type="clinical_entry",
+        entity_id=entry.id,
+        actor_id=user.actor_id,
+        metadata={
+            "patient_id": str(patient_id),
+            "entry_id": str(entry.id),
+            "proposal_count": len(response.proposals),
+            "applies_changes": response.applies_changes,
+            "requires_human_confirmation": response.requires_human_confirmation,
+        },
+    )
+    session.commit()
+    return response
+
+
+@router.post(
+    "/{patient_id}/ai/confirm-clinical-patch",
+    response_model=ConfirmClinicalPatchResponse,
+)
+def confirm_clinical_patch(
+    patient_id: uuid.UUID,
+    payload: ConfirmClinicalPatchRequest,
+    session: SessionDep,
+    user: AiAccessDep,
+) -> ConfirmClinicalPatchResponse:
+    require_patient(session, patient_id)
+    return confirm_patch_service(
+        session=session,
+        patient_id=patient_id,
+        payload=payload,
+        actor=user.actor_id,
+        validate_encounter=lambda encounter_id: validate_encounter_for_patient(
+            session,
+            patient_id,
+            encounter_id,
+        ),
+    )
 
 
 @router.post(

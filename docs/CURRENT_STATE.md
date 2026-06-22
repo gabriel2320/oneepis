@@ -1,6 +1,6 @@
 # Current State
 
-## Fase 1 implementada
+## Fase 1 cerrada
 
 OneEpis ya tiene una base E2E real:
 
@@ -73,10 +73,12 @@ IA:
 - `POST /api/v1/patients/{patient_id}/ai/clinical-intent-route`
 - `POST /api/v1/patients/{patient_id}/ai/review-item-decision`
 - `POST /api/v1/patients/{patient_id}/ai/draft-soap-from-events`
+- `POST /api/v1/patients/{patient_id}/ai/event-proposals-from-entry`
+- `POST /api/v1/patients/{patient_id}/ai/confirm-clinical-patch`
 - factory compatible en `services/ai/provider.py`
 - contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
-- AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados y hoja SOAP con margen inteligente aunque Ollama este apagado
+- AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados, hoja SOAP con margen inteligente, propuestas de eventos desde evoluciones escritas y guardado por `ClinicalPatch` confirmado aunque Ollama este apagado
 
 Hospitalizacion:
 
@@ -110,6 +112,7 @@ Rutas App Router bajo `apps/web/src/app`.
 
 Capas:
 
+- `src/app/api/ai/clinical-command/route.ts`: BFF streaming con Vercel AI SDK; orquesta FastAPI y no reemplaza la API clinica canonica
 - `src/lib/api/*`: clientes API por dominio
 - `src/lib/api/auth.ts`: login local y sesion actual
 - `src/lib/types.ts`: contrato TypeScript
@@ -121,6 +124,14 @@ Capas:
 - `/pacientes` funciona como mesa clinica de entrada con buscador, metricas operativas y lista escaneable
 - `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
 - `/pacientes/[patientId]/ai-chart` muestra inteligencia simulada, intenciones clinicas, propuestas revisables y hoja SOAP editable con margen inteligente
+- AI-Chart envia la barra clinica al BFF de Next, que delega la resolucion estructurada en FastAPI y transmite eventos tipados JSONL con AI SDK
+- AI-Chart no guarda propuestas desde campos sueltos; envia `ClinicalPatch` al backend para aceptar/rechazar/guardar
+- AI-Chart muestra estado operativo de eventos, evoluciones, seleccion, modo y permisos antes de generar o guardar
+- AI-Chart explica acciones bloqueadas con condicion o rol habilitante
+- AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia
+- Propuestas desde evolucion muestran estado visible `pendiente`, `registrando`, `registrada en ficha` o `rechazada` antes y despues de confirmar el `ClinicalPatch`
+- Las decisiones de propuesta se consideran durables via auditoria; la UI mantiene estado local de sesion para operacion inmediata
+- La vista de operaciones `ClinicalPatch` esta extraida como componente reusable para evitar inflar paneles AI-Chart
 - `src/components/clinical/ambulatory-visit-pages.tsx`: atencion ambulatoria minima sobre encuentros y SOAP
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
@@ -131,6 +142,7 @@ Tests API:
 - fixtures compartidas en `apps/api/tests/conftest.py`
 - cobertura paciente separada por dominios: ficha, permisos, auditoria, IA y encuentros
 - cobertura hospitalizacion separada por board, camas y hoja diaria
+- `ClinicalPatch` cubre aceptacion, rechazo y target no soportado; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported`
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
@@ -141,6 +153,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
 - `apps/api/src/oneepis_api/services/clinical_intent.py` ya concentra reglas deterministicas; nuevas reglas deben agruparse por dominio o extraerse antes de crecer mucho mas.
+- `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
+- `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
@@ -149,8 +163,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2, temas visuales v2 y AI-Chart Core Nivel 0.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- Validacion reciente: API 50 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
-- Siguiente paso recomendado: consolidar AI-Chart sin crear dashboard, chat libre ni nuevos modulos; ampliar prellenados solo sobre formularios reales y extraer subcomponentes si la pantalla crece.
+- Validacion reciente: API 56 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
+- Siguiente paso recomendado: iniciar Fase 2 como Context Builder explicable dentro de AI-Chart, manteniendo AI Bridge unico y sin crear chat libre, RAG, agentes ni nuevos modulos.
 
 ## Historial
 

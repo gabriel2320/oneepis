@@ -22,6 +22,22 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText(/Borrador IA/)).toBeVisible();
 });
 
+test("AI-Chart renders event proposals from written entries", async ({ page }) => {
+  await page.goto(`/pacientes/${demoPatientId}/ai-chart`);
+
+  await expect(page.getByRole("heading", { name: "AI-Chart Core" })).toBeVisible();
+  await expect(page.getByText("Eventos desde evolucion")).toBeVisible();
+  await expect(page.getByText("Estado operativo")).toBeVisible();
+  await expect(page.getByText("Seleccionados")).toBeVisible();
+  await expect(page.getByText("propuesta revisable")).toBeVisible();
+  await expect(
+    page.getByText("Estados: pendiente / registrando / registrada en ficha / rechazada."),
+  ).toBeVisible();
+  await expect(page.getByText("Modo demo: no se generan borradores reales.")).toBeVisible();
+  await expect(page.getByText("Modo demo: no se ejecutan intenciones reales.").first()).toBeVisible();
+  await expect(page.getByText("Modo demo: no se generan propuestas reales.")).toBeVisible();
+});
+
 test("patient status screen renders governed edit form", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/estado`);
 

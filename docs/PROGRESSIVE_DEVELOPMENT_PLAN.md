@@ -30,6 +30,60 @@ No se avanza a una fase si la anterior no conserva:
 - degradacion sin Ollama
 - correlato visual editable o confirmable
 
+## Estado Actual
+
+OneEpis tiene Fase 1 cerrada a nivel de producto minimo. La base ya permite:
+
+- leer ficha longitudinal por paciente
+- usar eventos clinicos como memoria estructurada
+- generar borrador SOAP desde eventos
+- usar barra clinica dirigida con AI Bridge
+- generar propuestas revisables desde evoluciones escritas
+- persistir cambios IA solo mediante `ClinicalPatch` confirmado
+- auditar aceptacion, rechazo y guardado
+- funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y Ollama apagado
+
+El proximo trabajo puede preparar Fase 2 solo si conserva esta base. No agregar
+chat libre, RAG, documentos o IA externa como atajo.
+
+## Foco Inmediato
+
+Prioridad antes de abrir Fase 2:
+
+1. Context Builder serio: asociar evidencia por problema y explicar inferencias.
+2. AI Bridge unico: no crear nuevos Route Handlers de IA por caso de uso.
+3. Refactor minimo: extraer helpers de patch solo si aparece duplicacion real.
+4. Mantener permisos visibles y estados de patch en cada nueva accion.
+
+Hecho en este foco:
+
+- la pagina AI-Chart volvio a quedar bajo presupuesto como orquestador
+- las acciones bloqueadas explican motivo en generacion SOAP, propuestas y guardado
+- AI-Chart muestra estado operativo de eventos, evoluciones, seleccion, modo y permisos
+- propuestas desde evolucion muestran estado local `pendiente`, `registrando`, `registrada en ficha` o `rechazada`
+- los estados persistentes de propuesta quedan resueltos por auditoria; la sesion UI mantiene el estado operativo local
+- las acciones bloqueadas muestran condicion o rol habilitante
+- la aplicacion de `ClinicalPatch` salio de la ruta HTTP y vive en servicio backend dedicado
+- la vista de operaciones `ClinicalPatch` quedo como componente reusable, no embebida en un panel especifico
+- `ClinicalPatch` rechaza targets no soportados sin escribir ficha, sin auditar aceptacion y con auditoria `unsupported`
+- el smoke E2E cubre la presencia del flujo visual AI-Chart sin depender de Ollama
+
+Cola corta antes de Fase 2:
+
+- correr gates completos despues del commit para comprobar contrato limpio
+- no crear nuevas superficies IA; usar AI-Chart y componentes existentes
+- mantener `ClinicalPatch` limitado a `clinical_event` y `evolution` hasta que exista duplicacion o necesidad real
+
+Fuera de foco:
+
+- chat libre generico
+- RAG
+- documentos/PDF reales
+- IA externa
+- dashboard nuevo
+- receta valida o firma real
+- `packages/ai-core`, `packages/rag` o agentes externos
+
 ## Fase 0: Simulated Clinical Intelligence
 
 Objetivo: que la ficha se comporte como IA clinica sin depender de LLM.
@@ -44,34 +98,19 @@ Componentes:
 - validadores de faltantes
 - auditoria
 
-Implementado hasta ahora:
+Implementado:
 
 - eventos clinicos, timeline y borrador SOAP desde eventos
-- `ClinicalIntent` con fuentes, faltantes, certeza, evidencia y acciones
-- router deterministico con barra dirigida y fallback seguro
-- reglas 24 h para signos vitales, examenes, medicacion y eventos no asociados
-- `review_items` aceptables/rechazables con auditoria e historial visual
-- hallazgos agrupados por dominio, estado y fuente
-- hoja SOAP editable con margen inteligente persistente
-- trazabilidad S/O/A/P por seccion del borrador SOAP
-- acciones propuestas con `action_id`, descripcion y etiqueta de confirmacion
-- decisiones de acciones propuestas auditadas sin aplicar cambios automaticos
-- acciones propuestas conectadas a flujos estructurados existentes
-- prellenado de evento/pendiente desde accion auditada sin guardado automatico
-- barra clinica dirigida que ejecuta la intencion reconocida
-- prellenado de problema activo desde accion propuesta sin guardado automatico
-- fallback de barra clinica resuelto por `action_id`, no por texto visible
-- intencion `draft_soap` genera hoja SOAP editable desde fuentes de eventos sin guardar
-- panel compacto de cambios 24 h visible antes del margen detallado
-- reglas de examenes aceptan payload estructurado `results[]` sin leer texto libre
-- guardado de SOAP generado exige marca visual de revision humana
-- guardado de SOAP generado persiste metadata de revision humana en `extra_data`
-- R-01 AI-Chart Split: componentes extraidos y pagina reducida a orquestador
-- router dirigido abre formularios existentes de medicacion, alergias y signos con origen AI-Chart revisable
+- `ClinicalIntent` deterministico con fuentes, faltantes, certeza, evidencia y acciones
+- reglas locales de cambios 24 h, signos vitales, examenes, medicacion y revision
+- `review_items` aceptables/rechazables con auditoria
+- hoja SOAP editable con margen inteligente y trazabilidad S/O/A/P
+- acciones propuestas que abren flujos estructurados existentes sin guardar automaticamente
+- AI-Chart dividido en componentes; la pagina queda como orquestador
+- AI Bridge inicial con stream tipado JSONL desde Next hacia FastAPI
+- `ClinicalPatch` para propuestas que pueden escribir ficha
 
-Siguiente incremento:
-
-- crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable
+Resultado: la ficha ya simula inteligencia clinica util sin depender del LLM.
 
 ## Consolidacion post R-01
 
@@ -85,32 +124,79 @@ Presupuesto activo:
 - `clinical-intent-result-panel.tsx`: si crece, extraer paneles laterales antes de sumar features.
 - no crear nuevas rutas AI-Chart para tareas que caben en la pantalla actual.
 
-Cola corta permitida antes de pasar a Fase 2:
-
-1. Crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable.
-2. Reforzar permisos/estados visuales por modo sin cambiar roles.
-
-Bloqueado por ahora:
-
-- chat libre generico
-- documentos/PDF reales
-- RAG
-- IA externa
-- receta valida/firma real
-- dashboard nuevo
+Cola corta permitida antes de pasar a Fase 2: usar la lista de `Foco Inmediato`.
 
 Criterio para cerrar Fase 1:
 
 ```text
 abrir paciente -> pedir evolucion -> ver cambios 24 h -> hoja SOAP editable
 -> fuentes/faltantes -> revision humana explicita -> guardar borrador auditado
+-> proponer evento desde evolucion -> confirmar/rechazar patch -> ver estado visible
 ```
 
 Debe funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y con Ollama apagado.
 
+## Patron AI Bridge
+
+La frontera IA viva queda:
+
+```text
+Next UI -> Next Route Handler BFF -> FastAPI clinico -> stream tipado -> UI
+```
+
+Reglas:
+
+- Next conversa y transmite; FastAPI decide permisos, contexto clinico y auditoria.
+- El bridge no escribe ficha ni decide permisos clinicos por su cuenta.
+- Todo stream debe poder expresar progreso, fuentes, advertencias y propuestas.
+- El stream usa eventos tipados JSONL; la UI no debe depender de texto libre para actuar.
+- No crear un Route Handler nuevo por cada idea si puede entrar por el bridge compartido.
+
+Eventos objetivo:
+
+```text
+status -> source -> warning -> proposal -> done
+```
+
+`token` queda reservado para lenguaje generado por modelo; no debe sustituir a `proposal`.
+
+## ClinicalPatch v0
+
+Toda IA que proponga escritura debe converger a un parche revisable:
+
+```text
+target: evolution | clinical_event | problem | medication | document
+mode: draft | suggestion
+operations: add | replace | annotate
+sources
+warnings
+requires_human_confirmation
+```
+
+La UI puede aceptar, editar o rechazar operaciones. El backend solo guarda despues de confirmacion humana explicita y registra auditoria.
+
+Implementado v0:
+
+- `clinical_event` como primer target real
+- propuestas desde evolucion escrita incluyen `patch`
+- `POST /api/v1/patients/{patient_id}/ai/confirm-clinical-patch`
+- aceptacion crea evento clinico auditado
+- rechazo audita sin aplicar cambios
+- la UI expone operaciones del patch antes de confirmarlo
+- `evolution` crea borradores SOAP no firmados desde texto revisado
+
+No hacer todavia:
+
+- aplicar patch parcial desde UI compleja
+- crear editor generico de patches
+- mover patch a paquete compartido hasta tener duplicacion clara
+- usar patch para receta, firma o indicaciones ejecutables
+
 ## Fase 1: AI-Chart Core estable
 
 Objetivo: consolidar paciente -> eventos -> contexto -> borrador -> confirmacion -> auditoria.
+
+Estado: cerrado como minimo producto verificable.
 
 Ya implementado:
 
@@ -124,11 +210,11 @@ Ya implementado:
 - contexto por problema
 - baseline de evolucion previa
 
-Pendiente:
+Pendiente que pasa a Fase 2 o mantenimiento:
 
-- pulir UI de revision antes de guardar
-- permitir crear eventos desde una evolucion ya escrita
-- reforzar permisos y estados clinicos por modo
+- mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador
+- sostener estados visuales y permisos al sumar nuevas inferencias
+- ampliar contexto explicable sin crear chat libre ni RAG
 
 ## Fase 2: Context Builder serio
 
