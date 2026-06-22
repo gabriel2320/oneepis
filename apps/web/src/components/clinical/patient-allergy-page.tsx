@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -28,11 +28,18 @@ import {
 export function NewAllergyPage() {
   const patientId = usePatientId();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
   const { user, isLoading: userLoading } = useCurrentUser();
   const canWrite = canManageAllergies(user);
-  const [formState, setFormState] = useState({ substance: "", reaction: "", severity: "unknown" });
+  const [formState, setFormState] = useState({
+    substance: searchParams.get("substance")?.slice(0, 160) ?? "",
+    reaction: searchParams.get("reaction")?.slice(0, 240) ?? "",
+    severity: allergySeverityFromQuery(searchParams.get("severity")),
+    ai_action_id: searchParams.get("aiActionId")?.slice(0, 160) ?? "",
+    source_text: searchParams.get("sourceText")?.slice(0, 600) ?? "",
+  });
   const mutation = useMutation({
     mutationFn: (payload: AllergyCreate) => createAllergy(patientId, payload),
     onSuccess: async () => {
@@ -58,6 +65,12 @@ export function NewAllergyPage() {
           <ErrorState description="Tu rol actual no permite registrar alergias." />
         ) : null}
         <ClinicalSectionCard title="Alergia">
+          {formState.ai_action_id ? (
+            <div className="mb-4 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+              <p>Formulario abierto desde AI-Chart. Revisa y edita antes de guardar.</p>
+              {formState.source_text ? <p className="mt-1">Origen: {formState.source_text}</p> : null}
+            </div>
+          ) : null}
           <form
             className="space-y-4"
             onSubmit={(event) => {
@@ -105,4 +118,11 @@ export function NewAllergyPage() {
       </div>
     </PatientClinicalShell>
   );
+}
+
+function allergySeverityFromQuery(value: string | null) {
+  if (value === "mild" || value === "moderate" || value === "severe" || value === "unknown") {
+    return value;
+  }
+  return "unknown";
 }

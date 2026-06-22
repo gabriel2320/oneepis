@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -29,11 +29,19 @@ import {
 export function NewMedicationPage() {
   const patientId = usePatientId();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
   const { user, isLoading: userLoading } = useCurrentUser();
   const canWrite = canManageMedications(user);
-  const [formState, setFormState] = useState({ name: "", dose: "", route: "", frequency: "" });
+  const [formState, setFormState] = useState({
+    name: searchParams.get("name")?.slice(0, 160) ?? "",
+    dose: searchParams.get("dose")?.slice(0, 80) ?? "",
+    route: searchParams.get("route")?.slice(0, 80) ?? "",
+    frequency: searchParams.get("frequency")?.slice(0, 120) ?? "",
+    ai_action_id: searchParams.get("aiActionId")?.slice(0, 160) ?? "",
+    source_text: searchParams.get("sourceText")?.slice(0, 600) ?? "",
+  });
   const mutation = useMutation({
     mutationFn: (payload: MedicationCreate) => createMedication(patientId, payload),
     onSuccess: async () => {
@@ -59,6 +67,12 @@ export function NewMedicationPage() {
           <ErrorState description="Tu rol actual no permite registrar medicacion." />
         ) : null}
         <ClinicalSectionCard title="Medicamento">
+          {formState.ai_action_id ? (
+            <div className="mb-4 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+              <p>Formulario abierto desde AI-Chart. Revisa y edita antes de guardar.</p>
+              {formState.source_text ? <p className="mt-1">Origen: {formState.source_text}</p> : null}
+            </div>
+          ) : null}
           <form
             className="space-y-4"
             onSubmit={(event) => {

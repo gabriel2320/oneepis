@@ -70,6 +70,7 @@ OneEpis ya muestra en AI-Chart:
 - enlace desde accion propuesta hacia flujo estructurado existente
 - prellenado de eventos/pendientes desde accion propuesta revisable
 - prellenado de problema activo desde accion propuesta revisable
+- acciones directas del router abren formularios existentes con origen AI-Chart visible
 - barra conversacional dirigida que mueve el AI-Chart al ejecutar intenciones
 - intencion de evolucion abre hoja SOAP editable desde fuentes visibles
 - panel compacto de cambios 24 h en el cuerpo principal de la respuesta
@@ -80,9 +81,9 @@ OneEpis ya muestra en AI-Chart:
 
 ## Pendiente visual inmediato
 
-El siguiente avance permitido es ampliar el prellenado a otros formularios
-existentes. No crear otra pantalla ni aplicar datos clinicos finales desde una
-respuesta IA.
+El siguiente avance permitido es crear eventos desde una evolucion ya escrita,
+solo como propuesta revisable. No crear otra pantalla ni aplicar datos clinicos
+finales desde una respuesta IA.
 
 ## Regla post R-01
 

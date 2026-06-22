@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -30,6 +30,7 @@ import {
 export function NewVitalSignPage() {
   const patientId = usePatientId();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
   const { user, isLoading: userLoading } = useCurrentUser();
@@ -40,6 +41,8 @@ export function NewVitalSignPage() {
     heart_rate_bpm: "",
     oxygen_saturation_pct: "",
     temperature_c: "",
+    ai_action_id: searchParams.get("aiActionId")?.slice(0, 160) ?? "",
+    source_text: searchParams.get("sourceText")?.slice(0, 600) ?? "",
   });
   const mutation = useMutation({
     mutationFn: (payload: VitalSignCreate) => createVitalSign(patientId, payload),
@@ -69,6 +72,12 @@ export function NewVitalSignPage() {
           <ErrorState description="Tu rol actual no permite registrar signos vitales." />
         ) : null}
         <ClinicalSectionCard title="Control">
+          {formState.ai_action_id ? (
+            <div className="mb-4 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+              <p>Formulario abierto desde AI-Chart. Ingresa o corrige los valores antes de guardar.</p>
+              {formState.source_text ? <p className="mt-1">Origen: {formState.source_text}</p> : null}
+            </div>
+          ) : null}
           <form
             className="space-y-4"
             onSubmit={(event) => {

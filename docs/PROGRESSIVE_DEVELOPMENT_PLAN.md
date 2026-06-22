@@ -67,10 +67,11 @@ Implementado hasta ahora:
 - guardado de SOAP generado exige marca visual de revision humana
 - guardado de SOAP generado persiste metadata de revision humana en `extra_data`
 - R-01 AI-Chart Split: componentes extraidos y pagina reducida a orquestador
+- router dirigido abre formularios existentes de medicacion, alergias y signos con origen AI-Chart revisable
 
 Siguiente incremento:
 
-- ampliar prellenado solo cuando exista acto clinico completo y formulario real
+- crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable
 
 ## Consolidacion post R-01
 
@@ -86,9 +87,8 @@ Presupuesto activo:
 
 Cola corta permitida antes de pasar a Fase 2:
 
-1. Ampliar prellenado solo para formularios existentes con acto clinico completo.
-2. Crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable.
-3. Reforzar permisos/estados visuales por modo sin cambiar roles.
+1. Crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable.
+2. Reforzar permisos/estados visuales por modo sin cambiar roles.
 
 Bloqueado por ahora:
 

@@ -219,6 +219,7 @@ export function PatientAiChartPage() {
             isExecuting={intentMutation.isPending}
             hasRouteError={routeMutation.isError}
             hasIntentError={intentMutation.isError}
+            patientId={patientId}
             onRouterTextChange={setRouterText}
             onRoute={() => routeMutation.mutate()}
             onExecuteIntent={(intentType) => intentMutation.mutate(intentType)}

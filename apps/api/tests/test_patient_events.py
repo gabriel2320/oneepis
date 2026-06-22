@@ -1,5 +1,8 @@
 from fastapi.testclient import TestClient
 
+from oneepis_api.schemas.clinical_record import ClinicalIntentRouteRequest
+from oneepis_api.services.clinical_intent import route_clinical_intent
+
 
 def test_clinical_events_timeline_and_draft_are_audited(
     client: TestClient,
@@ -466,3 +469,18 @@ def test_clinical_intent_router_is_directed_and_audited(
     audit_response = client.get(f"/api/v1/patients/{patient['id']}/audit-events", headers=auth)
     actions = [item["action"] for item in audit_response.json()]
     assert actions.count("ai.clinical_intent.routed") == 2
+
+
+def test_clinical_intent_route_returns_direct_form_action():
+    routed = route_clinical_intent(
+        ClinicalIntentRouteRequest(text="Registrar medicamento losartan 50 mg")
+    )
+
+    assert routed.recognized is True
+    assert routed.intent_type is None
+    assert routed.mode == "structured_proposal"
+    assert routed.suggested_actions[0].action_type == "create_event"
+    assert routed.suggested_actions[0].label == "Registrar medicacion"
+    assert routed.suggested_actions[0].requires_confirmation is True
+    description = routed.suggested_actions[0].description
+    assert "Texto original: Registrar medicamento losartan 50 mg" in description

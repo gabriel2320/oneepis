@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type {
@@ -7,7 +9,7 @@ import type {
 } from "@/lib/types";
 import { DEMO_MODE } from "@/lib/api/client";
 
-import { aiStatusLabel, fallbackActionToIntent } from "./ai-chart-utils";
+import { aiStatusLabel, clinicalActionKey, clinicalActionTarget, fallbackActionToIntent } from "./ai-chart-utils";
 
 type ClinicalIntentCommandBarProps = {
   routerText: string;
@@ -19,6 +21,7 @@ type ClinicalIntentCommandBarProps = {
   isExecuting: boolean;
   hasRouteError: boolean;
   hasIntentError: boolean;
+  patientId: string;
   onRouterTextChange: (value: string) => void;
   onRoute: () => void;
   onExecuteIntent: (intentType: ClinicalIntentType) => void;
@@ -43,6 +46,7 @@ export function ClinicalIntentCommandBar({
   isExecuting,
   hasRouteError,
   hasIntentError,
+  patientId,
   onRouterTextChange,
   onRoute,
   onExecuteIntent,
@@ -71,6 +75,7 @@ export function ClinicalIntentCommandBar({
       {routedIntent ? (
         <ClinicalIntentRouteResult
           routedIntent={routedIntent}
+          patientId={patientId}
           onExecute={onExecuteIntent}
           isExecuting={isRouting || isExecuting}
         />
@@ -99,10 +104,12 @@ export function ClinicalIntentCommandBar({
 
 function ClinicalIntentRouteResult({
   routedIntent,
+  patientId,
   onExecute,
   isExecuting,
 }: {
   routedIntent: ClinicalIntentRouteResponse;
+  patientId: string;
   onExecute: (intentType: ClinicalIntentType) => void;
   isExecuting: boolean;
 }) {
@@ -149,6 +156,19 @@ function ClinicalIntentRouteResult({
               {action.label}
             </Button>
           ))}
+        </div>
+      ) : null}
+      {routedIntent.suggested_actions.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {routedIntent.suggested_actions.map((action) => {
+            const target = clinicalActionTarget(patientId, action);
+            if (!target) return null;
+            return (
+              <Button key={clinicalActionKey(action)} asChild type="button" variant="outline" size="sm">
+                <Link href={target.href}>{target.label}</Link>
+              </Button>
+            );
+          })}
         </div>
       ) : null}
     </div>

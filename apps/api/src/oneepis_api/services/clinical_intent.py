@@ -65,6 +65,22 @@ def resolve_clinical_intent(
 
 def route_clinical_intent(payload: ClinicalIntentRouteRequest) -> ClinicalIntentRouteResponse:
     text = _normalize_text(payload.text)
+    direct_action = _direct_form_action(text, payload.text)
+    if direct_action:
+        return ClinicalIntentRouteResponse(
+            recognized=True,
+            original_text=payload.text,
+            intent_type=None,
+            mode="structured_proposal",
+            confidence="moderate",
+            explanation=(
+                "Se reconocio una accion de registro. AI-Chart abrira un formulario existente; "
+                "no se guardaran datos sin revision humana."
+            ),
+            suggested_actions=[direct_action],
+            fallback_options=_fallback_actions(),
+        )
+
     matches: list[tuple[ClinicalIntentType, str, tuple[str, ...]]] = [
         (
             "draft_soap",
@@ -1092,6 +1108,35 @@ def _fallback_actions() -> list[ClinicalIntentAction]:
         ),
         _action("review_sources", "Mostrar fuentes", "Ver fuentes usadas por AI-Chart."),
     ]
+
+
+def _direct_form_action(text: str, original_text: str) -> ClinicalIntentAction | None:
+    form_actions: list[tuple[tuple[str, ...], str, str]] = [
+        (
+            ("medicacion", "medicamento", "farmaco", "receta"),
+            "Registrar medicacion",
+            "Abrir formulario de medicacion con origen AI-Chart revisable.",
+        ),
+        (
+            ("alergia", "alergias", "alergico"),
+            "Registrar alergia",
+            "Abrir formulario de alergias con origen AI-Chart revisable.",
+        ),
+        (
+            ("signos vitales", "control de signos", "presion", "saturacion", "temperatura"),
+            "Registrar signos vitales",
+            "Abrir formulario de signos vitales con origen AI-Chart revisable.",
+        ),
+    ]
+    for keywords, label, description in form_actions:
+        if any(keyword in text for keyword in keywords):
+            return _action(
+                "create_event",
+                label,
+                f"{description} Texto original: {original_text}",
+                requires_confirmation=True,
+            )
+    return None
 
 
 def _action(

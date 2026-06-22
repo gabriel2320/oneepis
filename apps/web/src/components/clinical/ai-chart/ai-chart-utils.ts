@@ -24,10 +24,21 @@ export function clinicalEventSourceIds(intent: ClinicalIntentResponse) {
 export function clinicalActionTarget(patientId: string, action: ClinicalIntentAction) {
   const eventHref = clinicalEventPrefillHref(patientId, action);
   const problemHref = clinicalProblemPrefillHref(patientId, action);
+  const medicationHref = clinicalMedicationPrefillHref(patientId, action);
+  const allergyHref = clinicalAllergyPrefillHref(patientId, action);
+  const vitalHref = clinicalVitalPrefillHref(patientId, action);
   const targets: Partial<Record<ClinicalIntentAction["action_type"], { href: string; label: string }>> = {
     create_event: {
-      href: problemHref ?? eventHref,
-      label: problemHref ? "Registrar problema" : "Abrir eventos",
+      href: medicationHref ?? allergyHref ?? vitalHref ?? problemHref ?? eventHref,
+      label: medicationHref
+        ? "Registrar medicacion"
+        : allergyHref
+          ? "Registrar alergia"
+          : vitalHref
+            ? "Registrar signos"
+            : problemHref
+              ? "Registrar problema"
+              : "Abrir eventos",
     },
     create_soap_draft: {
       href: `/pacientes/${patientId}/evoluciones/desde-eventos`,
@@ -46,7 +57,7 @@ export function clinicalActionTarget(patientId: string, action: ClinicalIntentAc
 }
 
 export function clinicalProblemPrefillHref(patientId: string, action: ClinicalIntentAction) {
-  const normalizedLabel = action.label.toLocaleLowerCase("es-CL");
+  const normalizedLabel = normalizedActionText(action);
   if (!normalizedLabel.includes("problema")) {
     return null;
   }
@@ -58,6 +69,63 @@ export function clinicalProblemPrefillHref(patientId: string, action: ClinicalIn
     params.set("aiActionId", action.action_id);
   }
   return `/pacientes/${patientId}/problemas/nuevo?${params.toString()}`;
+}
+
+export function clinicalMedicationPrefillHref(patientId: string, action: ClinicalIntentAction) {
+  const normalized = normalizedActionText(action);
+  if (!normalized.includes("medicacion") && !normalized.includes("medicamento") && !normalized.includes("farmaco")) {
+    return null;
+  }
+  const params = aiActionParams(action);
+  const medicationText = actionClinicalRemainder(action, [
+    "registrar",
+    "agregar",
+    "crear",
+    "medicacion",
+    "medicamento",
+    "farmaco",
+    "receta",
+  ]);
+  if (medicationText) {
+    params.set("name", medicationText);
+  }
+  return `/pacientes/${patientId}/medicacion/nueva?${params.toString()}`;
+}
+
+export function clinicalAllergyPrefillHref(patientId: string, action: ClinicalIntentAction) {
+  const normalized = normalizedActionText(action);
+  if (!normalized.includes("alergia") && !normalized.includes("alergico")) {
+    return null;
+  }
+  const params = aiActionParams(action);
+  const substance = actionClinicalRemainder(action, [
+    "registrar",
+    "agregar",
+    "crear",
+    "alergia",
+    "alergias",
+    "alergico",
+    "a",
+  ]);
+  if (substance) {
+    params.set("substance", substance);
+  }
+  return `/pacientes/${patientId}/alergias/nueva?${params.toString()}`;
+}
+
+export function clinicalVitalPrefillHref(patientId: string, action: ClinicalIntentAction) {
+  const normalized = normalizedActionText(action);
+  if (
+    !normalized.includes("signos vitales") &&
+    !normalized.includes("control de signos") &&
+    !normalized.includes("presion") &&
+    !normalized.includes("saturacion") &&
+    !normalized.includes("temperatura")
+  ) {
+    return null;
+  }
+  const params = aiActionParams(action);
+  return `/pacientes/${patientId}/signos-vitales/nuevo?${params.toString()}`;
 }
 
 export function clinicalEventPrefillHref(patientId: string, action: ClinicalIntentAction) {
@@ -214,6 +282,37 @@ export function formatDate(value: string) {
 function hasTokenOverlap(left: string, right: string) {
   const rightTokens = new Set(meaningfulTokens(right));
   return meaningfulTokens(left).some((token) => rightTokens.has(token));
+}
+
+function normalizedActionText(action: ClinicalIntentAction) {
+  return normalizeClinicalText(`${action.action_id ?? ""} ${action.label} ${action.description ?? ""}`);
+}
+
+function aiActionParams(action: ClinicalIntentAction) {
+  const params = new URLSearchParams();
+  if (action.action_id) {
+    params.set("aiActionId", action.action_id);
+  }
+  if (action.description) {
+    params.set("sourceText", action.description.slice(0, 600));
+  }
+  return params;
+}
+
+function actionClinicalRemainder(action: ClinicalIntentAction, removableTokens: string[]) {
+  const originalText = action.description?.match(/Texto original:\s*(.+)$/)?.[1] ?? "";
+  const source = originalText || action.label;
+  const removable = new Set(removableTokens.map(normalizeClinicalText));
+  const remainder = source
+    .split(/\s+/)
+    .filter((word) => !removable.has(normalizeClinicalText(word)))
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (remainder.length < 3 || remainder.length > 120) {
+    return "";
+  }
+  return remainder;
 }
 
 function meaningfulTokens(value: string) {
