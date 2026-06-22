@@ -197,7 +197,43 @@ def test_context_builder_explains_problem_evidence_links(
 
     unlinked = next(context for context in contexts if context["status"] == "unlinked")
     assert unlinked["evidence"][0]["source_id"] == unlinked_event_id
-    assert any("no coincidieron textualmente" in item for item in unlinked["explanations"])
+    assert any("no coincidieron con reglas locales" in item for item in unlinked["explanations"])
+
+
+def test_context_builder_links_problem_by_local_clinical_vocabulary(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = _create_patient(client, auth, first_name="Contexto", last_name="Vocabulario")
+    problem_id = _create_problem(
+        client,
+        auth,
+        patient_id,
+        title="Neumonia adquirida en comunidad",
+    )
+    event_id = _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Disnea en disminucion con menor requerimiento de oxigeno.",
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert response.status_code == 200
+    contexts = response.json()["problem_contexts"]
+    structured = next(context for context in contexts if context["problem_id"] == problem_id)
+    assert structured["evidence"][0]["source_id"] == event_id
+    assert structured["evidence"][0]["detail"] == (
+        "Evento asociado por vocabulario clinico local: respiratorio."
+    )
+    assert any("vocabulario clinico local" in item for item in structured["explanations"])
+    assert not any(context["status"] == "unlinked" for context in contexts)
 
 
 def test_context_builder_missing_data_depends_on_care_context(

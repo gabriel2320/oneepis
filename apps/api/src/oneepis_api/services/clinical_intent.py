@@ -545,18 +545,14 @@ def _problem_contexts(
 
     for problem in snapshot.active_problems[:8]:
         title = problem.title
-        matched_events = [
-            event
-            for event in events
-            if title.casefold() in event.summary.casefold()
-            or event.summary.casefold() in title.casefold()
-        ]
+        matched_events = [event for event in events if _problem_event_match_reason(title, event)]
         linked_event_ids.update(event.id for event in matched_events)
         evidence = [
             ClinicalEvidenceMark(
                 label=event.summary,
                 status="confirmed",
-                detail="Evento reciente asociado por coincidencia textual con el problema.",
+                detail=_problem_event_match_reason(title, event)
+                or "Evento reciente asociado al problema.",
                 source_id=event.id,
             )
             for event in matched_events[:5]
@@ -568,14 +564,17 @@ def _problem_contexts(
             pending.append("Problema sin nota de plan estructurada.")
         explanations = [
             "Problema activo estructurado en la ficha.",
-            "La evidencia se asocia cuando el texto del evento y el titulo del problema coinciden.",
+            (
+                "La evidencia se asocia por coincidencia textual o vocabulario clinico local "
+                "explicito."
+            ),
         ]
         if evidence:
             explanations.append(
-                f"{len(evidence)} evento(s) reciente(s) vinculados por coincidencia textual."
+                f"{len(evidence)} evento(s) reciente(s) vinculados por regla local."
             )
         else:
-            explanations.append("No hubo coincidencia textual con eventos recientes.")
+            explanations.append("No hubo coincidencia ni vocabulario local con eventos recientes.")
         if problem.notes:
             explanations.append("El problema tiene nota de plan estructurada.")
         else:
@@ -608,7 +607,7 @@ def _problem_contexts(
                 ],
                 pending=["Revisar si corresponde crear o actualizar un problema activo."],
                 explanations=[
-                    "Estos eventos recientes no coincidieron textualmente con problemas activos.",
+                    "Estos eventos recientes no coincidieron con reglas locales de problemas activos.",
                     "Se muestran como contexto no vinculado para revision humana.",
                 ],
             )
@@ -759,11 +758,46 @@ def _clinical_course_finding(summary: str) -> str | None:
 
 
 def _event_matches_any_problem(snapshot: PatientRecordSnapshot, event: object) -> bool:
-    summary = event.summary.casefold()
     return any(
-        problem.title.casefold() in summary or summary in problem.title.casefold()
+        _problem_event_match_reason(problem.title, event)
         for problem in snapshot.active_problems
     )
+
+
+def _problem_event_match_reason(problem_title: str, event: object) -> str | None:
+    problem = _normalize_text(problem_title)
+    summary = _normalize_text(event.summary)
+    if problem in summary or summary in problem:
+        return "Evento asociado por coincidencia textual con el problema."
+
+    vocabularies = {
+        "respiratorio": {
+            "problem": ("neumonia", "respiratorio", "epoc", "asma", "bronquial"),
+            "event": ("disnea", "tos", "saturacion", "oxigeno", "respiratorio", "crepit"),
+        },
+        "dolor": {
+            "problem": ("dolor", "algia"),
+            "event": ("dolor", "algia", "colico", "molestia"),
+        },
+        "fiebre": {
+            "problem": ("fiebre", "febril", "infeccion"),
+            "event": ("fiebre", "febril", "temperatura", "calofrios"),
+        },
+        "hipertension": {
+            "problem": ("hipertension", "hta", "presion arterial"),
+            "event": ("presion", "pa ", "sistolica", "diastolica", "hipertension"),
+        },
+        "diabetes": {
+            "problem": ("diabetes", "dm2", "glicemia"),
+            "event": ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia", "insulina"),
+        },
+    }
+    for label, terms in vocabularies.items():
+        if any(term in problem for term in terms["problem"]) and any(
+            term in summary for term in terms["event"]
+        ):
+            return f"Evento asociado por vocabulario clinico local: {label}."
+    return None
 
 
 def _exam_payload_rule_findings(

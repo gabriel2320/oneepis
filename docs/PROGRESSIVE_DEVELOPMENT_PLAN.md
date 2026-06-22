@@ -45,6 +45,7 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La ba
 - explicar por que un evento reciente se asocia o no a un problema activo dentro del Context Builder
 - mostrar faltantes contextualizados por atencion ambulatoria, hospitalizada o desconocida
 - detectar curso clinico narrativo como mejora o empeoramiento desde eventos recientes
+- asociar evidencia a problemas por vocabulario clinico local explicable, no solo texto literal
 
 El proximo trabajo puede preparar Fase 2 solo si conserva esta base. No agregar
 chat libre, RAG, documentos o IA externa como atajo.
@@ -232,10 +233,11 @@ Implementado inicial:
 - la UI muestra explicaciones dentro de `Problemas y evidencia`
 - `missing_data` describe por que falta el dato y ajusta baseline/signos vitales segun contexto asistencial
 - eventos recientes con lenguaje de mejoria o empeoramiento generan reglas locales visibles en `Curso clinico`
+- asociaciones por problema usan vocabulario local inicial por dominios respiratorio, dolor, fiebre, hipertension y diabetes
 
 Trabajo:
 
-- asociacion semantica local por problema, mas alla de coincidencia textual simple
+- ampliar vocabulario local por problema y revisar falsos positivos
 - ampliar reglas explicitas de mejoria/empeoramiento por dominio
 - ampliar faltantes por tipo de atencion a dominios especificos
 - comparacion 24 h con datos estructurados
