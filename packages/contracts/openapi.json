@@ -7886,6 +7886,13 @@
             },
             "type": "array",
             "title": "Pending"
+          },
+          "explanations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Explanations"
           }
         },
         "type": "object",

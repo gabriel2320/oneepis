@@ -51,6 +51,48 @@ def _create_entry(
     return response.json()["id"]
 
 
+def _create_problem(
+    client: TestClient,
+    auth: dict[str, str],
+    patient_id: str,
+    *,
+    title: str,
+    notes: str | None = None,
+) -> str:
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=auth,
+        json={
+            "title": title,
+            "onset_date": "2026-06-01",
+            "notes": notes,
+        },
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
+def _create_event(
+    client: TestClient,
+    auth: dict[str, str],
+    patient_id: str,
+    *,
+    summary: str,
+) -> str:
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:00:00Z",
+            "summary": summary,
+            "source_type": "manual",
+        },
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
 def _audit_events(client: TestClient, auth: dict[str, str], patient_id: str) -> list[dict]:
     response = client.get(
         f"/api/v1/patients/{patient_id}/audit-events",
@@ -108,6 +150,51 @@ def test_patient_ai_suggestions_return_404_for_missing_patient(
     )
 
     assert response.status_code == 404
+
+
+def test_context_builder_explains_problem_evidence_links(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = _create_patient(client, auth, first_name="Contexto", last_name="Explicable")
+    problem_id = _create_problem(
+        client,
+        auth,
+        patient_id,
+        title="Dolor abdominal",
+        notes="Controlar evolucion y tolerancia oral.",
+    )
+    linked_event_id = _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Dolor abdominal en disminucion.",
+    )
+    unlinked_event_id = _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Control telefonico pendiente.",
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert response.status_code == 200
+    contexts = response.json()["problem_contexts"]
+    structured = next(context for context in contexts if context["problem_id"] == problem_id)
+    assert structured["title"] == "Dolor abdominal"
+    assert structured["evidence"][0]["source_id"] == linked_event_id
+    assert any("coincidencia textual" in item for item in structured["explanations"])
+    assert any("nota de plan estructurada" in item for item in structured["explanations"])
+
+    unlinked = next(context for context in contexts if context["status"] == "unlinked")
+    assert unlinked["evidence"][0]["source_id"] == unlinked_event_id
+    assert any("no coincidieron textualmente" in item for item in unlinked["explanations"])
 
 
 def test_event_proposals_from_entry_are_reviewable_and_do_not_persist(

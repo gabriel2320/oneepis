@@ -149,6 +149,9 @@ function ProblemsEvidencePanel({ intent }: { intent: ClinicalIntentResponse }) {
                 {context.title} · {context.status}
               </p>
               <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                {context.explanations.map((item) => (
+                  <li key={item}>Explicacion: {item}</li>
+                ))}
                 {context.evidence.length > 0 ? (
                   context.evidence.map((mark) => <li key={`${mark.status}-${mark.label}`}>{mark.label}</li>)
                 ) : (

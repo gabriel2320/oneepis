@@ -549,6 +549,20 @@ def _problem_contexts(
             pending.append("Sin evidencia reciente asociada automaticamente.")
         if not problem.notes:
             pending.append("Problema sin nota de plan estructurada.")
+        explanations = [
+            "Problema activo estructurado en la ficha.",
+            "La evidencia se asocia cuando el texto del evento y el titulo del problema coinciden.",
+        ]
+        if evidence:
+            explanations.append(
+                f"{len(evidence)} evento(s) reciente(s) vinculados por coincidencia textual."
+            )
+        else:
+            explanations.append("No hubo coincidencia textual con eventos recientes.")
+        if problem.notes:
+            explanations.append("El problema tiene nota de plan estructurada.")
+        else:
+            explanations.append("Falta nota de plan; se mantiene pendiente de revision.")
         contexts.append(
             ClinicalProblemContext(
                 problem_id=problem.id,
@@ -556,6 +570,7 @@ def _problem_contexts(
                 status="structured",
                 evidence=evidence,
                 pending=pending,
+                explanations=explanations,
             )
         )
 
@@ -575,6 +590,10 @@ def _problem_contexts(
                     for event in unlinked_events
                 ],
                 pending=["Revisar si corresponde crear o actualizar un problema activo."],
+                explanations=[
+                    "Estos eventos recientes no coincidieron textualmente con problemas activos.",
+                    "Se muestran como contexto no vinculado para revision humana.",
+                ],
             )
         )
     return contexts

@@ -394,6 +394,7 @@ export type ClinicalIntentResponse = {
       source_id?: string | null;
     }[];
     pending: string[];
+    explanations: string[];
   }[];
   change_set?: {
     baseline?: string | null;

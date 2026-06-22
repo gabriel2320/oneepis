@@ -32,7 +32,7 @@ No se avanza a una fase si la anterior no conserva:
 
 ## Estado Actual
 
-OneEpis tiene Fase 1 cerrada a nivel de producto minimo. La base ya permite:
+OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La base ya permite:
 
 - leer ficha longitudinal por paciente
 - usar eventos clinicos como memoria estructurada
@@ -42,6 +42,7 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo. La base ya permite:
 - persistir cambios IA solo mediante `ClinicalPatch` confirmado
 - auditar aceptacion, rechazo y guardado
 - funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y Ollama apagado
+- explicar por que un evento reciente se asocia o no a un problema activo dentro del Context Builder
 
 El proximo trabajo puede preparar Fase 2 solo si conserva esta base. No agregar
 chat libre, RAG, documentos o IA externa como atajo.
@@ -50,7 +51,7 @@ chat libre, RAG, documentos o IA externa como atajo.
 
 Prioridad antes de abrir Fase 2:
 
-1. Context Builder serio: asociar evidencia por problema y explicar inferencias.
+1. Context Builder serio: ampliar asociaciones por problema y explicar inferencias.
 2. AI Bridge unico: no crear nuevos Route Handlers de IA por caso de uso.
 3. Refactor minimo: extraer helpers de patch solo si aparece duplicacion real.
 4. Mantener permisos visibles y estados de patch en cada nueva accion.
@@ -220,9 +221,17 @@ Pendiente que pasa a Fase 2 o mantenimiento:
 
 Objetivo: pasar de listas utiles a contexto clinico explicable.
 
+Estado: iniciada con explicaciones deterministicas por problema.
+
+Implementado inicial:
+
+- `problem_contexts` incluye explicaciones visibles de asociacion por coincidencia textual
+- eventos recientes sin problema asociado quedan agrupados con razon de revision humana
+- la UI muestra explicaciones dentro de `Problemas y evidencia`
+
 Trabajo:
 
-- asociacion semantica local por problema
+- asociacion semantica local por problema, mas alla de coincidencia textual simple
 - reglas explicitas para mejoria/empeoramiento
 - faltantes por tipo de atencion
 - comparacion 24 h con datos estructurados

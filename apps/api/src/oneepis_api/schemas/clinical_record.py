@@ -289,6 +289,7 @@ class ClinicalProblemContext(APIModel):
     status: Literal["structured", "unlinked"]
     evidence: list[ClinicalEvidenceMark] = Field(default_factory=list)
     pending: list[str] = Field(default_factory=list)
+    explanations: list[str] = Field(default_factory=list)
 
 
 class ClinicalChangeSet(APIModel):
