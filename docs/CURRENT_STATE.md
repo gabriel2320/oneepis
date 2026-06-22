@@ -134,6 +134,7 @@ Capas:
 - AI-Chart etiqueta el curso clinico por dominio cuando el texto reciente permite distinguir respiratorio, dolor, infeccioso, hemodinamico, metabolico o digestivo
 - AI-Chart evita negaciones obvias de curso clinico y corrobora dominios respiratorio, infeccioso o hemodinamico con signos vitales cuando existen dos controles comparables
 - AI-Chart asocia problemas con eventos por vocabulario clinico local explicable cuando no hay coincidencia literal
+- AI-Chart evita negaciones obvias al asociar por vocabulario local para reducir falsos positivos
 - AI-Chart prioriza asociaciones SNOMED CT cuando el problema trae codigo y el evento incluye conceptos/ancestros derivados de repositorios terminologicos externos licenciados
 - AI-Chart agrega pendientes por problema activo segun dominio clinico probable: respiratorio, metabolico, hemodinamico o infeccioso
 - AI-Chart muestra razon de asociacion y fuente abreviada por cada evidencia vinculada a problema

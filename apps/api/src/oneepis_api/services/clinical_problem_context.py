@@ -48,8 +48,37 @@ def problem_event_match_reason(problem: object, event: object) -> str | None:
         if any(term in problem_text for term in terms["problem"]) and any(
             term in summary for term in terms["event"]
         ):
+            if _has_negated_vocabulary_signal(label, summary):
+                continue
             return f"Evento asociado por vocabulario clinico local: {label}."
     return None
+
+
+def _has_negated_vocabulary_signal(label: str, summary: str) -> bool:
+    negated_terms = {
+        "respiratorio": (
+            "sin disnea",
+            "niega disnea",
+            "sin tos",
+            "niega tos",
+            "sin dificultad respiratoria",
+        ),
+        "dolor": (
+            "sin dolor",
+            "niega dolor",
+            "no presenta dolor",
+            "descarta dolor",
+        ),
+        "fiebre": ("sin fiebre", "afebril", "niega fiebre"),
+        "hipertension": (
+            "presion normal",
+            "pa normal",
+            "sin hipertension",
+            "niega hipertension",
+        ),
+        "diabetes": ("niega diabetes", "sin diabetes"),
+    }
+    return any(term in summary for term in negated_terms.get(label, ()))
 
 
 def problem_domain_label(problem: object) -> str | None:
