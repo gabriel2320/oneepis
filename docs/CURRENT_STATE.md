@@ -13,6 +13,21 @@ OneEpis ya tiene una base E2E real:
 
 El modo demo solo debe usarse con `NEXT_PUBLIC_DEMO_MODE=true`.
 
+Programa de lectura aprobado, no implementado: `PROG-ASSISTANT-READ-01`.
+
+Este programa define una capa futura de asistente clinico de solo lectura para
+leer, buscar, mostrar, graficar y correlacionar la historia longitudinal del
+paciente. Queda integrado en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` como
+extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
+
+Estado real al 2026-06-22:
+
+- no existen todavia endpoints `/assistant/*`
+- no existe todavia ruta `/pacientes/[patientId]/contexto`
+- no hay busqueda, chart ni correlacion assistant dedicados
+- no se autoriza escritura clinica desde el programa
+- no debe implementarse encima de PR #1 mientras siga en draft o con CI remoto rojo
+
 ## Backend
 
 Router principal: `apps/api/src/oneepis_api/api/v1/routes/patients.py`.
@@ -175,6 +190,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - Validacion reciente: API 56 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
 - Siguiente paso recomendado: ampliar vocabulario local por problema y reglas por dominio clinico, midiendo falsos positivos, manteniendo AI Bridge unico y sin crear chat libre, RAG, agentes ni nuevos modulos.
+- Programa siguiente condicionado: `PROG-ASSISTANT-READ-01`, solo despues de base verde, para lectura longitudinal, busqueda, datos graficables y correlacion deterministica sin escritura clinica.
 
 ## Historial
 

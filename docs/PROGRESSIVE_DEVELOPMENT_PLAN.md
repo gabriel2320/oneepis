@@ -94,6 +94,85 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La ba
 El proximo trabajo puede preparar Fase 2 solo si conserva esta base. No agregar
 chat libre, RAG, documentos o IA externa como atajo.
 
+## PROG-ASSISTANT-READ-01
+
+Estado: programa aceptado como extension cerrada de Fase 2, no implementado.
+
+Objetivo: convertir OneEpis en una ficha medica tradicional aumentada que puede
+leer, buscar, mostrar, graficar y correlacionar su propia historia longitudinal,
+sin aumentar escritura automatica ni abrir chat libre.
+
+Decision de arquitectura:
+
+- el programa es de solo lectura
+- no reemplaza AI-Chart ni crea dashboard central
+- no usa RAG, embeddings, IA externa ni chat libre
+- no toca receta, firma clinica, indicaciones ejecutables ni documentos firmados
+- no escribe ficha; si en el futuro propone escritura, eso queda fuera de este
+  programa y debe pasar por `ClinicalPatch`
+- todas las respuestas deben incluir fuentes y declarar faltantes o limites
+- la primera implementacion debe ser deterministica y funcionar con Ollama apagado
+
+Condicion de entrada:
+
+- no iniciar este programa sobre PR #1 mientras siga en draft o con CI remoto rojo
+- primero dejar verde `api`, `web`, `contracts-e2e` y contrato OpenAPI del PR base
+- si el programa se abre como PR nuevo, partir desde una base verde y mantenerlo
+  como micro-PR logico
+
+Orden obligatorio de ejecucion:
+
+1. Backend schemas + timeline de lectura.
+2. Busqueda deterministica.
+3. Datos graficables.
+4. Correlacion deterministica por presets.
+5. OpenAPI y cliente web.
+6. UI minima solo si el backend esta verde.
+7. Tests y documentacion canonica.
+
+Entregables backend permitidos:
+
+```text
+GET  /api/v1/patients/{patient_id}/assistant/timeline
+POST /api/v1/patients/{patient_id}/assistant/search
+POST /api/v1/patients/{patient_id}/assistant/chart
+POST /api/v1/patients/{patient_id}/assistant/correlate
+```
+
+Estas rutas deben consultar entidades existentes y no crear, actualizar ni
+eliminar pacientes, evoluciones, eventos, signos vitales, medicamentos,
+alergias, problemas, encuentros, indicaciones ni auditoria de modificacion.
+
+Alcance por endpoint:
+
+- `timeline`: unir encuentros, evoluciones, eventos, signos vitales,
+  medicamentos activos, problemas activos, alergias e indicaciones si existen.
+- `search`: buscar texto deterministico en SOAP, eventos, problemas,
+  medicamentos, alergias, encuentros y notas/payload textual.
+- `chart`: devolver series de signos vitales, examenes desde eventos
+  `exam_result` y marcas de medicamentos, como datos listos para UI.
+- `correlate`: describir relaciones temporales con presets cerrados
+  `fever_infection`, `renal_medications`, `respiratory_oxygen`,
+  `hemoglobin_bleeding` y `medication_changes`.
+
+UI permitida:
+
+- preferir integracion sobria en AI-Chart si cabe sin inflar la pagina
+- permitir `/pacientes/[patientId]/contexto` solo como vista de ficha, no dashboard
+- bloques maximos iniciales: Timeline, Buscar, Graficar, Correlacionar
+- usar estados loading/empty/error y componentes clinicos existentes
+
+Criterios de aceptacion:
+
+- el asistente lee historia longitudinal autorizada
+- la busqueda devuelve fuentes, no solo texto
+- chart devuelve datos graficables, no imagenes ni graficos acoplados al backend
+- correlate no diagnostica ni prescribe; solo relaciona fuentes y faltantes
+- no hay escritura clinica nueva
+- OpenAPI queda actualizado
+- los tests prueban solo lectura, permisos y faltantes
+- pasan `check:api`, `check:web`, `check:contract`, `check:e2e` y `check`
+
 ## Foco Inmediato
 
 Prioridad antes de abrir Fase 2:
