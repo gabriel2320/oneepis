@@ -8,6 +8,11 @@ export type SoapDraftState = {
   plan: string;
 };
 
+export type HumanReviewConfirmation = {
+  human_reviewed: true;
+  human_reviewed_at: string;
+};
+
 export type RuleFindingGroup = {
   label: string;
   items: RuleFindingView[];

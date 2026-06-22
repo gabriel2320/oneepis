@@ -65,6 +65,7 @@ Implementado hasta ahora:
 - panel compacto de cambios 24 h visible antes del margen detallado
 - reglas de examenes aceptan payload estructurado `results[]` sin leer texto libre
 - guardado de SOAP generado exige marca visual de revision humana
+- guardado de SOAP generado persiste metadata de revision humana en `extra_data`
 - R-01 AI-Chart Split: componentes extraidos y pagina reducida a orquestador
 
 Siguiente incremento:
@@ -85,10 +86,9 @@ Presupuesto activo:
 
 Cola corta permitida antes de pasar a Fase 2:
 
-1. Pulir revision previa al guardado SOAP: fuentes, faltantes y confirmacion visible.
-2. Ampliar prellenado solo para formularios existentes con acto clinico completo.
-3. Crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable.
-4. Reforzar permisos/estados visuales por modo sin cambiar roles.
+1. Ampliar prellenado solo para formularios existentes con acto clinico completo.
+2. Crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable.
+3. Reforzar permisos/estados visuales por modo sin cambiar roles.
 
 Bloqueado por ahora:
 

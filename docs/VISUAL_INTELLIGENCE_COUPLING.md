@@ -74,6 +74,7 @@ OneEpis ya muestra en AI-Chart:
 - intencion de evolucion abre hoja SOAP editable desde fuentes visibles
 - panel compacto de cambios 24 h en el cuerpo principal de la respuesta
 - guardado de hoja SOAP generado bloqueado hasta revision humana explicita
+- metadata de revision humana persistida al guardar el borrador AI-Chart
 - estado IA generativa activa/degradada/apagada
 - AI-Chart dividido en componentes por responsabilidad para evitar inflado
 

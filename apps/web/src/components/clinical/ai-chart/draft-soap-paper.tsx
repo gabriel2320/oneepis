@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DEMO_MODE } from "@/lib/api/client";
 import type { DraftSoapFromEventsResponse } from "@/lib/types";
 
-import type { SoapDraftState } from "./ai-chart-types";
+import type { HumanReviewConfirmation, SoapDraftState } from "./ai-chart-types";
 import { SmartMarginBlock } from "./smart-margin";
 
 type DraftSoapPaperProps = {
@@ -18,7 +18,7 @@ type DraftSoapPaperProps = {
   canWriteSoap: boolean;
   isSaving: boolean;
   saveError: boolean;
-  onSave: () => void;
+  onSave: (review: HumanReviewConfirmation) => void;
   onSoapChange: (next: SoapDraftState | ((current: SoapDraftState) => SoapDraftState)) => void;
 };
 
@@ -43,7 +43,12 @@ export function DraftSoapPaper({
           type="button"
           size="sm"
           disabled={isSaving || DEMO_MODE || !canWriteSoap || !humanReviewed}
-          onClick={onSave}
+          onClick={() =>
+            onSave({
+              human_reviewed: true,
+              human_reviewed_at: new Date().toISOString(),
+            })
+          }
         >
           <Save className="h-4 w-4" />
           {isSaving ? "Guardando..." : "Guardar borrador"}

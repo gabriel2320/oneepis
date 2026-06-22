@@ -6,7 +6,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiChartGovernancePanel } from "@/components/clinical/ai-chart/ai-chart-governance-panel";
-import type { SoapDraftState } from "@/components/clinical/ai-chart/ai-chart-types";
+import type {
+  HumanReviewConfirmation,
+  SoapDraftState,
+} from "@/components/clinical/ai-chart/ai-chart-types";
 import { clinicalEventSourceIds, emptyToNull } from "@/components/clinical/ai-chart/ai-chart-utils";
 import { ClinicalIntentCommandBar } from "@/components/clinical/ai-chart/clinical-intent-command-bar";
 import { ClinicalIntentResultPanel } from "@/components/clinical/ai-chart/clinical-intent-result-panel";
@@ -116,7 +119,7 @@ export function PatientAiChartPage() {
     },
   });
   const saveMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (review: HumanReviewConfirmation) =>
       createClinicalEntry(patientId, {
         kind: "progress",
         status: "draft",
@@ -132,6 +135,8 @@ export function PatientAiChartPage() {
           ai_chart_section_sources: draft?.section_sources ?? [],
           ai_provider: draft?.provider,
           requires_human_confirmation: true,
+          human_reviewed: review.human_reviewed,
+          human_reviewed_at: review.human_reviewed_at,
         },
       }),
     onSuccess: async () => {
@@ -255,7 +260,7 @@ export function PatientAiChartPage() {
             canWriteSoap={canWriteSoap}
             isSaving={saveMutation.isPending}
             saveError={saveMutation.isError}
-            onSave={() => saveMutation.mutate()}
+            onSave={(review) => saveMutation.mutate(review)}
             onSoapChange={setSoap}
           />
         ) : null}
