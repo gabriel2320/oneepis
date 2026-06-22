@@ -138,7 +138,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
-- `apps/web/src/components/clinical/patient-ai-chart-pages.tsx` ya concentra varias responsabilidades; el siguiente crecimiento debe extraer subcomponentes si aumenta, no seguir agregando bloques inline.
+- `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
 - `apps/api/src/oneepis_api/services/clinical_intent.py` ya concentra reglas deterministicas; nuevas reglas deben agruparse por dominio o extraerse antes de crecer mucho mas.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.

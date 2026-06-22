@@ -65,6 +65,7 @@ Implementado hasta ahora:
 - panel compacto de cambios 24 h visible antes del margen detallado
 - reglas de examenes aceptan payload estructurado `results[]` sin leer texto libre
 - guardado de SOAP generado exige marca visual de revision humana
+- R-01 AI-Chart Split: componentes extraidos y pagina reducida a orquestador
 
 Siguiente incremento:
 

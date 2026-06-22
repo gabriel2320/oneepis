@@ -75,6 +75,7 @@ OneEpis ya muestra en AI-Chart:
 - panel compacto de cambios 24 h en el cuerpo principal de la respuesta
 - guardado de hoja SOAP generado bloqueado hasta revision humana explicita
 - estado IA generativa activa/degradada/apagada
+- AI-Chart dividido en componentes por responsabilidad para evitar inflado
 
 ## Pendiente visual inmediato
 
