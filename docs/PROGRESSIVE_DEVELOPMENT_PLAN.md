@@ -62,6 +62,7 @@ Implementado hasta ahora:
 - prellenado de problema activo desde accion propuesta sin guardado automatico
 - fallback de barra clinica resuelto por `action_id`, no por texto visible
 - intencion `draft_soap` genera hoja SOAP editable desde fuentes de eventos sin guardar
+- panel compacto de cambios 24 h visible antes del margen detallado
 
 Siguiente incremento:
 
