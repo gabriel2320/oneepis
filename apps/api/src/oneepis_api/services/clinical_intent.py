@@ -435,12 +435,29 @@ def _sources(snapshot: PatientRecordSnapshot, events: list[object]) -> list[Clin
 
 def _missing_data(snapshot: PatientRecordSnapshot, events: list[object]) -> list[str]:
     missing: list[str] = []
+    care_context = snapshot.patient.current_care_context
     if not events:
-        missing.append("Eventos clinicos recientes")
+        missing.append(
+            "Eventos clinicos recientes: necesarios para construir contexto longitudinal."
+        )
     if snapshot.latest_vitals is None:
-        missing.append("Signos vitales recientes")
+        if care_context == "hospitalized":
+            missing.append(
+                "Signos vitales recientes: requeridos para contexto hospitalizado."
+            )
+        else:
+            missing.append("Signos vitales recientes: faltan para contexto objetivo.")
     if not snapshot.active_problems:
-        missing.append("Problemas activos estructurados")
+        missing.append(
+            "Problemas activos estructurados: necesarios para agrupar evidencia por problema."
+        )
+    if not snapshot.recent_entries:
+        if care_context == "ambulatory":
+            missing.append("Evolucion ambulatoria reciente: falta baseline para comparar control.")
+        elif care_context == "hospitalized":
+            missing.append("Evolucion u hoja diaria reciente: falta baseline hospitalizado.")
+        else:
+            missing.append("Evolucion reciente: falta baseline clinico para comparar.")
     return missing
 
 

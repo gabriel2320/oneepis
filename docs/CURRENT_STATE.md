@@ -129,6 +129,7 @@ Capas:
 - AI-Chart muestra estado operativo de eventos, evoluciones, seleccion, modo y permisos antes de generar o guardar
 - AI-Chart explica acciones bloqueadas con condicion o rol habilitante
 - AI-Chart inicia Context Builder serio mostrando explicaciones por problema: por que una evidencia se asocia o queda sin vinculo
+- AI-Chart muestra faltantes con razon y contexto asistencial, no solo nombres de datos ausentes
 - AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia
 - Propuestas desde evolucion muestran estado visible `pendiente`, `registrando`, `registrada en ficha` o `rechazada` antes y despues de confirmar el `ClinicalPatch`
 - Las decisiones de propuesta se consideran durables via auditoria; la UI mantiene estado local de sesion para operacion inmediata
@@ -165,7 +166,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2, temas visuales v2 y AI-Chart Core Nivel 0.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - Validacion reciente: API 56 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
-- Siguiente paso recomendado: ampliar Fase 2 con asociaciones locales mas robustas por problema y reglas explicitas de mejoria/empeoramiento, manteniendo AI Bridge unico y sin crear chat libre, RAG, agentes ni nuevos modulos.
+- Siguiente paso recomendado: ampliar Fase 2 con asociaciones locales mas robustas por problema y reglas explicitas de mejoria/empeoramiento por dominio, manteniendo AI Bridge unico y sin crear chat libre, RAG, agentes ni nuevos modulos.
 
 ## Historial
 

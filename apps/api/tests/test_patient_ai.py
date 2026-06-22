@@ -7,6 +7,7 @@ def _create_patient(
     *,
     first_name: str = "Paciente",
     last_name: str = "IA",
+    current_care_context: str = "unknown",
 ) -> str:
     response = client.post(
         "/api/v1/patients",
@@ -16,6 +17,7 @@ def _create_patient(
             "last_name": last_name,
             "birth_date": "1988-01-01",
             "sex_at_birth": "unknown",
+            "current_care_context": current_care_context,
         },
     )
     assert response.status_code == 201
@@ -195,6 +197,47 @@ def test_context_builder_explains_problem_evidence_links(
     unlinked = next(context for context in contexts if context["status"] == "unlinked")
     assert unlinked["evidence"][0]["source_id"] == unlinked_event_id
     assert any("no coincidieron textualmente" in item for item in unlinked["explanations"])
+
+
+def test_context_builder_missing_data_depends_on_care_context(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    ambulatory_patient_id = _create_patient(
+        client,
+        auth,
+        first_name="Contexto",
+        last_name="Ambulatorio",
+        current_care_context="ambulatory",
+    )
+    hospitalized_patient_id = _create_patient(
+        client,
+        auth,
+        first_name="Contexto",
+        last_name="Hospitalizado",
+        current_care_context="hospitalized",
+    )
+
+    ambulatory_response = client.post(
+        f"/api/v1/patients/{ambulatory_patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+    hospitalized_response = client.post(
+        f"/api/v1/patients/{hospitalized_patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert ambulatory_response.status_code == 200
+    assert hospitalized_response.status_code == 200
+    ambulatory_missing = ambulatory_response.json()["missing_data"]
+    hospitalized_missing = hospitalized_response.json()["missing_data"]
+    assert any("Evolucion ambulatoria reciente" in item for item in ambulatory_missing)
+    assert any("contexto objetivo" in item for item in ambulatory_missing)
+    assert any("Evolucion u hoja diaria reciente" in item for item in hospitalized_missing)
+    assert any("contexto hospitalizado" in item for item in hospitalized_missing)
 
 
 def test_event_proposals_from_entry_are_reviewable_and_do_not_persist(
