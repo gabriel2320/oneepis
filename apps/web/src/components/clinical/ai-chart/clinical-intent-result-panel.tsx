@@ -153,12 +153,30 @@ function ProblemsEvidencePanel({ intent }: { intent: ClinicalIntentResponse }) {
                   <li key={item}>Explicacion: {item}</li>
                 ))}
                 {context.evidence.length > 0 ? (
-                  context.evidence.map((mark) => <li key={`${mark.status}-${mark.label}`}>{mark.label}</li>)
+                  context.evidence.map((mark) => (
+                    <li key={`${mark.status}-${mark.source_id ?? mark.label}`}>
+                      <div className="space-y-0.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="rounded-md border px-1.5 py-0.5">
+                            {mark.status}
+                          </span>
+                          <span>{mark.label}</span>
+                        </div>
+                        <p>Razon: {mark.detail}</p>
+                        {mark.source_id ? (
+                          <p>Fuente: evento {shortSourceId(mark.source_id)}</p>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))
                 ) : (
                   <li>Sin evidencia reciente asociada</li>
                 )}
                 {context.pending.map((item) => (
-                  <li key={item}>{item}</li>
+                  <li key={item}>
+                    <span className="rounded-md border px-1.5 py-0.5">pendiente</span>{" "}
+                    {item}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -169,6 +187,10 @@ function ProblemsEvidencePanel({ intent }: { intent: ClinicalIntentResponse }) {
       </div>
     </div>
   );
+}
+
+function shortSourceId(sourceId: string) {
+  return sourceId.slice(0, 8);
 }
 
 function ContextPanel({ intent }: { intent: ClinicalIntentResponse }) {

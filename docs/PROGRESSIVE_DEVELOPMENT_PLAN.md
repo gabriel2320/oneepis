@@ -239,6 +239,7 @@ Implementado inicial:
 - asociaciones por problema usan vocabulario local inicial por dominios respiratorio, dolor, fiebre, hipertension y diabetes
 - si un problema tiene `code_system=SNOMED-CT` y el evento trae conceptos/ancestros SNOMED desde un repositorio externo, el Context Builder prioriza esa asociacion explicable
 - los pendientes por problema activo incorporan faltantes por dominio respiratorio, metabolico, hemodinamico e infeccioso
+- la UI muestra para cada evidencia por problema su razon de asociacion y fuente abreviada
 
 Trabajo:
 
@@ -246,8 +247,7 @@ Trabajo:
 - conectar un repositorio RF2/terminology server SNOMED CT licenciado como fuente externa, sin versionar releases completos
 - ampliar reglas explicitas de mejoria/empeoramiento por dominio y sumar mas contrastes estructurados
 - ampliar faltantes por dominio con mas fuentes estructuradas que signos vitales y eventos recientes
-- comparacion 24 h con datos estructurados
-- evidencia vinculada a fuente
+- ampliar comparacion 24 h con mas datos estructurados
 
 Regla: toda inferencia debe mostrar por que se hizo.
 
