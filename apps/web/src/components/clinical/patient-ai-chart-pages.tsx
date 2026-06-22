@@ -547,7 +547,7 @@ function ClinicalIntentRouteResult({
   const fallbackIntents = routedIntent.fallback_options
     .map((action) => ({
       label: action.label,
-      intent: fallbackActionToIntent(action.label),
+      intent: fallbackActionToIntent(action),
     }))
     .filter((item): item is { label: string; intent: ClinicalIntentType } => Boolean(item.intent));
   return (
@@ -887,10 +887,11 @@ function clinicalActionKey(action: ClinicalIntentResponse["proposed_actions"][nu
 
 function clinicalActionTarget(patientId: string, action: ClinicalIntentAction) {
   const eventHref = clinicalEventPrefillHref(patientId, action);
+  const problemHref = clinicalProblemPrefillHref(patientId, action);
   const targets: Partial<Record<ClinicalIntentAction["action_type"], { href: string; label: string }>> = {
     create_event: {
-      href: eventHref,
-      label: "Abrir eventos",
+      href: problemHref ?? eventHref,
+      label: problemHref ? "Registrar problema" : "Abrir eventos",
     },
     create_soap_draft: {
       href: `/pacientes/${patientId}/evoluciones/desde-eventos`,
@@ -906,6 +907,21 @@ function clinicalActionTarget(patientId: string, action: ClinicalIntentAction) {
     },
   };
   return targets[action.action_type] ?? null;
+}
+
+function clinicalProblemPrefillHref(patientId: string, action: ClinicalIntentAction) {
+  const normalizedLabel = action.label.toLocaleLowerCase("es-CL");
+  if (!normalizedLabel.includes("problema")) {
+    return null;
+  }
+  const params = new URLSearchParams({
+    title: action.label,
+    notes: action.description ?? "",
+  });
+  if (action.action_id) {
+    params.set("aiActionId", action.action_id);
+  }
+  return `/pacientes/${patientId}/problemas/nuevo?${params.toString()}`;
 }
 
 function clinicalEventPrefillHref(patientId: string, action: ClinicalIntentAction) {
@@ -988,8 +1004,8 @@ function emptyToNull(value?: string | null) {
   return trimmed ? trimmed : null;
 }
 
-function fallbackActionToIntent(label: string): ClinicalIntentType | null {
-  const normalized = label.toLocaleLowerCase("es-CL");
+function fallbackActionToIntent(action: ClinicalIntentAction): ClinicalIntentType | null {
+  const normalized = (action.action_id ?? action.label).toLocaleLowerCase("es-CL");
   if (normalized.includes("resumir")) return "summarize_patient";
   if (normalized.includes("cambio")) return "daily_changes";
   if (normalized.includes("evolucion") || normalized.includes("soap")) return "draft_soap";

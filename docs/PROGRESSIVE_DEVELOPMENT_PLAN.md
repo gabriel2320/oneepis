@@ -59,12 +59,13 @@ Implementado hasta ahora:
 - acciones propuestas conectadas a flujos estructurados existentes
 - prellenado de evento/pendiente desde accion auditada sin guardado automatico
 - barra clinica dirigida que ejecuta la intencion reconocida
+- prellenado de problema activo desde accion propuesta sin guardado automatico
+- fallback de barra clinica resuelto por `action_id`, no por texto visible
 
 Siguiente incremento:
 
-- convertir fallback options en acciones de mayor precision por tipo, no solo por label
 - extender payload estructurado de examenes sin leer texto libre
-- ampliar prellenado a otros formularios existentes sin crear pantallas nuevas
+- ampliar prellenado solo cuando exista acto clinico completo y formulario real
 
 ## Fase 1: AI-Chart Core estable
 

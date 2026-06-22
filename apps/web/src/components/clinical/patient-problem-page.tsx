@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -29,16 +29,18 @@ import {
 export function NewProblemPage() {
   const patientId = usePatientId();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { record, recordQuery } = usePatientRecordQuery(patientId);
   const { user, isLoading: userLoading } = useCurrentUser();
   const canWrite = canManageProblems(user);
   const [formState, setFormState] = useState({
-    title: "",
+    title: searchParams.get("title")?.slice(0, 160) ?? "",
     code_system: "",
     code: "",
     onset_date: "",
-    notes: "",
+    notes: searchParams.get("notes")?.slice(0, 1200) ?? "",
+    ai_action_id: searchParams.get("aiActionId")?.slice(0, 160) ?? "",
   });
   const mutation = useMutation({
     mutationFn: (payload: ActiveProblemCreate) => createActiveProblem(patientId, payload),
@@ -65,6 +67,11 @@ export function NewProblemPage() {
           <ErrorState description="Tu rol actual no permite registrar problemas activos." />
         ) : null}
         <ClinicalSectionCard title="Problema">
+          {formState.ai_action_id ? (
+            <div className="mb-4 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+              Formulario prellenado desde AI-Chart. Revisa y edita antes de guardar.
+            </div>
+          ) : null}
           <form
             className="space-y-4"
             onSubmit={(event) => {

@@ -69,6 +69,7 @@ OneEpis ya muestra en AI-Chart:
 - decision de acciones propuestas con auditoria y sin mutacion automatica
 - enlace desde accion propuesta hacia flujo estructurado existente
 - prellenado de eventos/pendientes desde accion propuesta revisable
+- prellenado de problema activo desde accion propuesta revisable
 - barra conversacional dirigida que mueve el AI-Chart al ejecutar intenciones
 - estado IA generativa activa/degradada/apagada
 
