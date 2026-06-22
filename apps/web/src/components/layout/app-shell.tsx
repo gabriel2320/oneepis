@@ -28,15 +28,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[hsl(var(--background))]">
       <aside
         data-print-hidden="true"
-        className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r bg-card lg:block"
+        className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r bg-[hsl(var(--surface-raised))] shadow-sm lg:block"
       >
         <div className="flex h-full flex-col">
-          <div className="border-b p-4">
+          <div className="border-b bg-[hsl(var(--surface-subtle))]/45 p-4">
             <Link href="/pacientes" className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
                 <ClipboardList className="h-5 w-5" />
               </span>
               <span>
@@ -56,8 +56,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                    isActive && "bg-accent text-accent-foreground",
+                    "flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                    isActive && "border-primary/20 bg-accent text-accent-foreground shadow-sm",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <header
         data-print-hidden="true"
-        className="sticky top-0 z-20 border-b bg-card/95 px-4 py-3 backdrop-blur lg:hidden"
+        className="sticky top-0 z-20 border-b bg-[hsl(var(--surface-raised))]/95 px-4 py-3 shadow-sm backdrop-blur lg:hidden"
       >
         <div className="flex items-center justify-between gap-3">
           <Link href="/pacientes" className="flex items-center gap-2 text-sm font-semibold">
@@ -102,8 +102,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground",
-                  isActive && "border-primary bg-accent text-accent-foreground",
+                  "rounded-md border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground",
+                  isActive && "border-primary/50 bg-accent text-accent-foreground",
                 )}
               >
                 {item.label}

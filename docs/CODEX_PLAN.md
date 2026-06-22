@@ -66,18 +66,14 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-063: Guardia local anti-contaminacion y entrada `/pacientes` como mesa clinica sobria.
 - PR-064: Endurecimiento post-auditoria de print, build offline-safe y scripts Python reproducibles.
 - PR-065: Mesa `/pacientes` v2 con metricas operativas y lista clinica escaneable.
+- PR-066: Temas visuales v2 con tokens de superficie, shell refinado y swatches.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-065: la entrada de pacientes ya funciona como mesa
-clinica de trabajo. El siguiente bloque debe mejorar la experiencia visual en
-superficies existentes sin crear dashboard nuevo, dependencia nueva ni clinica
-core incompleta.
+Auditoria posterior a PR-066: la entrada de pacientes y la capa visual base ya
+quedaron fortalecidas. El siguiente bloque debe reducir deuda antes de sumar mas
+papel o crecimiento hospitalario.
 
-- PR-066: Temas visuales v2 en superficies existentes.
-  - Pulir tokens, jerarquia visual y densidad clinica sin dependencia nueva.
-  - Sostener paciente/ficha/papel como centro.
-  - No crear dashboard nuevo.
 - PR-067: Dieta de print antes de sumar mas papel.
   - Separar `clinical-print.tsx` si sigue creciendo.
   - Mantener rutas print como proyecciones, no fuente de verdad.

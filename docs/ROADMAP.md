@@ -107,6 +107,13 @@ OneEpis ya tiene una base clinica E2E real:
 - Se mantuvo paciente/ficha/papel como centro, sin crear dashboard nuevo ni dependencia visual nueva.
 - Se agrego smoke E2E para fijar la superficie como work queue clinica en desktop y mobile.
 
+### PR-066: temas visuales v2
+
+- Se agregaron tokens de superficie por tema para separar fondo, shell y areas elevadas sin dependencia nueva.
+- La navegacion global usa superficies tematicas y estados activos mas claros en desktop y mobile.
+- El selector de tema muestra un swatch persistente para hacer visible la plantilla activa.
+- Se mantuvo el cambio como refinamiento transversal, sin nuevas pantallas ni dashboard.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
@@ -118,9 +125,9 @@ OneEpis ya tiene una base clinica E2E real:
 
 ## Proximo rumbo
 
-El siguiente crecimiento recomendado despues de PR-065:
+El siguiente crecimiento recomendado despues de PR-066:
 
-- fortalecer temas visuales v2 con tokens clinicos reales en superficies existentes;
+- sostener los temas visuales v2 mientras se pulen superficies existentes;
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard;
 - no crear dashboard nuevo ni laboratorio visual pegado al core;
 - mantener paciente, ficha y papel como centro.

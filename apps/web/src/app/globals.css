@@ -24,6 +24,9 @@
   --warning-foreground: 30 20% 10%;
   --info: 210 78% 43%;
   --info-foreground: 0 0% 100%;
+  --surface: 208 38% 96%;
+  --surface-subtle: 210 28% 92%;
+  --surface-raised: 0 0% 100%;
   --border: 214 18% 84%;
   --input: 214 18% 84%;
   --ring: 184 69% 27%;
@@ -52,6 +55,9 @@
   --warning-foreground: 32 30% 9%;
   --info: 204 78% 58%;
   --info-foreground: 218 30% 9%;
+  --surface: 218 24% 11%;
+  --surface-subtle: 219 20% 16%;
+  --surface-raised: 219 25% 13%;
   --border: 218 16% 25%;
   --input: 218 16% 25%;
   --ring: 181 64% 42%;
@@ -78,6 +84,9 @@
   --warning-foreground: 32 30% 9%;
   --info: 205 88% 60%;
   --info-foreground: 218 30% 9%;
+  --surface: 220 28% 9%;
+  --surface-subtle: 221 22% 15%;
+  --surface-raised: 221 28% 12%;
   --border: 219 18% 27%;
   --input: 219 18% 27%;
   --ring: 188 86% 45%;
@@ -104,6 +113,9 @@
   --warning-foreground: 30 20% 10%;
   --info: 206 71% 42%;
   --info-foreground: 0 0% 100%;
+  --surface: 36 28% 95%;
+  --surface-subtle: 36 22% 90%;
+  --surface-raised: 0 0% 100%;
   --border: 34 16% 82%;
   --input: 34 16% 82%;
   --ring: 172 61% 29%;
@@ -120,6 +132,9 @@
   --muted-foreground: 35 12% 70%;
   --accent: 172 35% 22%;
   --accent-foreground: 166 68% 86%;
+  --surface: 218 22% 11%;
+  --surface-subtle: 218 18% 17%;
+  --surface-raised: 218 22% 14%;
   --border: 218 16% 26%;
   --input: 218 16% 26%;
 }
@@ -134,7 +149,9 @@ html {
 
 body {
   min-height: 100vh;
-  background: hsl(var(--background));
+  background:
+    linear-gradient(180deg, hsl(var(--surface)) 0, hsl(var(--background)) 260px),
+    hsl(var(--background));
   color: hsl(var(--foreground));
 }
 
