@@ -10,19 +10,29 @@ from oneepis_api.models.audit import AuditEvent
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.clinical_record import (
     ClinicalChangeSet,
-    ClinicalContextSection,
     ClinicalEvidenceMark,
     ClinicalIntentAction,
     ClinicalIntentRequest,
     ClinicalIntentResponse,
     ClinicalIntentRouteRequest,
     ClinicalIntentRouteResponse,
-    ClinicalIntentSource,
     ClinicalIntentType,
     ClinicalProblemContext,
     ClinicalReviewItem,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.clinical_context import (
+    clinical_context_sections as _context_sections,
+)
+from oneepis_api.services.clinical_context import (
+    clinical_evidence_marks as _evidence_marks,
+)
+from oneepis_api.services.clinical_context import (
+    clinical_missing_data as _missing_data,
+)
+from oneepis_api.services.clinical_context import (
+    clinical_sources as _sources,
+)
 from oneepis_api.services.clinical_course import clinical_course_finding
 from oneepis_api.services.clinical_problem_context import (
     event_matches_any_problem,
@@ -410,137 +420,6 @@ def _show_sources(
         review_items=review_items,
         proposed_actions=[_action("none", "Sin accion", "Lectura solamente.")],
     )
-
-
-def _sources(snapshot: PatientRecordSnapshot, events: list[object]) -> list[ClinicalIntentSource]:
-    sources = [
-        ClinicalIntentSource(
-            source_type="clinical_event",
-            source_id=event.id,
-            label=event.summary,
-        )
-        for event in events[:10]
-    ]
-    sources.extend(
-        ClinicalIntentSource(
-            source_type="clinical_entry",
-            source_id=entry.id,
-            label=entry.title,
-        )
-        for entry in snapshot.recent_entries[:5]
-    )
-    if snapshot.latest_vitals:
-        sources.append(
-            ClinicalIntentSource(
-                source_type="vital_sign",
-                source_id=snapshot.latest_vitals.id,
-                label="Ultimos signos vitales",
-            )
-        )
-    return sources
-
-
-def _missing_data(snapshot: PatientRecordSnapshot, events: list[object]) -> list[str]:
-    missing: list[str] = []
-    care_context = snapshot.patient.current_care_context
-    if not events:
-        missing.append(
-            "Eventos clinicos recientes: necesarios para construir contexto longitudinal."
-        )
-    if snapshot.latest_vitals is None:
-        if care_context == "hospitalized":
-            missing.append(
-                "Signos vitales recientes: requeridos para contexto hospitalizado."
-            )
-        else:
-            missing.append("Signos vitales recientes: faltan para contexto objetivo.")
-    if not snapshot.active_problems:
-        missing.append(
-            "Problemas activos estructurados: necesarios para agrupar evidencia por problema."
-        )
-    if not snapshot.recent_entries:
-        if care_context == "ambulatory":
-            missing.append("Evolucion ambulatoria reciente: falta baseline para comparar control.")
-        elif care_context == "hospitalized":
-            missing.append("Evolucion u hoja diaria reciente: falta baseline hospitalizado.")
-        else:
-            missing.append("Evolucion reciente: falta baseline clinico para comparar.")
-    return missing
-
-
-def _evidence_marks(
-    snapshot: PatientRecordSnapshot,
-    events: list[object],
-) -> list[ClinicalEvidenceMark]:
-    marks: list[ClinicalEvidenceMark] = []
-    marks.extend(
-        ClinicalEvidenceMark(
-            label=event.summary,
-            status="confirmed",
-            detail="Evento clinico registrado en la ficha.",
-            source_id=event.id,
-        )
-        for event in events[:8]
-    )
-    marks.extend(
-        ClinicalEvidenceMark(
-            label=entry.title,
-            status="confirmed",
-            detail="Evolucion/documento clinico registrado.",
-            source_id=entry.id,
-        )
-        for entry in snapshot.recent_entries[:3]
-    )
-    if snapshot.latest_vitals is None:
-        marks.append(
-            ClinicalEvidenceMark(
-                label="Signos vitales recientes",
-                status="missing",
-                detail="No hay signos vitales recientes en el snapshot.",
-            )
-        )
-    else:
-        marks.append(
-            ClinicalEvidenceMark(
-                label="Signos vitales recientes",
-                status="confirmed",
-                detail="Disponibles para contexto objetivo.",
-                source_id=snapshot.latest_vitals.id,
-            )
-        )
-    if not snapshot.active_problems:
-        marks.append(
-            ClinicalEvidenceMark(
-                label="Problemas activos",
-                status="needs_review",
-                detail="No hay problemas activos estructurados; revisar antes de documentar.",
-            )
-        )
-    return marks
-
-
-def _context_sections(
-    snapshot: PatientRecordSnapshot,
-    events: list[object],
-) -> list[ClinicalContextSection]:
-    return [
-        ClinicalContextSection(
-            title="Problemas activos",
-            items=[problem.title for problem in snapshot.active_problems[:6]],
-        ),
-        ClinicalContextSection(
-            title="Eventos recientes",
-            items=[event.summary for event in events[:6]],
-        ),
-        ClinicalContextSection(
-            title="Medicacion activa",
-            items=[med.name for med in snapshot.active_medications[:6]],
-        ),
-        ClinicalContextSection(
-            title="Evoluciones recientes",
-            items=[entry.title for entry in snapshot.recent_entries[:5]],
-        ),
-    ]
 
 
 def _problem_contexts(
