@@ -22,6 +22,9 @@ const routeResponseSchema = z
   .passthrough();
 
 type RoutedIntentPreview = z.infer<typeof routeResponseSchema>;
+type ClinicalCommandRouteResult =
+  | { ok: true; route: RoutedIntentPreview }
+  | { ok: false; status: number; explanation: string };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -31,8 +34,8 @@ export async function POST(request: Request) {
     return Response.json({ detail: "Invalid clinical command payload" }, { status: 422 });
   }
 
-  const routedIntent = await routeClinicalCommand(request, parsed.data.patientId, parsed.data.text);
-  const textStream = createClinicalCommandTextStream(routedIntent);
+  const result = await routeClinicalCommand(request, parsed.data.patientId, parsed.data.text);
+  const textStream = createClinicalCommandTextStream(result);
   return createTextStreamResponse({
     textStream,
     headers: {
@@ -42,7 +45,11 @@ export async function POST(request: Request) {
   });
 }
 
-async function routeClinicalCommand(request: Request, patientId: string, text: string) {
+async function routeClinicalCommand(
+  request: Request,
+  patientId: string,
+  text: string,
+): Promise<ClinicalCommandRouteResult> {
   const headers = new Headers({ "Content-Type": "application/json" });
   const authorization = request.headers.get("Authorization");
   const actor = request.headers.get("X-OneEpis-Actor");
@@ -63,22 +70,31 @@ async function routeClinicalCommand(request: Request, patientId: string, text: s
     },
   );
   if (!response.ok) {
-    return routeResponseSchema.parse({
-      recognized: false,
-      original_text: text,
-      intent_type: null,
-      mode: "read",
-      confidence: "low",
-      explanation: "No se pudo consultar la API clinica canonica.",
-      suggested_actions: [],
-      fallback_options: [],
-    });
+    return {
+      ok: false,
+      status: response.status,
+      explanation: `API clinica canonica respondio ${response.status}.`,
+    };
   }
-  return routeResponseSchema.parse(await response.json());
+  return { ok: true, route: routeResponseSchema.parse(await response.json()) };
 }
 
-function createClinicalCommandTextStream(route: RoutedIntentPreview) {
-  const events = [
+function createClinicalCommandTextStream(result: ClinicalCommandRouteResult) {
+  const events = result.ok ? successfulRouteEvents(result.route) : failedRouteEvents(result);
+
+  return new ReadableStream<string>({
+    async start(controller) {
+      for (const event of events) {
+        controller.enqueue(`${JSON.stringify(event)}\n`);
+        await new Promise((resolve) => setTimeout(resolve, 15));
+      }
+      controller.close();
+    },
+  });
+}
+
+function successfulRouteEvents(route: RoutedIntentPreview) {
+  return [
     streamEvent("status", { message: "Consultando API clinica canonica." }),
     streamEvent("proposal", { data: route }),
     streamEvent("status", {
@@ -102,16 +118,20 @@ function createClinicalCommandTextStream(route: RoutedIntentPreview) {
     }),
     streamEvent("done", {}),
   ];
+}
 
-  return new ReadableStream<string>({
-    async start(controller) {
-      for (const event of events) {
-        controller.enqueue(`${JSON.stringify(event)}\n`);
-        await new Promise((resolve) => setTimeout(resolve, 15));
-      }
-      controller.close();
-    },
-  });
+function failedRouteEvents(result: Extract<ClinicalCommandRouteResult, { ok: false }>) {
+  return [
+    streamEvent("status", { message: "Consultando API clinica canonica." }),
+    streamEvent("warning", {
+      message: result.explanation,
+      api_status: result.status,
+    }),
+    streamEvent("warning", {
+      message: "No se aplicaron cambios a la ficha. Revise autenticacion o disponibilidad API.",
+    }),
+    streamEvent("done", {}),
+  ];
 }
 
 function streamEvent(type: string, payload: Record<string, unknown>) {
