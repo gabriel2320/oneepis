@@ -279,10 +279,10 @@ Implementado inicial:
 - eventos recientes con lenguaje de mejoria o empeoramiento generan reglas locales visibles en `Curso clinico`
 - el curso clinico identifica dominios iniciales cuando hay senal textual suficiente: respiratorio, dolor, infeccioso, hemodinamico, metabolico o digestivo
 - el curso clinico evita negaciones obvias y puede corroborar dominios respiratorio, infeccioso o hemodinamico con signos vitales recientes
-- asociaciones por problema usan vocabulario local inicial por dominios respiratorio, dolor, fiebre, hipertension y diabetes
+- asociaciones por problema usan vocabulario local inicial por dominios respiratorio, dolor, fiebre, hipertension, diabetes y renal
 - las asociaciones por vocabulario local evitan negaciones obvias para reducir falsos positivos
 - si un problema tiene `code_system=SNOMED-CT` y el evento trae conceptos/ancestros SNOMED desde un repositorio externo, el Context Builder prioriza esa asociacion explicable
-- los pendientes por problema activo incorporan faltantes por dominio respiratorio, metabolico, hemodinamico e infeccioso
+- los pendientes por problema activo incorporan faltantes por dominio respiratorio, metabolico, hemodinamico, infeccioso y renal
 - la UI muestra para cada evidencia por problema su razon de asociacion y fuente abreviada
 
 Trabajo:

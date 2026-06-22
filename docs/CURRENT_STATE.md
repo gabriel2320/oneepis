@@ -136,7 +136,7 @@ Capas:
 - AI-Chart asocia problemas con eventos por vocabulario clinico local explicable cuando no hay coincidencia literal
 - AI-Chart evita negaciones obvias al asociar por vocabulario local para reducir falsos positivos
 - AI-Chart prioriza asociaciones SNOMED CT cuando el problema trae codigo y el evento incluye conceptos/ancestros derivados de repositorios terminologicos externos licenciados
-- AI-Chart agrega pendientes por problema activo segun dominio clinico probable: respiratorio, metabolico, hemodinamico o infeccioso
+- AI-Chart agrega pendientes por problema activo segun dominio clinico probable: respiratorio, metabolico, hemodinamico, infeccioso o renal
 - AI-Chart muestra razon de asociacion y fuente abreviada por cada evidencia vinculada a problema
 - AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia
 - Propuestas desde evolucion muestran estado visible `pendiente`, `registrando`, `registrada en ficha` o `rechazada` antes y despues de confirmar el `ClinicalPatch`

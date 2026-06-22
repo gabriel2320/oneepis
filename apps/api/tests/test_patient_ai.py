@@ -400,6 +400,56 @@ def test_context_builder_adds_domain_specific_problem_pending_data(
     assert any("glicemia" in item for item in metabolic_context["pending"])
 
 
+def test_context_builder_handles_renal_domain_context(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = _create_patient(client, auth, first_name="Contexto", last_name="Renal")
+    problem_id = _create_problem(
+        client,
+        auth,
+        patient_id,
+        title="Enfermedad renal cronica",
+        notes="Vigilar funcion renal.",
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert response.status_code == 200
+    context = next(
+        item for item in response.json()["problem_contexts"] if item["problem_id"] == problem_id
+    )
+    assert any("creatinina/eGFR o diuresis" in item for item in context["pending"])
+    assert any("Dominio clinico probable" in item for item in context["explanations"])
+
+    event_id = _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Creatinina en control, funcion renal estable.",
+    )
+    linked_response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert linked_response.status_code == 200
+    linked_context = next(
+        item for item in linked_response.json()["problem_contexts"] if item["problem_id"] == problem_id
+    )
+    assert linked_context["evidence"][0]["source_id"] == event_id
+    assert linked_context["evidence"][0]["detail"] == (
+        "Evento asociado por vocabulario clinico local: renal."
+    )
+    assert not any("creatinina/eGFR o diuresis" in item for item in linked_context["pending"])
+
+
 def test_context_builder_missing_data_depends_on_care_context(
     client: TestClient,
     auth_headers,

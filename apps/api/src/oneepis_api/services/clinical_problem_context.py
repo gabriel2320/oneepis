@@ -47,6 +47,11 @@ _LOCAL_VOCABULARIES = {
         "event": ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia", "insulina"),
         "negated_event": ("niega diabetes", "sin diabetes"),
     },
+    "renal": {
+        "problem": ("renal", "rinon", "nefropatia", "erc", "insuficiencia renal"),
+        "event": ("creatinina", "egfr", "filtrado glomerular", "diuresis", "renal"),
+        "negated_event": ("funcion renal normal", "sin falla renal", "niega falla renal"),
+    },
 }
 
 _DOMAIN_SNOMED_CODES = {
@@ -54,17 +59,11 @@ _DOMAIN_SNOMED_CODES = {
     "metabolico": {"73211009", "44054006"},
     "hemodinamico": {"38341003", "59621000"},
     "infeccioso": {"386661006", "40733004", "6142004"},
+    "renal": {"709044004", "431855005"},
 }
 
 _DOMAIN_PROBLEM_TERMS = {
-    "respiratorio": (
-        "neumonia",
-        "disnea",
-        "epoc",
-        "asma",
-        "respiratorio",
-        "bronquial",
-    ),
+    "respiratorio": ("neumonia", "disnea", "epoc", "asma", "respiratorio", "bronquial"),
     "metabolico": (
         "diabetes",
         "dm2",
@@ -74,13 +73,9 @@ _DOMAIN_PROBLEM_TERMS = {
         "hiperglicemia",
         "hipoglicemia",
     ),
-    "hemodinamico": (
-        "hipertension",
-        "hta",
-        "presion arterial",
-        "hipotension",
-    ),
+    "hemodinamico": ("hipertension", "hta", "presion arterial", "hipotension"),
     "infeccioso": ("fiebre", "febril", "infeccion", "sepsis"),
+    "renal": ("renal", "rinon", "nefropatia", "erc", "insuficiencia renal"),
 }
 
 
@@ -170,6 +165,14 @@ def problem_domain_missing_data(
         if latest_vitals is None or latest_vitals.temperature_c is None:
             missing.append(
                 "Falta temperatura reciente para contextualizar problema infeccioso."
+            )
+    elif domain == "renal":
+        if not _events_include_terms(
+            events,
+            ("creatinina", "egfr", "filtrado glomerular", "diuresis"),
+        ):
+            missing.append(
+                "Falta creatinina/eGFR o diuresis reciente para contextualizar problema renal."
             )
     return missing
 
