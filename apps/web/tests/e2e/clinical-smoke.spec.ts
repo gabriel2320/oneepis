@@ -3,6 +3,17 @@ import { expect, test } from "@playwright/test";
 const demoPatientId = "11111111-1111-4111-8111-111111111111";
 const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
 
+test("patients index renders clinical work queue", async ({ page }) => {
+  await page.goto("/pacientes");
+
+  await expect(page.getByRole("heading", { name: "Pacientes" })).toBeVisible();
+  await expect(page.getByText("Mesa clinica")).toBeVisible();
+  await expect(page.getByText("Fichas visibles", { exact: true })).toBeVisible();
+  await expect(page.getByText("Hospitalizadas", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Mesa de pacientes")).toBeVisible();
+  await expect(page.getByText("Paciente Demo Alfa")).toBeVisible();
+});
+
 test("patient ficha renders clinical shell and AI draft area", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
 

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { ClipboardList, FileText, Plus, Save, Search, ShieldCheck } from "lucide-react";
+import { Activity, Bed, ClipboardList, FileText, Plus, Save, Search, ShieldCheck } from "lucide-react";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AppShell } from "@/components/layout/app-shell";
@@ -43,6 +44,11 @@ export function PatientsIndexPage() {
   });
   const patients = DEMO_MODE ? demoRecords.map((item) => item.patient) : canReadPatients ? patientQuery.data : [];
   const patientCount = patients?.length ?? 0;
+  const activeCount = patients?.filter((patient) => patient.clinical_status === "active").length ?? 0;
+  const hospitalizedCount =
+    patients?.filter((patient) => patient.current_care_context === "hospitalized").length ?? 0;
+  const ambulatoryCount =
+    patients?.filter((patient) => patient.current_care_context === "ambulatory").length ?? 0;
 
   return (
     <AppShell>
@@ -73,15 +79,15 @@ export function PatientsIndexPage() {
           </div>
 
           <div className="mt-5 grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2">
               <FileText className="h-4 w-4 text-primary" />
               Ficha como centro
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2">
               <ShieldCheck className="h-4 w-4 text-success" />
               Auditoria por escritura
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2">
               <ClipboardList className="h-4 w-4 text-info" />
               Papel clinico gobernado
             </div>
@@ -106,6 +112,15 @@ export function PatientsIndexPage() {
                 : `${patientCount} fichas visibles`}
           </p>
         </div>
+
+        {!isAnonymous ? (
+          <div className="grid gap-3 md:grid-cols-4">
+            <PatientQueueMetric label="Fichas visibles" value={patientCount} icon={<ClipboardList className="h-4 w-4" />} />
+            <PatientQueueMetric label="Activas" value={activeCount} icon={<Activity className="h-4 w-4" />} />
+            <PatientQueueMetric label="Hospitalizadas" value={hospitalizedCount} icon={<Bed className="h-4 w-4" />} />
+            <PatientQueueMetric label="Ambulatorias" value={ambulatoryCount} icon={<FileText className="h-4 w-4" />} />
+          </div>
+        ) : null}
 
         {patientQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={4} /> : null}
         {patientQuery.isError && !DEMO_MODE ? (
@@ -242,30 +257,88 @@ export function NewPatientPage() {
 
 export function PatientList({ patients }: { patients: Patient[] }) {
   return (
-    <div className="overflow-hidden rounded-md border bg-card">
+    <div className="overflow-hidden rounded-md border bg-card" aria-label="Mesa de pacientes">
+      <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] gap-4 border-b bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground md:grid">
+        <span>Paciente</span>
+        <span>Contexto</span>
+        <span className="text-right">Estado</span>
+      </div>
       {patients.map((patient) => (
         <Link
           key={patient.id}
           href={`/pacientes/${patient.id}/ficha`}
-          className="flex flex-col gap-3 border-b p-4 transition-colors last:border-b-0 hover:bg-muted/70 md:flex-row md:items-center md:justify-between"
+          className="grid gap-3 border-b p-4 transition-colors last:border-b-0 hover:bg-muted/70 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] md:items-center"
         >
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">
               {patient.first_name} {patient.last_name}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Nacimiento {patient.birth_date}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {patient.clinical_identifier ? `ID ${patient.clinical_identifier}` : "Sin identificador clinico"} -{" "}
+              nacimiento {patient.birth_date}
+            </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="text-sm text-muted-foreground">
+            <p>{careContextLabel(patient.current_care_context)}</p>
+            <p className="mt-1 text-xs">Actualizada {formatDate(patient.updated_at)}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
             <Badge variant={patient.clinical_status === "active" ? "safe" : "outline"}>
-              {patient.clinical_status}
+              {clinicalStatusLabel(patient.clinical_status)}
             </Badge>
             {patient.current_care_context !== "unknown" ? (
-              <Badge variant="secondary">{patient.current_care_context}</Badge>
+              <Badge variant="secondary">{careContextLabel(patient.current_care_context)}</Badge>
             ) : null}
-            {patient.clinical_identifier ? <Badge variant="outline">{patient.clinical_identifier}</Badge> : null}
           </div>
         </Link>
       ))}
     </div>
   );
+}
+
+function PatientQueueMetric({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number;
+  icon: ReactNode;
+}) {
+  return (
+    <div className="rounded-md border bg-card p-3">
+      <div className="flex items-center justify-between gap-3 text-muted-foreground">
+        <p className="text-xs font-medium">{label}</p>
+        {icon}
+      </div>
+      <p className="mt-2 text-2xl font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function clinicalStatusLabel(status: Patient["clinical_status"]) {
+  const labels: Record<Patient["clinical_status"], string> = {
+    active: "Activa",
+    archived: "Archivada",
+    closed: "Cerrada",
+    draft: "Borrador",
+  };
+  return labels[status];
+}
+
+function careContextLabel(context: Patient["current_care_context"]) {
+  const labels: Record<Patient["current_care_context"], string> = {
+    ambulatory: "Ambulatoria",
+    hospitalized: "Hospitalizada",
+    unknown: "Sin contexto",
+  };
+  return labels[context];
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("es-CL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }

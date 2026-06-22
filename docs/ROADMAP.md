@@ -101,6 +101,12 @@ OneEpis ya tiene una base clinica E2E real:
 - Los scripts API/contrato usan `.venv/bin/python` para no depender del Python global de la maquina.
 - `npm run check` quedo validado completo con API, web, contrato y E2E.
 
+### PR-065: mesa `/pacientes` v2
+
+- `/pacientes` se fortalecio como mesa clinica de entrada con buscador, metricas operativas y lista escaneable.
+- Se mantuvo paciente/ficha/papel como centro, sin crear dashboard nuevo ni dependencia visual nueva.
+- Se agrego smoke E2E para fijar la superficie como work queue clinica en desktop y mobile.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
@@ -112,10 +118,10 @@ OneEpis ya tiene una base clinica E2E real:
 
 ## Proximo rumbo
 
-El siguiente crecimiento recomendado despues de PR-064:
+El siguiente crecimiento recomendado despues de PR-065:
 
-- fortalecer temas visuales v2 con tokens clinicos reales;
-- sostener `/pacientes` como mesa clinica de entrada;
+- fortalecer temas visuales v2 con tokens clinicos reales en superficies existentes;
+- sostener `/pacientes` como mesa clinica de entrada, no como dashboard;
 - no crear dashboard nuevo ni laboratorio visual pegado al core;
 - mantener paciente, ficha y papel como centro.
 
