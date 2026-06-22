@@ -5,6 +5,85 @@ from unicodedata import category, normalize
 from oneepis_api.schemas.patient import PatientRecordSnapshot
 
 
+_LOCAL_VOCABULARIES = {
+    "respiratorio": {
+        "problem": ("neumonia", "respiratorio", "epoc", "asma", "bronquial"),
+        "event": ("disnea", "tos", "saturacion", "oxigeno", "respiratorio", "crepit"),
+        "negated_event": (
+            "sin disnea",
+            "niega disnea",
+            "sin tos",
+            "niega tos",
+            "sin dificultad respiratoria",
+        ),
+    },
+    "dolor": {
+        "problem": ("dolor", "algia"),
+        "event": ("dolor", "algia", "colico", "molestia"),
+        "negated_event": (
+            "sin dolor",
+            "niega dolor",
+            "no presenta dolor",
+            "descarta dolor",
+        ),
+    },
+    "fiebre": {
+        "problem": ("fiebre", "febril", "infeccion"),
+        "event": ("fiebre", "febril", "temperatura", "calofrios"),
+        "negated_event": ("sin fiebre", "afebril", "niega fiebre"),
+    },
+    "hipertension": {
+        "problem": ("hipertension", "hta", "presion arterial"),
+        "event": ("presion", "pa ", "sistolica", "diastolica", "hipertension"),
+        "negated_event": (
+            "presion normal",
+            "pa normal",
+            "sin hipertension",
+            "niega hipertension",
+        ),
+    },
+    "diabetes": {
+        "problem": ("diabetes", "dm2", "glicemia"),
+        "event": ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia", "insulina"),
+        "negated_event": ("niega diabetes", "sin diabetes"),
+    },
+}
+
+_DOMAIN_SNOMED_CODES = {
+    "respiratorio": {"233604007", "267036007", "195967001", "13645005"},
+    "metabolico": {"73211009", "44054006"},
+    "hemodinamico": {"38341003", "59621000"},
+    "infeccioso": {"386661006", "40733004", "6142004"},
+}
+
+_DOMAIN_PROBLEM_TERMS = {
+    "respiratorio": (
+        "neumonia",
+        "disnea",
+        "epoc",
+        "asma",
+        "respiratorio",
+        "bronquial",
+    ),
+    "metabolico": (
+        "diabetes",
+        "dm2",
+        "dm1",
+        "glicemia",
+        "glucosa",
+        "hiperglicemia",
+        "hipoglicemia",
+    ),
+    "hemodinamico": (
+        "hipertension",
+        "hta",
+        "presion arterial",
+        "hipotension",
+    ),
+    "infeccioso": ("fiebre", "febril", "infeccion", "sepsis"),
+}
+
+
 def event_matches_any_problem(snapshot: PatientRecordSnapshot, event: object) -> bool:
     return any(
         problem_event_match_reason(problem, event)
@@ -22,29 +101,7 @@ def problem_event_match_reason(problem: object, event: object) -> str | None:
     if problem_text in summary or summary in problem_text:
         return "Evento asociado por coincidencia textual con el problema."
 
-    vocabularies = {
-        "respiratorio": {
-            "problem": ("neumonia", "respiratorio", "epoc", "asma", "bronquial"),
-            "event": ("disnea", "tos", "saturacion", "oxigeno", "respiratorio", "crepit"),
-        },
-        "dolor": {
-            "problem": ("dolor", "algia"),
-            "event": ("dolor", "algia", "colico", "molestia"),
-        },
-        "fiebre": {
-            "problem": ("fiebre", "febril", "infeccion"),
-            "event": ("fiebre", "febril", "temperatura", "calofrios"),
-        },
-        "hipertension": {
-            "problem": ("hipertension", "hta", "presion arterial"),
-            "event": ("presion", "pa ", "sistolica", "diastolica", "hipertension"),
-        },
-        "diabetes": {
-            "problem": ("diabetes", "dm2", "glicemia"),
-            "event": ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia", "insulina"),
-        },
-    }
-    for label, terms in vocabularies.items():
+    for label, terms in _LOCAL_VOCABULARIES.items():
         if any(term in problem_text for term in terms["problem"]) and any(
             term in summary for term in terms["event"]
         ):
@@ -55,71 +112,18 @@ def problem_event_match_reason(problem: object, event: object) -> str | None:
 
 
 def _has_negated_vocabulary_signal(label: str, summary: str) -> bool:
-    negated_terms = {
-        "respiratorio": (
-            "sin disnea",
-            "niega disnea",
-            "sin tos",
-            "niega tos",
-            "sin dificultad respiratoria",
-        ),
-        "dolor": (
-            "sin dolor",
-            "niega dolor",
-            "no presenta dolor",
-            "descarta dolor",
-        ),
-        "fiebre": ("sin fiebre", "afebril", "niega fiebre"),
-        "hipertension": (
-            "presion normal",
-            "pa normal",
-            "sin hipertension",
-            "niega hipertension",
-        ),
-        "diabetes": ("niega diabetes", "sin diabetes"),
-    }
-    return any(term in summary for term in negated_terms.get(label, ()))
+    terms = _LOCAL_VOCABULARIES.get(label, {})
+    return any(term in summary for term in terms.get("negated_event", ()))
 
 
 def problem_domain_label(problem: object) -> str | None:
     code = _snomed_problem_code(problem)
-    if code in {"233604007", "267036007", "195967001", "13645005"}:
-        return "respiratorio"
-    if code in {"73211009", "44054006"}:
-        return "metabolico"
-    if code in {"38341003", "59621000"}:
-        return "hemodinamico"
-    if code in {"386661006", "40733004", "6142004"}:
-        return "infeccioso"
+    for label, codes in _DOMAIN_SNOMED_CODES.items():
+        if code in codes:
+            return label
 
     title = _normalize_text(problem.title)
-    domains = {
-        "respiratorio": (
-            "neumonia",
-            "disnea",
-            "epoc",
-            "asma",
-            "respiratorio",
-            "bronquial",
-        ),
-        "metabolico": (
-            "diabetes",
-            "dm2",
-            "dm1",
-            "glicemia",
-            "glucosa",
-            "hiperglicemia",
-            "hipoglicemia",
-        ),
-        "hemodinamico": (
-            "hipertension",
-            "hta",
-            "presion arterial",
-            "hipotension",
-        ),
-        "infeccioso": ("fiebre", "febril", "infeccion", "sepsis"),
-    }
-    for label, terms in domains.items():
+    for label, terms in _DOMAIN_PROBLEM_TERMS.items():
         if any(term in title for term in terms):
             return label
     return None
