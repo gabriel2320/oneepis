@@ -131,6 +131,7 @@ Capas:
 - AI-Chart inicia Context Builder serio mostrando explicaciones por problema: por que una evidencia se asocia o queda sin vinculo
 - AI-Chart muestra faltantes con razon y contexto asistencial, no solo nombres de datos ausentes
 - AI-Chart agrupa reglas narrativas de mejoria/empeoramiento como `Curso clinico`
+- AI-Chart etiqueta el curso clinico por dominio cuando el texto reciente permite distinguir respiratorio, dolor, infeccioso, hemodinamico, metabolico o digestivo
 - AI-Chart asocia problemas con eventos por vocabulario clinico local explicable cuando no hay coincidencia literal
 - AI-Chart prioriza asociaciones SNOMED CT cuando el problema trae codigo y el evento incluye conceptos/ancestros derivados de repositorios terminologicos externos licenciados
 - AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia

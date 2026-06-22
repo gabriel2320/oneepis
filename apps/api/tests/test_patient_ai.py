@@ -368,6 +368,8 @@ def test_context_builder_flags_clinical_course_from_recent_events(
     rule_findings = response.json()["change_set"]["rule_findings"]
     assert any("Mejoria clinica sugerida" in finding for finding in rule_findings)
     assert any("Empeoramiento clinico sugerido" in finding for finding in rule_findings)
+    assert any("dominio dolor" in finding for finding in rule_findings)
+    assert any("dominio respiratorio" in finding for finding in rule_findings)
 
 
 def test_event_proposals_from_entry_are_reviewable_and_do_not_persist(

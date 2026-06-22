@@ -734,6 +734,8 @@ def _event_rule_findings(
 
 def _clinical_course_finding(summary: str) -> str | None:
     normalized = _normalize_text(summary)
+    domain = _clinical_course_domain_label(normalized)
+    domain_detail = f" (dominio {domain})" if domain else ""
     improving_terms = (
         "mejoria",
         "mejora",
@@ -755,9 +757,52 @@ def _clinical_course_finding(summary: str) -> str | None:
         "descompensacion",
     )
     if any(term in normalized for term in worsening_terms):
-        return f"Empeoramiento clinico sugerido por evento: {summary}."
+        return f"Empeoramiento clinico sugerido{domain_detail} por evento: {summary}."
     if any(term in normalized for term in improving_terms):
-        return f"Mejoria clinica sugerida por evento: {summary}."
+        return f"Mejoria clinica sugerida{domain_detail} por evento: {summary}."
+    return None
+
+
+def _clinical_course_domain_label(normalized_summary: str) -> str | None:
+    domains = {
+        "respiratorio": (
+            "disnea",
+            "tos",
+            "saturacion",
+            "oxigeno",
+            "respiratorio",
+            "broncoespasmo",
+            "expectoracion",
+        ),
+        "dolor": ("dolor", "algia", "colico", "molestia"),
+        "infeccioso": (
+            "fiebre",
+            "febril",
+            "temperatura",
+            "calofrios",
+            "infeccion",
+            "pcr",
+        ),
+        "hemodinamico": (
+            "presion",
+            "hipotension",
+            "hipertension",
+            "taquicardia",
+            "bradicardia",
+        ),
+        "metabolico": (
+            "glicemia",
+            "glucosa",
+            "hipoglicemia",
+            "hiperglicemia",
+            "diabetes",
+            "insulina",
+        ),
+        "digestivo": ("vomito", "nauseas", "diarrea", "abdomen", "abdominal"),
+    }
+    for label, terms in domains.items():
+        if any(term in normalized_summary for term in terms):
+            return label
     return None
 
 
