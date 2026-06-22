@@ -4,7 +4,6 @@ from unicodedata import category, normalize
 
 from oneepis_api.schemas.patient import PatientRecordSnapshot
 
-
 _LOCAL_VOCABULARIES = {
     "respiratorio": {
         "problem": ("neumonia", "respiratorio", "epoc", "asma", "bronquial"),
@@ -150,7 +149,8 @@ def problem_domain_missing_data(
             ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia"),
         ):
             missing.append(
-                "Falta glicemia o evento metabolico reciente para contextualizar diabetes/metabolico."
+                "Falta glicemia o evento metabolico reciente para contextualizar "
+                "diabetes/metabolico."
             )
     elif domain == "hemodinamico":
         if (

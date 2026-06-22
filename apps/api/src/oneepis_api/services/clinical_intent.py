@@ -624,7 +624,8 @@ def _problem_contexts(
                 ],
                 pending=["Revisar si corresponde crear o actualizar un problema activo."],
                 explanations=[
-                    "Estos eventos recientes no coincidieron con reglas locales de problemas activos.",
+                    "Estos eventos recientes no coincidieron con reglas locales "
+                    "de problemas activos.",
                     "Se muestran como contexto no vinculado para revision humana.",
                 ],
             )

@@ -395,7 +395,9 @@ def test_context_builder_adds_domain_specific_problem_pending_data(
         context for context in contexts if context["problem_id"] == metabolic_problem_id
     )
     assert any("saturacion O2 reciente" in item for item in respiratory_context["pending"])
-    assert any("frecuencia respiratoria reciente" in item for item in respiratory_context["pending"])
+    assert any(
+        "frecuencia respiratoria reciente" in item for item in respiratory_context["pending"]
+    )
     assert any("Dominio clinico probable" in item for item in respiratory_context["explanations"])
     assert any("glicemia" in item for item in metabolic_context["pending"])
 
@@ -441,7 +443,9 @@ def test_context_builder_handles_renal_domain_context(
 
     assert linked_response.status_code == 200
     linked_context = next(
-        item for item in linked_response.json()["problem_contexts"] if item["problem_id"] == problem_id
+        item
+        for item in linked_response.json()["problem_contexts"]
+        if item["problem_id"] == problem_id
     )
     assert linked_context["evidence"][0]["source_id"] == event_id
     assert linked_context["evidence"][0]["detail"] == (
