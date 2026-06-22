@@ -149,3 +149,13 @@ Todo PR debe responder:
 - Un componente UI debe preferir composicion antes que props infinitas.
 - Un servicio backend debe expresar reglas de dominio, no consultas mezcladas con controladores grandes.
 - Si un modulo queda a medias, no entra: debe tener flujo humano minimo, permisos, auditoria si escribe y estado empty/error/loading cuando aplique.
+
+### Presupuesto AI-Chart
+
+AI-Chart debe crecer por componentes pequenos y actos clinicos cerrados.
+
+- La pagina `patient-ai-chart-pages.tsx` es solo orquestador.
+- Los componentes AI-Chart no deben transformarse en mini paginas.
+- Si un componente supera el presupuesto, extraer subpaneles antes de agregar comportamiento.
+- `ai-chart-utils.ts` es soporte visual; no debe acumular reglas clinicas de dominio.
+- Nuevas intenciones deben pasar por API, tests y correlato visual antes de llegar a UI.

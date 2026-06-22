@@ -82,3 +82,13 @@ OneEpis ya muestra en AI-Chart:
 El siguiente avance permitido es ampliar el prellenado a otros formularios
 existentes. No crear otra pantalla ni aplicar datos clinicos finales desde una
 respuesta IA.
+
+## Regla post R-01
+
+El acoplamiento inteligencia -> interfaz debe mantenerse dentro de componentes
+AI-Chart separados. Si una nueva inteligencia necesita visualizacion:
+
+1. primero decidir que acto clinico cierra;
+2. luego elegir componente existente;
+3. si no cabe, extraer subpanel dentro de `ai-chart/`;
+4. nunca recrear un dashboard ni un panel IA paralelo.

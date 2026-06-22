@@ -71,6 +71,43 @@ Siguiente incremento:
 
 - ampliar prellenado solo cuando exista acto clinico completo y formulario real
 
+## Consolidacion post R-01
+
+Estado: AI-Chart ya fue separado en componentes. La pagina paciente queda como
+orquestador y no debe volver a concentrar UI detallada.
+
+Presupuesto activo:
+
+- `patient-ai-chart-pages.tsx`: maximo recomendado 300 lineas.
+- `ai-chart-utils.ts`: no agregar reglas clinicas nuevas; moverlas al backend.
+- `clinical-intent-result-panel.tsx`: si crece, extraer paneles laterales antes de sumar features.
+- no crear nuevas rutas AI-Chart para tareas que caben en la pantalla actual.
+
+Cola corta permitida antes de pasar a Fase 2:
+
+1. Pulir revision previa al guardado SOAP: fuentes, faltantes y confirmacion visible.
+2. Ampliar prellenado solo para formularios existentes con acto clinico completo.
+3. Crear eventos desde una evolucion ya escrita solo si queda como propuesta revisable.
+4. Reforzar permisos/estados visuales por modo sin cambiar roles.
+
+Bloqueado por ahora:
+
+- chat libre generico
+- documentos/PDF reales
+- RAG
+- IA externa
+- receta valida/firma real
+- dashboard nuevo
+
+Criterio para cerrar Fase 1:
+
+```text
+abrir paciente -> pedir evolucion -> ver cambios 24 h -> hoja SOAP editable
+-> fuentes/faltantes -> revision humana explicita -> guardar borrador auditado
+```
+
+Debe funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y con Ollama apagado.
+
 ## Fase 1: AI-Chart Core estable
 
 Objetivo: consolidar paciente -> eventos -> contexto -> borrador -> confirmacion -> auditoria.

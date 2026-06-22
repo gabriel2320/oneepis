@@ -48,3 +48,15 @@ OneEpis debe sentirse como mesa clinica viva:
 - auditoria visible
 - IA local util, silenciosa y trazable
 - dashboards, chat libre y modulos incompletos fuera del core
+
+## AI-Chart despues de R-01
+
+AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.
+Reglas para nuevos cambios:
+
+- mantener `patient-ai-chart-pages.tsx` como orquestador
+- no agregar bloques UI inline grandes en la pagina
+- preferir componentes existentes antes de crear rutas nuevas
+- no sumar reglas clinicas al frontend; si una regla interpreta datos, vive en API
+- todo nuevo output debe tener fuente, faltante/limite, accion humana y auditoria
+- no tocar Ollama/API externa hasta cerrar Fase 1 del plan progresivo
