@@ -82,7 +82,8 @@ export function PatientAiChartPage() {
   });
   const events = useMemo(() => eventsQuery.data ?? [], [eventsQuery.data]);
   const draftMutation = useMutation({
-    mutationFn: () => draftSoapFromEvents(patientId, { clinical_event_ids: selectedIds }),
+    mutationFn: (clinicalEventIds?: string[]) =>
+      draftSoapFromEvents(patientId, { clinical_event_ids: clinicalEventIds ?? selectedIds }),
     onSuccess: (response) => {
       setDraft(response);
       setSoap({
@@ -100,7 +101,16 @@ export function PatientAiChartPage() {
         intent_type: intentType,
         mode: intentType === "draft_soap" ? "draft" : "read",
       }),
-    onSuccess: setIntent,
+    onSuccess: (response) => {
+      setIntent(response);
+      if (response.intent_type === "draft_soap") {
+        const sourceEventIds = clinicalEventSourceIds(response);
+        if (sourceEventIds.length > 0) {
+          setSelectedIds(sourceEventIds);
+          draftMutation.mutate(sourceEventIds);
+        }
+      }
+    },
   });
   const routeMutation = useMutation({
     mutationFn: () => routeClinicalIntent(patientId, { text: routerText }),
@@ -279,7 +289,7 @@ export function PatientAiChartPage() {
                   DEMO_MODE ||
                   !canUseAi
                 }
-                onClick={() => draftMutation.mutate()}
+                onClick={() => draftMutation.mutate(undefined)}
               >
                 <BrainCircuit className="h-4 w-4" />
                 {draftMutation.isPending ? "Generando..." : "Generar SOAP"}
@@ -883,6 +893,12 @@ function ClinicalIntentResult({
 
 function clinicalActionKey(action: ClinicalIntentResponse["proposed_actions"][number]) {
   return action.action_id ?? `${action.action_type}-${action.label}`;
+}
+
+function clinicalEventSourceIds(intent: ClinicalIntentResponse) {
+  return intent.sources
+    .filter((source) => source.source_type === "clinical_event" && source.source_id)
+    .map((source) => source.source_id as string);
 }
 
 function clinicalActionTarget(patientId: string, action: ClinicalIntentAction) {

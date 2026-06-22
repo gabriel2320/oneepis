@@ -71,6 +71,7 @@ OneEpis ya muestra en AI-Chart:
 - prellenado de eventos/pendientes desde accion propuesta revisable
 - prellenado de problema activo desde accion propuesta revisable
 - barra conversacional dirigida que mueve el AI-Chart al ejecutar intenciones
+- intencion de evolucion abre hoja SOAP editable desde fuentes visibles
 - estado IA generativa activa/degradada/apagada
 
 ## Pendiente visual inmediato

@@ -61,6 +61,7 @@ Implementado hasta ahora:
 - barra clinica dirigida que ejecuta la intencion reconocida
 - prellenado de problema activo desde accion propuesta sin guardado automatico
 - fallback de barra clinica resuelto por `action_id`, no por texto visible
+- intencion `draft_soap` genera hoja SOAP editable desde fuentes de eventos sin guardar
 
 Siguiente incremento:
 
