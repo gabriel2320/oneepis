@@ -22,7 +22,7 @@ export function PrintPatientPage({ kind }: { kind: "ficha" | "resumen" | "receta
     enabled: Boolean(patientId) && !DEMO_MODE,
   });
   const record =
-    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null) ??
+    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) : null) ??
     recordQuery.data;
 
   return (
@@ -51,9 +51,9 @@ export function PrintEvolutionPage() {
     enabled: Boolean(patientId) && !DEMO_MODE,
   });
   const record =
-    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null) ??
+    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) : null) ??
     recordQuery.data;
-  const entry = record?.recent_entries.find((item) => item.id === entryId) ?? record?.recent_entries[0];
+  const entry = record?.recent_entries.find((item) => item.id === entryId);
 
   return (
     <PrintPage>
@@ -61,7 +61,9 @@ export function PrintEvolutionPage() {
       {record && entry ? (
         <SoapPrintSheet record={record} entry={entry} />
       ) : (
-        <p className="p-6 text-sm">Cargando evolucion...</p>
+        <p className="p-6 text-sm">
+          {record ? "Evolucion no encontrada." : "Cargando evolucion..."}
+        </p>
       )}
     </PrintPage>
   );
@@ -82,12 +84,12 @@ export function PrintHospitalDailySheetPage() {
     enabled: Boolean(patientId) && !DEMO_MODE,
   });
   const record =
-    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null) ??
+    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) : null) ??
     recordQuery.data;
   const sheets = DEMO_MODE
     ? demoHospitalDailySheets.filter((item) => item.patient_id === patientId)
     : (sheetsQuery.data ?? []);
-  const sheet = sheets.find((item) => item.id === sheetId) ?? sheets[0];
+  const sheet = sheets.find((item) => item.id === sheetId);
 
   return (
     <PrintPage>
@@ -95,7 +97,9 @@ export function PrintHospitalDailySheetPage() {
       {record && sheet ? (
         <HospitalDailyPrintSheet record={record} sheet={sheet} />
       ) : (
-        <p className="p-6 text-sm">Cargando hoja diaria...</p>
+        <p className="p-6 text-sm">
+          {record ? "Hoja diaria no encontrada." : "Cargando hoja diaria..."}
+        </p>
       )}
     </PrintPage>
   );

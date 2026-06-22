@@ -63,14 +63,23 @@ Mesa clinica viva con Ollama first-class y seguridad local:
 - PR-060: Politica de indicaciones y receta sin producto nuevo.
 - PR-061: Indicacion hospitalaria minima como borrador gobernado.
 - PR-062: Consulta ambulatoria minima sobre encuentro y SOAP existentes.
+- PR-063: Guardia local anti-contaminacion y entrada `/pacientes` como mesa clinica sobria.
+- PR-064: Endurecimiento post-auditoria de print, build offline-safe y scripts Python reproducibles.
 
 ## Proximo bloque propuesto
 
-Auditoria posterior a PR-062: atencion ambulatoria ya crea un encuentro
-ambulatorio y una evolucion SOAP vinculada usando endpoints existentes. No se
-creo agenda completa ni API nueva.
+Auditoria posterior a PR-064: la base clinica, consulta minima y papel quedaron
+endurecidos. El siguiente bloque debe mejorar la experiencia visual sin crear
+dashboard nuevo, dependencia nueva ni clinica core incompleta.
 
-- PR-063: Evaluar read-model hospitalario.
+- PR-065: Temas visuales v2 y mesa `/pacientes`.
+  - Pulir tokens, jerarquia visual y densidad clinica sin dependencia nueva.
+  - Sostener paciente/ficha/papel como centro.
+  - No crear dashboard nuevo.
+- PR-066: Dieta de print antes de sumar mas papel.
+  - Separar `clinical-print.tsx` si sigue creciendo.
+  - Mantener rutas print como proyecciones, no fuente de verdad.
+- PR-067: Evaluar read-model hospitalario.
   - Solo si rondas o indicaciones empiezan a duplicar consultas desde frontend.
   - No crear dashboard nuevo.
 

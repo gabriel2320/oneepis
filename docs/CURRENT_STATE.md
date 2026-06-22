@@ -114,6 +114,7 @@ Capas:
 - `src/components/clinical/ambulatory-visit-pages.tsx`: atencion ambulatoria minima sobre encuentros y SOAP
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
+- las rutas print no hacen fallback silencioso a otro documento cuando el ID solicitado no existe
 
 Tests API:
 
@@ -133,13 +134,12 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 ## Auditoria rapida 2026-06-21
 
-- `main` limpio y alineado con `origin/main`.
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima y atencion ambulatoria minima.
+- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima y endurecimiento post-auditoria.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- `npm run check` pasa completo: API 44 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 23 passed / 1 skip esperado.
+- `npm run check` pasa completo: API 46 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 23 passed / 1 skip esperado.
 - Siguiente paso recomendado: fortalecer temas visuales v2 sin crear dashboards ni nuevas dependencias.
 
-## Programa activo PR-018 a PR-062
+## Programa activo PR-018 a PR-064
 
 - PR-018: Ollama first-class local.
 - PR-019: IA acoplada a ficha paciente.
@@ -187,6 +187,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - PR-061: Indicacion hospitalaria minima como borrador gobernado.
 - PR-062: Consulta ambulatoria minima sobre encuentro y SOAP existentes.
 - PR-063: Guardia local anti-contaminacion y entrada `/pacientes` como mesa clinica sobria.
+- PR-064: Endurecimiento post-auditoria de print, build offline-safe y scripts Python reproducibles.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 
