@@ -63,10 +63,10 @@ Implementado hasta ahora:
 - fallback de barra clinica resuelto por `action_id`, no por texto visible
 - intencion `draft_soap` genera hoja SOAP editable desde fuentes de eventos sin guardar
 - panel compacto de cambios 24 h visible antes del margen detallado
+- reglas de examenes aceptan payload estructurado `results[]` sin leer texto libre
 
 Siguiente incremento:
 
-- extender payload estructurado de examenes sin leer texto libre
 - ampliar prellenado solo cuando exista acto clinico completo y formulario real
 
 ## Fase 1: AI-Chart Core estable

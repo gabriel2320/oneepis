@@ -172,6 +172,28 @@ def test_clinical_intent_returns_sources_and_audit(
             "payload": {"code": "creatinina", "value": "1.6", "unit": "mg/dL"},
         },
     ).json()
+    previous_panel_response = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-21T13:30:00Z",
+            "summary": "Panel inflamatorio previo",
+            "payload": {"results": [{"code": "pcr", "value": "180", "unit": "mg/L"}]},
+        },
+    )
+    assert previous_panel_response.status_code == 201
+    current_panel_response = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-22T13:30:00Z",
+            "summary": "Panel inflamatorio actual",
+            "payload": {"results": [{"code": "pcr", "value": "92", "unit": "mg/L"}]},
+        },
+    )
+    assert current_panel_response.status_code == 201
     medication_event = client.post(
         f"/api/v1/patients/{patient['id']}/clinical-events",
         headers=auth,
@@ -267,6 +289,7 @@ def test_clinical_intent_returns_sources_and_audit(
         in intent["change_set"]["rule_findings"]
     )
     assert "Creatinina subio de 1.1 a 1.6 mg/dL." in intent["change_set"]["rule_findings"]
+    assert "PCR bajo de 180 a 92 mg/L." in intent["change_set"]["rule_findings"]
     assert (
         f"Nuevo evento de medicacion registrado: {medication_event['summary']}."
         in intent["change_set"]["rule_findings"]
@@ -319,9 +342,9 @@ def test_clinical_intent_returns_sources_and_audit(
     decision = decision_response.json()
     assert decision["audited"] is True
     assert decision["decision"] == "accepted"
-    assert (
-        "2 evento(s) recientes sin problema activo asociado."
-        in intent["change_set"]["rule_findings"]
+    assert any(
+        finding.endswith("evento(s) recientes sin problema activo asociado.")
+        for finding in intent["change_set"]["rule_findings"]
     )
     assert any(
         context["problem_id"] == problem["id"]

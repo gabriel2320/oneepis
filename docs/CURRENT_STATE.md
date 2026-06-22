@@ -149,7 +149,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2, temas visuales v2 y AI-Chart Core Nivel 0.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - Validacion reciente: API 50 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
-- Siguiente paso recomendado: consolidar AI-Chart sin crear dashboard, chat libre ni nuevos modulos; vincular frases del borrador SOAP con fuentes concretas y extraer subcomponentes si la pantalla crece.
+- Siguiente paso recomendado: consolidar AI-Chart sin crear dashboard, chat libre ni nuevos modulos; ampliar prellenados solo sobre formularios reales y extraer subcomponentes si la pantalla crece.
 
 ## Historial
 
