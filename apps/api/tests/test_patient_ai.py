@@ -80,13 +80,14 @@ def _create_event(
     patient_id: str,
     *,
     summary: str,
+    occurred_at: str = "2026-06-20T12:00:00Z",
 ) -> str:
     response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-events",
         headers=auth,
         json={
             "event_type": "clinical_note",
-            "occurred_at": "2026-06-20T12:00:00Z",
+            "occurred_at": occurred_at,
             "summary": summary,
             "source_type": "manual",
         },
@@ -238,6 +239,46 @@ def test_context_builder_missing_data_depends_on_care_context(
     assert any("contexto objetivo" in item for item in ambulatory_missing)
     assert any("Evolucion u hoja diaria reciente" in item for item in hospitalized_missing)
     assert any("contexto hospitalizado" in item for item in hospitalized_missing)
+
+
+def test_context_builder_flags_clinical_course_from_recent_events(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = _create_patient(client, auth, first_name="Curso", last_name="Clinico")
+    _create_entry(
+        client,
+        auth,
+        patient_id,
+        title="Baseline clinico",
+        assessment="Control previo.",
+    )
+    _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Dolor abdominal en mejoria.",
+        occurred_at="2026-06-20T13:00:00Z",
+    )
+    _create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Disnea empeora durante la tarde.",
+        occurred_at="2026-06-20T14:00:00Z",
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "daily_changes"},
+    )
+
+    assert response.status_code == 200
+    rule_findings = response.json()["change_set"]["rule_findings"]
+    assert any("Mejoria clinica sugerida" in finding for finding in rule_findings)
+    assert any("Empeoramiento clinico sugerido" in finding for finding in rule_findings)
 
 
 def test_event_proposals_from_entry_are_reviewable_and_do_not_persist(

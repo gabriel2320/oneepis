@@ -715,6 +715,9 @@ def _event_rule_findings(
         label = labels.get(event_type)
         if label:
             findings.append(f"{label}: {event.summary}.")
+        course_finding = _clinical_course_finding(event.summary)
+        if course_finding:
+            findings.append(course_finding)
 
     unlinked_count = sum(
         1 for event in compared_events if not _event_matches_any_problem(snapshot, event)
@@ -724,6 +727,35 @@ def _event_rule_findings(
             f"{unlinked_count} evento(s) recientes sin problema activo asociado."
         )
     return findings
+
+
+def _clinical_course_finding(summary: str) -> str | None:
+    normalized = _normalize_text(summary)
+    improving_terms = (
+        "mejoria",
+        "mejora",
+        "mejorando",
+        "en disminucion",
+        "disminuye",
+        "cede",
+        "controlado",
+        "estable",
+    )
+    worsening_terms = (
+        "empeora",
+        "empeoramiento",
+        "aumenta",
+        "aumento",
+        "progresion",
+        "persiste",
+        "sin mejoria",
+        "descompensacion",
+    )
+    if any(term in normalized for term in worsening_terms):
+        return f"Empeoramiento clinico sugerido por evento: {summary}."
+    if any(term in normalized for term in improving_terms):
+        return f"Mejoria clinica sugerida por evento: {summary}."
+    return None
 
 
 def _event_matches_any_problem(snapshot: PatientRecordSnapshot, event: object) -> bool:

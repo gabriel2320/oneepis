@@ -44,6 +44,7 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La ba
 - funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y Ollama apagado
 - explicar por que un evento reciente se asocia o no a un problema activo dentro del Context Builder
 - mostrar faltantes contextualizados por atencion ambulatoria, hospitalizada o desconocida
+- detectar curso clinico narrativo como mejora o empeoramiento desde eventos recientes
 
 El proximo trabajo puede preparar Fase 2 solo si conserva esta base. No agregar
 chat libre, RAG, documentos o IA externa como atajo.
@@ -230,11 +231,12 @@ Implementado inicial:
 - eventos recientes sin problema asociado quedan agrupados con razon de revision humana
 - la UI muestra explicaciones dentro de `Problemas y evidencia`
 - `missing_data` describe por que falta el dato y ajusta baseline/signos vitales segun contexto asistencial
+- eventos recientes con lenguaje de mejoria o empeoramiento generan reglas locales visibles en `Curso clinico`
 
 Trabajo:
 
 - asociacion semantica local por problema, mas alla de coincidencia textual simple
-- reglas explicitas para mejoria/empeoramiento
+- ampliar reglas explicitas de mejoria/empeoramiento por dominio
 - ampliar faltantes por tipo de atencion a dominios especificos
 - comparacion 24 h con datos estructurados
 - evidencia vinculada a fuente
