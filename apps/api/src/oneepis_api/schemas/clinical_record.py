@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -11,6 +11,8 @@ from oneepis_api.models.clinical_record import (
     AllergySeverity,
     ClinicalEntryKind,
     ClinicalEntryStatus,
+    ClinicalEventSourceType,
+    ClinicalEventType,
     EncounterStatus,
     EncounterType,
     RecordStatus,
@@ -55,6 +57,235 @@ class ClinicalEntryRead(ClinicalEntryBase):
     patient_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+
+
+class ClinicalEventBase(APIModel):
+    encounter_id: uuid.UUID | None = None
+    event_type: ClinicalEventType
+    occurred_at: datetime
+    summary: str = Field(min_length=1, max_length=280)
+    source_type: ClinicalEventSourceType = ClinicalEventSourceType.MANUAL
+    source_ref: str | None = Field(default=None, max_length=160)
+    payload: dict[str, Any] = Field(default_factory=dict)
+    created_by: str = Field(default="system", max_length=120)
+
+
+class ClinicalEventCreate(ClinicalEventBase):
+    pass
+
+
+class ClinicalEventUpdate(APIModel):
+    encounter_id: uuid.UUID | None = None
+    event_type: ClinicalEventType | None = None
+    occurred_at: datetime | None = None
+    summary: str | None = Field(default=None, min_length=1, max_length=280)
+    source_type: ClinicalEventSourceType | None = None
+    source_ref: str | None = Field(default=None, max_length=160)
+    payload: dict[str, Any] | None = None
+
+
+class ClinicalEventRead(ClinicalEventBase):
+    id: uuid.UUID
+    patient_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class ClinicalTimelineRead(APIModel):
+    events: list[ClinicalEventRead]
+    entries: list[ClinicalEntryRead]
+
+
+class ClinicalEventSource(APIModel):
+    clinical_event_id: uuid.UUID
+    label: str
+
+
+class DraftSoapSectionSource(APIModel):
+    section: Literal["subjective", "objective", "assessment", "plan"]
+    source_type: str
+    source_id: uuid.UUID | None = None
+    label: str
+    reason: str
+
+
+class DraftSoapFromEventsRequest(APIModel):
+    clinical_event_ids: list[uuid.UUID] = Field(min_length=1, max_length=20)
+    encounter_id: uuid.UUID | None = None
+
+
+class DraftSoapFromEventsResponse(APIModel):
+    title: str
+    subjective: str
+    objective: str
+    assessment: str
+    plan: str
+    sources: list[ClinicalEventSource]
+    section_sources: list[DraftSoapSectionSource] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    ai_available: bool
+    provider: str
+    requires_human_confirmation: bool = True
+
+
+ClinicalIntentType = Literal[
+    "summarize_patient",
+    "daily_changes",
+    "active_problems",
+    "timeline",
+    "draft_soap",
+    "show_sources",
+]
+ClinicalIntentMode = Literal["read", "draft", "structured_proposal", "human_confirmation"]
+
+
+class ClinicalIntentRequest(APIModel):
+    intent_type: ClinicalIntentType
+    mode: ClinicalIntentMode = "read"
+    focus: str | None = Field(default=None, max_length=240)
+    max_events: int = Field(default=10, ge=1, le=50)
+
+
+class ClinicalIntentRouteRequest(APIModel):
+    text: str = Field(min_length=1, max_length=320)
+    max_events: int = Field(default=10, ge=1, le=50)
+
+
+class ClinicalIntentSource(APIModel):
+    source_type: str
+    source_id: uuid.UUID | None = None
+    label: str
+
+
+class ClinicalIntentAction(APIModel):
+    action_type: Literal[
+        "create_event",
+        "create_soap_draft",
+        "review_sources",
+        "add_pending",
+        "none",
+    ]
+    label: str
+    action_id: str | None = None
+    description: str | None = None
+    confirmation_label: str | None = None
+    requires_confirmation: bool = False
+
+
+class ClinicalIntentActionDecisionRequest(APIModel):
+    decision: Literal["reviewed", "accepted", "rejected"]
+    action_type: Literal[
+        "create_event",
+        "create_soap_draft",
+        "review_sources",
+        "add_pending",
+        "none",
+    ]
+    label: str = Field(min_length=1, max_length=240)
+    action_id: str | None = Field(default=None, max_length=180)
+    description: str | None = Field(default=None, max_length=600)
+    requires_confirmation: bool = False
+    note: str | None = Field(default=None, max_length=600)
+
+
+class ClinicalIntentActionDecisionResponse(APIModel):
+    decision: Literal["reviewed", "accepted", "rejected"]
+    audited: bool = True
+    applies_changes: bool = False
+    message: str
+
+
+class ClinicalEvidenceMark(APIModel):
+    label: str
+    status: Literal["confirmed", "inferred", "missing", "needs_review"]
+    detail: str
+    source_id: uuid.UUID | None = None
+
+
+class ClinicalContextSection(APIModel):
+    title: str
+    items: list[str] = Field(default_factory=list)
+
+
+class ClinicalProblemContext(APIModel):
+    problem_id: uuid.UUID | None = None
+    title: str
+    status: Literal["structured", "unlinked"]
+    evidence: list[ClinicalEvidenceMark] = Field(default_factory=list)
+    pending: list[str] = Field(default_factory=list)
+
+
+class ClinicalChangeSet(APIModel):
+    baseline: str | None = None
+    new_items: list[str] = Field(default_factory=list)
+    rule_findings: list[str] = Field(default_factory=list)
+    missing_for_comparison: list[str] = Field(default_factory=list)
+
+
+ClinicalReviewItemType = Literal[
+    "missing_medication_dose",
+    "missing_medication_frequency",
+    "unstructured_medication_event",
+    "unlinked_medication_event",
+]
+
+
+class ClinicalReviewItem(APIModel):
+    item_type: ClinicalReviewItemType
+    label: str
+    detail: str
+    severity: Literal["info", "warning", "critical"] = "warning"
+    source_type: str
+    source_id: uuid.UUID | None = None
+    suggested_action: str
+    decision_status: Literal["pending", "accepted", "rejected"] = "pending"
+    decision_actor_id: str | None = None
+    decision_at: datetime | None = None
+    decision_audit_event_id: uuid.UUID | None = None
+
+
+class ClinicalReviewItemDecisionRequest(APIModel):
+    decision: Literal["accepted", "rejected"]
+    item_type: ClinicalReviewItemType
+    label: str = Field(min_length=1, max_length=240)
+    detail: str = Field(min_length=1, max_length=600)
+    source_type: str = Field(min_length=1, max_length=80)
+    source_id: uuid.UUID | None = None
+    note: str | None = Field(default=None, max_length=600)
+
+
+class ClinicalReviewItemDecisionResponse(APIModel):
+    decision: Literal["accepted", "rejected"]
+    audited: bool = True
+    message: str
+
+
+class ClinicalIntentResponse(APIModel):
+    intent_type: str
+    mode: str
+    clinical_answer: str
+    sources: list[ClinicalIntentSource]
+    certainty: Literal["high", "moderate", "low"]
+    missing_data: list[str] = Field(default_factory=list)
+    proposed_actions: list[ClinicalIntentAction] = Field(default_factory=list)
+    evidence_marks: list[ClinicalEvidenceMark] = Field(default_factory=list)
+    context_sections: list[ClinicalContextSection] = Field(default_factory=list)
+    problem_contexts: list[ClinicalProblemContext] = Field(default_factory=list)
+    change_set: ClinicalChangeSet | None = None
+    review_items: list[ClinicalReviewItem] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    requires_human_confirmation: bool = False
+
+
+class ClinicalIntentRouteResponse(APIModel):
+    recognized: bool
+    original_text: str
+    intent_type: ClinicalIntentType | None = None
+    mode: ClinicalIntentMode = "read"
+    confidence: Literal["high", "moderate", "low"]
+    explanation: str
+    suggested_actions: list[ClinicalIntentAction] = Field(default_factory=list)
+    fallback_options: list[ClinicalIntentAction] = Field(default_factory=list)
 
 
 class AllergyBase(APIModel):

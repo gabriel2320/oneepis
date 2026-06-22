@@ -2,30 +2,15 @@
 
 ## Rutas
 
-- `/print/pacientes/[patientId]/ficha`
-- `/print/pacientes/[patientId]/evolucion/[entryId]`
-- `/print/pacientes/[patientId]/resumen`
-- `/print/pacientes/[patientId]/receta`
-- `/print/hospitalizacion/rondas`
-- `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]`
-- `/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]`
+El arbol vigente de rutas print vive en `docs/SCREEN_TREE.md`.
 
 ## Componentes
 
-Ubicaciones:
+Ubicaciones principales:
 
 - `apps/web/src/components/print/clinical-print.tsx`
 - `apps/web/src/components/print/hospital-indication-print.tsx`
 - `apps/web/src/components/print/hospital-round-print.tsx`
-
-- `PrintPage`
-- `PrintHeader`
-- `PrintFooter`
-- `ClinicalPaperSheet`
-- `SoapPrintSheet`
-- `PatientSummaryPrintSheet`
-- `PrintHospitalIndicationPage`
-- `PrintHospitalRoundPage`
 
 ## CSS
 
@@ -56,6 +41,5 @@ Cada documento debe incluir:
 
 ## Pendiente
 
-- soporte A5 real por ruta o preferencia.
-- numeracion de paginas multihoja.
-- folios firmados cuando exista modulo de firma.
+- numeracion de paginas multihoja
+- folios firmados solo cuando exista modulo de firma

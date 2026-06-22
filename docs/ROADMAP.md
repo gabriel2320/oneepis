@@ -6,7 +6,7 @@ cronologica para humanos y agentes.
 
 ## Estado actual
 
-Fecha de corte: 2026-06-21.
+Fecha de corte: 2026-06-22.
 
 OneEpis ya tiene una base clinica E2E real:
 
@@ -114,6 +114,17 @@ OneEpis ya tiene una base clinica E2E real:
 - El selector de tema muestra un swatch persistente para hacer visible la plantilla activa.
 - Se mantuvo el cambio como refinamiento transversal, sin nuevas pantallas ni dashboard.
 
+### Bloque AI-Chart Core Nivel 0
+
+- Se agrego `clinical_events` como columna de hechos longitudinales.
+- AI-Chart quedo como ficha inteligente simulada: reglas, plantillas, fuentes, faltantes y auditoria.
+- Se agrego router deterministico de intenciones clinicas y barra dirigida, sin chat libre generico.
+- La comparacion 24 h muestra hallazgos por dominio, estado visual y fuente por hallazgo.
+- `review_items` permite aceptar/rechazar propuestas sin aplicar cambios automaticos a la ficha.
+- El historial visual de decisiones muestra actor, fecha y evento de auditoria.
+- El borrador SOAP desde eventos se muestra como hoja carta editable con margen inteligente persistente.
+- El principio sigue siendo Nivel 0 primero: la ficha debe ser util aunque Ollama este apagado.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
@@ -125,12 +136,16 @@ OneEpis ya tiene una base clinica E2E real:
 
 ## Proximo rumbo
 
-El siguiente crecimiento recomendado despues de PR-066:
+El siguiente crecimiento recomendado despues de PR-066 y AI-Chart Core:
 
-- sostener los temas visuales v2 mientras se pulen superficies existentes;
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard;
 - no crear dashboard nuevo ni laboratorio visual pegado al core;
 - mantener paciente, ficha y papel como centro.
+- evolucionar AI-Chart como memoria clinica activa, no como chat generico.
+- seguir `docs/AI_CHART_INTERACTION_VISION.md` para intenciones clinicas, fuentes, certeza, faltantes, confirmacion humana y gateway externo futuro.
+- tratar `docs/SIMULATED_CLINICAL_INTELLIGENCE.md` como Nivel 0 obligatorio: reglas, plantillas, timeline, validadores, preferencias y auditoria antes de depender de Ollama.
+- usar `docs/GOVERNANCE.md` como mapa de decision para evitar inflar codigo o documentos.
+- vincular frases del borrador SOAP con fuentes concretas antes de ampliar documentos, alta, preferencias o API externa.
 
 Despues de eso, cualquier expansion debe pasar por la escalera OneEpis:
 

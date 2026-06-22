@@ -22,6 +22,7 @@ Dominios CRUD:
 - pacientes
 - encuentros clinicos
 - clinical entries con vinculo opcional a encuentro
+- clinical events como hechos longitudinales
 - problemas activos
 - alergias
 - medicacion
@@ -68,9 +69,14 @@ IA:
 - `GET /api/v1/ai/status`
 - `POST /api/v1/ai/clinical-insights`
 - `POST /api/v1/patients/{patient_id}/ai/suggestions`
+- `POST /api/v1/patients/{patient_id}/ai/clinical-intent`
+- `POST /api/v1/patients/{patient_id}/ai/clinical-intent-route`
+- `POST /api/v1/patients/{patient_id}/ai/review-item-decision`
+- `POST /api/v1/patients/{patient_id}/ai/draft-soap-from-events`
 - factory compatible en `services/ai/provider.py`
 - contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
+- AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados y hoja SOAP con margen inteligente aunque Ollama este apagado
 
 Hospitalizacion:
 
@@ -113,6 +119,8 @@ Capas:
 - `src/components/clinical/patient-clinical-shell.tsx`: mesa clinica por paciente
 - `src/components/clinical/patient-*-pages.tsx`: pantallas paciente importadas directo por App Router
 - `/pacientes` funciona como mesa clinica de entrada con buscador, metricas operativas y lista escaneable
+- `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
+- `/pacientes/[patientId]/ai-chart` muestra inteligencia simulada, intenciones clinicas, propuestas revisables y hoja SOAP editable con margen inteligente
 - `src/components/clinical/ambulatory-visit-pages.tsx`: atencion ambulatoria minima sobre encuentros y SOAP
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
@@ -130,68 +138,23 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
+- `apps/web/src/components/clinical/patient-ai-chart-pages.tsx` ya concentra varias responsabilidades; el siguiente crecimiento debe extraer subcomponentes si aumenta, no seguir agregando bloques inline.
+- `apps/api/src/oneepis_api/services/clinical_intent.py` ya concentra reglas deterministicas; nuevas reglas deben agruparse por dominio o extraerse antes de crecer mucho mas.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
-## Auditoria rapida 2026-06-21
+## Auditoria rapida 2026-06-22
 
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2 y temas visuales v2.
+- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2, temas visuales v2 y AI-Chart Core Nivel 0.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- `npm run check` pasa completo: API 46 tests, web typecheck/lint/build, OpenAPI sin diff y E2E 23 passed / 1 skip esperado.
-- Siguiente paso recomendado: fortalecer temas visuales v2 sin crear dashboards ni nuevas dependencias.
+- Validacion reciente: API 50 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
+- Siguiente paso recomendado: consolidar AI-Chart sin crear dashboard, chat libre ni nuevos modulos; vincular frases del borrador SOAP con fuentes concretas y extraer subcomponentes si la pantalla crece.
 
-## Programa activo PR-018 a PR-066
+## Historial
 
-- PR-018: Ollama first-class local.
-- PR-019: IA acoplada a ficha paciente.
-- PR-020: Patient Clinical Shell.
-- PR-021: Ficha resumen tipo mesa clinica.
-- PR-022: Una accion = una pantalla.
-- PR-023: SOAP con asistente Ollama.
-- PR-024: Modo papel v2.
-- PR-025: QA visual + Ollama.
-- PR-026: Auth local + roles + actor auditado.
-- PR-027: Permisos clinicos por accion.
-- PR-028: Auditoria fuerte con correlation ID y before/after.
-- PR-029: Estado de ficha, contexto asistencial y problemas activos auditados.
-- PR-030: Pantalla gobernada para editar estado clinico y contexto asistencial.
-- PR-031: Encuentros clinicos auditados como puente para consulta y hospitalizacion.
-- PR-032: Evoluciones SOAP vinculables a encuentros clinicos.
-- PR-033: Tablero hospitalario simple desde encuentros de hospitalizacion activos.
-- PR-034: Camas hospitalarias estructuradas con asignacion auditada.
-- PR-035: Administracion UI de camas y creacion dedicada.
-- PR-036: Asignacion de ingresos activos a camas existentes.
-- PR-037: CI real con ruff, lint, build, OpenAPI y Playwright.
-- PR-038: Seguridad fail-closed fuera de development.
-- PR-039: Dieta inicial de `patient-pages.tsx` con barrel compatible.
-- PR-040: Playwright inicia servidor fresco por defecto; reuse solo con `PLAYWRIGHT_REUSE_SERVER=true`.
-- PR-041: Doctrina anti-inflacion canonica en `docs/GOVERNANCE.md`.
-- PR-042: Gates oficiales como pocos comandos raiz.
-- PR-043: Dieta backend de pacientes sin cambiar OpenAPI.
-- PR-044: Retiro del barrel temporal frontend de paciente.
-- PR-045: Papel serio con smoke print dedicado.
-- PR-046: Criterio para proximo crecimiento clinico minimo.
-- PR-047: Alinear guias y gates oficiales.
-- PR-048: Retiro de legacy demo frontend.
-- PR-049: Dieta UI sin cambiar conducta.
-- PR-050: Dieta IA backend.
-- PR-051: Dieta tests API.
-- PR-052: Hoja diaria hospitalizada minima y auditable.
-- PR-053: Edicion UI dedicada para hoja diaria hospitalizada.
-- PR-054: Estado `draft/closed` y bloqueo de edicion en hoja diaria.
-- PR-055: Reglas de fecha/encuentro para hoja diaria hospitalizada.
-- PR-056: Rondas hospitalarias de lectura desde datos existentes.
-- PR-057: Dieta tests hospitalizacion sin cambiar comportamiento.
-- PR-058: Papel hospitalario de ronda desde datos existentes.
-- PR-059: Fecha clinica local para hoja diaria hospitalizada.
-- PR-060: Politica de indicaciones y receta sin producto nuevo.
-- PR-061: Indicacion hospitalaria minima como borrador gobernado.
-- PR-062: Consulta ambulatoria minima sobre encuentro y SOAP existentes.
-- PR-063: Guardia local anti-contaminacion y entrada `/pacientes` como mesa clinica sobria.
-- PR-064: Endurecimiento post-auditoria de print, build offline-safe y scripts Python reproducibles.
-- PR-065: Mesa `/pacientes` v2 con metricas operativas y lista clinica escaneable.
-- PR-066: Temas visuales v2 con tokens de superficie, shell refinado y swatches.
+El historial cronologico vive en `docs/ROADMAP.md`.
+La guia operativa para agentes vive en `docs/CODEX_PLAN.md`.
 
 Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
 

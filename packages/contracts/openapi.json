@@ -1546,6 +1546,816 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/clinical-events": {
+      "get": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "List Clinical Events",
+        "operationId": "list_clinical_events_api_v1_patients__patient_id__clinical_events_get",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClinicalEventRead"
+                  },
+                  "title": "Response List Clinical Events Api V1 Patients  Patient Id  Clinical Events Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Create Clinical Event",
+        "operationId": "create_clinical_event_api_v1_patients__patient_id__clinical_events_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalEventCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalEventRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/clinical-events/{event_id}": {
+      "patch": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Update Clinical Event",
+        "operationId": "update_clinical_event_api_v1_patients__patient_id__clinical_events__event_id__patch",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalEventUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalEventRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/timeline": {
+      "get": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Get Clinical Timeline",
+        "operationId": "get_clinical_timeline_api_v1_patients__patient_id__timeline_get",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalTimelineRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/ai/draft-soap-from-events": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Create Draft Soap From Events",
+        "operationId": "create_draft_soap_from_events_api_v1_patients__patient_id__ai_draft_soap_from_events_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftSoapFromEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftSoapFromEventsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/ai/clinical-intent": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Create Clinical Intent",
+        "operationId": "create_clinical_intent_api_v1_patients__patient_id__ai_clinical_intent_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalIntentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalIntentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/ai/clinical-intent-route": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Route Patient Clinical Intent",
+        "operationId": "route_patient_clinical_intent_api_v1_patients__patient_id__ai_clinical_intent_route_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalIntentRouteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalIntentRouteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/ai/action-decision": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Decide Clinical Intent Action",
+        "operationId": "decide_clinical_intent_action_api_v1_patients__patient_id__ai_action_decision_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalIntentActionDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalIntentActionDecisionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/ai/review-item-decision": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Decide Clinical Review Item",
+        "operationId": "decide_clinical_review_item_api_v1_patients__patient_id__ai_review_item_decision_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalReviewItemDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalReviewItemDecisionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/allergies": {
       "get": {
         "tags": [
@@ -5186,6 +5996,64 @@
         ],
         "title": "ClinicalAiSuggestion"
       },
+      "ClinicalChangeSet": {
+        "properties": {
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "new_items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "New Items"
+          },
+          "rule_findings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rule Findings"
+          },
+          "missing_for_comparison": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing For Comparison"
+          }
+        },
+        "type": "object",
+        "title": "ClinicalChangeSet"
+      },
+      "ClinicalContextSection": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "ClinicalContextSection"
+      },
       "ClinicalEncounterCreate": {
         "properties": {
           "type": {
@@ -5801,6 +6669,331 @@
         "type": "object",
         "title": "ClinicalEntryUpdate"
       },
+      "ClinicalEventCreate": {
+        "properties": {
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/ClinicalEventType"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 280,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "source_type": {
+            "$ref": "#/components/schemas/ClinicalEventSourceType",
+            "default": "manual"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "created_by": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Created By",
+            "default": "system"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_type",
+          "occurred_at",
+          "summary"
+        ],
+        "title": "ClinicalEventCreate"
+      },
+      "ClinicalEventRead": {
+        "properties": {
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/ClinicalEventType"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 280,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "source_type": {
+            "$ref": "#/components/schemas/ClinicalEventSourceType",
+            "default": "manual"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "created_by": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Created By",
+            "default": "system"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_type",
+          "occurred_at",
+          "summary",
+          "id",
+          "patient_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ClinicalEventRead"
+      },
+      "ClinicalEventSource": {
+        "properties": {
+          "clinical_event_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Clinical Event Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clinical_event_id",
+          "label"
+        ],
+        "title": "ClinicalEventSource"
+      },
+      "ClinicalEventSourceType": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "clinical_entry",
+          "vital_sign",
+          "imported_document",
+          "ai_draft"
+        ],
+        "title": "ClinicalEventSourceType"
+      },
+      "ClinicalEventType": {
+        "type": "string",
+        "enum": [
+          "symptom",
+          "vital_sign",
+          "exam_result",
+          "diagnosis",
+          "medication",
+          "procedure",
+          "clinical_note",
+          "care_plan",
+          "administrative"
+        ],
+        "title": "ClinicalEventType"
+      },
+      "ClinicalEventUpdate": {
+        "properties": {
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "event_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClinicalEventType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "source_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClinicalEventSourceType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload"
+          }
+        },
+        "type": "object",
+        "title": "ClinicalEventUpdate"
+      },
+      "ClinicalEvidenceMark": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "inferred",
+              "missing",
+              "needs_review"
+            ],
+            "title": "Status"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "status",
+          "detail"
+        ],
+        "title": "ClinicalEvidenceMark"
+      },
       "ClinicalInsightRequest": {
         "properties": {
           "patient_id": {
@@ -5890,6 +7083,890 @@
           "summary"
         ],
         "title": "ClinicalInsightResponse"
+      },
+      "ClinicalIntentAction": {
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "create_event",
+              "create_soap_draft",
+              "review_sources",
+              "add_pending",
+              "none"
+            ],
+            "title": "Action Type"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "action_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "confirmation_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Label"
+          },
+          "requires_confirmation": {
+            "type": "boolean",
+            "title": "Requires Confirmation",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "action_type",
+          "label"
+        ],
+        "title": "ClinicalIntentAction"
+      },
+      "ClinicalIntentActionDecisionRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "reviewed",
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "create_event",
+              "create_soap_draft",
+              "review_sources",
+              "add_pending",
+              "none"
+            ],
+            "title": "Action Type"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "action_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 180
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 600
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "requires_confirmation": {
+            "type": "boolean",
+            "title": "Requires Confirmation",
+            "default": false
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 600
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "action_type",
+          "label"
+        ],
+        "title": "ClinicalIntentActionDecisionRequest"
+      },
+      "ClinicalIntentActionDecisionResponse": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "reviewed",
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "audited": {
+            "type": "boolean",
+            "title": "Audited",
+            "default": true
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "message"
+        ],
+        "title": "ClinicalIntentActionDecisionResponse"
+      },
+      "ClinicalIntentRequest": {
+        "properties": {
+          "intent_type": {
+            "type": "string",
+            "enum": [
+              "summarize_patient",
+              "daily_changes",
+              "active_problems",
+              "timeline",
+              "draft_soap",
+              "show_sources"
+            ],
+            "title": "Intent Type"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "read",
+              "draft",
+              "structured_proposal",
+              "human_confirmation"
+            ],
+            "title": "Mode",
+            "default": "read"
+          },
+          "focus": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Focus"
+          },
+          "max_events": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Max Events",
+            "default": 10
+          }
+        },
+        "type": "object",
+        "required": [
+          "intent_type"
+        ],
+        "title": "ClinicalIntentRequest"
+      },
+      "ClinicalIntentResponse": {
+        "properties": {
+          "intent_type": {
+            "type": "string",
+            "title": "Intent Type"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "clinical_answer": {
+            "type": "string",
+            "title": "Clinical Answer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalIntentSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "certainty": {
+            "type": "string",
+            "enum": [
+              "high",
+              "moderate",
+              "low"
+            ],
+            "title": "Certainty"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Data"
+          },
+          "proposed_actions": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalIntentAction"
+            },
+            "type": "array",
+            "title": "Proposed Actions"
+          },
+          "evidence_marks": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalEvidenceMark"
+            },
+            "type": "array",
+            "title": "Evidence Marks"
+          },
+          "context_sections": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalContextSection"
+            },
+            "type": "array",
+            "title": "Context Sections"
+          },
+          "problem_contexts": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalProblemContext"
+            },
+            "type": "array",
+            "title": "Problem Contexts"
+          },
+          "change_set": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClinicalChangeSet"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review_items": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalReviewItem"
+            },
+            "type": "array",
+            "title": "Review Items"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "requires_human_confirmation": {
+            "type": "boolean",
+            "title": "Requires Human Confirmation",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "intent_type",
+          "mode",
+          "clinical_answer",
+          "sources",
+          "certainty"
+        ],
+        "title": "ClinicalIntentResponse"
+      },
+      "ClinicalIntentRouteRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "max_events": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Max Events",
+            "default": 10
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ClinicalIntentRouteRequest"
+      },
+      "ClinicalIntentRouteResponse": {
+        "properties": {
+          "recognized": {
+            "type": "boolean",
+            "title": "Recognized"
+          },
+          "original_text": {
+            "type": "string",
+            "title": "Original Text"
+          },
+          "intent_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "summarize_patient",
+                  "daily_changes",
+                  "active_problems",
+                  "timeline",
+                  "draft_soap",
+                  "show_sources"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent Type"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "read",
+              "draft",
+              "structured_proposal",
+              "human_confirmation"
+            ],
+            "title": "Mode",
+            "default": "read"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "moderate",
+              "low"
+            ],
+            "title": "Confidence"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "suggested_actions": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalIntentAction"
+            },
+            "type": "array",
+            "title": "Suggested Actions"
+          },
+          "fallback_options": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalIntentAction"
+            },
+            "type": "array",
+            "title": "Fallback Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recognized",
+          "original_text",
+          "confidence",
+          "explanation"
+        ],
+        "title": "ClinicalIntentRouteResponse"
+      },
+      "ClinicalIntentSource": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_type",
+          "label"
+        ],
+        "title": "ClinicalIntentSource"
+      },
+      "ClinicalProblemContext": {
+        "properties": {
+          "problem_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Problem Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "structured",
+              "unlinked"
+            ],
+            "title": "Status"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalEvidenceMark"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "pending": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pending"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "status"
+        ],
+        "title": "ClinicalProblemContext"
+      },
+      "ClinicalReviewItem": {
+        "properties": {
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "missing_medication_dose",
+              "missing_medication_frequency",
+              "unstructured_medication_event",
+              "unlinked_medication_event"
+            ],
+            "title": "Item Type"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ],
+            "title": "Severity",
+            "default": "warning"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "suggested_action": {
+            "type": "string",
+            "title": "Suggested Action"
+          },
+          "decision_status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision Status",
+            "default": "pending"
+          },
+          "decision_actor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Actor Id"
+          },
+          "decision_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision At"
+          },
+          "decision_audit_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Audit Event Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_type",
+          "label",
+          "detail",
+          "source_type",
+          "suggested_action"
+        ],
+        "title": "ClinicalReviewItem"
+      },
+      "ClinicalReviewItemDecisionRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "missing_medication_dose",
+              "missing_medication_frequency",
+              "unstructured_medication_event",
+              "unlinked_medication_event"
+            ],
+            "title": "Item Type"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "detail": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Detail"
+          },
+          "source_type": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Source Type"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 600
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "item_type",
+          "label",
+          "detail",
+          "source_type"
+        ],
+        "title": "ClinicalReviewItemDecisionRequest"
+      },
+      "ClinicalReviewItemDecisionResponse": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "audited": {
+            "type": "boolean",
+            "title": "Audited",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "message"
+        ],
+        "title": "ClinicalReviewItemDecisionResponse"
+      },
+      "ClinicalTimelineRead": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalEventRead"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalEntryRead"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "events",
+          "entries"
+        ],
+        "title": "ClinicalTimelineRead"
+      },
+      "DraftSoapFromEventsRequest": {
+        "properties": {
+          "clinical_event_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Clinical Event Ids"
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clinical_event_ids"
+        ],
+        "title": "DraftSoapFromEventsRequest"
+      },
+      "DraftSoapFromEventsResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "subjective": {
+            "type": "string",
+            "title": "Subjective"
+          },
+          "objective": {
+            "type": "string",
+            "title": "Objective"
+          },
+          "assessment": {
+            "type": "string",
+            "title": "Assessment"
+          },
+          "plan": {
+            "type": "string",
+            "title": "Plan"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalEventSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "section_sources": {
+            "items": {
+              "$ref": "#/components/schemas/DraftSoapSectionSource"
+            },
+            "type": "array",
+            "title": "Section Sources"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "ai_available": {
+            "type": "boolean",
+            "title": "Ai Available"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "requires_human_confirmation": {
+            "type": "boolean",
+            "title": "Requires Human Confirmation",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "subjective",
+          "objective",
+          "assessment",
+          "plan",
+          "sources",
+          "ai_available",
+          "provider"
+        ],
+        "title": "DraftSoapFromEventsResponse"
+      },
+      "DraftSoapSectionSource": {
+        "properties": {
+          "section": {
+            "type": "string",
+            "enum": [
+              "subjective",
+              "objective",
+              "assessment",
+              "plan"
+            ],
+            "title": "Section"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "section",
+          "source_type",
+          "label",
+          "reason"
+        ],
+        "title": "DraftSoapSectionSource"
       },
       "EncounterStatus": {
         "type": "string",

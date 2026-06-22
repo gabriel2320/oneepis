@@ -73,6 +73,8 @@ export const careContextOptions: { value: CareContext; label: string }[] = [
 export type PatientSection =
   | "ficha"
   | "encuentros"
+  | "eventos"
+  | "ai-chart"
   | "evoluciones"
   | "problemas"
   | "alergias"

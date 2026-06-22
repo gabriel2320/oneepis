@@ -1,8 +1,10 @@
-# Ollama and Tools
+# Ollama
 
 ## Objetivo
 
 La IA local debe asistir documentacion clinica, no tomar decisiones autonomas.
+
+Ollama es Nivel 1. OneEpis debe ser util antes de Ollama mediante `Simulated Clinical Intelligence`: reglas, plantillas, timeline, validadores, contexto y auditoria. Ver `docs/SIMULATED_CLINICAL_INTELLIGENCE.md`.
 
 Reglas:
 
@@ -40,13 +42,26 @@ La implementacion Ollama usa:
 - `/api/tags` para disponibilidad local de modelos.
 - `/api/chat` con `stream=false` y `format=json`.
 
-Superficies actuales:
+Superficies actuales de IA:
 
 - `GET /api/v1/ai/status`: estado Ollama y modelos por tarea.
 - `POST /api/v1/ai/clinical-insights`: borrador desde texto clinico.
 - `POST /api/v1/patients/{patient_id}/ai/suggestions`: sugerencias temporales desde snapshot.
 
 Ninguna superficie IA persiste, firma ni modifica ficha.
+
+## Modo sin Ollama
+
+Si Ollama esta apagado o lento, el sistema debe seguir funcionando con:
+
+- resumen por plantilla
+- contexto clinico desde eventos
+- comparacion minima con evolucion previa
+- borrador SOAP estructurado
+- faltantes y marcas de evidencia
+- fuentes y auditoria
+
+La UI debe comunicarlo como degradacion controlada, no como falla total del producto.
 
 Referencias oficiales:
 
@@ -56,32 +71,6 @@ Referencias oficiales:
 - https://ollama.com/library/llama3.2
 - https://ollama.com/library/qwen3
 
-## Herramientas recomendadas para fases siguientes
-
-- Auth y permisos: antes de uploads, recetas, firma o auditoria legal.
-- Politica PHI: clasificacion de datos, logs, backups, retencion y borrado.
-- RAG gobernado: solo despues de permisos, corpus aprobado y trazabilidad de fuente.
-- Playwright: cobertura visual de rutas principales, Ollama visible y print.
-- OpenAPI codegen: generar tipos cliente cuando el contrato se estabilice.
-- Sentry/OpenTelemetry: observabilidad sin PHI en logs.
-- Alembic discipline: cada cambio de modelo debe tener migracion y prueba.
-
-## Playwright
-
-Se agrega `@playwright/test` como devDependency para smoke visual de:
-
-- ficha paciente con shell clinico
-- nueva evolucion SOAP con revision Ollama
-- configuracion IA
-- rutas print
-- desktop y mobile
-
-Los tests usan `NEXT_PUBLIC_DEMO_MODE=true` y no requieren datos reales.
-
-Por defecto Playwright inicia un servidor Next.js fresco para evitar validar contra un proceso viejo.
-Si quieres reutilizar un servidor ya levantado manualmente, ejecuta con `PLAYWRIGHT_REUSE_SERVER=true` y
-asegura que `PLAYWRIGHT_PORT` o `PLAYWRIGHT_BASE_URL` apunten al servidor correcto.
-
 ## Fuera de fase 1
 
 - uploads reales de documentos
@@ -89,3 +78,10 @@ asegura que `PLAYWRIGHT_PORT` o `PLAYWRIGHT_BASE_URL` apunten al servidor correc
 - soporte multiusuario clinico
 - integraciones HL7/FHIR
 - embeddings en produccion
+- API externa con datos clinicos identificados
+
+## Siguientes herramientas IA
+
+- Privacy & Safety Gateway antes de IA externa.
+- RAG gobernado solo despues de permisos, corpus aprobado y trazabilidad de fuente.
+- Embeddings solo cuando exista un flujo documental auditado.

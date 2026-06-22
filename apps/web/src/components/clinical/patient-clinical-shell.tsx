@@ -9,6 +9,7 @@ import {
   BrainCircuit,
   CalendarClock,
   ClipboardList,
+  GitBranch,
   FileText,
   HeartPulse,
   History,
@@ -32,6 +33,8 @@ import { cn } from "@/lib/utils";
 const clinicalNav = [
   { key: "ficha", label: "Resumen", icon: ClipboardList },
   { key: "encuentros", label: "Encuentros", icon: CalendarClock },
+  { key: "eventos", label: "Eventos", icon: GitBranch },
+  { key: "ai-chart", label: "AI-Chart", icon: BrainCircuit },
   { key: "evoluciones", label: "Evoluciones", icon: FileText },
   { key: "problemas", label: "Problemas", icon: ShieldAlert },
   { key: "alergias", label: "Alergias", icon: AlertTriangle },

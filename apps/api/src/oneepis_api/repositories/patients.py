@@ -9,6 +9,7 @@ from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
     ClinicalEntry,
+    ClinicalEvent,
     Medication,
     RecordStatus,
     VitalSign,
@@ -52,6 +53,18 @@ def get_recent_entries(
     return list(session.scalars(statement))
 
 
+def get_recent_events(
+    session: Session, patient_id: uuid.UUID, limit: int = 50
+) -> list[ClinicalEvent]:
+    statement = (
+        select(ClinicalEvent)
+        .where(ClinicalEvent.patient_id == patient_id)
+        .order_by(ClinicalEvent.occurred_at.desc())
+        .limit(limit)
+    )
+    return list(session.scalars(statement))
+
+
 def get_latest_vitals(session: Session, patient_id: uuid.UUID) -> VitalSign | None:
     statement = (
         select(VitalSign)
@@ -60,6 +73,18 @@ def get_latest_vitals(session: Session, patient_id: uuid.UUID) -> VitalSign | No
         .limit(1)
     )
     return session.scalars(statement).first()
+
+
+def get_recent_vitals(
+    session: Session, patient_id: uuid.UUID, limit: int = 5
+) -> list[VitalSign]:
+    statement = (
+        select(VitalSign)
+        .where(VitalSign.patient_id == patient_id)
+        .order_by(VitalSign.measured_at.desc())
+        .limit(limit)
+    )
+    return list(session.scalars(statement))
 
 
 def get_active_allergies(session: Session, patient_id: uuid.UUID) -> list[Allergy]:

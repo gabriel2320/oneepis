@@ -13,6 +13,20 @@ import type {
   ClinicalEncounter,
   ClinicalEncounterCreate,
   ClinicalEncounterUpdate,
+  ClinicalEvent,
+  ClinicalEventCreate,
+  ClinicalEventUpdate,
+  ClinicalIntentRequest,
+  ClinicalIntentActionDecisionRequest,
+  ClinicalIntentActionDecisionResponse,
+  ClinicalIntentRouteRequest,
+  ClinicalIntentRouteResponse,
+  ClinicalIntentResponse,
+  ClinicalReviewItemDecisionRequest,
+  ClinicalReviewItemDecisionResponse,
+  ClinicalTimeline,
+  DraftSoapFromEventsRequest,
+  DraftSoapFromEventsResponse,
   Medication,
   MedicationCreate,
   MedicationUpdate,
@@ -41,6 +55,85 @@ export function updateClinicalEntry(
     method: "PATCH",
     body: JSON.stringify(payload),
   });
+}
+
+export function listClinicalEvents(patientId: string) {
+  return apiFetch<ClinicalEvent[]>(`/api/v1/patients/${patientId}/clinical-events?limit=50`);
+}
+
+export function createClinicalEvent(patientId: string, payload: ClinicalEventCreate) {
+  return apiFetch<ClinicalEvent>(`/api/v1/patients/${patientId}/clinical-events`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateClinicalEvent(
+  patientId: string,
+  eventId: string,
+  payload: ClinicalEventUpdate,
+) {
+  return apiFetch<ClinicalEvent>(`/api/v1/patients/${patientId}/clinical-events/${eventId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getClinicalTimeline(patientId: string) {
+  return apiFetch<ClinicalTimeline>(`/api/v1/patients/${patientId}/timeline?limit=50`);
+}
+
+export function draftSoapFromEvents(patientId: string, payload: DraftSoapFromEventsRequest) {
+  return apiFetch<DraftSoapFromEventsResponse>(
+    `/api/v1/patients/${patientId}/ai/draft-soap-from-events`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function createClinicalIntent(patientId: string, payload: ClinicalIntentRequest) {
+  return apiFetch<ClinicalIntentResponse>(`/api/v1/patients/${patientId}/ai/clinical-intent`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function routeClinicalIntent(patientId: string, payload: ClinicalIntentRouteRequest) {
+  return apiFetch<ClinicalIntentRouteResponse>(
+    `/api/v1/patients/${patientId}/ai/clinical-intent-route`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function decideClinicalReviewItem(
+  patientId: string,
+  payload: ClinicalReviewItemDecisionRequest,
+) {
+  return apiFetch<ClinicalReviewItemDecisionResponse>(
+    `/api/v1/patients/${patientId}/ai/review-item-decision`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function decideClinicalIntentAction(
+  patientId: string,
+  payload: ClinicalIntentActionDecisionRequest,
+) {
+  return apiFetch<ClinicalIntentActionDecisionResponse>(
+    `/api/v1/patients/${patientId}/ai/action-decision`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
 }
 
 export function listAllergies(patientId: string) {

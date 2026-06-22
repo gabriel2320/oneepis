@@ -4,6 +4,7 @@ from oneepis_api.models.clinical_record import (
     Allergy,
     ClinicalEncounter,
     ClinicalEntry,
+    ClinicalEvent,
     Medication,
     VitalSign,
 )
@@ -14,6 +15,7 @@ __all__ = [
     "Allergy",
     "AuditEvent",
     "ClinicalEncounter",
+    "ClinicalEvent",
     "ClinicalEntry",
     "HospitalBed",
     "HospitalDailySheet",

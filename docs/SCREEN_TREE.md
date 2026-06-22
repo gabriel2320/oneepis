@@ -13,10 +13,13 @@
 /pacientes/[patientId]
 /pacientes/[patientId]/estado
 /pacientes/[patientId]/ficha
+/pacientes/[patientId]/eventos
+/pacientes/[patientId]/ai-chart
 /pacientes/[patientId]/encuentros
 /pacientes/[patientId]/encuentros/nuevo
 /pacientes/[patientId]/evoluciones
 /pacientes/[patientId]/evoluciones/nueva
+/pacientes/[patientId]/evoluciones/desde-eventos
 /pacientes/[patientId]/problemas
 /pacientes/[patientId]/problemas/nuevo
 /pacientes/[patientId]/alergias
@@ -32,7 +35,8 @@
 
 Estado:
 
-- `/pacientes`, `/pacientes/nuevo`, estado clinico, ficha, encuentros, evoluciones, problemas activos, alergias, medicacion, signos vitales, IA y auditoria estan conectadas a la base E2E.
+- `/pacientes`, `/pacientes/nuevo`, estado clinico, ficha, eventos, AI-Chart, encuentros, evoluciones, problemas activos, alergias, medicacion, signos vitales, IA y auditoria estan conectadas a la base E2E.
+- AI-Chart usa eventos clinicos, reglas locales, fuentes, faltantes, propuestas revisables y hoja SOAP con margen inteligente.
 - documentos existe como ruta preparada, sin backend definitivo.
 
 ## Hospitalizacion

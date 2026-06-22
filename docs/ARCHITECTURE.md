@@ -30,9 +30,14 @@ flowchart LR
   AI --> Ollama["Ollama local"]
 ```
 
-## Dominios Iniciales
+## Dominios Actuales
 
 - Pacientes: datos mínimos y trazables.
-- Ficha clínica: entradas clínicas, signos vitales, alergias y medicación.
+- Ficha clínica: entradas clínicas, signos vitales, alergias, medicación y problemas activos.
+- Encuentros: puente entre consulta, hospitalizacion y documentos clinicos.
+- Eventos clinicos: hechos longitudinales para timeline, AI-Chart y borradores.
+- Hospitalizacion: camas, hojas diarias, rondas de lectura e indicaciones borrador.
+- Consulta: atencion ambulatoria minima sobre encuentro y SOAP.
+- Papel: proyecciones imprimibles, nunca fuente de verdad.
 - Auditoría: eventos de cambios relevantes.
-- IA: contratos de resumen/asistencia con proveedor local Ollama configurable.
+- IA: reglas locales, AI-Chart y proveedor local Ollama configurable como mejora opcional.

@@ -30,6 +30,40 @@ Evita explicitamente:
 - pantallas abarrotadas
 - scripts, docs y gates infinitos que nadie entiende
 
+## Frontera Documental
+
+No crear documentos nuevos si una fuente existente puede absorber la decision.
+
+Responsabilidades canonicas:
+
+- `README.md`: entrada operativa, stack, comandos y enlaces.
+- `docs/CURRENT_STATE.md`: verdad operativa actual.
+- `docs/ROADMAP.md`: historial y rumbo, no backlog detallado.
+- `docs/GOVERNANCE.md`: criterios anti-inflacion y limites activos.
+- `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart.
+- `docs/AI_CHART_CORE.md`: contrato conceptual de AI-Chart.
+- `docs/VISUAL_INTELLIGENCE_COUPLING.md`: regla inteligencia -> UI visible.
+- `docs/SCREEN_TREE.md`: rutas y estado por superficie.
+
+Los documentos largos de vision son cantera conceptual. No son backlog directo
+si no pasan antes por el plan progresivo y la escalera OneEpis.
+
+## Limites Activos
+
+No construir ahora:
+
+- dashboard central nuevo
+- chat libre generico
+- receta valida o firma clinica real
+- indicaciones ejecutables
+- agenda productiva
+- RAG documental amplio
+- IA externa identificada
+- importador PDF completo
+
+El proximo avance debe consolidar AI-Chart Nivel 0: fuentes por frase del
+borrador SOAP y propuestas explicitas confirmables, sin crear modulo nuevo.
+
 ## Escalera OneEpis
 
 Antes de crear una feature, pantalla, endpoint, dependencia o documento, responde en orden:

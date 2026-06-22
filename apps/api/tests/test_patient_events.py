@@ -1,0 +1,445 @@
+from fastapi.testclient import TestClient
+
+
+def test_clinical_events_timeline_and_draft_are_audited(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_response = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "AI",
+            "last_name": "Chart",
+            "birth_date": "1985-05-12",
+            "sex_at_birth": "female",
+        },
+    )
+    assert patient_response.status_code == 201
+    patient_id = patient_response.json()["id"]
+
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Control AI-Chart",
+            "started_at": "2026-06-22T10:00:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
+
+    event_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "encounter_id": encounter_id,
+            "event_type": "symptom",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Dolor toracico resuelto",
+            "source_type": "manual",
+            "payload": {"details": "Sin dolor al momento de la evaluacion."},
+        },
+    )
+    assert event_response.status_code == 201
+    event = event_response.json()
+    assert event["created_by"] == "medico@oneepis.local"
+
+    timeline_response = client.get(f"/api/v1/patients/{patient_id}/timeline", headers=auth)
+    assert timeline_response.status_code == 200
+    timeline = timeline_response.json()
+    assert timeline["events"][0]["summary"] == "Dolor toracico resuelto"
+    assert timeline["entries"] == []
+
+    draft_response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/draft-soap-from-events",
+        headers=auth,
+        json={"clinical_event_ids": [event["id"]], "encounter_id": encounter_id},
+    )
+    assert draft_response.status_code == 200
+    draft = draft_response.json()
+    assert draft["requires_human_confirmation"] is True
+    assert draft["provider"] == "local_rules"
+    assert draft["ai_available"] is True
+    assert draft["sources"][0]["clinical_event_id"] == event["id"]
+    assert {
+        (source["section"], source["source_type"], source["source_id"])
+        for source in draft["section_sources"]
+    } >= {
+        ("subjective", "clinical_event", event["id"]),
+        ("objective", "clinical_event", event["id"]),
+    }
+    assert "Dolor toracico resuelto" in draft["subjective"]
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    audit_events = audit_response.json()
+    actions = {item["action"] for item in audit_events}
+    assert {"clinical_event.created", "ai.soap_draft.created"}.issubset(actions)
+    draft_audit = next(item for item in audit_events if item["action"] == "ai.soap_draft.created")
+    assert draft_audit["extra_data"]["section_sources"][0]["section"] == "subjective"
+
+
+def test_draft_rejects_events_from_other_patient(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    first = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Primer",
+            "last_name": "Paciente",
+            "birth_date": "1980-01-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    second = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Segundo",
+            "last_name": "Paciente",
+            "birth_date": "1981-01-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    event = client.post(
+        f"/api/v1/patients/{first['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Evento de otro paciente",
+        },
+    ).json()
+
+    response = client.post(
+        f"/api/v1/patients/{second['id']}/ai/draft-soap-from-events",
+        headers=auth,
+        json={"clinical_event_ids": [event["id"]]},
+    )
+
+    assert response.status_code == 404
+
+
+def test_clinical_intent_returns_sources_and_audit(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Intent",
+            "last_name": "Clinico",
+            "birth_date": "1979-03-01",
+            "sex_at_birth": "male",
+        },
+    ).json()
+    event = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T12:00:00Z",
+            "summary": "Neumonia adquirida en la comunidad: paciente afebril y sin dolor",
+        },
+    ).json()
+    previous_exam_response = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-21T11:00:00Z",
+            "summary": "Creatinina 1.1 mg/dL",
+            "payload": {"code": "creatinina", "value": "1.1", "unit": "mg/dL"},
+        },
+    )
+    assert previous_exam_response.status_code == 201
+    exam_event = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-22T13:00:00Z",
+            "summary": "Creatinina subio a 1.6 mg/dL",
+            "payload": {"code": "creatinina", "value": "1.6", "unit": "mg/dL"},
+        },
+    ).json()
+    medication_event = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "medication",
+            "occurred_at": "2026-06-22T14:00:00Z",
+            "summary": "Se ajusta dosis de enoxaparina",
+            "payload": {
+                "action": "dose_changed",
+                "name": "Enoxaparina",
+                "previous_dose": "40 mg cada 24 h",
+                "dose": "20 mg cada 24 h",
+            },
+        },
+    ).json()
+    active_medication_response = client.post(
+        f"/api/v1/patients/{patient['id']}/medications",
+        headers=auth,
+        json={
+            "name": "Losartan",
+            "route": "oral",
+        },
+    )
+    assert active_medication_response.status_code == 201
+    problem = client.post(
+        f"/api/v1/patients/{patient['id']}/problems",
+        headers=auth,
+        json={
+            "title": "Neumonia adquirida en la comunidad",
+            "notes": "Completar duracion antibiotica.",
+        },
+    ).json()
+    entry_response = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-entries",
+        headers=auth,
+        json={
+            "kind": "progress",
+            "status": "signed",
+            "occurred_at": "2026-06-21T12:00:00Z",
+            "title": "Evolucion previa",
+            "subjective": "Sin fiebre.",
+            "objective": "Estable.",
+            "assessment": "Neumonia en tratamiento.",
+            "plan": "Mantener antibioticos.",
+        },
+    )
+    assert entry_response.status_code == 201
+    entry = entry_response.json()
+    previous_vitals_response = client.post(
+        f"/api/v1/patients/{patient['id']}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-21T12:00:00Z",
+            "temperature_c": "38.2",
+            "systolic_bp": 130,
+            "heart_rate_bpm": 104,
+            "oxygen_saturation_pct": "92.0",
+        },
+    )
+    assert previous_vitals_response.status_code == 201
+    current_vitals_response = client.post(
+        f"/api/v1/patients/{patient['id']}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-22T12:00:00Z",
+            "temperature_c": "36.8",
+            "systolic_bp": 118,
+            "heart_rate_bpm": 82,
+            "oxygen_saturation_pct": "96.0",
+        },
+    )
+    assert current_vitals_response.status_code == 201
+
+    response = client.post(
+        f"/api/v1/patients/{patient['id']}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient", "mode": "read"},
+    )
+
+    assert response.status_code == 200
+    intent = response.json()
+    assert intent["intent_type"] == "summarize_patient"
+    assert "Intent Clinico" in intent["clinical_answer"]
+    assert any(source["source_id"] == event["id"] for source in intent["sources"])
+    assert any(section["title"] == "Eventos recientes" for section in intent["context_sections"])
+    assert any(mark["status"] == "confirmed" for mark in intent["evidence_marks"])
+    assert intent["change_set"]["baseline"] == entry["title"]
+    assert event["summary"] in intent["change_set"]["new_items"]
+    assert "Temperatura bajo de 38.2 a 36.8 C." in intent["change_set"]["rule_findings"]
+    assert "Saturacion O2 subio de 92 a 96 %." in intent["change_set"]["rule_findings"]
+    assert (
+        f"Nuevo examen registrado: {exam_event['summary']}."
+        in intent["change_set"]["rule_findings"]
+    )
+    assert "Creatinina subio de 1.1 a 1.6 mg/dL." in intent["change_set"]["rule_findings"]
+    assert (
+        f"Nuevo evento de medicacion registrado: {medication_event['summary']}."
+        in intent["change_set"]["rule_findings"]
+    )
+    assert (
+        "Dosis modificada: Enoxaparina de 40 mg cada 24 h a 20 mg cada 24 h."
+        in intent["change_set"]["rule_findings"]
+    )
+    assert (
+        "Revisar medicamento activo sin dosis: Losartan."
+        in intent["change_set"]["rule_findings"]
+    )
+    assert (
+        "Revisar medicamento activo sin frecuencia: Losartan."
+        in intent["change_set"]["rule_findings"]
+    )
+    assert (
+        f"Revisar evento de medicacion sin problema activo asociado: "
+        f"{medication_event['summary']}."
+        in intent["change_set"]["rule_findings"]
+    )
+    review_item_types = {item["item_type"] for item in intent["review_items"]}
+    assert {
+        "missing_medication_dose",
+        "missing_medication_frequency",
+        "unlinked_medication_event",
+    }.issubset(review_item_types)
+    assert any(
+        item["source_id"] == medication_event["id"]
+        and item["suggested_action"] == "Vincular a un problema activo o crear uno si corresponde."
+        for item in intent["review_items"]
+    )
+    review_item = next(
+        item for item in intent["review_items"] if item["item_type"] == "unlinked_medication_event"
+    )
+    decision_response = client.post(
+        f"/api/v1/patients/{patient['id']}/ai/review-item-decision",
+        headers=auth,
+        json={
+            "decision": "accepted",
+            "item_type": review_item["item_type"],
+            "label": review_item["label"],
+            "detail": review_item["detail"],
+            "source_type": review_item["source_type"],
+            "source_id": review_item["source_id"],
+            "note": "Revisado en test.",
+        },
+    )
+    assert decision_response.status_code == 200
+    decision = decision_response.json()
+    assert decision["audited"] is True
+    assert decision["decision"] == "accepted"
+    assert (
+        "2 evento(s) recientes sin problema activo asociado."
+        in intent["change_set"]["rule_findings"]
+    )
+    assert any(
+        context["problem_id"] == problem["id"]
+        and context["evidence"][0]["source_id"] == event["id"]
+        for context in intent["problem_contexts"]
+    )
+    assert intent["requires_human_confirmation"] is False
+
+    audit_response = client.get(f"/api/v1/patients/{patient['id']}/audit-events", headers=auth)
+    audit_events = audit_response.json()
+    actions = {item["action"] for item in audit_events}
+    assert "ai.clinical_intent.created" in actions
+    review_decision = next(
+        item for item in audit_events if item["action"] == "ai.review_item.decided"
+    )
+    assert review_decision["extra_data"]["decision"] == "accepted"
+    assert review_decision["extra_data"]["applies_changes"] is False
+
+    repeated_response = client.post(
+        f"/api/v1/patients/{patient['id']}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient", "mode": "read"},
+    )
+    assert repeated_response.status_code == 200
+    repeated_intent = repeated_response.json()
+    repeated_item = next(
+        item
+        for item in repeated_intent["review_items"]
+        if item["item_type"] == "unlinked_medication_event"
+    )
+    assert repeated_item["decision_status"] == "accepted"
+    assert repeated_item["decision_actor_id"] == "medico@oneepis.local"
+    assert repeated_item["decision_at"] is not None
+    assert repeated_item["decision_audit_event_id"] == review_decision["id"]
+    soap_action = next(
+        action
+        for action in repeated_intent["proposed_actions"]
+        if action["action_type"] == "create_soap_draft"
+    )
+    assert soap_action["action_id"] == "create_soap_draft:preparar_evolucion_soap"
+    assert soap_action["description"]
+    assert soap_action["confirmation_label"] == "Revisar y confirmar"
+
+    action_decision_response = client.post(
+        f"/api/v1/patients/{patient['id']}/ai/action-decision",
+        headers=auth,
+        json={
+            "decision": "accepted",
+            "action_type": soap_action["action_type"],
+            "action_id": soap_action["action_id"],
+            "label": soap_action["label"],
+            "description": soap_action["description"],
+            "requires_confirmation": soap_action["requires_confirmation"],
+            "note": "Accion revisada en test.",
+        },
+    )
+    assert action_decision_response.status_code == 200
+    action_decision = action_decision_response.json()
+    assert action_decision["audited"] is True
+    assert action_decision["applies_changes"] is False
+    assert action_decision["decision"] == "accepted"
+
+    action_audit_response = client.get(
+        f"/api/v1/patients/{patient['id']}/audit-events",
+        headers=auth,
+    )
+    action_audit = next(
+        item
+        for item in action_audit_response.json()
+        if item["action"] == "ai.clinical_action.decided"
+    )
+    assert action_audit["extra_data"]["action_id"] == soap_action["action_id"]
+    assert action_audit["extra_data"]["applies_changes"] is False
+
+
+def test_clinical_intent_router_is_directed_and_audited(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Router",
+            "last_name": "Clinico",
+            "birth_date": "1982-02-02",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+
+    response = client.post(
+        f"/api/v1/patients/{patient['id']}/ai/clinical-intent-route",
+        headers=auth,
+        json={"text": "Prepara evolucion medica de hoy"},
+    )
+
+    assert response.status_code == 200
+    routed = response.json()
+    assert routed["recognized"] is True
+    assert routed["intent_type"] == "draft_soap"
+    assert routed["mode"] == "draft"
+    assert routed["suggested_actions"][0]["requires_confirmation"] is True
+    assert routed["suggested_actions"][0]["action_id"]
+    assert routed["suggested_actions"][0]["description"]
+
+    fallback_response = client.post(
+        f"/api/v1/patients/{patient['id']}/ai/clinical-intent-route",
+        headers=auth,
+        json={"text": "haz magia rara"},
+    )
+
+    assert fallback_response.status_code == 200
+    fallback = fallback_response.json()
+    assert fallback["recognized"] is False
+    assert fallback["intent_type"] is None
+    assert fallback["fallback_options"]
+
+    audit_response = client.get(f"/api/v1/patients/{patient['id']}/audit-events", headers=auth)
+    actions = [item["action"] for item in audit_response.json()]
+    assert actions.count("ai.clinical_intent.routed") == 2

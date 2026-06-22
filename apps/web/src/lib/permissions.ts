@@ -4,6 +4,7 @@ import type { AuthUser, UserRole } from "@/lib/types";
 const patientWriters: UserRole[] = ["admin", "medico", "dev"];
 const medicalWriters: UserRole[] = ["admin", "medico", "dev"];
 const vitalSignWriters: UserRole[] = ["admin", "medico", "enfermeria", "dev"];
+const clinicalEventWriters: UserRole[] = ["admin", "medico", "enfermeria", "dev"];
 const clinicalAiUsers: UserRole[] = ["admin", "medico", "dev"];
 
 export function canCreatePatient(user?: AuthUser | null) {
@@ -16,6 +17,10 @@ export function canManagePatient(user?: AuthUser | null) {
 
 export function canManageClinicalEntries(user?: AuthUser | null) {
   return hasAnyRole(user, medicalWriters);
+}
+
+export function canManageClinicalEvents(user?: AuthUser | null) {
+  return hasAnyRole(user, clinicalEventWriters);
 }
 
 export function canManageAllergies(user?: AuthUser | null) {

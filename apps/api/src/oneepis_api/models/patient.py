@@ -16,6 +16,7 @@ if TYPE_CHECKING:
         Allergy,
         ClinicalEncounter,
         ClinicalEntry,
+        ClinicalEvent,
         Medication,
         VitalSign,
     )
@@ -78,6 +79,10 @@ class Patient(Base, IdMixin, TimestampMixin):
     emergency_contact: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
 
     clinical_entries: Mapped[list[ClinicalEntry]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
+    clinical_events: Mapped[list[ClinicalEvent]] = relationship(
         back_populates="patient",
         cascade="all, delete-orphan",
     )
