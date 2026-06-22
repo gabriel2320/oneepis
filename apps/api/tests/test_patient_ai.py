@@ -317,6 +317,56 @@ def test_context_builder_links_problem_by_snomed_repository_payload(
     assert not any(context["status"] == "unlinked" for context in contexts)
 
 
+def test_context_builder_adds_domain_specific_problem_pending_data(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = _create_patient(client, auth, first_name="Contexto", last_name="Pendientes")
+    respiratory_problem_id = _create_problem(
+        client,
+        auth,
+        patient_id,
+        title="Neumonia adquirida en comunidad",
+        notes="Controlar sintomas respiratorios.",
+    )
+    metabolic_problem_id = _create_problem(
+        client,
+        auth,
+        patient_id,
+        title="Diabetes mellitus tipo 2",
+        notes="Control metabolico pendiente.",
+    )
+    _create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T13:00:00Z",
+        temperature_c="36.8",
+        systolic_bp=128,
+        heart_rate_bpm=82,
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert response.status_code == 200
+    contexts = response.json()["problem_contexts"]
+    respiratory_context = next(
+        context for context in contexts if context["problem_id"] == respiratory_problem_id
+    )
+    metabolic_context = next(
+        context for context in contexts if context["problem_id"] == metabolic_problem_id
+    )
+    assert any("saturacion O2 reciente" in item for item in respiratory_context["pending"])
+    assert any("frecuencia respiratoria reciente" in item for item in respiratory_context["pending"])
+    assert any("Dominio clinico probable" in item for item in respiratory_context["explanations"])
+    assert any("glicemia" in item for item in metabolic_context["pending"])
+
+
 def test_context_builder_missing_data_depends_on_care_context(
     client: TestClient,
     auth_headers,

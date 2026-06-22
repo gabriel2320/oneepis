@@ -566,6 +566,7 @@ def _problem_contexts(
             pending.append("Sin evidencia reciente asociada automaticamente.")
         if not problem.notes:
             pending.append("Problema sin nota de plan estructurada.")
+        pending.extend(_problem_domain_missing_data(problem, snapshot, events))
         explanations = [
             "Problema activo estructurado en la ficha.",
             (
@@ -573,6 +574,11 @@ def _problem_contexts(
                 "o vocabulario clinico local explicito."
             ),
         ]
+        domain = _problem_domain_label(problem)
+        if domain:
+            explanations.append(
+                f"Dominio clinico probable para faltantes contextuales: {domain}."
+            )
         if evidence:
             explanations.append(
                 f"{len(evidence)} evento(s) reciente(s) vinculados por regla local."
@@ -940,6 +946,110 @@ def _problem_event_match_reason(problem: object, event: object) -> str | None:
         ):
             return f"Evento asociado por vocabulario clinico local: {label}."
     return None
+
+
+def _problem_domain_label(problem: object) -> str | None:
+    code = _snomed_problem_code(problem)
+    if code in {"233604007", "267036007", "195967001", "13645005"}:
+        return "respiratorio"
+    if code in {"73211009", "44054006"}:
+        return "metabolico"
+    if code in {"38341003", "59621000"}:
+        return "hemodinamico"
+    if code in {"386661006", "40733004", "6142004"}:
+        return "infeccioso"
+
+    title = _normalize_text(problem.title)
+    domains = {
+        "respiratorio": (
+            "neumonia",
+            "disnea",
+            "epoc",
+            "asma",
+            "respiratorio",
+            "bronquial",
+        ),
+        "metabolico": (
+            "diabetes",
+            "dm2",
+            "dm1",
+            "glicemia",
+            "glucosa",
+            "hiperglicemia",
+            "hipoglicemia",
+        ),
+        "hemodinamico": (
+            "hipertension",
+            "hta",
+            "presion arterial",
+            "hipotension",
+        ),
+        "infeccioso": ("fiebre", "febril", "infeccion", "sepsis"),
+    }
+    for label, terms in domains.items():
+        if any(term in title for term in terms):
+            return label
+    return None
+
+
+def _problem_domain_missing_data(
+    problem: object,
+    snapshot: PatientRecordSnapshot,
+    events: list[object],
+) -> list[str]:
+    domain = _problem_domain_label(problem)
+    if domain is None:
+        return []
+
+    latest_vitals = snapshot.latest_vitals
+    missing: list[str] = []
+    if domain == "respiratorio":
+        if latest_vitals is None or latest_vitals.oxygen_saturation_pct is None:
+            missing.append(
+                "Falta saturacion O2 reciente para contextualizar problema respiratorio."
+            )
+        if latest_vitals is None or latest_vitals.respiratory_rate_bpm is None:
+            missing.append(
+                "Falta frecuencia respiratoria reciente para contextualizar problema respiratorio."
+            )
+    elif domain == "metabolico":
+        if not _events_include_terms(
+            events,
+            ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia"),
+        ):
+            missing.append(
+                "Falta glicemia o evento metabolico reciente para contextualizar diabetes/metabolico."
+            )
+    elif domain == "hemodinamico":
+        if (
+            latest_vitals is None
+            or latest_vitals.systolic_bp is None
+            or latest_vitals.diastolic_bp is None
+        ):
+            missing.append(
+                "Falta presion arterial reciente para contextualizar problema hemodinamico."
+            )
+    elif domain == "infeccioso":
+        if latest_vitals is None or latest_vitals.temperature_c is None:
+            missing.append(
+                "Falta temperatura reciente para contextualizar problema infeccioso."
+            )
+    return missing
+
+
+def _events_include_terms(events: list[object], terms: tuple[str, ...]) -> bool:
+    for event in events[:12]:
+        text = _normalize_text(event.summary)
+        payload = event.payload if isinstance(event.payload, dict) else {}
+        payload_terms = " ".join(
+            str(value)
+            for value in payload.values()
+            if isinstance(value, str | int | float)
+        )
+        normalized_payload = _normalize_text(payload_terms)
+        if any(term in text or term in normalized_payload for term in terms):
+            return True
+    return False
 
 
 def _snomed_event_match_reason(problem: object, event: object) -> str | None:

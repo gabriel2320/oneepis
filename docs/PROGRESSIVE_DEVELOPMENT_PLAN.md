@@ -238,13 +238,14 @@ Implementado inicial:
 - el curso clinico evita negaciones obvias y puede corroborar dominios respiratorio, infeccioso o hemodinamico con signos vitales recientes
 - asociaciones por problema usan vocabulario local inicial por dominios respiratorio, dolor, fiebre, hipertension y diabetes
 - si un problema tiene `code_system=SNOMED-CT` y el evento trae conceptos/ancestros SNOMED desde un repositorio externo, el Context Builder prioriza esa asociacion explicable
+- los pendientes por problema activo incorporan faltantes por dominio respiratorio, metabolico, hemodinamico e infeccioso
 
 Trabajo:
 
 - ampliar vocabulario local por problema y revisar falsos positivos
 - conectar un repositorio RF2/terminology server SNOMED CT licenciado como fuente externa, sin versionar releases completos
 - ampliar reglas explicitas de mejoria/empeoramiento por dominio y sumar mas contrastes estructurados
-- ampliar faltantes por tipo de atencion a dominios especificos
+- ampliar faltantes por dominio con mas fuentes estructuradas que signos vitales y eventos recientes
 - comparacion 24 h con datos estructurados
 - evidencia vinculada a fuente
 
