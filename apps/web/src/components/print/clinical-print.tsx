@@ -181,24 +181,32 @@ export function PatientSummaryPrintSheet({
 
 export function PrescriptionA5Sheet({ record }: { record: PatientRecordSnapshot }) {
   return (
-    <article className="print-sheet mx-auto min-h-[210mm] max-w-[148mm] border bg-card p-6 shadow-sm">
-      <PrintHeader record={record} title="Receta" />
+    <article className="print-sheet mx-auto min-h-[210mm] max-w-[148mm] border-2 border-warning bg-card p-6 shadow-sm">
+      <PrintHeader record={record} title="Receta bloqueada" />
       <div className="space-y-5 py-6">
-        <section className="print-section rounded-md border border-warning/40 bg-warning/10 p-3">
-          <h2 className="text-sm font-semibold">Prescripcion no habilitada</h2>
+        <section className="print-section rounded-md border-2 border-warning bg-warning/10 p-4">
+          <h2 className="text-sm font-semibold uppercase text-warning-foreground">
+            No emitir como receta clinica
+          </h2>
+          <p className="mt-2 text-sm font-medium">
+            Documento bloqueado: no valido para prescribir, dispensar, indicar tratamiento ni
+            respaldar compra de medicamentos.
+          </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Requiere autenticacion, permisos, firma profesional y politica de prescripcion.
+            La prescripcion requiere autenticacion, permisos, validacion clinica, firma profesional
+            y politica institucional habilitada.
           </p>
         </section>
         <section className="print-section">
-          <h2 className="text-sm font-semibold">Paciente</h2>
-          <p className="mt-2 text-sm">
-            {record.patient.first_name} {record.patient.last_name}
+          <h2 className="text-sm font-semibold">Referencia de paciente</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {record.patient.clinical_identifier ?? record.patient.id}
           </p>
         </section>
         <section className="print-section min-h-32 border-t pt-4">
-          <p className="text-sm text-muted-foreground">
-            Firma profesional: _________________________
+          <p className="text-sm font-semibold uppercase">Sin medicamentos autorizados</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            OneEpis no imprime recetas mientras el modulo de prescripcion permanezca bloqueado.
           </p>
         </section>
       </div>
