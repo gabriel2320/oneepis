@@ -80,10 +80,18 @@ Foco actual:
 - no extraer `packages/ai-core` hasta que haya duplicacion real
 - no ampliar a RAG, documentos ni IA externa antes de completar nucleo paciente tradicional
 
-Siguiente orden de ejecucion despues de antecedentes/laboratorio sobrio:
+Cola de ejecucion automatica:
 
-1. escoger una sola superficie de `SCREEN_TREE` -> `Contratos minimos antes de UI amplia`
-2. implementar contrato o reutilizacion de entidad existente
-3. agregar UI minima solo despues de permisos/auditoria/tests
-4. agregar papel carta solo si produce documento clinico
-5. mantener agenda avanzada, firma/cierre legal de epicrisis y papel amplio en PRs separados
+1. `PROG-CONSOLIDATE-01`: cerrar documentacion, poda preventiva, guardrails y cola automatica.
+2. `PROG-AMB-PRECONSULTA-00`: definir contrato docs-only de admision/preconsulta.
+3. `PROG-CLINICAL-RISK-00`: definir contrato docs-only de riesgos clinicos.
+4. `PROG-AMB-PRECONSULTA-01`: implementar preconsulta minima solo si el contrato ya fue aprobado.
+
+Reglas para avanzar:
+
+- partir desde `main` limpio
+- una rama y un PR por bloque
+- no mezclar contrato docs-only con implementacion
+- no agregar UI amplia antes de contrato, permisos, auditoria y pruebas
+- no ampliar IA durante esta cola
+- usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge
