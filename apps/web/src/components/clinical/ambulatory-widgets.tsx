@@ -4,7 +4,12 @@ import { EmptyState } from "@/components/clinical/states";
 import { Button } from "@/components/ui/button";
 
 export function AppointmentList() {
-  return <EmptyState title="Agenda ambulatoria" description="Agenda lista para integracion posterior." />;
+  return (
+    <EmptyState
+      title="Pantalla preparada: agenda ambulatoria"
+      description="Agenda lista para integracion posterior; no simula flujo productivo."
+    />
+  );
 }
 
 export function VisitWorkspace() {

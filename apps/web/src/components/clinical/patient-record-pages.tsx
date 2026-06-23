@@ -190,8 +190,8 @@ function PatientSectionContent({
   return (
     <ClinicalSectionCard title="Documentos">
       <EmptyState
-        title="Documentos sin uploads reales"
-        description="Se habilitara cuando existan autenticacion, permisos y politica PHI."
+        title="Pantalla preparada: documentos sin uploads reales"
+        description="Se habilitara cuando existan autenticacion, permisos y politica PHI; no simula flujo productivo."
       />
     </ClinicalSectionCard>
   );

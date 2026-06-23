@@ -49,7 +49,10 @@ export function AmbulatorySummaryPage() {
   return (
     <ModulePage title="Resumen ambulatorio" description="Vista longitudinal por paciente.">
       <ClinicalSectionCard title="Resumen">
-        <EmptyState title="Resumen pendiente" description="Usara snapshot clinico y evolucion temporal." />
+        <EmptyState
+          title="Pantalla preparada: resumen pendiente"
+          description="Usara snapshot clinico y evolucion temporal; no simula flujo productivo."
+        />
       </ClinicalSectionCard>
     </ModulePage>
   );

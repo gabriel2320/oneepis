@@ -129,6 +129,24 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
 });
 
+test("prepared screens declare pending status", async ({ page }) => {
+  await page.goto("/consulta/agenda");
+  await expect(page.getByRole("heading", { name: "Agenda" })).toBeVisible();
+  await expect(page.getByText("Pantalla preparada: agenda ambulatoria")).toBeVisible();
+  await expect(page.getByText("no simula flujo productivo")).toBeVisible();
+
+  await page.goto(`/consulta/pacientes/${demoPatientId}/resumen`);
+  await expect(page.getByRole("heading", { name: "Resumen ambulatorio" })).toBeVisible();
+  await expect(page.getByText("Pantalla preparada: resumen pendiente")).toBeVisible();
+  await expect(page.getByText("no simula flujo productivo")).toBeVisible();
+
+  await page.goto(`/pacientes/${demoPatientId}/documentos`);
+  await expect(
+    page.getByText("Pantalla preparada: documentos sin uploads reales"),
+  ).toBeVisible();
+  await expect(page.getByText("no simula flujo productivo")).toBeVisible();
+});
+
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 
