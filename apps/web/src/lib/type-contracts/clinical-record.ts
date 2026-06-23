@@ -1,6 +1,13 @@
 import type { Patient } from "./patient";
 
-export type ClinicalEntryKind = "intake" | "progress" | "lab_result" | "prescription" | "procedure" | "note";
+export type ClinicalEntryKind =
+  | "intake"
+  | "progress"
+  | "discharge_summary"
+  | "lab_result"
+  | "prescription"
+  | "procedure"
+  | "note";
 export type ClinicalEntryStatus = "draft" | "signed" | "amended";
 export type ClinicalEventType =
   | "symptom"

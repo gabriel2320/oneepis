@@ -8546,6 +8546,7 @@
         "enum": [
           "intake",
           "progress",
+          "discharge_summary",
           "lab_result",
           "prescription",
           "procedure",

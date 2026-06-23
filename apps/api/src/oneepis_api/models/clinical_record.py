@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 class ClinicalEntryKind(enum.StrEnum):
     INTAKE = "intake"
     PROGRESS = "progress"
+    DISCHARGE_SUMMARY = "discharge_summary"
     LAB_RESULT = "lab_result"
     PRESCRIPTION = "prescription"
     PROCEDURE = "procedure"

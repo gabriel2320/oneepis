@@ -179,7 +179,7 @@ Laboratorio estructurado:
 - existe lectura minima de paneles/resultados recientes dentro de Assistant Read, sin escritura ni carga masiva
 - existe lectura minima de paneles/resultados recientes dentro de la ficha, sin escritura, carga masiva ni navegacion nueva
 - la ficha inicia antecedentes clinicos de solo lectura desde problemas, alergias, medicacion y eventos curados; antecedentes familiares/sociales, vacunas, dispositivos y diagnosticos codificados siguen pendientes de contrato
-- `docs/SCREEN_TREE.md` registra contratos minimos bloqueantes para agenda real, atencion ambulatoria cerrable, ingreso medico hospitalario, epicrisis borrador y papel tradicional; no se debe crear UI amplia de esas superficies antes de cumplirlos
+- `docs/SCREEN_TREE.md` registra contratos minimos bloqueantes para agenda real, alta/epicrisis firmada y papel tradicional; no se debe crear UI amplia de esas superficies antes de cumplirlos
 - `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
 - `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
 - lectura usa permisos de ficha, incluyendo `solo_lectura`
@@ -202,6 +202,9 @@ Hospitalizacion:
 - ingreso medico hospitalario minimo existe como `ClinicalEntry(kind=intake)` vinculado a encuentro `hospitalization` en curso
 - `/hospitalizacion/pacientes/[patientId]/ingreso` crea borradores de ingreso con permisos medico/admin/dev y auditoria de `clinical_entry.created`
 - `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` imprime hoja carta por ID estricto y no equivale a firma legal
+- epicrisis preliminar existe como `ClinicalEntry(kind=discharge_summary)` vinculado a encuentro `hospitalization` en curso
+- `/hospitalizacion/pacientes/[patientId]/epicrisis` crea borradores de epicrisis con permisos medico/admin/dev y auditoria de `clinical_entry.created`
+- `/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]` imprime hoja carta por ID estricto y no equivale a alta firmada
 - hoja diaria hospitalizada tiene PostgreSQL, API, permisos, auditoria, OpenAPI, crear/listar/editar/cerrar UI y print
 - estado de hoja diaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
 - fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado usando fecha clinica local `America/Santiago`, no el dia UTC crudo
@@ -297,7 +300,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
-- agenda real, epicrisis y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
+- agenda real, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 

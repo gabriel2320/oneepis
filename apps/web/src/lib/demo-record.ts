@@ -135,7 +135,25 @@ export const demoRecords: PatientRecordSnapshot[] = [
     active_allergies: [],
     active_medications: [],
     active_problems: [],
-    recent_entries: [],
+    recent_entries: [
+      {
+        id: "62222222-2222-4222-8222-222222222222",
+        patient_id: "12222222-2222-4222-8222-222222222222",
+        encounter_id: "82222222-2222-4222-8222-222222222222",
+        kind: "discharge_summary",
+        status: "draft",
+        occurred_at: "2026-06-21T10:00:00Z",
+        title: "Epicrisis preliminar demo",
+        subjective: "Motivo de hospitalizacion ficticio para validar documento de egreso.",
+        objective: "Evolucion intrahospitalaria demo sin datos reales de paciente.",
+        assessment: "Diagnosticos de egreso pendientes de revision humana.",
+        plan: "Plan de alta demo; no corresponde a indicacion valida ni firma legal.",
+        tags: ["hospitalization", "discharge_summary", "demo"],
+        created_by: "profesional.demo",
+        created_at: "2026-06-21T10:00:00Z",
+        updated_at: "2026-06-21T10:00:00Z",
+      },
+    ],
   },
   {
     patient: {
