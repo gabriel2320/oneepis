@@ -14,6 +14,11 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalIntentSource,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.clinical_lab_context import (
+    lab_context_items,
+    lab_evidence_marks,
+    lab_sources,
+)
 
 
 @dataclass(frozen=True)
@@ -54,6 +59,7 @@ def build_event_context(
 def clinical_sources(
     snapshot: PatientRecordSnapshot,
     events: list[object],
+    lab_results: list[object] | None = None,
 ) -> list[ClinicalIntentSource]:
     sources = [
         ClinicalIntentSource(
@@ -79,6 +85,7 @@ def clinical_sources(
                 label="Ultimos signos vitales",
             )
         )
+    sources.extend(lab_sources(lab_results or []))
     return sources
 
 
@@ -113,6 +120,7 @@ def clinical_missing_data(snapshot: PatientRecordSnapshot, events: list[object])
 def clinical_evidence_marks(
     snapshot: PatientRecordSnapshot,
     events: list[object],
+    lab_results: list[object] | None = None,
 ) -> list[ClinicalEvidenceMark]:
     marks: list[ClinicalEvidenceMark] = []
     marks.extend(
@@ -150,6 +158,7 @@ def clinical_evidence_marks(
                 source_id=snapshot.latest_vitals.id,
             )
         )
+    marks.extend(lab_evidence_marks(lab_results or []))
     if not snapshot.active_problems:
         marks.append(
             ClinicalEvidenceMark(
@@ -164,6 +173,7 @@ def clinical_evidence_marks(
 def clinical_context_sections(
     snapshot: PatientRecordSnapshot,
     events: list[object],
+    lab_results: list[object] | None = None,
 ) -> list[ClinicalContextSection]:
     return [
         ClinicalContextSection(
@@ -177,6 +187,10 @@ def clinical_context_sections(
         ClinicalContextSection(
             title="Medicacion activa",
             items=[med.name for med in snapshot.active_medications[:6]],
+        ),
+        ClinicalContextSection(
+            title="Examenes estructurados",
+            items=lab_context_items(lab_results or []),
         ),
         ClinicalContextSection(
             title="Evoluciones recientes",

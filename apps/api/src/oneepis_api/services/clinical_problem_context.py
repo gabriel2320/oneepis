@@ -3,6 +3,7 @@ from __future__ import annotations
 from unicodedata import category, normalize
 
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.clinical_lab_context import lab_results_include_terms
 
 _LOCAL_VOCABULARIES = {
     "respiratorio": {
@@ -127,6 +128,7 @@ def problem_domain_missing_data(
     problem: object,
     snapshot: PatientRecordSnapshot,
     events: list[object],
+    lab_results: list[object] | None = None,
 ) -> list[str]:
     domain = problem_domain_label(problem)
     if domain is None:
@@ -144,9 +146,10 @@ def problem_domain_missing_data(
                 "Falta frecuencia respiratoria reciente para contextualizar problema respiratorio."
             )
     elif domain == "metabolico":
-        if not _events_include_terms(
-            events,
-            ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia"),
+        terms = ("glicemia", "glucosa", "hipoglicemia", "hiperglicemia", "hba1c")
+        if not _events_include_terms(events, terms) and not lab_results_include_terms(
+            lab_results or [],
+            terms,
         ):
             missing.append(
                 "Falta glicemia o evento metabolico reciente para contextualizar "
@@ -167,9 +170,10 @@ def problem_domain_missing_data(
                 "Falta temperatura reciente para contextualizar problema infeccioso."
             )
     elif domain == "renal":
-        if not _events_include_terms(
-            events,
-            ("creatinina", "egfr", "filtrado glomerular", "diuresis"),
+        terms = ("creatinina", "egfr", "filtrado glomerular", "diuresis", "urea")
+        if not _events_include_terms(events, terms) and not lab_results_include_terms(
+            lab_results or [],
+            terms,
         ):
             missing.append(
                 "Falta creatinina/eGFR o diuresis reciente para contextualizar problema renal."

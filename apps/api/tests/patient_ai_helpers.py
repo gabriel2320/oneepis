@@ -130,6 +130,40 @@ def create_vitals(
     return response.json()["id"]
 
 
+def create_lab_panel(
+    client: TestClient,
+    auth: dict[str, str],
+    patient_id: str,
+    *,
+    panel_name: str = "Perfil renal",
+    result_name: str = "Creatinina",
+    code: str = "creatinina",
+    value: str = "1.10",
+    unit: str = "mg/dL",
+    status: str = "active",
+) -> dict:
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "occurred_at": "2026-06-20T09:00:00Z",
+            "panel_name": panel_name,
+            "results": [
+                {
+                    "code": code,
+                    "name": result_name,
+                    "value": value,
+                    "numeric_value": value,
+                    "unit": unit,
+                    "status": status,
+                }
+            ],
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
 def audit_events(client: TestClient, auth: dict[str, str], patient_id: str) -> list[dict]:
     response = client.get(
         f"/api/v1/patients/{patient_id}/audit-events",

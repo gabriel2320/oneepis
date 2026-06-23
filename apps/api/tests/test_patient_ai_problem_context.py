@@ -1,5 +1,11 @@
 from fastapi.testclient import TestClient
-from patient_ai_helpers import create_event, create_patient, create_problem, create_vitals
+from patient_ai_helpers import (
+    create_event,
+    create_lab_panel,
+    create_patient,
+    create_problem,
+    create_vitals,
+)
 
 
 def test_context_builder_explains_problem_evidence_links(
@@ -265,6 +271,45 @@ def test_context_builder_handles_renal_domain_context(
         "Evento asociado por vocabulario clinico local: renal."
     )
     assert not any("creatinina/eGFR o diuresis" in item for item in linked_context["pending"])
+
+
+def test_context_builder_uses_structured_lab_results_as_problem_evidence(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Contexto", last_name="Lab")
+    problem_id = create_problem(
+        client,
+        auth,
+        patient_id,
+        title="Enfermedad renal cronica",
+        notes="Vigilar funcion renal.",
+    )
+    panel = create_lab_panel(client, auth, patient_id)
+    result_id = panel["results"][0]["id"]
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "summarize_patient"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    context = next(
+        item for item in payload["problem_contexts"] if item["problem_id"] == problem_id
+    )
+    assert context["evidence"][0]["source_id"] == result_id
+    assert context["evidence"][0]["detail"] == (
+        "Resultado estructurado asociado por dominio clinico local: renal."
+    )
+    assert not any("creatinina/eGFR o diuresis" in item for item in context["pending"])
+    assert any(source["source_type"] == "lab_result" for source in payload["sources"])
+    assert any(
+        section["title"] == "Examenes estructurados" and section["items"]
+        for section in payload["context_sections"]
+    )
 
 
 def test_context_builder_missing_data_depends_on_care_context(

@@ -164,7 +164,7 @@ function ProblemsEvidencePanel({ intent }: { intent: ClinicalIntentResponse }) {
                         </div>
                         <p>Razon: {mark.detail}</p>
                         {mark.source_id ? (
-                          <p>Fuente: evento {shortSourceId(mark.source_id)}</p>
+                          <p>Fuente: registro {shortSourceId(mark.source_id)}</p>
                         ) : null}
                       </div>
                     </li>

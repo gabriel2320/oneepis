@@ -10,14 +10,12 @@ from oneepis_api.models.audit import AuditEvent
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.clinical_record import (
     ClinicalChangeSet,
-    ClinicalEvidenceMark,
     ClinicalIntentAction,
     ClinicalIntentRequest,
     ClinicalIntentResponse,
     ClinicalIntentRouteRequest,
     ClinicalIntentRouteResponse,
     ClinicalIntentType,
-    ClinicalProblemContext,
     ClinicalReviewItem,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
@@ -34,11 +32,12 @@ from oneepis_api.services.clinical_context import (
     clinical_sources as _sources,
 )
 from oneepis_api.services.clinical_course import clinical_course_finding
+from oneepis_api.services.clinical_lab_context import fetch_context_lab_results
 from oneepis_api.services.clinical_problem_context import (
     event_matches_any_problem,
-    problem_domain_label,
-    problem_domain_missing_data,
-    problem_event_match_reason,
+)
+from oneepis_api.services.clinical_problem_context_builder import (
+    build_problem_contexts as _problem_contexts,
 )
 
 ReviewDecisionMetadata = dict[str, object]
@@ -63,21 +62,26 @@ def resolve_clinical_intent(
     )
     events = patient_repo.get_recent_events(session, patient_id, limit=payload.max_events)
     recent_vitals = patient_repo.get_recent_vitals(session, patient_id, limit=2)
+    lab_results = fetch_context_lab_results(session, patient_id)
     latest_entry = snapshot.recent_entries[0] if snapshot.recent_entries else None
     review_items = _review_items(snapshot, events, latest_entry)
     review_items = _apply_review_decisions(session, patient_id, review_items)
 
     if payload.intent_type == "summarize_patient":
-        return _summarize_patient(payload, snapshot, events, recent_vitals, review_items)
+        return _summarize_patient(
+            payload, snapshot, events, recent_vitals, lab_results, review_items
+        )
     if payload.intent_type == "daily_changes":
-        return _daily_changes(payload, snapshot, events, recent_vitals, review_items)
+        return _daily_changes(payload, snapshot, events, recent_vitals, lab_results, review_items)
     if payload.intent_type == "active_problems":
-        return _active_problems(payload, snapshot, recent_vitals, review_items)
+        return _active_problems(payload, snapshot, recent_vitals, lab_results, review_items)
     if payload.intent_type == "timeline":
-        return _timeline(payload, snapshot, events, recent_vitals, review_items)
+        return _timeline(payload, snapshot, events, recent_vitals, lab_results, review_items)
     if payload.intent_type == "draft_soap":
-        return _draft_soap_intent(payload, snapshot, events, recent_vitals, review_items)
-    return _show_sources(payload, snapshot, events, recent_vitals, review_items)
+        return _draft_soap_intent(
+            payload, snapshot, events, recent_vitals, lab_results, review_items
+        )
+    return _show_sources(payload, snapshot, events, recent_vitals, lab_results, review_items)
 
 
 def route_clinical_intent(payload: ClinicalIntentRouteRequest) -> ClinicalIntentRouteResponse:
@@ -204,6 +208,7 @@ def _summarize_patient(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     recent_vitals: list[object],
+    lab_results: list[object],
     review_items: list[ClinicalReviewItem],
 ) -> ClinicalIntentResponse:
     patient = snapshot.patient
@@ -219,12 +224,12 @@ def _summarize_patient(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer="\n".join(lines),
-        sources=_sources(snapshot, events),
+        sources=_sources(snapshot, events, lab_results),
         certainty="moderate" if events or snapshot.recent_entries else "low",
         missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events),
-        context_sections=_context_sections(snapshot, events),
-        problem_contexts=_problem_contexts(snapshot, events),
+        evidence_marks=_evidence_marks(snapshot, events, lab_results),
+        context_sections=_context_sections(snapshot, events, lab_results),
+        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -244,6 +249,7 @@ def _daily_changes(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     recent_vitals: list[object],
+    lab_results: list[object],
     review_items: list[ClinicalReviewItem],
 ) -> ClinicalIntentResponse:
     latest_entry = snapshot.recent_entries[0] if snapshot.recent_entries else None
@@ -257,12 +263,12 @@ def _daily_changes(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer=answer,
-        sources=_sources(snapshot, events),
+        sources=_sources(snapshot, events, lab_results),
         certainty="moderate" if event_lines else "low",
         missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events),
-        context_sections=_context_sections(snapshot, events),
-        problem_contexts=_problem_contexts(snapshot, events),
+        evidence_marks=_evidence_marks(snapshot, events, lab_results),
+        context_sections=_context_sections(snapshot, events, lab_results),
+        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -280,6 +286,7 @@ def _active_problems(
     payload: ClinicalIntentRequest,
     snapshot: PatientRecordSnapshot,
     recent_vitals: list[object],
+    lab_results: list[object],
     review_items: list[ClinicalReviewItem],
 ) -> ClinicalIntentResponse:
     if snapshot.active_problems:
@@ -296,12 +303,12 @@ def _active_problems(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer=answer,
-        sources=_sources(snapshot, []),
+        sources=_sources(snapshot, [], lab_results),
         certainty="high" if snapshot.active_problems else "low",
         missing_data=missing,
-        evidence_marks=_evidence_marks(snapshot, []),
-        context_sections=_context_sections(snapshot, []),
-        problem_contexts=_problem_contexts(snapshot, []),
+        evidence_marks=_evidence_marks(snapshot, [], lab_results),
+        context_sections=_context_sections(snapshot, [], lab_results),
+        problem_contexts=_problem_contexts(snapshot, [], lab_results),
         change_set=_change_set(snapshot, [], recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -320,6 +327,7 @@ def _timeline(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     recent_vitals: list[object],
+    lab_results: list[object],
     review_items: list[ClinicalReviewItem],
 ) -> ClinicalIntentResponse:
     items = [f"- {event.occurred_at.isoformat()}: {event.summary}" for event in events[:10]]
@@ -330,12 +338,12 @@ def _timeline(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer="\n".join(items) if items else "No hay timeline suficiente.",
-        sources=_sources(snapshot, events),
+        sources=_sources(snapshot, events, lab_results),
         certainty="moderate" if items else "low",
         missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events),
-        context_sections=_context_sections(snapshot, events),
-        problem_contexts=_problem_contexts(snapshot, events),
+        evidence_marks=_evidence_marks(snapshot, events, lab_results),
+        context_sections=_context_sections(snapshot, events, lab_results),
+        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -349,6 +357,7 @@ def _draft_soap_intent(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     recent_vitals: list[object],
+    lab_results: list[object],
     review_items: list[ClinicalReviewItem],
 ) -> ClinicalIntentResponse:
     subjective = _join_titles([event.summary for event in events[:5]])
@@ -377,12 +386,12 @@ def _draft_soap_intent(
         intent_type=payload.intent_type,
         mode="draft",
         clinical_answer=answer,
-        sources=_sources(snapshot, events),
+        sources=_sources(snapshot, events, lab_results),
         certainty="moderate" if events else "low",
         missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events),
-        context_sections=_context_sections(snapshot, events),
-        problem_contexts=_problem_contexts(snapshot, events),
+        evidence_marks=_evidence_marks(snapshot, events, lab_results),
+        context_sections=_context_sections(snapshot, events, lab_results),
+        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -403,9 +412,10 @@ def _show_sources(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     recent_vitals: list[object],
+    lab_results: list[object],
     review_items: list[ClinicalReviewItem],
 ) -> ClinicalIntentResponse:
-    sources = _sources(snapshot, events)
+    sources = _sources(snapshot, events, lab_results)
     return ClinicalIntentResponse(
         intent_type=payload.intent_type,
         mode=payload.mode,
@@ -413,103 +423,13 @@ def _show_sources(
         sources=sources,
         certainty="high" if sources else "low",
         missing_data=[],
-        evidence_marks=_evidence_marks(snapshot, events),
-        context_sections=_context_sections(snapshot, events),
-        problem_contexts=_problem_contexts(snapshot, events),
+        evidence_marks=_evidence_marks(snapshot, events, lab_results),
+        context_sections=_context_sections(snapshot, events, lab_results),
+        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[_action("none", "Sin accion", "Lectura solamente.")],
     )
-
-
-def _problem_contexts(
-    snapshot: PatientRecordSnapshot,
-    events: list[object],
-) -> list[ClinicalProblemContext]:
-    contexts: list[ClinicalProblemContext] = []
-    linked_event_ids: set[uuid.UUID] = set()
-
-    for problem in snapshot.active_problems[:8]:
-        title = problem.title
-        event_reasons = [
-            (event, reason)
-            for event in events
-            if (reason := problem_event_match_reason(problem, event))
-        ]
-        matched_events = [event for event, _reason in event_reasons]
-        linked_event_ids.update(event.id for event in matched_events)
-        evidence = [
-            ClinicalEvidenceMark(
-                label=event.summary,
-                status="confirmed",
-                detail=reason,
-                source_id=event.id,
-            )
-            for event, reason in event_reasons[:5]
-        ]
-        pending = []
-        if not evidence:
-            pending.append("Sin evidencia reciente asociada automaticamente.")
-        if not problem.notes:
-            pending.append("Problema sin nota de plan estructurada.")
-        pending.extend(problem_domain_missing_data(problem, snapshot, events))
-        explanations = [
-            "Problema activo estructurado en la ficha.",
-            (
-                "La evidencia se asocia por codigo SNOMED CT externo, coincidencia textual "
-                "o vocabulario clinico local explicito."
-            ),
-        ]
-        domain = problem_domain_label(problem)
-        if domain:
-            explanations.append(
-                f"Dominio clinico probable para faltantes contextuales: {domain}."
-            )
-        if evidence:
-            explanations.append(
-                f"{len(evidence)} evento(s) reciente(s) vinculados por regla local."
-            )
-        else:
-            explanations.append("No hubo coincidencia ni vocabulario local con eventos recientes.")
-        if problem.notes:
-            explanations.append("El problema tiene nota de plan estructurada.")
-        else:
-            explanations.append("Falta nota de plan; se mantiene pendiente de revision.")
-        contexts.append(
-            ClinicalProblemContext(
-                problem_id=problem.id,
-                title=title,
-                status="structured",
-                evidence=evidence,
-                pending=pending,
-                explanations=explanations,
-            )
-        )
-
-    unlinked_events = [event for event in events[:8] if event.id not in linked_event_ids]
-    if unlinked_events:
-        contexts.append(
-            ClinicalProblemContext(
-                title="Eventos sin problema asociado",
-                status="unlinked",
-                evidence=[
-                    ClinicalEvidenceMark(
-                        label=event.summary,
-                        status="needs_review",
-                        detail="Evento reciente aun no vinculado a un problema activo.",
-                        source_id=event.id,
-                    )
-                    for event in unlinked_events
-                ],
-                pending=["Revisar si corresponde crear o actualizar un problema activo."],
-                explanations=[
-                    "Estos eventos recientes no coincidieron con reglas locales "
-                    "de problemas activos.",
-                    "Se muestran como contexto no vinculado para revision humana.",
-                ],
-            )
-        )
-    return contexts
 
 
 def _change_set(

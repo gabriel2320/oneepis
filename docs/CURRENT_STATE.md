@@ -209,6 +209,7 @@ Capas:
 - AI-Chart prioriza asociaciones SNOMED CT cuando el problema trae codigo y el evento incluye conceptos/ancestros derivados de repositorios terminologicos externos licenciados
 - AI-Chart agrega pendientes por problema activo segun dominio clinico probable: respiratorio, metabolico, hemodinamico, infeccioso o renal
 - AI-Chart muestra razon de asociacion y fuente abreviada por cada evidencia vinculada a problema
+- AI-Chart usa resultados `lab_results` activos como evidencia explicable para problemas compatibles por dominio clinico local, sin crear escritura ni auditoria de modificacion
 - AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia
 - Propuestas desde evolucion muestran estado visible `pendiente`, `registrando`, `registrada en ficha` o `rechazada` antes y despues de confirmar el `ClinicalPatch`
 - Las decisiones de propuesta se consideran durables via auditoria; la UI mantiene estado local de sesion para operacion inmediata
@@ -255,6 +256,7 @@ Release gates demo:
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, mesa `/pacientes` v2, temas visuales v2, AI-Chart Core Nivel 0, PR #1 mergeado y endurecimiento `ClinicalPatch`.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - Validacion reciente local Assistant Read UI: typecheck/lint web y contrato cliente manual actualizado.
+- Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
 - Siguiente paso recomendado: validar Assistant Read y laboratorio estructurado minimo con walkthrough humano de `v0.4-assistant-read` antes de agregar UI amplia.
 - Siguiente bloque de producto despues del contrato de laboratorio: UI minima de lectura/carga controlada o importador, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
