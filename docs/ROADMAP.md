@@ -165,13 +165,16 @@ OneEpis ya tiene una base clinica E2E real:
 
 ### PROG-CONSOLIDATE-01: consolidacion post #15-#17
 
-- Estado: siguiente bloque inmediato antes de abrir otra feature clinica.
+- Estado: en cierre antes de abrir otra feature clinica.
 - Objetivo: reconciliar documentacion canonica, podar componentes cerca del
   limite de tamano, reforzar guardrails y dejar cola de avance automatico.
 - Alcance permitido: docs canonicos, extraccion de componentes sin cambio de
   conducta, reporte near-limit no bloqueante y reglas E2E mas precisas.
 - Fuera de alcance: endpoints nuevos, OpenAPI, IA nueva, adjuntos, firma,
   receta valida, agenda avanzada o pantallas grandes.
+- Cola posterior: `PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00` y
+  `PROG-AMB-PRECONSULTA-01`, con branch, titulo, gates y criterio de merge
+  definidos en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`.
 
 ## Principios aprendidos
 

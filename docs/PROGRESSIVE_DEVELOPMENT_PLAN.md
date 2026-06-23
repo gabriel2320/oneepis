@@ -235,7 +235,7 @@ Siguiente bloque obligatorio antes de otra feature: `PROG-CONSOLIDATE-01`.
 
 ## PROG-CONSOLIDATE-01
 
-Estado: activo inmediato.
+Estado: en cierre.
 
 Objetivo: consolidar #15-#17, aprender de errores y preparar avance automatico
 sin abrir nueva superficie clinica.
@@ -247,17 +247,37 @@ Trabajo permitido:
 - reforzar `check:size` con reporte near-limit no bloqueante
 - documentar cola de avance automatico
 
+Avances completados:
+
+- PR #18: reconciliacion documental post #15-#17
+- PR #19: extraccion de `PatientPaperDocuments` sin cambio de conducta
+- PR #20: reporte near-limit no bloqueante en `check:size`
+
+Pendiente para cerrar el programa: PR-AUTO-01, documentar la cola de ejecucion
+automatica con branch, titulo, gates y criterio de merge.
+
 Fuera de alcance:
 
 - API/OpenAPI/modelos nuevos
 - IA nueva, dashboards, adjuntos, firma, receta valida o preconsulta implementada
 
-Fuera de alcance:
+### Cola de ejecucion automatica
 
-- nueva IA, chat libre, RAG, IA externa o dashboard
-- pantalla dedicada de laboratorio
-- receta valida, firma, folio, orden ejecutable o administracion de medicamentos
-- agenda avanzada/productiva, firma legal o cierre de alta sin contrato backend previo
+Reglas de ejecucion:
+
+- partir siempre desde `main` limpio y actualizado
+- abrir una sola rama por bloque y no mezclar contrato con implementacion
+- no crear UI amplia si el contrato clinico todavia no esta aprobado
+- no agregar backend/API/OpenAPI si el bloque es docs-only
+- corregir fallos dentro de la misma rama antes de marcar ready
+- fusionar solo con CI verde y docs canonicos reconciliados
+
+| Orden | Bloque | Branch sugerida | PR title sugerido | Gates esperados | Criterio de merge |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `PROG-CONSOLIDATE-01` | `codex/automatic-advance-queue` | `[codex] document automatic advance queue` | `npm run check:size` | #18-#20 mergeados, cola documentada y sin API/UI nueva |
+| 2 | `PROG-AMB-PRECONSULTA-00` | `codex/ambulatory-preconsult-contract` | `[codex] define ambulatory preconsult contract` | `npm run check:size` | contrato minimo aprobado en docs, sin rutas ni endpoints nuevos |
+| 3 | `PROG-CLINICAL-RISK-00` | `codex/clinical-risk-contract` | `[codex] define clinical risk contract` | `npm run check:size` | contrato de riesgos con fuente, permisos, auditoria, papel/IA y criterios de promocion |
+| 4 | `PROG-AMB-PRECONSULTA-01` | `codex/ambulatory-preconsult-minimal` | `[codex] implement minimal ambulatory preconsult` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/UI minima/papel declarado completos segun contrato |
 
 ## Plan post-auditoria 2026-06-23
 

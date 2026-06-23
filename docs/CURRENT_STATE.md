@@ -37,6 +37,8 @@ Estado real al 2026-06-23:
   - PR #15: agenda ambulatoria minima persistida con `ClinicalAppointment`
   - PR #16: resumen ambulatorio real de solo lectura
   - PR #17: indice de documentos/papel existente desde rutas print
+- `PROG-CONSOLIDATE-01` queda en cierre con documentacion reconciliada,
+  poda preventiva, reporte near-limit y cola de ejecucion automatica
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
@@ -48,6 +50,8 @@ Estado real al 2026-06-23:
 - `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability` y que no haya rutas duplicadas en mapa/registry
 - la barra de intenciones clinicas bloquea ejecucion directa y re-ejecucion de intenciones que la pantalla actual no declare como permitidas
 - si no existe `ScreenCapability`, la UI bloquea intenciones IA por defecto
+- la proxima ejecucion funcional debe partir por contrato docs-only:
+  `PROG-AMB-PRECONSULTA-00`, no por UI amplia
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
