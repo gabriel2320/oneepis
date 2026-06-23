@@ -129,3 +129,72 @@ def test_clinical_entry_can_be_linked_and_unlinked_from_encounter(
         item["extra_data"]["after"] == {"encounter_id": encounter_id} for item in updates
     )
     assert any(item["extra_data"]["after"] == {"encounter_id": None} for item in updates)
+
+
+def test_discharge_summary_requires_hospitalization_encounter(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    hospital_encounter = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Hospitalizacion para epicrisis",
+            "started_at": "2026-06-20T09:00:00Z",
+        },
+    ).json()
+    ambulatory_encounter = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Control ambulatorio",
+            "started_at": "2026-06-20T12:00:00Z",
+        },
+    ).json()
+
+    invalid_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json={
+            "encounter_id": ambulatory_encounter["id"],
+            "kind": "discharge_summary",
+            "occurred_at": "2026-06-21T10:00:00Z",
+            "title": "Epicrisis fuera de hospitalizacion",
+        },
+    )
+    assert invalid_response.status_code == 422
+
+    created_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json={
+            "encounter_id": hospital_encounter["id"],
+            "kind": "discharge_summary",
+            "occurred_at": "2026-06-21T10:00:00Z",
+            "title": "Epicrisis preliminar",
+            "assessment": "Diagnostico de egreso en borrador.",
+            "plan": "Control y seguimiento documentado.",
+        },
+    )
+    assert created_response.status_code == 201
+    created = created_response.json()
+    assert created["kind"] == "discharge_summary"
+    assert created["status"] == "draft"
+    assert created["encounter_id"] == hospital_encounter["id"]
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    created_audit = next(
+        item
+        for item in audit_response.json()
+        if item["action"] == "clinical_entry.created"
+        and item["extra_data"]["kind"] == "discharge_summary"
+    )
+    assert created_audit["entity_id"] == created["id"]

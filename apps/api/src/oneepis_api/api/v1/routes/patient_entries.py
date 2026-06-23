@@ -6,7 +6,13 @@ from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import ClinicalEntryActorDep
-from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEntryStatus
+from oneepis_api.models.clinical_record import (
+    ClinicalEncounter,
+    ClinicalEntry,
+    ClinicalEntryKind,
+    ClinicalEntryStatus,
+    EncounterType,
+)
 from oneepis_api.schemas.clinical_record import (
     ClinicalEntryCreate,
     ClinicalEntryRead,
@@ -26,6 +32,11 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
+
+HOSPITAL_DOCUMENT_KINDS = {
+    ClinicalEntryKind.INTAKE,
+    ClinicalEntryKind.DISCHARGE_SUMMARY,
+}
 
 @router.get("/{patient_id}/clinical-entries", response_model=list[ClinicalEntryRead])
 def list_clinical_entries(
@@ -74,7 +85,7 @@ def create_clinical_entry(
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
     entry_data = payload.model_dump()
-    validate_encounter_for_patient(session, patient_id, payload.encounter_id)
+    validate_entry_encounter(session, patient_id, payload.kind, payload.encounter_id)
     entry_data["created_by"] = actor
     entry = ClinicalEntry(patient_id=patient_id, **entry_data)
     session.add(entry)
@@ -110,7 +121,7 @@ def update_clinical_entry(
         "Clinical entry not found",
     )
     if "encounter_id" in payload.model_dump(exclude_unset=True):
-        validate_encounter_for_patient(session, patient_id, payload.encounter_id)
+        validate_entry_encounter(session, patient_id, entry.kind, payload.encounter_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(entry, update_fields)
     fields = apply_update(entry, payload)
@@ -167,3 +178,31 @@ def delete_draft_clinical_entry(
     session.delete(entry)
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def validate_entry_encounter(
+    session: SessionDep,
+    patient_id: uuid.UUID,
+    kind: ClinicalEntryKind,
+    encounter_id: uuid.UUID | None,
+) -> None:
+    if kind not in HOSPITAL_DOCUMENT_KINDS:
+        validate_encounter_for_patient(session, patient_id, encounter_id)
+        return
+    if encounter_id is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Hospital clinical documents require a hospitalization encounter",
+        )
+    encounter = require_patient_child(
+        session,
+        ClinicalEncounter,
+        encounter_id,
+        patient_id,
+        "Encounter not found",
+    )
+    if encounter.type != EncounterType.HOSPITALIZATION:
+        raise HTTPException(
+            status_code=422,
+            detail="Hospital clinical documents require a hospitalization encounter",
+        )
