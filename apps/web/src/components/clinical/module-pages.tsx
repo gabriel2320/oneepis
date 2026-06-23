@@ -11,7 +11,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
-import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
+import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import { AppointmentList, VisitWorkspace } from "@/components/clinical/ambulatory-widgets";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,19 +43,6 @@ export function AppointmentPage() {
     <ModulePage title="Agenda" description="Agenda ambulatoria lista para integracion.">
       <ClinicalSectionCard title="AppointmentList">
         <AppointmentList />
-      </ClinicalSectionCard>
-    </ModulePage>
-  );
-}
-
-export function AmbulatorySummaryPage() {
-  return (
-    <ModulePage title="Resumen ambulatorio" description="Vista longitudinal por paciente.">
-      <ClinicalSectionCard title="Resumen">
-        <EmptyState
-          title="Pantalla preparada: resumen pendiente"
-          description="Usara snapshot clinico y evolucion temporal; no simula flujo productivo."
-        />
       </ClinicalSectionCard>
     </ModulePage>
   );

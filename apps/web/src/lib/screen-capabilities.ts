@@ -67,7 +67,7 @@ export const screenCapabilities: ScreenCapability[] = [
   capability("/consulta", "Ambulatorio", "seguimiento", "completa", "App Router", "none", "lectura paciente", "none", "none", AI.none, "indice simple"),
   capability("/consulta/agenda", "Ambulatorio", "episodio", "completa", "clinical appointments", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "admision/preconsulta futura"),
   capability("/consulta/pacientes/[patientId]/atencion", "Ambulatorio", "acto clinico", "completa", "encuentros + SOAP", "clinical_write", "medico/admin/dev", "writes", "none", AI.draft, "cierre de consulta"),
-  capability("/consulta/pacientes/[patientId]/resumen", "Ambulatorio", "seguimiento", "preparada", "UI preparada", "none", "lectura paciente", "none", "none", AI.summary, "resumen ambulatorio real"),
+  capability("/consulta/pacientes/[patientId]/resumen", "Ambulatorio", "seguimiento", "completa", "record + appointments + encounters", "none", "lectura paciente", "none", "none", AI.summary, "seguimiento formal futuro"),
   capability("/hospitalizacion", "Hospitalizacion", "seguimiento", "completa", "App Router", "none", "lectura paciente", "none", "none", AI.none, "indice simple"),
   capability("/hospitalizacion/camas", "Hospitalizacion", "episodio", "completa", "hospitalizacion + camas", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "censo por servicio/equipo"),
   capability("/hospitalizacion/camas/nueva", "Hospitalizacion", "episodio", "completa", "camas", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "administracion institucional futura"),
