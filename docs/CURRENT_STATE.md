@@ -53,6 +53,9 @@ Estado real al 2026-06-23:
 - `PROG-AMB-PRECONSULTA-00` define contrato docs-only de preconsulta
   ambulatoria; la preconsulta sigue futura hasta un PR de implementacion minima
   con permisos, auditoria, registry y E2E
+- `PROG-CLINICAL-RISK-00` define contrato docs-only de riesgos clinicos;
+  riesgos siguen futuros hasta un PR con entidad/API bajo paciente, permisos,
+  auditoria, registry, UI minima y E2E
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -248,6 +251,15 @@ Documentos/papel:
 
 - `/pacientes/[patientId]/documentos` es indice real de papel existente: ficha, resumen, evoluciones, ingreso y epicrisis cuando hay entradas disponibles
 - adjuntos externos, consentimientos, custodia documental, firma real y receta valida siguen bloqueados/futuros
+
+Seguridad clinica:
+
+- riesgos clinicos estructurados tienen contrato minimo: caida, UPP, TEV,
+  aislamiento, evento adverso y otro
+- la fuente futura debe ser inspeccionable y cada alerta debe mostrar severidad,
+  estado, razon, limite y accion humana
+- no existe todavia modelo, endpoint ni UI de riesgos; no hay dashboard de
+  seguridad ni automatizacion por IA
 
 ## Frontend
 
