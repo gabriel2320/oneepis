@@ -71,6 +71,48 @@ class AssistantChartResponse(APIModel):
     applies_changes: bool = False
 
 
+AssistantCorrelationPreset = Literal[
+    "fever_infection",
+    "renal_medications",
+    "respiratory_oxygen",
+    "hemoglobin_bleeding",
+    "medication_changes",
+]
+
+
+class AssistantCorrelationRequest(APIModel):
+    presets: list[AssistantCorrelationPreset] = Field(default_factory=list, max_length=8)
+    limit: int = Field(default=100, ge=1, le=500)
+
+
+class AssistantCorrelationEvidence(APIModel):
+    source_type: Literal["vital_sign", "clinical_event", "medication"]
+    source_id: uuid.UUID
+    occurred_at: datetime
+    label: str = Field(min_length=1, max_length=160)
+    summary: str = Field(min_length=1, max_length=320)
+    source_path: str = Field(min_length=1, max_length=240)
+
+
+class AssistantCorrelationResult(APIModel):
+    preset: AssistantCorrelationPreset
+    label: str = Field(min_length=1, max_length=160)
+    summary: str = Field(min_length=1, max_length=320)
+    evidence: list[AssistantCorrelationEvidence] = Field(default_factory=list)
+    missing_data: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class AssistantCorrelationResponse(APIModel):
+    patient_id: uuid.UUID
+    correlations: list[AssistantCorrelationResult] = Field(default_factory=list)
+    missing_data: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    limit: int = Field(ge=1, le=500)
+    has_more: bool = False
+    applies_changes: bool = False
+
+
 class AssistantSearchResult(APIModel):
     item_type: AssistantTimelineItemType
     item_id: uuid.UUID

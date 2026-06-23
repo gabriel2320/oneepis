@@ -2806,6 +2806,93 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/assistant/correlate": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Correlate Assistant Read Layer",
+        "operationId": "correlate_assistant_read_layer_api_v1_patients__patient_id__assistant_correlate_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantCorrelationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantCorrelationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/allergies": {
       "get": {
         "tags": [
@@ -6439,6 +6526,192 @@
           "source_label"
         ],
         "title": "AssistantChartSeries"
+      },
+      "AssistantCorrelationEvidence": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "vital_sign",
+              "clinical_event",
+              "medication"
+            ],
+            "title": "Source Type"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "source_path": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Source Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_type",
+          "source_id",
+          "occurred_at",
+          "label",
+          "summary",
+          "source_path"
+        ],
+        "title": "AssistantCorrelationEvidence"
+      },
+      "AssistantCorrelationRequest": {
+        "properties": {
+          "presets": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "fever_infection",
+                "renal_medications",
+                "respiratory_oxygen",
+                "hemoglobin_bleeding",
+                "medication_changes"
+              ]
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Presets"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 100
+          }
+        },
+        "type": "object",
+        "title": "AssistantCorrelationRequest"
+      },
+      "AssistantCorrelationResponse": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "correlations": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantCorrelationResult"
+            },
+            "type": "array",
+            "title": "Correlations"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Data"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Limit"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "default": false
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "limit"
+        ],
+        "title": "AssistantCorrelationResponse"
+      },
+      "AssistantCorrelationResult": {
+        "properties": {
+          "preset": {
+            "type": "string",
+            "enum": [
+              "fever_infection",
+              "renal_medications",
+              "respiratory_oxygen",
+              "hemoglobin_bleeding",
+              "medication_changes"
+            ],
+            "title": "Preset"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantCorrelationEvidence"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Data"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "preset",
+          "label",
+          "summary"
+        ],
+        "title": "AssistantCorrelationResult"
       },
       "AssistantSearchResponse": {
         "properties": {

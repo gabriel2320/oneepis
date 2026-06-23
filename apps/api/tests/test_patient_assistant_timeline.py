@@ -507,3 +507,136 @@ def test_assistant_chart_unknown_patient_returns_404(
     )
 
     assert response.status_code == 404
+
+
+def test_assistant_correlate_returns_explainable_sources_without_writing(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Assistant", last_name="Correlate")
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T10:00:00Z",
+        temperature_c="38.5",
+    )
+    event_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-20T11:00:00Z",
+            "summary": "PCR elevada por sospecha infeccion",
+            "source_type": "manual",
+            "payload": {"code": "pcr", "value": "180", "unit": "mg/L"},
+        },
+    )
+    assert event_response.status_code == 201
+    before_audit = audit_events(client, auth, patient_id)
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/correlate",
+        headers=auth,
+        json={"presets": ["fever_infection"], "limit": 10},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["patient_id"] == patient_id
+    assert payload["applies_changes"] is False
+    assert payload["missing_data"] == ["No hay medicacion activa estructurada para correlacionar."]
+    assert payload["has_more"] is False
+    correlation = payload["correlations"][0]
+    assert correlation["preset"] == "fever_infection"
+    assert correlation["missing_data"] == []
+    assert "interpretacion humana" in correlation["summary"]
+    labels = {item["label"] for item in correlation["evidence"]}
+    assert labels == {"Fiebre", "Marcador infeccioso textual"}
+    assert {item["source_type"] for item in correlation["evidence"]} == {
+        "vital_sign",
+        "clinical_event",
+    }
+    after_audit = audit_events(client, auth, patient_id)
+    assert after_audit == before_audit
+
+
+def test_assistant_correlate_allows_readonly_user(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Correlate", last_name="Lector")
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T10:00:00Z",
+        oxygen_saturation_pct="89.0",
+    )
+    create_event(client, auth, patient_id, summary="Paciente con disnea")
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/correlate",
+        headers=readonly_auth,
+        json={"presets": ["respiratory_oxygen"]},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["correlations"][0]["missing_data"] == []
+
+
+def test_assistant_correlate_reports_limit_and_missing_evidence(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Correlate", last_name="Limit")
+    create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Primer evento sin correlacion",
+        occurred_at="2026-06-20T10:00:00Z",
+    )
+    create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Segundo evento sin correlacion",
+        occurred_at="2026-06-20T11:00:00Z",
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/correlate",
+        headers=auth,
+        json={"presets": ["renal_medications"], "limit": 1},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["has_more"] is True
+    assert payload["warnings"] == ["Correlacion limitada a 1 registros por dominio."]
+    assert "No hay signos vitales estructurados para correlacionar." in payload["missing_data"]
+    assert "No hay medicacion activa estructurada para correlacionar." in payload["missing_data"]
+    correlation = payload["correlations"][0]
+    assert correlation["preset"] == "renal_medications"
+    assert correlation["evidence"] == []
+    assert correlation["missing_data"] != []
+
+
+def test_assistant_correlate_unknown_patient_returns_404(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+
+    response = client.post(
+        "/api/v1/patients/11111111-1111-4111-8111-111111111111/assistant/correlate",
+        headers=auth,
+        json={},
+    )
+
+    assert response.status_code == 404
