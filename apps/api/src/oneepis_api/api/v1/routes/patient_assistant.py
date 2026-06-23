@@ -459,7 +459,7 @@ def _event_items(
             label=event.event_type.value,
             summary=event.summary,
             source_label="clinical_events",
-            source_path=f"/api/v1/patients/{patient_id}/clinical-events",
+            source_path=_clinical_event_source_path(patient_id, event.id),
         )
         for event in events
     ]
@@ -614,7 +614,7 @@ def _event_search_results(
             snippet=_snippet(query, event.summary),
             matched_fields=_matched_fields(query, {"summary": event.summary}),
             source_label="clinical_events",
-            source_path=f"/api/v1/patients/{patient_id}/clinical-events",
+            source_path=_clinical_event_source_path(patient_id, event.id),
         )
         for event in events
     ]
@@ -793,7 +793,7 @@ def _exam_chart_series(
                     value=value,
                     source_type="clinical_event",
                     source_id=event.id,
-                    source_path=f"/api/v1/patients/{patient_id}/clinical-events",
+                    source_path=_clinical_event_source_path(patient_id, event.id),
                     note=event.summary,
                 )
             )
@@ -996,10 +996,14 @@ def _event_evidence(
             occurred_at=event.occurred_at,
             label=label,
             summary=event.summary,
-            source_path=f"/api/v1/patients/{patient_id}/clinical-events",
+            source_path=_clinical_event_source_path(patient_id, event.id),
         )
         for event in events
     ]
+
+
+def _clinical_event_source_path(patient_id: uuid.UUID, event_id: uuid.UUID) -> str:
+    return f"/api/v1/patients/{patient_id}/clinical-events/{event_id}"
 
 
 def _medication_evidence(

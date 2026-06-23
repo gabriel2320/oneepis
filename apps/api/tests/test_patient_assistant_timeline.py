@@ -112,7 +112,7 @@ def test_assistant_timeline_reads_longitudinal_sources_without_writing(
     assert vital_item["source_path"].endswith("/vital-signs/" + vital_item["item_id"])
     event_item = next(item for item in payload["items"] if item["item_type"] == "clinical_event")
     assert event_item["summary"] == "Evento longitudinal relevante"
-    assert event_item["source_path"].endswith("/clinical-events")
+    assert event_item["source_path"].endswith("/clinical-events/" + event_item["item_id"])
     after_audit = audit_events(client, auth, patient_id)
     assert after_audit == before_audit
 
@@ -270,6 +270,8 @@ def test_assistant_search_reads_sources_without_writing(
     assert entry_item["matched_fields"] == ["assessment"]
     assert "Diabetes mellitus" in entry_item["snippet"]
     assert entry_item["source_path"].endswith("/clinical-entries/" + entry_item["item_id"])
+    event_item = next(item for item in payload["results"] if item["item_type"] == "clinical_event")
+    assert event_item["source_path"].endswith("/clinical-events/" + event_item["item_id"])
     problem_item = next(item for item in payload["results"] if item["item_type"] == "problem")
     assert problem_item["source_path"].endswith("/problems/" + problem_item["item_id"])
     after_audit = audit_events(client, auth, patient_id)
@@ -420,6 +422,9 @@ def test_assistant_chart_returns_vitals_and_exam_series_without_writing(
     assert exam_series["unit"] == "mg/dL"
     assert [point["value"] for point in exam_series["points"]] == [1.1, 1.6]
     assert exam_series["points"][0]["source_type"] == "clinical_event"
+    assert exam_series["points"][0]["source_path"].endswith(
+        "/clinical-events/" + exam_series["points"][0]["source_id"]
+    )
     after_audit = audit_events(client, auth, patient_id)
     assert after_audit == before_audit
 
@@ -558,6 +563,10 @@ def test_assistant_correlate_returns_explainable_sources_without_writing(
         "vital_sign",
         "clinical_event",
     }
+    event_evidence = next(
+        item for item in correlation["evidence"] if item["source_type"] == "clinical_event"
+    )
+    assert event_evidence["source_path"].endswith("/clinical-events/" + event_evidence["source_id"])
     after_audit = audit_events(client, auth, patient_id)
     assert after_audit == before_audit
 

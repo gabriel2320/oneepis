@@ -79,6 +79,22 @@ def create_clinical_event(
     return event
 
 
+@router.get("/{patient_id}/clinical-events/{event_id}", response_model=ClinicalEventRead)
+def get_clinical_event(
+    patient_id: uuid.UUID,
+    event_id: uuid.UUID,
+    session: SessionDep,
+) -> ClinicalEvent:
+    require_patient(session, patient_id)
+    return require_patient_child(
+        session,
+        ClinicalEvent,
+        event_id,
+        patient_id,
+        "Clinical event not found",
+    )
+
+
 @router.patch("/{patient_id}/clinical-events/{event_id}", response_model=ClinicalEventRead)
 def update_clinical_event(
     patient_id: uuid.UUID,
