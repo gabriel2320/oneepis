@@ -48,6 +48,24 @@ Responsabilidades canonicas:
 Los documentos largos de vision son cantera conceptual. No son backlog directo
 si no pasan antes por el plan progresivo y la escalera OneEpis.
 
+## Politica de Pantallas
+
+Toda pantalla clinica debe tener un estado explicito en `docs/SCREEN_TREE.md`:
+
+- `completa`: tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
+- `preparada`: existe como borde visible, declara que esta pendiente y no simula produccion.
+- `futura`: pertenece al mapa maestro, pero no tiene ruta o contrato listo.
+
+Reglas:
+
+- Ninguna pantalla nueva entra sin estado explicito.
+- Una pantalla preparada debe mostrar su estado pendiente en UI y quedar cubierta por E2E si es visible.
+- Una pantalla completa exige contrato backend antes de UI amplia si maneja datos clinicos nuevos.
+- Si escribe, debe tener permisos, auditoria, actor, `correlation_id`, OpenAPI y test API.
+- Si produce documento clinico, debe tener papel carta o declarar explicitamente que no tiene papel aun.
+- No se promueve una pantalla por apariencia: debe cerrar un acto clinico real.
+- El orden del producto es `paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento`.
+
 ## Limites Activos
 
 No construir ahora:

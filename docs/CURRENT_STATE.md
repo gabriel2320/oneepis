@@ -25,6 +25,10 @@ extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
 
 Estado real al 2026-06-23:
 
+- prototipo visual aprobado como base de ficha clinica tradicional gobernada
+- falta expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio, hospitalizacion, documentos/papel, resultados y seguridad clinica
+- el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz con estado `completa`, `preparada` o `futura`
+- una pantalla preparada no cuenta como feature final y debe declarar su estado pendiente
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -233,6 +237,9 @@ Tests API:
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - no agregar nueva clinica core sin flujo completo PostgreSQL/API/permisos/auditoria/OpenAPI/UI
+- no agregar pantallas clinicas nuevas sin registrar estado explicito en `docs/SCREEN_TREE.md`
+- promover pantallas preparadas a completas solo con contrato backend, permisos, auditoria si escribe, pruebas y papel cuando aplique
+- mantener la regla de producto: paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
@@ -273,6 +280,7 @@ Accesibilidad, performance y observabilidad pendientes:
 - Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
 - Rediseño grafico-web inicial: navegacion paciente agrupada, ficha como hoja clinica viva, AI-Chart con pasos guiados, paridad papel basica y tokens clinicos V2 documentados.
 - Validacion reciente rediseño visual: `npm run check:size`, `npm run check:web`, `npm run check:e2e`, `npm run check:contract` y `npm run check:api`.
+- Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y brechas futuras por modulo, estado, fuente de verdad, escritura, papel y pendiente.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
 - Siguiente paso recomendado: ejecutar walkthrough humano de `v0.4-assistant-read`, corregir hallazgos y preparar tag/changelog.
 - Siguiente bloque de producto despues de `v0.4`: correccion controlada de laboratorio o carga acotada, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
