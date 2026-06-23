@@ -60,3 +60,14 @@ Reglas para nuevos cambios:
 - no sumar reglas clinicas al frontend; si una regla interpreta datos, vive en API
 - todo nuevo output debe tener fuente, faltante/limite, accion humana y auditoria
 - no tocar Ollama/API externa hasta cerrar Fase 1 del plan progresivo
+- crecimiento IA conversacional entra primero por el `AI Bridge` compartido; no crear Route Handlers paralelos sin necesidad
+- propuestas de escritura deben converger a `ClinicalPatch` revisable antes de persistir
+
+Foco actual:
+
+- Fase 1 queda cerrada; el siguiente avance debe ser Fase 2 Context Builder explicable
+- mantener `ClinicalPatch` simple: `clinical_event` y `evolution`
+- tratar estados de propuesta como flujo local + auditoria hasta decidir persistencia propia
+- no crear editor generico de patches
+- no extraer `packages/ai-core` hasta que haya duplicacion real
+- no ampliar a RAG, documentos ni IA externa antes de cerrar Fase 1

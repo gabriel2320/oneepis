@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from patient_ai_helpers import create_patient
 
 
 def test_patient_ai_suggestions_use_snapshot_without_persisting(
@@ -6,18 +7,7 @@ def test_patient_ai_suggestions_use_snapshot_without_persisting(
     auth_headers,
 ) -> None:
     auth = auth_headers(client)
-    patient_response = client.post(
-        "/api/v1/patients",
-        headers=auth,
-        json={
-            "first_name": "C",
-            "last_name": "Paciente",
-            "birth_date": "1992-01-01",
-            "sex_at_birth": "unknown",
-        },
-    )
-    assert patient_response.status_code == 201
-    patient_id = patient_response.json()["id"]
+    patient_id = create_patient(client, auth, first_name="C", last_name="Paciente")
 
     response = client.post(
         f"/api/v1/patients/{patient_id}/ai/suggestions",

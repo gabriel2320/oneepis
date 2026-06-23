@@ -160,6 +160,7 @@ export function aiStatusLabel(status?: AIProviderStatus, isError = false) {
 export function groupRuleFindings(items: string[], intent: ClinicalIntentResponse) {
   const groups = [
     { label: "Signos vitales", items: [] as RuleFindingView[] },
+    { label: "Curso clinico", items: [] as RuleFindingView[] },
     { label: "Examenes", items: [] as RuleFindingView[] },
     { label: "Medicacion", items: [] as RuleFindingView[] },
     { label: "Revision", items: [] as RuleFindingView[] },
@@ -180,22 +181,27 @@ export function groupRuleFindings(items: string[], intent: ClinicalIntentRespons
     ) {
       groups[0].items.push(view);
     } else if (
+      normalized.includes("mejoria clinica") ||
+      normalized.includes("empeoramiento clinico")
+    ) {
+      groups[1].items.push(view);
+    } else if (
       normalized.includes("examen") ||
       normalized.includes("creatinina") ||
       normalized.includes("pcr") ||
       normalized.includes("hemoglobina")
     ) {
-      groups[1].items.push(view);
+      groups[2].items.push(view);
     } else if (
       normalized.includes("medicamento") ||
       normalized.includes("medicacion") ||
       normalized.includes("dosis")
     ) {
-      groups[2].items.push(view);
-    } else if (normalized.includes("revisar") || normalized.includes("sin problema")) {
       groups[3].items.push(view);
-    } else {
+    } else if (normalized.includes("revisar") || normalized.includes("sin problema")) {
       groups[4].items.push(view);
+    } else {
+      groups[5].items.push(view);
     }
   }
   return groups.filter((group) => group.items.length > 0);
@@ -217,14 +223,16 @@ export function ruleFindingStatus(item: string): RuleFindingView["status"] {
     normalized.includes("hemoglobina bajo") ||
     normalized.includes("saturacion o2 bajo") ||
     normalized.includes("temperatura subio") ||
-    normalized.includes("pcr subio")
+    normalized.includes("pcr subio") ||
+    normalized.includes("empeoramiento clinico")
   ) {
     return "empeora";
   }
   if (
     normalized.includes("saturacion o2 subio") ||
     normalized.includes("temperatura bajo") ||
-    normalized.includes("pcr bajo")
+    normalized.includes("pcr bajo") ||
+    normalized.includes("mejoria clinica")
   ) {
     return "mejora";
   }
@@ -250,6 +258,9 @@ export function ruleFindingSource(item: string, intent: ClinicalIntentResponse) 
     normalized.includes("saturacion")
   ) {
     return "signos vitales: ultimos dos controles estructurados";
+  }
+  if (normalized.includes("mejoria clinica") || normalized.includes("empeoramiento clinico")) {
+    return "clinical_event: evento reciente interpretado por regla local";
   }
   if (
     normalized.includes("examen") ||

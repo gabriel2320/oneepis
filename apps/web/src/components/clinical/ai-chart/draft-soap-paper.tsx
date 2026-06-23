@@ -34,6 +34,7 @@ export function DraftSoapPaper({
   const providerStatus = draft.ai_available ? "IA generativa activa" : "Modo estructurado sin IA";
   const certainty = draft.sources.length > 0 ? "moderada" : "baja";
   const [humanReviewed, setHumanReviewed] = useState(false);
+  const saveBlockedReason = soapSaveBlockedReason({ isSaving, canWriteSoap, humanReviewed });
   return (
     <ClinicalSectionCard
       title="Hoja carta SOAP"
@@ -42,7 +43,7 @@ export function DraftSoapPaper({
         <Button
           type="button"
           size="sm"
-          disabled={isSaving || DEMO_MODE || !canWriteSoap || !humanReviewed}
+          disabled={Boolean(saveBlockedReason)}
           onClick={() =>
             onSave({
               human_reviewed: true,
@@ -144,6 +145,21 @@ export function DraftSoapPaper({
               <p>Sin advertencias criticas del generador.</p>
             )}
           </SmartMarginBlock>
+          <SmartMarginBlock title="Patch de guardado">
+            <ul className="space-y-1">
+              <li>Titulo: {soap.title || "Sin titulo"}</li>
+              <li>S: {sectionState(soap.subjective)}</li>
+              <li>O: {sectionState(soap.objective)}</li>
+              <li>A: {sectionState(soap.assessment)}</li>
+              <li>P: {sectionState(soap.plan)}</li>
+            </ul>
+            <p className="mt-2">Destino: borrador de evolucion no firmado.</p>
+          </SmartMarginBlock>
+          {saveBlockedReason && !isSaving ? (
+            <SmartMarginBlock title="Bloqueo de guardado">
+              <p>{saveBlockedReason}</p>
+            </SmartMarginBlock>
+          ) : null}
           <SmartMarginBlock title="Acciones humanas">
             <label className="flex gap-2">
               <input
@@ -192,4 +208,32 @@ function soapSectionLabel(section: DraftSoapFromEventsResponse["section_sources"
     plan: "P",
   };
   return labels[section];
+}
+
+function sectionState(value: string) {
+  return value.trim() ? "se guardara texto revisado" : "se guardara vacio";
+}
+
+function soapSaveBlockedReason({
+  isSaving,
+  canWriteSoap,
+  humanReviewed,
+}: {
+  isSaving: boolean;
+  canWriteSoap: boolean;
+  humanReviewed: boolean;
+}) {
+  if (isSaving) {
+    return "Guardando borrador.";
+  }
+  if (DEMO_MODE) {
+    return "Modo demo: no se guardan borradores reales.";
+  }
+  if (!canWriteSoap) {
+    return "Guardar evoluciones SOAP requiere rol admin, medico o dev.";
+  }
+  if (!humanReviewed) {
+    return "Marca la revision humana antes de guardar.";
+  }
+  return null;
 }

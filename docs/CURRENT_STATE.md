@@ -1,6 +1,6 @@
 # Current State
 
-## Fase 1 implementada
+## Fase 1 cerrada, Fase 2 iniciada
 
 OneEpis ya tiene una base E2E real:
 
@@ -12,6 +12,21 @@ OneEpis ya tiene una base E2E real:
 6. Refrescar UI con React Query.
 
 El modo demo solo debe usarse con `NEXT_PUBLIC_DEMO_MODE=true`.
+
+Programa de lectura aprobado, no implementado: `PROG-ASSISTANT-READ-01`.
+
+Este programa define una capa futura de asistente clinico de solo lectura para
+leer, buscar, mostrar, graficar y correlacionar la historia longitudinal del
+paciente. Queda integrado en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` como
+extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
+
+Estado real al 2026-06-22:
+
+- no existen todavia endpoints `/assistant/*`
+- no existe todavia ruta `/pacientes/[patientId]/contexto`
+- no hay busqueda, chart ni correlacion assistant dedicados
+- no se autoriza escritura clinica desde el programa
+- no debe implementarse encima de PR #1 mientras siga en draft o con CI remoto rojo
 
 ## Backend
 
@@ -73,10 +88,12 @@ IA:
 - `POST /api/v1/patients/{patient_id}/ai/clinical-intent-route`
 - `POST /api/v1/patients/{patient_id}/ai/review-item-decision`
 - `POST /api/v1/patients/{patient_id}/ai/draft-soap-from-events`
+- `POST /api/v1/patients/{patient_id}/ai/event-proposals-from-entry`
+- `POST /api/v1/patients/{patient_id}/ai/confirm-clinical-patch`
 - factory compatible en `services/ai/provider.py`
 - contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
-- AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados y hoja SOAP con margen inteligente aunque Ollama este apagado
+- AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados, hoja SOAP con margen inteligente, propuestas de eventos desde evoluciones escritas y guardado por `ClinicalPatch` confirmado aunque Ollama este apagado
 
 Hospitalizacion:
 
@@ -110,6 +127,7 @@ Rutas App Router bajo `apps/web/src/app`.
 
 Capas:
 
+- `src/app/api/ai/clinical-command/route.ts`: BFF streaming con Vercel AI SDK; orquesta FastAPI y no reemplaza la API clinica canonica
 - `src/lib/api/*`: clientes API por dominio
 - `src/lib/api/auth.ts`: login local y sesion actual
 - `src/lib/types.ts`: contrato TypeScript
@@ -121,6 +139,24 @@ Capas:
 - `/pacientes` funciona como mesa clinica de entrada con buscador, metricas operativas y lista escaneable
 - `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
 - `/pacientes/[patientId]/ai-chart` muestra inteligencia simulada, intenciones clinicas, propuestas revisables y hoja SOAP editable con margen inteligente
+- AI-Chart envia la barra clinica al BFF de Next, que delega la resolucion estructurada en FastAPI y transmite eventos tipados JSONL con AI SDK
+- AI-Chart no guarda propuestas desde campos sueltos; envia `ClinicalPatch` al backend para aceptar/rechazar/guardar
+- AI-Chart muestra estado operativo de eventos, evoluciones, seleccion, modo y permisos antes de generar o guardar
+- AI-Chart explica acciones bloqueadas con condicion o rol habilitante
+- AI-Chart inicia Context Builder serio mostrando explicaciones por problema: por que una evidencia se asocia o queda sin vinculo
+- AI-Chart muestra faltantes con razon y contexto asistencial, no solo nombres de datos ausentes
+- AI-Chart agrupa reglas narrativas de mejoria/empeoramiento como `Curso clinico`
+- AI-Chart etiqueta el curso clinico por dominio cuando el texto reciente permite distinguir respiratorio, dolor, infeccioso, hemodinamico, metabolico o digestivo
+- AI-Chart evita negaciones obvias de curso clinico y corrobora dominios respiratorio, infeccioso o hemodinamico con signos vitales cuando existen dos controles comparables
+- AI-Chart asocia problemas con eventos por vocabulario clinico local explicable cuando no hay coincidencia literal
+- AI-Chart evita negaciones obvias al asociar por vocabulario local para reducir falsos positivos
+- AI-Chart prioriza asociaciones SNOMED CT cuando el problema trae codigo y el evento incluye conceptos/ancestros derivados de repositorios terminologicos externos licenciados
+- AI-Chart agrega pendientes por problema activo segun dominio clinico probable: respiratorio, metabolico, hemodinamico, infeccioso o renal
+- AI-Chart muestra razon de asociacion y fuente abreviada por cada evidencia vinculada a problema
+- AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia
+- Propuestas desde evolucion muestran estado visible `pendiente`, `registrando`, `registrada en ficha` o `rechazada` antes y despues de confirmar el `ClinicalPatch`
+- Las decisiones de propuesta se consideran durables via auditoria; la UI mantiene estado local de sesion para operacion inmediata
+- La vista de operaciones `ClinicalPatch` esta extraida como componente reusable para evitar inflar paneles AI-Chart
 - `src/components/clinical/ambulatory-visit-pages.tsx`: atencion ambulatoria minima sobre encuentros y SOAP
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
@@ -131,6 +167,7 @@ Tests API:
 - fixtures compartidas en `apps/api/tests/conftest.py`
 - cobertura paciente separada por dominios: ficha, permisos, auditoria, IA y encuentros
 - cobertura hospitalizacion separada por board, camas y hoja diaria
+- `ClinicalPatch` cubre aceptacion, rechazo y target no soportado; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported`
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
@@ -141,6 +178,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
 - `apps/api/src/oneepis_api/services/clinical_intent.py` ya concentra reglas deterministicas; nuevas reglas deben agruparse por dominio o extraerse antes de crecer mucho mas.
+- `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
+- `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
@@ -149,8 +188,9 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2, temas visuales v2 y AI-Chart Core Nivel 0.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- Validacion reciente: API 50 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
-- Siguiente paso recomendado: consolidar AI-Chart sin crear dashboard, chat libre ni nuevos modulos; ampliar prellenados solo sobre formularios reales y extraer subcomponentes si la pantalla crece.
+- Validacion reciente: API 56 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
+- Siguiente paso recomendado: ampliar vocabulario local por problema y reglas por dominio clinico, midiendo falsos positivos, manteniendo AI Bridge unico y sin crear chat libre, RAG, agentes ni nuevos modulos.
+- Programa siguiente condicionado: `PROG-ASSISTANT-READ-01`, solo despues de base verde, para lectura longitudinal, busqueda, datos graficables y correlacion deterministica sin escritura clinica.
 
 ## Historial
 

@@ -61,8 +61,47 @@ No construir ahora:
 - IA externa identificada
 - importador PDF completo
 
-El proximo avance debe consolidar AI-Chart Nivel 0: fuentes por frase del
-borrador SOAP y propuestas explicitas confirmables, sin crear modulo nuevo.
+El proximo avance debe consolidar AI-Chart Nivel 0 y Fase 2 con permisos,
+fuentes, faltantes y estados visuales claros. No debe crear un producto paralelo.
+
+Programa cerrado permitido: `PROG-ASSISTANT-READ-01`.
+
+Este programa solo puede avanzar como asistente de lectura de ficha. Su objetivo
+es que OneEpis pueda leer, buscar, mostrar, graficar y correlacionar su propia
+historia longitudinal sin aumentar escritura clinica.
+
+Reglas duras del programa:
+
+- no crea chat libre
+- no crea RAG
+- no usa IA externa
+- no agrega recetas, firma clinica ni ordenes ejecutables
+- no escribe ficha ni auditoria de modificacion desde endpoints `assistant`
+- no crea dashboard central
+- no suma dependencias salvo justificacion minima y necesaria
+- cada respuesta debe exponer fuentes y datos faltantes cuando apliquen
+- cualquier UI debe vivir dentro de la experiencia paciente/ficha y verse como
+  ficha clinica, no como laboratorio IA
+
+El backend de lectura puede agregar endpoints nuevos solo si el caso no cabe en
+el AI Bridge existente y queda probado como solo lectura. La UI nueva
+`/pacientes/[patientId]/contexto` queda permitida solo despues de tener backend,
+OpenAPI y tests verdes; si el alcance no lo justifica, debe integrarse en
+AI-Chart sin inflar `patient-ai-chart-pages.tsx`.
+
+Trabajo permitido inmediato:
+
+- explicar acciones bloqueadas por rol, modo demo o falta de revision humana
+- mostrar estado de propuesta y destino del patch antes de confirmar
+- mejorar textos de auditoria y trazabilidad en pantallas existentes
+
+Trabajo no permitido inmediato:
+
+- nuevo dashboard
+- chat libre
+- RAG
+- editor generico de patches
+- agentes o paquetes IA nuevos
 
 ## Escalera OneEpis
 
@@ -75,6 +114,40 @@ Antes de crear una feature, pantalla, endpoint, dependencia o documento, respond
 5. Solo entonces implementa lo minimo verificable.
 
 Si una respuesta es "no" o "todavia no", no lo agregues al core. Dejale una nota breve en el plan vivo si realmente importa.
+
+## Algoritmo Anti-Engorda
+
+Usa este algoritmo antes de cualquier avance automatico de fase:
+
+1. Identifica la fase activa en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`.
+2. Elige un solo incremento que mejore esa fase sin abrir otra superficie.
+3. Rechaza el incremento si necesita dashboard, chat libre, RAG, IA externa, documento nuevo o modulo nuevo.
+4. Rechaza el incremento si no puede verse, revisarse o auditarse en una pantalla existente.
+5. Reusa API, componentes, servicios y tests existentes antes de crear archivos.
+6. Si un archivo existente supera el presupuesto, extrae primero una pieza pequena y luego agrega comportamiento.
+7. Si la feature escribe ficha, debe pasar por API, permisos, auditoria, OpenAPI y confirmacion humana.
+8. Si la feature solo infiere, debe mostrar fuente, razon, faltante o limite.
+9. Si no hay prueba enfocada posible, reduce el alcance hasta que exista.
+10. Actualiza solo los documentos canonicos afectados.
+
+Salida obligatoria de cada incremento:
+
+- un cambio funcional pequeno
+- una prueba o gate que cubra el comportamiento
+- diff sin archivos ajenos
+- contrato actualizado solo si cambio la API
+- plan vivo actualizado solo si cambia el estado real
+
+Reglas duras de no engorda:
+
+- No crear carpeta nueva para una sola funcion.
+- No crear componente nuevo si el bloque entra limpio en un componente existente.
+- No crear endpoint nuevo si una intencion o ruta existente puede expresar el caso.
+- No crear documento nuevo si `CURRENT_STATE`, `GOVERNANCE`, `PROGRESSIVE_DEVELOPMENT_PLAN` o `AI_CHART_CORE` pueden absorber la decision.
+- No sumar dependencia para reglas, parsing o UI que el stack actual ya resuelve.
+- No mover codigo a paquete compartido hasta que existan dos consumidores reales.
+- No dejar placeholders, pantallas puente ni rutas vacias.
+- No mezclar refactor grande con feature clinica.
 
 ## Politica de Indicaciones y Receta
 
@@ -117,9 +190,12 @@ Papel obligatorio:
 - Evita abstracciones genericas hasta que haya dos usos reales.
 - No aceptes fixtures con datos sensibles o realistas.
 - No aceptes fixtures, seeds o pacientes de desarrollo con nombres de proyectos previos.
+- No copies releases completos de SNOMED CT dentro del repo; usa codigos en ficha y repositorios/servidores terminologicos externos licenciados.
 - No crees un documento nuevo si puedes actualizar uno existente.
 - No agregues scripts nuevos si un comando existente puede expresar el gate.
 - Actualiza OpenAPI cuando cambie la API.
+- Route Handlers de Next pueden actuar como BFF de interaccion/streaming IA, pero no deben duplicar permisos, auditoria ni escritura clinica de FastAPI.
+- Toda propuesta IA que pueda escribir ficha debe pasar por `ClinicalPatch` y confirmacion backend.
 
 ## Nuevas Dependencias
 

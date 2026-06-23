@@ -10,10 +10,12 @@ import type {
   HumanReviewConfirmation,
   SoapDraftState,
 } from "@/components/clinical/ai-chart/ai-chart-types";
-import { clinicalEventSourceIds, emptyToNull } from "@/components/clinical/ai-chart/ai-chart-utils";
+import { clinicalEventSourceIds } from "@/components/clinical/ai-chart/ai-chart-utils";
+import { buildSoapDraftPatch } from "@/components/clinical/ai-chart/clinical-patch";
 import { ClinicalIntentCommandBar } from "@/components/clinical/ai-chart/clinical-intent-command-bar";
 import { ClinicalIntentResultPanel } from "@/components/clinical/ai-chart/clinical-intent-result-panel";
 import { DraftSoapPaper } from "@/components/clinical/ai-chart/draft-soap-paper";
+import { EntryEventProposalsSection } from "@/components/clinical/ai-chart/entry-event-proposals-section";
 import { EventSelectionPanel } from "@/components/clinical/ai-chart/event-selection-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
@@ -21,16 +23,16 @@ import { ErrorState } from "@/components/clinical/states";
 import { AppShell } from "@/components/layout/app-shell";
 import { getAiStatus } from "@/lib/api/ai";
 import {
-  createClinicalEntry,
+  confirmClinicalPatch,
   createClinicalIntent,
   decideClinicalIntentAction,
   decideClinicalReviewItem,
   draftSoapFromEvents,
   listClinicalEvents,
-  routeClinicalIntent,
+  streamClinicalCommandPreview,
 } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
-import { canManageClinicalEntries, canUseClinicalAi } from "@/lib/permissions";
+import { canManageClinicalEntries, canManageClinicalEvents, canUseClinicalAi } from "@/lib/permissions";
 import type {
   ClinicalIntentAction,
   ClinicalIntentResponse,
@@ -38,6 +40,7 @@ import type {
   ClinicalIntentType,
   ClinicalReviewItem,
   DraftSoapFromEventsResponse,
+  AIStreamEvent,
 } from "@/lib/types";
 
 import { BackLink, PageTitle, usePatientId, usePatientRecordQuery } from "./patient-page-shared";
@@ -50,6 +53,7 @@ export function PatientAiChartPage() {
   const { user, isLoading: userLoading } = useCurrentUser();
   const canUseAi = canUseClinicalAi(user);
   const canWriteSoap = canManageClinicalEntries(user);
+  const canCreateEvents = canManageClinicalEvents(user);
   const aiStatus = useQuery({
     queryKey: ["ai-status"],
     queryFn: getAiStatus,
@@ -61,6 +65,9 @@ export function PatientAiChartPage() {
   const [intent, setIntent] = useState<ClinicalIntentResponse | null>(null);
   const [routerText, setRouterText] = useState("");
   const [routedIntent, setRoutedIntent] = useState<ClinicalIntentRouteResponse | null>(null);
+  const [routeEvents, setRouteEvents] = useState<AIStreamEvent[]>([]);
+  const [isStreamingRoutePreview, setIsStreamingRoutePreview] = useState(false);
+  const [routePreviewError, setRoutePreviewError] = useState(false);
   const [reviewDecisionMessage, setReviewDecisionMessage] = useState<string | null>(null);
   const [actionDecisionMessage, setActionDecisionMessage] = useState<string | null>(null);
   const [soap, setSoap] = useState<SoapDraftState>({
@@ -77,6 +84,7 @@ export function PatientAiChartPage() {
     enabled: Boolean(patientId) && !DEMO_MODE,
   });
   const events = useMemo(() => eventsQuery.data ?? [], [eventsQuery.data]);
+  const recentEntries = record?.recent_entries ?? [];
 
   const draftMutation = useMutation({
     mutationFn: (clinicalEventIds?: string[]) =>
@@ -110,7 +118,23 @@ export function PatientAiChartPage() {
     },
   });
   const routeMutation = useMutation({
-    mutationFn: () => routeClinicalIntent(patientId, { text: routerText }),
+    mutationFn: async () => {
+      setRouteEvents([]);
+      setRoutePreviewError(false);
+      setIsStreamingRoutePreview(true);
+      try {
+        return await streamClinicalCommandPreview({
+          patientId,
+          text: routerText,
+          onEvent: (event) => setRouteEvents((current) => [...current, event]),
+        });
+      } catch {
+        setRoutePreviewError(true);
+        throw new Error("No se pudo orquestar la intencion clinica.");
+      } finally {
+        setIsStreamingRoutePreview(false);
+      }
+    },
     onSuccess: (response) => {
       setRoutedIntent(response);
       if (response.intent_type) {
@@ -120,24 +144,9 @@ export function PatientAiChartPage() {
   });
   const saveMutation = useMutation({
     mutationFn: (review: HumanReviewConfirmation) =>
-      createClinicalEntry(patientId, {
-        kind: "progress",
-        status: "draft",
-        occurred_at: new Date().toISOString(),
-        title: soap.title,
-        subjective: emptyToNull(soap.subjective),
-        objective: emptyToNull(soap.objective),
-        assessment: emptyToNull(soap.assessment),
-        plan: emptyToNull(soap.plan),
-        tags: ["soap", "ai-chart"],
-        extra_data: {
-          ai_chart_sources: draft?.sources ?? [],
-          ai_chart_section_sources: draft?.section_sources ?? [],
-          ai_provider: draft?.provider,
-          requires_human_confirmation: true,
-          human_reviewed: review.human_reviewed,
-          human_reviewed_at: review.human_reviewed_at,
-        },
+      confirmClinicalPatch(patientId, {
+        decision: "accepted",
+        patch: buildSoapDraftPatch({ soap, draft, review }),
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] });
@@ -178,7 +187,6 @@ export function PatientAiChartPage() {
       setActionDecisionMessage(response.message);
     },
   });
-
   if (recordQuery.isLoading && !DEMO_MODE) {
     return <PatientClinicalLoading />;
   }
@@ -218,6 +226,9 @@ export function PatientAiChartPage() {
             isRouting={routeMutation.isPending}
             isExecuting={intentMutation.isPending}
             hasRouteError={routeMutation.isError}
+            routeEvents={routeEvents}
+            isStreamingRoutePreview={isStreamingRoutePreview}
+            hasRoutePreviewError={routePreviewError}
             hasIntentError={intentMutation.isError}
             patientId={patientId}
             onRouterTextChange={setRouterText}
@@ -250,8 +261,22 @@ export function PatientAiChartPage() {
             onGenerate={() => draftMutation.mutate(undefined)}
             onSelectedIdsChange={setSelectedIds}
           />
-          <AiChartGovernancePanel />
+          <AiChartGovernancePanel
+            eventCount={events.length}
+            entryCount={recentEntries.length}
+            selectedEventCount={selectedIds.length}
+            canUseAi={canUseAi}
+            canWriteSoap={canWriteSoap}
+            canCreateEvents={canCreateEvents}
+          />
         </div>
+
+        <EntryEventProposalsSection
+          patientId={patientId}
+          entries={recentEntries}
+          canUseAi={canUseAi}
+          canCreateEvents={canCreateEvents}
+        />
 
         {draftMutation.isError ? <ErrorState description="No se pudo generar el borrador SOAP." /> : null}
         {draft ? (

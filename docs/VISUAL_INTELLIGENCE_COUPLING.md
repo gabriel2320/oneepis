@@ -78,12 +78,22 @@ OneEpis ya muestra en AI-Chart:
 - metadata de revision humana persistida al guardar el borrador AI-Chart
 - estado IA generativa activa/degradada/apagada
 - AI-Chart dividido en componentes por responsabilidad para evitar inflado
+- propuestas de eventos desde evolucion escrita como tarjetas revisables
+- operaciones principales de `ClinicalPatch` antes de confirmar escritura
+- estado de propuesta visible: `pendiente`, `registrando`, `registrada en ficha` o `rechazada`
+- guardado de SOAP generado como `ClinicalPatch target=evolution`, siempre borrador no firmado
+- bloqueos de AI-Chart con condicion o rol habilitante visible
 
 ## Pendiente visual inmediato
 
-El siguiente avance permitido es crear eventos desde una evolucion ya escrita,
-solo como propuesta revisable. No crear otra pantalla ni aplicar datos clinicos
-finales desde una respuesta IA.
+Fase 1 queda cubierta para el flujo AI-Chart minimo. El siguiente avance permitido
+es Fase 2 Context Builder, siempre dentro de la pantalla existente:
+
+- mantener visibles fuentes, limites y destino del patch
+- cubrir estados de propuesta/patch en prueba E2E o componente
+- explicar inferencias nuevas por problema, fuente y regla
+
+No crear otra pantalla ni aplicar datos clinicos finales desde una respuesta IA.
 
 ## Regla post R-01
 

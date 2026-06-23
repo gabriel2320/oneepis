@@ -19,8 +19,13 @@ paciente -> encuentro -> eventos clinicos -> contexto -> borrador SOAP
 - La IA no escribe documentos clinicos finales sin confirmacion humana.
 - Todo borrador expone fuentes, faltantes, certeza y auditoria.
 - Todo borrador SOAP expone trazabilidad por seccion S/O/A/P.
+- El contexto por problema debe explicar por que una fuente fue asociada o quedo pendiente.
+- Si existen codigos SNOMED CT, el contexto puede usar payloads derivados de un repositorio terminologico externo licenciado; no se versionan releases completos en este repo.
 - Ollama es opcional; Nivel 0 debe funcionar con reglas locales.
 - Toda inteligencia debe tener representacion visual y accion humana.
+- Next Route Handlers pueden transmitir vistas previas de interaccion, pero no son autoridad clinica.
+- El AI Bridge transmite eventos tipados: `status`, `source`, `warning`, `proposal`, `done`.
+- Toda propuesta que pueda terminar en escritura debe expresarse como `ClinicalPatch` revisable.
 
 ## Contratos principales
 
@@ -28,6 +33,48 @@ paciente -> encuentro -> eventos clinicos -> contexto -> borrador SOAP
 - `POST /api/v1/patients/{patient_id}/ai/clinical-intent-route`
 - `POST /api/v1/patients/{patient_id}/ai/review-item-decision`
 - `POST /api/v1/patients/{patient_id}/ai/draft-soap-from-events`
+- `POST /api/v1/patients/{patient_id}/ai/event-proposals-from-entry`
+- `POST /api/v1/patients/{patient_id}/ai/confirm-clinical-patch`
+
+## ClinicalPatch
+
+Las propuestas que pueden escribir ficha salen como `ClinicalPatch`:
+
+```text
+target -> clinical_event | evolution | problem | medication | document
+mode -> draft | suggestion
+operations -> add | replace | annotate
+sources -> fuentes visibles
+warnings -> limites clinicos
+requires_human_confirmation -> true
+```
+
+Estado actual:
+
+- v0 soporta `clinical_event` y `evolution`.
+- Las evoluciones escritas generan propuestas de eventos con patch incluido.
+- La UI muestra las operaciones principales del patch antes de confirmar.
+- La UI muestra estado local de propuesta: `pendiente`, `registrando`, `registrada en ficha` o `rechazada`.
+- Aceptar el patch crea un evento clinico auditado.
+- Guardar SOAP generado usa `target=evolution` y crea solo borrador no firmado.
+- Rechazar el patch audita la decision sin persistir cambios.
+- La UI no arma escrituras desde campos sueltos; envia la decision al backend.
+
+Siguiente mejora permitida:
+
+- hacer mas claros los permisos bloqueados y cubrir el flujo con E2E, sin agregar nuevas rutas IA.
+
+## AI Bridge
+
+El bridge recomendado es:
+
+```text
+UI AI-Chart -> Next Route Handler -> FastAPI -> eventos tipados -> UI
+```
+
+Next puede mejorar experiencia y streaming. FastAPI conserva contexto clinico,
+permisos, auditoria y persistencia. El bridge no debe multiplicarse en muchos
+endpoints especializados hasta que exista un nucleo compartido.
 
 ## Intenciones iniciales
 

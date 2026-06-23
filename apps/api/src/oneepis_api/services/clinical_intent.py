@@ -10,19 +10,36 @@ from oneepis_api.models.audit import AuditEvent
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.clinical_record import (
     ClinicalChangeSet,
-    ClinicalContextSection,
     ClinicalEvidenceMark,
     ClinicalIntentAction,
     ClinicalIntentRequest,
     ClinicalIntentResponse,
     ClinicalIntentRouteRequest,
     ClinicalIntentRouteResponse,
-    ClinicalIntentSource,
     ClinicalIntentType,
     ClinicalProblemContext,
     ClinicalReviewItem,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.clinical_context import (
+    clinical_context_sections as _context_sections,
+)
+from oneepis_api.services.clinical_context import (
+    clinical_evidence_marks as _evidence_marks,
+)
+from oneepis_api.services.clinical_context import (
+    clinical_missing_data as _missing_data,
+)
+from oneepis_api.services.clinical_context import (
+    clinical_sources as _sources,
+)
+from oneepis_api.services.clinical_course import clinical_course_finding
+from oneepis_api.services.clinical_problem_context import (
+    event_matches_any_problem,
+    problem_domain_label,
+    problem_domain_missing_data,
+    problem_event_match_reason,
+)
 
 ReviewDecisionMetadata = dict[str, object]
 
@@ -405,120 +422,6 @@ def _show_sources(
     )
 
 
-def _sources(snapshot: PatientRecordSnapshot, events: list[object]) -> list[ClinicalIntentSource]:
-    sources = [
-        ClinicalIntentSource(
-            source_type="clinical_event",
-            source_id=event.id,
-            label=event.summary,
-        )
-        for event in events[:10]
-    ]
-    sources.extend(
-        ClinicalIntentSource(
-            source_type="clinical_entry",
-            source_id=entry.id,
-            label=entry.title,
-        )
-        for entry in snapshot.recent_entries[:5]
-    )
-    if snapshot.latest_vitals:
-        sources.append(
-            ClinicalIntentSource(
-                source_type="vital_sign",
-                source_id=snapshot.latest_vitals.id,
-                label="Ultimos signos vitales",
-            )
-        )
-    return sources
-
-
-def _missing_data(snapshot: PatientRecordSnapshot, events: list[object]) -> list[str]:
-    missing: list[str] = []
-    if not events:
-        missing.append("Eventos clinicos recientes")
-    if snapshot.latest_vitals is None:
-        missing.append("Signos vitales recientes")
-    if not snapshot.active_problems:
-        missing.append("Problemas activos estructurados")
-    return missing
-
-
-def _evidence_marks(
-    snapshot: PatientRecordSnapshot,
-    events: list[object],
-) -> list[ClinicalEvidenceMark]:
-    marks: list[ClinicalEvidenceMark] = []
-    marks.extend(
-        ClinicalEvidenceMark(
-            label=event.summary,
-            status="confirmed",
-            detail="Evento clinico registrado en la ficha.",
-            source_id=event.id,
-        )
-        for event in events[:8]
-    )
-    marks.extend(
-        ClinicalEvidenceMark(
-            label=entry.title,
-            status="confirmed",
-            detail="Evolucion/documento clinico registrado.",
-            source_id=entry.id,
-        )
-        for entry in snapshot.recent_entries[:3]
-    )
-    if snapshot.latest_vitals is None:
-        marks.append(
-            ClinicalEvidenceMark(
-                label="Signos vitales recientes",
-                status="missing",
-                detail="No hay signos vitales recientes en el snapshot.",
-            )
-        )
-    else:
-        marks.append(
-            ClinicalEvidenceMark(
-                label="Signos vitales recientes",
-                status="confirmed",
-                detail="Disponibles para contexto objetivo.",
-                source_id=snapshot.latest_vitals.id,
-            )
-        )
-    if not snapshot.active_problems:
-        marks.append(
-            ClinicalEvidenceMark(
-                label="Problemas activos",
-                status="needs_review",
-                detail="No hay problemas activos estructurados; revisar antes de documentar.",
-            )
-        )
-    return marks
-
-
-def _context_sections(
-    snapshot: PatientRecordSnapshot,
-    events: list[object],
-) -> list[ClinicalContextSection]:
-    return [
-        ClinicalContextSection(
-            title="Problemas activos",
-            items=[problem.title for problem in snapshot.active_problems[:6]],
-        ),
-        ClinicalContextSection(
-            title="Eventos recientes",
-            items=[event.summary for event in events[:6]],
-        ),
-        ClinicalContextSection(
-            title="Medicacion activa",
-            items=[med.name for med in snapshot.active_medications[:6]],
-        ),
-        ClinicalContextSection(
-            title="Evoluciones recientes",
-            items=[entry.title for entry in snapshot.recent_entries[:5]],
-        ),
-    ]
-
-
 def _problem_contexts(
     snapshot: PatientRecordSnapshot,
     events: list[object],
@@ -528,27 +431,50 @@ def _problem_contexts(
 
     for problem in snapshot.active_problems[:8]:
         title = problem.title
-        matched_events = [
-            event
+        event_reasons = [
+            (event, reason)
             for event in events
-            if title.casefold() in event.summary.casefold()
-            or event.summary.casefold() in title.casefold()
+            if (reason := problem_event_match_reason(problem, event))
         ]
+        matched_events = [event for event, _reason in event_reasons]
         linked_event_ids.update(event.id for event in matched_events)
         evidence = [
             ClinicalEvidenceMark(
                 label=event.summary,
                 status="confirmed",
-                detail="Evento reciente asociado por coincidencia textual con el problema.",
+                detail=reason,
                 source_id=event.id,
             )
-            for event in matched_events[:5]
+            for event, reason in event_reasons[:5]
         ]
         pending = []
         if not evidence:
             pending.append("Sin evidencia reciente asociada automaticamente.")
         if not problem.notes:
             pending.append("Problema sin nota de plan estructurada.")
+        pending.extend(problem_domain_missing_data(problem, snapshot, events))
+        explanations = [
+            "Problema activo estructurado en la ficha.",
+            (
+                "La evidencia se asocia por codigo SNOMED CT externo, coincidencia textual "
+                "o vocabulario clinico local explicito."
+            ),
+        ]
+        domain = problem_domain_label(problem)
+        if domain:
+            explanations.append(
+                f"Dominio clinico probable para faltantes contextuales: {domain}."
+            )
+        if evidence:
+            explanations.append(
+                f"{len(evidence)} evento(s) reciente(s) vinculados por regla local."
+            )
+        else:
+            explanations.append("No hubo coincidencia ni vocabulario local con eventos recientes.")
+        if problem.notes:
+            explanations.append("El problema tiene nota de plan estructurada.")
+        else:
+            explanations.append("Falta nota de plan; se mantiene pendiente de revision.")
         contexts.append(
             ClinicalProblemContext(
                 problem_id=problem.id,
@@ -556,6 +482,7 @@ def _problem_contexts(
                 status="structured",
                 evidence=evidence,
                 pending=pending,
+                explanations=explanations,
             )
         )
 
@@ -575,6 +502,11 @@ def _problem_contexts(
                     for event in unlinked_events
                 ],
                 pending=["Revisar si corresponde crear o actualizar un problema activo."],
+                explanations=[
+                    "Estos eventos recientes no coincidieron con reglas locales "
+                    "de problemas activos.",
+                    "Se muestran como contexto no vinculado para revision humana.",
+                ],
             )
         )
     return contexts
@@ -595,7 +527,7 @@ def _change_set(
         missing.append("Dos controles de signos vitales para comparar")
     rule_findings = [
         *_vital_rule_findings(recent_vitals),
-        *_event_rule_findings(snapshot, events, latest_entry),
+        *_event_rule_findings(snapshot, events, latest_entry, recent_vitals),
         *_exam_payload_rule_findings(events, latest_entry),
         *_medication_payload_rule_findings(events, latest_entry),
         *_medication_review_findings(snapshot, events, latest_entry),
@@ -657,6 +589,7 @@ def _event_rule_findings(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     baseline_entry: object | None,
+    recent_vitals: list[object],
 ) -> list[str]:
     compared_events = [
         event
@@ -679,23 +612,18 @@ def _event_rule_findings(
         label = labels.get(event_type)
         if label:
             findings.append(f"{label}: {event.summary}.")
+        course_finding = clinical_course_finding(event.summary, recent_vitals)
+        if course_finding:
+            findings.append(course_finding)
 
     unlinked_count = sum(
-        1 for event in compared_events if not _event_matches_any_problem(snapshot, event)
+        1 for event in compared_events if not event_matches_any_problem(snapshot, event)
     )
     if unlinked_count:
         findings.append(
             f"{unlinked_count} evento(s) recientes sin problema activo asociado."
         )
     return findings
-
-
-def _event_matches_any_problem(snapshot: PatientRecordSnapshot, event: object) -> bool:
-    summary = event.summary.casefold()
-    return any(
-        problem.title.casefold() in summary or summary in problem.title.casefold()
-        for problem in snapshot.active_problems
-    )
 
 
 def _exam_payload_rule_findings(
@@ -841,7 +769,7 @@ def _medication_review_findings(
                 f"Revisar evento de medicacion sin payload estructurado suficiente: "
                 f"{event.summary}."
             )
-        if not _event_matches_any_problem(snapshot, event):
+        if not event_matches_any_problem(snapshot, event):
             findings.append(
                 f"Revisar evento de medicacion sin problema activo asociado: {event.summary}."
             )
@@ -896,7 +824,7 @@ def _review_items(
                     suggested_action="Completar payload con action y name/medication.",
                 )
             )
-        if not _event_matches_any_problem(snapshot, event):
+        if not event_matches_any_problem(snapshot, event):
             items.append(
                 ClinicalReviewItem(
                     item_type="unlinked_medication_event",

@@ -27,6 +27,11 @@ export function EventSelectionPanel({
   onGenerate,
   onSelectedIdsChange,
 }: EventSelectionPanelProps) {
+  const blockedReason = eventSelectionBlockedReason({
+    selectedCount: selectedIds.length,
+    isGenerating,
+    canUseAi,
+  });
   return (
     <ClinicalSectionCard
       title="Eventos fuente"
@@ -35,7 +40,7 @@ export function EventSelectionPanel({
         <Button
           type="button"
           size="sm"
-          disabled={selectedIds.length === 0 || isGenerating || DEMO_MODE || !canUseAi}
+          disabled={Boolean(blockedReason)}
           onClick={onGenerate}
         >
           <BrainCircuit className="h-4 w-4" />
@@ -48,9 +53,36 @@ export function EventSelectionPanel({
         selectedIds={selectedIds}
         onSelectedIdsChange={onSelectedIdsChange}
       />
+      {blockedReason && !isGenerating ? (
+        <p className="mt-3 text-xs text-muted-foreground">{blockedReason}</p>
+      ) : null}
       {hasError ? <p className="mt-3 text-sm text-destructive">No se pudieron cargar eventos.</p> : null}
     </ClinicalSectionCard>
   );
+}
+
+function eventSelectionBlockedReason({
+  selectedCount,
+  isGenerating,
+  canUseAi,
+}: {
+  selectedCount: number;
+  isGenerating: boolean;
+  canUseAi: boolean;
+}) {
+  if (isGenerating) {
+    return "Generando borrador.";
+  }
+  if (DEMO_MODE) {
+    return "Modo demo: no se generan borradores reales.";
+  }
+  if (!canUseAi) {
+    return "Usar IA clinica requiere rol admin, medico o dev.";
+  }
+  if (selectedCount === 0) {
+    return "Selecciona al menos un evento fuente.";
+  }
+  return null;
 }
 
 function EventSelectionList({

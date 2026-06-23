@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type {
   AIProviderStatus,
+  AIStreamEvent,
   ClinicalIntentRouteResponse,
   ClinicalIntentType,
 } from "@/lib/types";
@@ -20,6 +21,9 @@ type ClinicalIntentCommandBarProps = {
   isRouting: boolean;
   isExecuting: boolean;
   hasRouteError: boolean;
+  routeEvents: AIStreamEvent[];
+  isStreamingRoutePreview: boolean;
+  hasRoutePreviewError: boolean;
   hasIntentError: boolean;
   patientId: string;
   onRouterTextChange: (value: string) => void;
@@ -45,12 +49,24 @@ export function ClinicalIntentCommandBar({
   isRouting,
   isExecuting,
   hasRouteError,
+  routeEvents,
+  isStreamingRoutePreview,
+  hasRoutePreviewError,
   hasIntentError,
   patientId,
   onRouterTextChange,
   onRoute,
   onExecuteIntent,
 }: ClinicalIntentCommandBarProps) {
+  const routeBlockedReason = clinicalCommandBlockedReason({
+    isPending: isRouting,
+    hasText: routerText.trim().length > 0,
+    canUseAi,
+  });
+  const intentBlockedReason = clinicalIntentBlockedReason({
+    isPending: isExecuting,
+    canUseAi,
+  });
   return (
     <>
       <div className="mb-4 grid gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
@@ -63,12 +79,15 @@ export function ClinicalIntentCommandBar({
         <Button
           type="button"
           variant="secondary"
-          disabled={isRouting || routerText.trim().length === 0 || DEMO_MODE || !canUseAi}
+          disabled={Boolean(routeBlockedReason)}
           onClick={onRoute}
         >
           Ejecutar
         </Button>
       </div>
+      {routeBlockedReason && !isRouting ? (
+        <p className="mb-3 text-xs text-muted-foreground">{routeBlockedReason}</p>
+      ) : null}
       {hasRouteError ? (
         <p className="mb-3 text-sm text-destructive">No se pudo interpretar la frase clinica.</p>
       ) : null}
@@ -80,6 +99,25 @@ export function ClinicalIntentCommandBar({
           isExecuting={isRouting || isExecuting}
         />
       ) : null}
+      {routeEvents.length > 0 || isStreamingRoutePreview || hasRoutePreviewError ? (
+        <div className="mb-4 rounded-md border bg-background p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-medium">Orquestacion streaming</p>
+            <span className="rounded-md border px-2 py-1 text-xs text-muted-foreground">
+              FastAPI + Next Route Handler + AI SDK
+            </span>
+          </div>
+          <AIStreamEventList events={routeEvents} />
+          {isStreamingRoutePreview ? (
+            <p className="mt-2 text-xs text-muted-foreground">Transmitiendo...</p>
+          ) : null}
+          {hasRoutePreviewError ? (
+            <p className="mt-2 text-xs text-destructive">
+              No se pudo generar la vista previa streaming.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <GenerativeAiStatus status={aiStatus} isError={aiStatusIsError} />
       <div className="flex flex-wrap gap-2">
         {intentActions.map((action) => (
@@ -88,18 +126,95 @@ export function ClinicalIntentCommandBar({
             type="button"
             variant="outline"
             size="sm"
-            disabled={isExecuting || DEMO_MODE || !canUseAi}
+            disabled={Boolean(intentBlockedReason)}
             onClick={() => onExecuteIntent(action.intent)}
           >
             {action.label}
           </Button>
         ))}
       </div>
+      {intentBlockedReason && !isExecuting ? (
+        <p className="mt-3 text-xs text-muted-foreground">{intentBlockedReason}</p>
+      ) : null}
       {hasIntentError ? (
         <p className="mt-3 text-sm text-destructive">No se pudo resolver la intencion clinica.</p>
       ) : null}
     </>
   );
+}
+
+function clinicalCommandBlockedReason({
+  isPending,
+  hasText,
+  canUseAi,
+}: {
+  isPending: boolean;
+  hasText: boolean;
+  canUseAi: boolean;
+}) {
+  if (isPending) {
+    return "Interpretando frase clinica.";
+  }
+  if (DEMO_MODE) {
+    return "Modo demo: no se ejecutan intenciones reales.";
+  }
+  if (!canUseAi) {
+    return "Usar la barra clinica requiere rol admin, medico o dev.";
+  }
+  if (!hasText) {
+    return "Escribe una instruccion clinica para ejecutar.";
+  }
+  return null;
+}
+
+function clinicalIntentBlockedReason({
+  isPending,
+  canUseAi,
+}: {
+  isPending: boolean;
+  canUseAi: boolean;
+}) {
+  if (isPending) {
+    return "Ejecutando intencion clinica.";
+  }
+  if (DEMO_MODE) {
+    return "Modo demo: no se ejecutan intenciones reales.";
+  }
+  if (!canUseAi) {
+    return "Usar intenciones clinicas requiere rol admin, medico o dev.";
+  }
+  return null;
+}
+
+function AIStreamEventList({ events }: { events: AIStreamEvent[] }) {
+  if (events.length === 0) {
+    return null;
+  }
+  return (
+    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+      {events.map((event, index) => (
+        <li key={`${event.type}-${index}`} className="flex flex-wrap items-center gap-1.5">
+          <span className="rounded-md border px-1.5 py-0.5">{event.type}</span>
+          <span>{eventLabel(event)}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function eventLabel(event: AIStreamEvent) {
+  if (event.type === "status" || event.type === "warning" || event.type === "error") {
+    return event.message;
+  }
+  if (event.type === "source") {
+    return event.label;
+  }
+  if (event.type === "proposal") {
+    return event.data.recognized
+      ? `Propuesta: ${event.data.intent_type ?? event.data.mode}`
+      : "Propuesta de fallback seguro";
+  }
+  return "Flujo completado";
 }
 
 function ClinicalIntentRouteResult({
