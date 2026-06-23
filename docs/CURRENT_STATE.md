@@ -179,7 +179,7 @@ Laboratorio estructurado:
 - existe lectura minima de paneles/resultados recientes dentro de Assistant Read, sin escritura ni carga masiva
 - existe lectura minima de paneles/resultados recientes dentro de la ficha, sin escritura, carga masiva ni navegacion nueva
 - la ficha inicia antecedentes clinicos de solo lectura desde problemas, alergias, medicacion y eventos curados; antecedentes familiares/sociales, vacunas, dispositivos y diagnosticos codificados siguen pendientes de contrato
-- `docs/SCREEN_TREE.md` registra contratos minimos bloqueantes para agenda real, alta/epicrisis firmada y papel tradicional; no se debe crear UI amplia de esas superficies antes de cumplirlos
+- `docs/SCREEN_TREE.md` registra contratos minimos bloqueantes para agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional; no se debe crear UI amplia de esas superficies antes de cumplirlos
 - `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
 - `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
 - lectura usa permisos de ficha, incluyendo `solo_lectura`
@@ -219,7 +219,9 @@ Consulta:
 
 - `/consulta/pacientes/{patient_id}/atencion` usa endpoints existentes para crear encuentro ambulatorio y evolucion SOAP vinculada
 - la misma pantalla permite cerrar un encuentro ambulatorio en curso como `completed` usando el PATCH existente de encuentros; es cierre administrativo auditado, no firma ni receta valida
-- no hay agenda productiva todavia; `/consulta/agenda` sigue como borde preparado
+- agenda ambulatoria minima existe como `ClinicalAppointment`, con persistencia, estados, permisos y auditoria
+- `/consulta/agenda` lista citas por dia, permite crear cita programada y enlaza a la atencion del paciente
+- agenda avanzada por equipos/recursos, admision/preconsulta y no-show operacional siguen futuras
 - resumen ambulatorio dedicado sigue preparado; la ficha paciente continua siendo el centro longitudinal
 
 ## Frontend
@@ -299,8 +301,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_intent.py` ya concentra reglas deterministicas; nuevas reglas deben agruparse por dominio o extraerse antes de crecer mucho mas.
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
-- `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
-- agenda real, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
+- `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados/bloqueados; no expandir todos a la vez.
+- agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
@@ -313,7 +315,7 @@ Release gates demo:
 - Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
 - Estado `v0.4-assistant-read`: walkthrough humano aprobado el 2026-06-23; changelog y tag `v0.4-assistant-read` creados sobre `main`.
 - Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
-- Pantallas preparadas no cuentan como feature completa: `/consulta/agenda`, resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
+- Pantallas preparadas no cuentan como feature completa: resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
 - Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
 
 Accesibilidad, performance y observabilidad pendientes:

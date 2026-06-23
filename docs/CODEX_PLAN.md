@@ -86,4 +86,4 @@ Siguiente orden de ejecucion despues de antecedentes/laboratorio sobrio:
 2. implementar contrato o reutilizacion de entidad existente
 3. agregar UI minima solo despues de permisos/auditoria/tests
 4. agregar papel carta solo si produce documento clinico
-5. mantener agenda, firma/cierre legal de epicrisis y papel amplio en PRs separados
+5. mantener agenda avanzada, firma/cierre legal de epicrisis y papel amplio en PRs separados

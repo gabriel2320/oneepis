@@ -223,14 +223,14 @@ Trabajo permitido:
 - antecedentes clinicos de solo lectura dentro de ficha
 - curaduria minima de eventos como antecedentes, diagnosticos, procedimientos y planes
 - laboratorio sobrio con fuente especifica por panel/resultado
-- contratos futuros para agenda, firma/cierre legal de epicrisis y papel antes de UI amplia
+- contratos futuros para agenda avanzada, firma/cierre legal de epicrisis y papel antes de UI amplia
 
 Fuera de alcance:
 
 - nueva IA, chat libre, RAG, IA externa o dashboard
 - pantalla dedicada de laboratorio
 - receta valida, firma, folio, orden ejecutable o administracion de medicamentos
-- agenda productiva, firma legal o cierre de alta sin contrato backend previo
+- agenda avanzada/productiva, firma legal o cierre de alta sin contrato backend previo
 
 ## Plan post-auditoria 2026-06-23
 
@@ -251,7 +251,7 @@ Prioridad actual:
 1. `PROG-PATIENT-CORE-01`: antecedentes de solo lectura en ficha.
 2. Curaduria minima de eventos sin nueva tabla.
 3. Laboratorio sobrio con fuentes especificas, sin dashboard.
-4. Contratos futuros de agenda, firma/cierre legal de epicrisis y papel amplio antes de UI amplia.
+4. Contratos futuros de agenda avanzada, firma/cierre legal de epicrisis y papel amplio antes de UI amplia.
 5. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
 
 Hecho en este foco:

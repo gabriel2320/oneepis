@@ -73,7 +73,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes/[patientId]/ai-chart` | IA clinica | acto clinico | completa | AI-Chart + Assistant Read | si via `ClinicalPatch` | medico/admin/dev + permiso IA | si si confirma | SOAP carta | lectura, series, borrador | mantener `v0.4-assistant-read` cerrado; no expandir IA antes de nucleo paciente |
 | `/pacientes/[patientId]/auditoria` | Seguridad/auditoria | seguimiento | completa | audit events | no | lectura auditoria | no | no | no | auditoria de accesos futura |
 | `/consulta` | Ambulatorio | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
-| `/consulta/agenda` | Ambulatorio | episodio | preparada | UI preparada | no | lectura paciente | no | no | no | agenda productiva |
+| `/consulta/agenda` | Ambulatorio | episodio | completa | `clinical_appointments` | si | medico/admin/dev | si | no | no | admision/preconsulta y agenda por equipos futuras |
 | `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP | si | medico/admin/dev | si | no | borrador revisable | cierre administrativo minimo implementado; diagnosticos finales futuros |
 | `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | preparada | UI preparada | no | lectura paciente | no | no | lectura resumida | resumen ambulatorio real si aporta sobre ficha |
 | `/hospitalizacion` | Hospitalizacion | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
@@ -108,7 +108,7 @@ tener contrato minimo y flujo humano verificable.
 | Dispositivos/protesis/accesos | Nucleo paciente | paciente | futura | entidad dedicada o eventos | si | medico/admin/dev | si | no | lectura contextual | uso clinico claro |
 | Linea de tiempo avanzada/filtrable | Nucleo paciente | seguimiento | futura | eventos + encuentros + documentos + resultados | no | lectura paciente | no | no | lectura contextual | la ficha ya tiene lectura minima; falta filtro, dominios y documentos |
 | Buscador longitudinal | Nucleo paciente | seguimiento | futura | eventos + entradas + resultados | no | lectura paciente | no | no | busqueda asistida | no duplicar Assistant Read |
-| Agenda productiva | Ambulatorio | episodio | futura | citas/appointments | si | admision/medico/admin/dev | si | no | no | modelo de cita y estados |
+| Agenda avanzada/productiva | Ambulatorio | episodio | futura | citas + equipos + admision | si | admision/medico/admin/dev futuro | si | no | no | agenda minima ya existe; falta agenda por recursos/equipos y preconsulta |
 | Admision/preconsulta ambulatoria | Ambulatorio | episodio | futura | encuentro + observaciones | si | admision/enfermeria/medico/admin/dev | si | no | faltantes | identidad, signos y pendientes |
 | Motivo de consulta estructurado | Ambulatorio | acto clinico | futura | encuentro + entrada clinica | si | medico/admin/dev | si | si si aplica | apoyo SOAP | contrato antes de UI amplia |
 | Cierre de consulta | Ambulatorio | firma/estado | futura | encuentro + estado | si | medico/admin/dev | si | si si aplica | no firma | diagnostico/plan/cierre borrador |
@@ -142,7 +142,7 @@ tener contrato minimo y flujo humano verificable.
 | Nucleo paciente faltante | antecedentes dentro de ficha existente | reusar eventos/problemas/alergias/medicacion antes de entidad dedicada | antecedentes visibles en ficha como lectura minima, con faltantes declarados y sin duplicar eventos |
 | Linea de tiempo avanzada | vista longitudinal dentro de ficha | lectura compuesta de eventos, encuentros, entradas, documentos y resultados | filtros por dominio, fuente inspeccionable y sin escritura |
 | Diagnosticos historicos | extension de problemas | contrato que separe problema activo, diagnostico historico y codificacion | no mezclar estado activo con diagnostico cerrado |
-| Ambulatorio minimo | `/consulta/agenda` o admision/preconsulta | modelo de cita/estado o encuentro preconsulta | agenda deja de ser preparada solo si persiste estados reales y E2E |
+| Ambulatorio minimo | `/consulta/agenda` | `ClinicalAppointment` con estados reales | implementado como agenda persistida; admision/preconsulta queda futura |
 | Consulta completa | `/consulta/pacientes/[patientId]/atencion` | cierre de encuentro, diagnostico/plan y documento si aplica | SOAP/plan/cierre con auditoria y sin receta valida automatica |
 | Hospitalizacion critica | ingreso medico | `ClinicalEntry(kind=intake)` vinculado a encuentro hospitalario | papel carta, borrador y auditoria implementados; firma/cierre legal futuros |
 | Evolucion hospitalaria | hoja diaria/evolucion por problema | entradas por problema vinculadas a ingreso | no reemplazar firma real; mantener borrador trazable |
@@ -160,7 +160,7 @@ el mapa debe declarar que sigue pendiente.
 
 | Superficie | Modelo minimo | API minima futura | UI minima permitida | Papel | Tests obligatorios |
 | --- | --- | --- | --- | --- | --- |
-| Agenda real | `ClinicalAppointment`: paciente, inicio, fin opcional, motivo, ubicacion, profesional/equipo opcional y estado `scheduled/check_in/in_progress/completed/cancelled/no_show` | listar por fecha/rango, crear, actualizar estado y listar por paciente | `/consulta/agenda` deja de ser preparada solo si muestra agenda persistida, estados reales y enlace a atencion | no aplica inicialmente | permisos, auditoria de escritura, E2E agenda -> paciente -> atencion |
+| Agenda real | `ClinicalAppointment`: paciente, inicio, fin opcional, motivo, ubicacion, profesional/equipo opcional y estado `scheduled/check_in/in_progress/completed/cancelled/no_show` | implementado: listar por fecha/rango, crear, actualizar estado y listar por paciente | `/consulta/agenda` muestra agenda persistida, estados reales y enlace a atencion | no aplica inicialmente | permisos, auditoria de escritura, E2E agenda -> paciente -> atencion |
 | Atencion ambulatoria cerrable | `ClinicalEncounter` existente con `status=completed`, `ended_at`, evolucion SOAP vinculada y plan documentado | implementado minimo reutilizando PATCH de encuentros y entradas clinicas existentes | `/consulta/pacientes/[patientId]/atencion` permite crear borrador y cerrar encuentro como no firmado | resumen carta futuro si produce documento | cierre exige actor, auditoria, no receta valida automatica y no orden ejecutable |
 | Ingreso medico hospitalario | `ClinicalEntry(kind=intake)` vinculado a encuentro `hospitalization`; no tabla nueva en primer PR | implementado reutilizando entradas clinicas vinculadas al ingreso | pantalla hospitalaria de ingreso como borrador editable, con secciones clinicas minimas | carta obligatoria de ingreso borrador | encuentro debe ser hospitalario, permisos medico/admin/dev, auditoria y print sin fallback |
 | Epicrisis borrador | `ClinicalEntry(kind=discharge_summary)` vinculado a encuentro `hospitalization`; no tabla nueva en primer PR | implementado reutilizando entradas clinicas vinculadas a la hospitalizacion | pantalla unica de epicrisis vinculada al ingreso, sin firma legal | carta obligatoria con estado draft y footer desarrollo | encuentro debe ser hospitalario, permisos medico/admin/dev, auditoria y print sin fallback |
@@ -174,4 +174,4 @@ el mapa debe declarar que sigue pendiente.
 - Una pantalla completa no puede depender de fallback silencioso al primer paciente, documento o registro si la ruta trae ID.
 - IA puede sugerir o resumir, pero no convierte una pantalla futura en completa ni firma documentos.
 - La IA permitida por pantalla se declara en el Screen Capability Registry; una accion no declarada debe quedar bloqueada antes de ejecutarse.
-- Receta valida, firma clinica, folio, despacho, administracion de medicamentos, ordenes ejecutables, agenda productiva e IA externa siguen bloqueadas/futuras hasta cumplir sus contratos.
+- Receta valida, firma clinica, folio, despacho, administracion de medicamentos, ordenes ejecutables, agenda avanzada e IA externa siguen bloqueadas/futuras hasta cumplir sus contratos.

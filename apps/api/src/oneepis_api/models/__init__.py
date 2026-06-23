@@ -2,6 +2,7 @@ from oneepis_api.models.audit import AuditEvent
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
+    ClinicalAppointment,
     ClinicalEncounter,
     ClinicalEntry,
     ClinicalEvent,
@@ -17,6 +18,7 @@ __all__ = [
     "Allergy",
     "AuditEvent",
     "ClinicalEncounter",
+    "ClinicalAppointment",
     "ClinicalEvent",
     "ClinicalEntry",
     "LabPanel",

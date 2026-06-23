@@ -65,7 +65,7 @@ export const screenCapabilities: ScreenCapability[] = [
   capability("/configuracion/api", "Acceso/configuracion", "seguimiento", "completa", "config API/OpenAPI", "none", "sesion local", "none", "none", AI.none, "health y versionado"),
   capability("/configuracion/ia", "Acceso/configuracion", "seguimiento", "completa", "AI status", "none", "sesion local", "none", "none", AI.read, "preferencias Ollama/local futuras"),
   capability("/consulta", "Ambulatorio", "seguimiento", "completa", "App Router", "none", "lectura paciente", "none", "none", AI.none, "indice simple"),
-  capability("/consulta/agenda", "Ambulatorio", "episodio", "preparada", "UI preparada", "none", "lectura paciente", "none", "none", AI.none, "agenda productiva"),
+  capability("/consulta/agenda", "Ambulatorio", "episodio", "completa", "clinical appointments", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "admision/preconsulta futura"),
   capability("/consulta/pacientes/[patientId]/atencion", "Ambulatorio", "acto clinico", "completa", "encuentros + SOAP", "clinical_write", "medico/admin/dev", "writes", "none", AI.draft, "cierre de consulta"),
   capability("/consulta/pacientes/[patientId]/resumen", "Ambulatorio", "seguimiento", "preparada", "UI preparada", "none", "lectura paciente", "none", "none", AI.summary, "resumen ambulatorio real"),
   capability("/hospitalizacion", "Hospitalizacion", "seguimiento", "completa", "App Router", "none", "lectura paciente", "none", "none", AI.none, "indice simple"),

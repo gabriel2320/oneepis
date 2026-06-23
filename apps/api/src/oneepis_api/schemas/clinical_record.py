@@ -35,6 +35,12 @@ from oneepis_api.schemas.clinical_record_contracts.ai import (
     EventProposalFromEntryRequest,
     EventProposalsFromEntryResponse,
 )
+from oneepis_api.schemas.clinical_record_contracts.appointments import (
+    ClinicalAppointmentBase,
+    ClinicalAppointmentCreate,
+    ClinicalAppointmentRead,
+    ClinicalAppointmentUpdate,
+)
 from oneepis_api.schemas.clinical_record_contracts.assistant import (
     AssistantChartPoint,
     AssistantChartRequest,
@@ -128,6 +134,10 @@ __all__ = [
     "AssistantTimelineItemType",
     "AssistantTimelineResponse",
     "ClinicalChangeSet",
+    "ClinicalAppointmentBase",
+    "ClinicalAppointmentCreate",
+    "ClinicalAppointmentRead",
+    "ClinicalAppointmentUpdate",
     "ClinicalContextSection",
     "ClinicalEncounterBase",
     "ClinicalEncounterCreate",
