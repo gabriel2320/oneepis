@@ -129,6 +129,15 @@ Regla para el siguiente bloque clinico tradicional:
 - no mezclar agenda, ingreso medico y epicrisis en el mismo PR
 - si la superficie no cumple su contrato, permanece `preparada`, `futura` o `bloqueada`
 
+Regla especifica de preconsulta ambulatoria:
+
+- `PROG-AMB-PRECONSULTA-01` debe reutilizar agenda, encuentro, signos y eventos
+  antes de crear tablas o endpoints compuestos.
+- La preconsulta puede preparar la atencion, pero no diagnostica, no firma, no
+  receta, no ordena y no ejecuta acciones clinicas automaticamente.
+- Si la UI necesita un flujo mas complejo, primero se actualiza el contrato en
+  `docs/SCREEN_TREE.md`; no se crea un modulo administrativo paralelo.
+
 ## Lecciones Post #15-#17
 
 Los avances de agenda, resumen ambulatorio e indice de papel mostraron errores
