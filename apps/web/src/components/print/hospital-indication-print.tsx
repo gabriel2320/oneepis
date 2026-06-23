@@ -28,12 +28,12 @@ export function PrintHospitalIndicationPage() {
     enabled: Boolean(patientId) && !DEMO_MODE,
   });
   const record =
-    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null) ??
+    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) : null) ??
     recordQuery.data;
   const indications = DEMO_MODE
     ? demoHospitalIndications.filter((item) => item.patient_id === patientId)
     : (indicationsQuery.data ?? []);
-  const indication = indications.find((item) => item.id === indicationId) ?? indications[0];
+  const indication = indications.find((item) => item.id === indicationId);
 
   return (
     <PrintPage>
@@ -41,7 +41,9 @@ export function PrintHospitalIndicationPage() {
       {record && indication ? (
         <HospitalIndicationPrintSheet indication={indication} record={record} />
       ) : (
-        <p className="p-6 text-sm">Cargando indicacion...</p>
+        <p className="p-6 text-sm">
+          {record ? "Indicacion no encontrada." : "Cargando indicacion..."}
+        </p>
       )}
     </PrintPage>
   );

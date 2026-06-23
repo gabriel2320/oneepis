@@ -154,6 +154,7 @@ Reglas duras de no engorda:
 - No mover codigo a paquete compartido hasta que existan dos consumidores reales.
 - No dejar placeholders, pantallas puente ni rutas vacias.
 - No mezclar refactor grande con feature clinica.
+- No usar fallback silencioso al primer paciente, documento o registro cuando la ruta trae un ID concreto.
 
 ## Politica de Indicaciones y Receta
 

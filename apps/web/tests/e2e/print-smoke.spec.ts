@@ -48,6 +48,12 @@ test.describe("print routes", () => {
     await expect(page.getByText("Borrador de indicacion demo")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 
+    await page.goto(
+      `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicacion/00000000-0000-4000-8000-000000000000`,
+    );
+    await expect(page.getByText("Indicacion no encontrada.")).toBeVisible();
+    await expect(page.getByText("Borrador de indicacion demo")).not.toBeVisible();
+
     await page.goto("/print/hospitalizacion/rondas");
     await expect(page.getByRole("heading", { name: "Ronda hospitalaria" })).toBeVisible();
     await expect(page.getByText("Paciente Demo Beta")).toBeVisible();
