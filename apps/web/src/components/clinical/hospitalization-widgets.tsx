@@ -41,6 +41,11 @@ export function BedBoard({ items = [] }: { items?: HospitalizationBoardItem[] })
               <Link href={`/pacientes/${item.patient.id}/ficha`}>Ficha</Link>
             </Button>
             <Button asChild variant="outline" size="sm">
+              <Link href={`/hospitalizacion/pacientes/${item.patient.id}/ingreso`}>
+                Ingreso medico
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
               <Link href={`/hospitalizacion/pacientes/${item.patient.id}/hoja-diaria`}>
                 Hoja diaria
               </Link>
@@ -103,6 +108,12 @@ function HospitalRoundItem({ item }: { item: HospitalizationBoardItem }) {
             <Link href={`/pacientes/${item.patient.id}/ficha`}>
               <FileText className="h-4 w-4" />
               Ficha
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/hospitalizacion/pacientes/${item.patient.id}/ingreso`}>
+              <FileText className="h-4 w-4" />
+              Ingreso
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm">

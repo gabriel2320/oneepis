@@ -82,20 +82,31 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
                   </p>
                 ) : null}
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Fuente: lab_result
-                  <span className="mx-1">-</span>
                   {result.status === "entered_in_error"
                     ? "Corregido; fuera de tendencias"
-                    : `Estado: ${result.status}`}
+                    : result.numeric_value !== null && result.numeric_value !== undefined
+                      ? "Activo y graficable si la serie lo solicita"
+                      : "Activo, no graficable sin valor numerico"}
+                </p>
+                <p className="mt-1 break-all text-[11px] text-muted-foreground">
+                  Fuente: {labResultSourcePath(panel, result.id)}
                 </p>
               </div>
             ))}
           </div>
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Fuente: lab_panel - Resultados: {panel.results.length}
+            Fuente panel: {labPanelSourcePath(panel)} - Resultados: {panel.results.length}
           </p>
         </div>
       ))}
     </div>
   );
+}
+
+function labPanelSourcePath(panel: LabPanel) {
+  return `/api/v1/patients/${panel.patient_id}/lab-panels/${panel.id}`;
+}
+
+function labResultSourcePath(panel: LabPanel, resultId: string) {
+  return `${labPanelSourcePath(panel)}/results/${resultId}`;
 }

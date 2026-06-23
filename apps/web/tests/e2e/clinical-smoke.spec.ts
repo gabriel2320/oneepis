@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const demoPatientId = "11111111-1111-4111-8111-111111111111";
 const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
+const demoIntakeEntryId = "61111111-1111-4111-8111-111111111111";
 
 test("patients index renders clinical work queue", async ({ page }) => {
   await page.goto("/pacientes");
@@ -20,6 +21,9 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
   await expect(page.getByText("Hoja clinica viva")).toBeVisible();
   await expect(page.getByText("Linea clinica longitudinal")).toBeVisible();
+  await expect(page.getByText("Antecedentes clinicos")).toBeVisible();
+  await expect(page.getByText("Problema demo activo")).toBeVisible();
+  await expect(page.getByText("Faltantes declarados")).toBeVisible();
   await expect(page.getByRole("link", { name: "Ver papel", exact: true })).toBeVisible();
   await expect(page.getByText("Sugerencias Ollama")).toBeVisible();
   await expect(page.getByText(/Borrador IA/)).toBeVisible();
@@ -78,10 +82,20 @@ test("patient status screen renders governed edit form", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Guardar estado" })).toBeDisabled();
 });
 
+test("patient events expose curation presets for patient core", async ({ page }) => {
+  await page.goto(`/pacientes/${demoPatientId}/eventos`);
+
+  await expect(page.getByRole("heading", { name: "Eventos clinicos" })).toBeVisible();
+  await expect(page.getByText("Curaduria minima para ficha tradicional")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Diagnostico historico" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Procedimiento previo" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Antecedente familiar/social" })).toBeDisabled();
+});
+
 test("patient encounters render list and creation screen", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/encuentros`);
 
-  await expect(page.getByText("Encuentro demo")).toBeVisible();
+  await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Nuevo" })).toBeVisible();
 
   await page.goto(`/pacientes/${demoPatientId}/encuentros/nuevo`);
@@ -118,6 +132,17 @@ test("hospital rounds render active read-only worklist", async ({ page }) => {
   await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
   await expect(page.getByText("Ingreso sin cama demo")).toBeVisible();
   await expect(page.getByText("Sin hoja diaria para este ingreso")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Ingreso/ }).first()).toBeVisible();
+});
+
+test("hospital admission renders governed intake draft workspace", async ({ page }) => {
+  await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/ingreso`);
+
+  await expect(page.getByRole("heading", { name: "Ingreso medico hospitalario" })).toBeVisible();
+  await expect(page.getByText("Borrador de ingreso")).toBeVisible();
+  await expect(page.getByLabel("Hospitalizacion activa")).toContainText("Hospitalizacion demo");
+  await expect(page.getByText("Sin ingreso medico registrado")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar ingreso" })).toBeDisabled();
 });
 
 test("hospital daily sheet renders patient workspace", async ({ page }) => {
@@ -156,8 +181,10 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
 
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
   await expect(page.getByText("Encuentro ambulatorio y evolucion SOAP vinculada.")).toBeVisible();
-  await expect(page.getByText("Encuentro demo")).toBeVisible();
+  await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
+  await expect(page.getByText("Cierre de consulta")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Cerrar encuentro" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
 });
 
@@ -198,6 +225,10 @@ test("AI settings and print routes render", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
   await expect(page.getByText("Vista papel")).toBeVisible();
   await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+
+  await page.goto(`/print/hospitalizacion/pacientes/${demoPatientId}/ingreso/${demoIntakeEntryId}`);
+  await expect(page.getByRole("heading", { name: "Ingreso medico hospitalario" })).toBeVisible();
+  await expect(page.getByText("Ingreso administrativo demo")).toBeVisible();
 });
 
 test("login route renders local auth form", async ({ page }) => {

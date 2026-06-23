@@ -52,7 +52,7 @@ OneEpis debe sentirse como mesa clinica viva:
 - IA local util, silenciosa y trazable
 - dashboards, chat libre y modulos incompletos fuera del core
 
-## AI-Chart despues de R-01
+## AI-Chart despues de v0.4
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.
 Reglas para nuevos cambios:
@@ -63,18 +63,27 @@ Reglas para nuevos cambios:
 - mantener subpaneles de AI-Chart bajo presupuesto; si crecen, extraer secciones antes de sumar conducta
 - no sumar reglas clinicas al frontend; si una regla interpreta datos, vive en API
 - todo nuevo output debe tener fuente, faltante/limite, accion humana y auditoria
-- no tocar Ollama/API externa hasta cerrar Fase 1 del plan progresivo
+- no tocar Ollama/API externa durante `PROG-PATIENT-CORE-01`
 - crecimiento IA conversacional entra primero por el `AI Bridge` compartido; no crear Route Handlers paralelos sin necesidad
 - propuestas de escritura deben converger a `ClinicalPatch` revisable antes de persistir
 
 Foco actual:
 
-- Fase 1 queda cerrada y PR #1 fue mergeado; el siguiente avance debe ser micro-PR desde `main`
-- priorizar Assistant Read Layer de solo lectura antes de laboratorio estructurado amplio
-- si se toca Context Builder, debe ser una mejora explicable puntual dentro de Fase 2
+- `v0.4-assistant-read` queda cerrado, tagueado y con walkthrough humano aprobado
+- el avance activo es `PROG-PATIENT-CORE-01`
+- priorizar nucleo paciente tradicional, antecedentes leidos desde fuentes existentes y laboratorio sobrio
+- si se toca Context Builder, debe ser solo mantenimiento o explicacion puntual, no nueva IA
 - mantener `ClinicalPatch` simple: `clinical_event` y `evolution`
 - no aceptar `ClinicalPatch` sin confirmacion humana obligatoria ni evoluciones que no sean borrador
 - tratar estados de propuesta como flujo local + auditoria hasta decidir persistencia propia
 - no crear editor generico de patches
 - no extraer `packages/ai-core` hasta que haya duplicacion real
-- no ampliar a RAG, documentos ni IA externa antes de cerrar Assistant Read y su validacion humana
+- no ampliar a RAG, documentos ni IA externa antes de completar nucleo paciente tradicional
+
+Siguiente orden de ejecucion despues de antecedentes/laboratorio sobrio:
+
+1. escoger una sola superficie de `SCREEN_TREE` -> `Contratos minimos antes de UI amplia`
+2. implementar contrato o reutilizacion de entidad existente
+3. agregar UI minima solo despues de permisos/auditoria/tests
+4. agregar papel carta solo si produce documento clinico
+5. mantener agenda, ingreso medico y epicrisis en PRs separados

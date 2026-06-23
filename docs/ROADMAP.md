@@ -6,7 +6,7 @@ cronologica para humanos y agentes.
 
 ## Estado actual
 
-Fecha de corte: 2026-06-22.
+Fecha de corte: 2026-06-23.
 
 OneEpis ya tiene una base clinica E2E real:
 
@@ -134,6 +134,26 @@ OneEpis ya tiene una base clinica E2E real:
 - La IA por pantalla queda cerrada por `ScreenCapability`; sin capability no se ejecuta intencion IA.
 - El walkthrough humano fue aprobado el 2026-06-23.
 - El changelog del release vive en `CHANGELOG.md`.
+- El tag `v0.4-assistant-read` queda publicado sobre `main`.
+
+### PROG-PATIENT-CORE-01: nucleo paciente tradicional
+
+- Se cierra la expansion IA y se vuelve al tronco de ficha tradicional.
+- La ficha inicia antecedentes clinicos de solo lectura desde problemas, alergias,
+  medicacion y eventos curados, sin ruta nueva ni backend nuevo.
+- La pantalla de eventos agrega curaduria minima para antecedentes, diagnosticos,
+  procedimientos y planes usando `clinical_events`.
+- Laboratorio queda como lectura sobria en ficha/AI-Chart, con fuente especifica
+  por panel/resultado y sin dashboard dedicado.
+- Atencion ambulatoria agrega cierre administrativo minimo del encuentro usando
+  el contrato existente de `ClinicalEncounter`; no equivale a firma ni receta.
+- Ingreso medico hospitalario entra como borrador `ClinicalEntry(kind=intake)`
+  vinculado a hospitalizacion activa, con papel carta propio por ID estricto.
+- Agenda real, epicrisis y papel firmado/legal quedan pendientes de contrato
+  backend antes de UI amplia.
+- El mapa maestro registra contratos minimos bloqueantes para agenda real,
+  atencion ambulatoria cerrable, ingreso medico hospitalario, epicrisis borrador
+  y papel tradicional.
 
 ## Principios aprendidos
 
@@ -146,12 +166,15 @@ OneEpis ya tiene una base clinica E2E real:
 
 ## Proximo rumbo
 
-El siguiente crecimiento recomendado despues de PR-066 y AI-Chart Core:
+El siguiente crecimiento recomendado despues de `v0.4-assistant-read`:
 
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard;
 - no crear dashboard nuevo ni laboratorio visual pegado al core;
 - mantener paciente, ficha y papel como centro.
-- evolucionar AI-Chart como memoria clinica activa, no como chat generico.
+- congelar nueva IA hasta completar el nucleo paciente tradicional.
+- complejizar antecedentes, diagnosticos historicos y linea longitudinal dentro de ficha.
+- preparar contratos de agenda, ingreso medico y epicrisis antes de crear UI amplia.
+- elegir solo uno de esos contratos por PR cuando empiece la implementacion.
 - seguir `docs/AI_CHART_INTERACTION_VISION.md` para intenciones clinicas, fuentes, certeza, faltantes, confirmacion humana y gateway externo futuro.
 - tratar `docs/SIMULATED_CLINICAL_INTELLIGENCE.md` como Nivel 0 obligatorio: reglas, plantillas, timeline, validadores, preferencias y auditoria antes de depender de Ollama.
 - usar `docs/GOVERNANCE.md` como mapa de decision para evitar inflar codigo o documentos.

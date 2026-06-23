@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { API_ACTOR, apiFetch, getStoredAuthToken } from "@/lib/api/client";
 import type {
   ActiveProblem,
   ActiveProblemCreate,
@@ -46,11 +46,13 @@ import type {
   VitalSignCreate,
   VitalSignUpdate,
 } from "@/lib/types";
-import { API_ACTOR, getStoredAuthToken } from "@/lib/api/client";
 
 export function listClinicalEntries(patientId: string) {
   return apiFetch<ClinicalEntry[]>(`/api/v1/patients/${patientId}/clinical-entries?limit=50`);
 }
+
+export const getClinicalEntry = (patientId: string, entryId: string) =>
+  apiFetch<ClinicalEntry>(`/api/v1/patients/${patientId}/clinical-entries/${entryId}`);
 
 export function createClinicalEntry(patientId: string, payload: ClinicalEntryCreate) {
   return apiFetch<ClinicalEntry>(`/api/v1/patients/${patientId}/clinical-entries`, {
