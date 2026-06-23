@@ -125,6 +125,16 @@ OneEpis ya tiene una base clinica E2E real:
 - El borrador SOAP desde eventos se muestra como hoja carta editable con margen inteligente persistente.
 - El principio sigue siendo Nivel 0 primero: la ficha debe ser util aunque Ollama este apagado.
 
+### Release v0.4-assistant-read
+
+- Assistant Read quedo como capa de lectura clinica de solo lectura dentro de AI-Chart.
+- Timeline, busqueda, series y correlacion exponen fuentes, limites y datos faltantes.
+- Laboratorio estructurado minimo se lee en Assistant Read y en la ficha sin pantalla nueva ni dashboard.
+- La ficha muestra una linea de tiempo completa minima usando eventos y evoluciones existentes.
+- La IA por pantalla queda cerrada por `ScreenCapability`; sin capability no se ejecuta intencion IA.
+- El walkthrough humano fue aprobado el 2026-06-23.
+- El changelog del release vive en `CHANGELOG.md`.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.

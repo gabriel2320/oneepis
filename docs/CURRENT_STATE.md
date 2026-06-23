@@ -294,7 +294,7 @@ Release gates demo:
 - Checklist `v0.4-assistant-read`: paciente, hospitalizacion, evolucion, signo vital, evento clinico, laboratorio estructurado reciente, AI-Chart/Assistant Read, impresion y auditoria.
 - Criterios `v0.4`: fuentes inspeccionables, limites/faltantes visibles, cero escritura automatica, cero chat libre, cero RAG, cero IA externa activa y compatibilidad `lab_results` + `clinical_events.exam_result`.
 - Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
-- Estado `v0.4-assistant-read`: candidato automatizado; el tag final queda pendiente de walkthrough humano.
+- Estado `v0.4-assistant-read`: walkthrough humano aprobado el 2026-06-23; listo para tag final si CI remoto se mantiene verde.
 - Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
 - Pantallas preparadas no cuentan como feature completa: `/consulta/agenda`, resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
 - Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
@@ -316,8 +316,8 @@ Accesibilidad, performance y observabilidad pendientes:
 - Seguridad CI: job `security-report` report-only con gitleaks, dependency review, CodeQL, `npm audit` y `pip-audit`; no bloquea merge durante piloto salvo decision explicita posterior.
 - Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y superficies futuras por modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Siguiente paso recomendado: ejecutar walkthrough humano de `v0.4-assistant-read`, corregir hallazgos y preparar tag/changelog.
-- Siguiente bloque de producto despues de `v0.4`: correccion controlada de laboratorio o carga acotada, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
+- Release `v0.4-assistant-read`: changelog creado y walkthrough humano aprobado el 2026-06-23.
+- Siguiente bloque de producto despues de `v0.4`: nucleo paciente tradicional y laboratorio/ficha sobria, sin nueva IA ni dashboard.
 
 ## Historial
 
