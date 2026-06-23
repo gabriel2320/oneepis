@@ -225,6 +225,33 @@ Trabajo permitido:
 - laboratorio sobrio con fuente especifica por panel/resultado
 - contratos futuros para agenda avanzada, firma/cierre legal de epicrisis y papel antes de UI amplia
 
+Avances ya mergeados de este programa:
+
+- PR #15: agenda ambulatoria minima con `ClinicalAppointment`
+- PR #16: resumen ambulatorio real de solo lectura
+- PR #17: indice de documentos/papel existente
+
+Siguiente bloque obligatorio antes de otra feature: `PROG-CONSOLIDATE-01`.
+
+## PROG-CONSOLIDATE-01
+
+Estado: activo inmediato.
+
+Objetivo: consolidar #15-#17, aprender de errores y preparar avance automatico
+sin abrir nueva superficie clinica.
+
+Trabajo permitido:
+
+- reconciliar documentos canonicos
+- extraer componentes web cercanos al limite de tamano
+- reforzar `check:size` con reporte near-limit no bloqueante
+- documentar cola de avance automatico
+
+Fuera de alcance:
+
+- API/OpenAPI/modelos nuevos
+- IA nueva, dashboards, adjuntos, firma, receta valida o preconsulta implementada
+
 Fuera de alcance:
 
 - nueva IA, chat libre, RAG, IA externa o dashboard
@@ -248,10 +275,10 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. `PROG-PATIENT-CORE-01`: antecedentes de solo lectura en ficha.
-2. Curaduria minima de eventos sin nueva tabla.
-3. Laboratorio sobrio con fuentes especificas, sin dashboard.
-4. Contratos futuros de agenda avanzada, firma/cierre legal de epicrisis y papel amplio antes de UI amplia.
+1. `PROG-CONSOLIDATE-01`: docs, poda preventiva, guardrails y cola automatica.
+2. `PROG-AMB-PRECONSULTA-00`: contrato docs-only antes de implementar preconsulta.
+3. `PROG-CLINICAL-RISK-00`: contrato docs-only de riesgos clinicos.
+4. `PROG-AMB-PRECONSULTA-01`: implementacion minima solo despues del contrato aprobado.
 5. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
 
 Hecho en este foco:

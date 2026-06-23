@@ -20,6 +20,13 @@ Estados permitidos:
 
 Las pantallas preparadas o bloqueadas no cuentan como feature final.
 
+Avances `v0.5-patient-core` ya consolidados:
+
+- PR #15 promovio `/consulta/agenda` a agenda minima persistida.
+- PR #16 promovio `/consulta/pacientes/[patientId]/resumen` a lectura ambulatoria real.
+- PR #17 promovio `/pacientes/[patientId]/documentos` a indice de papel existente.
+- Adjuntos externos, consentimientos, receta valida, firma y agenda avanzada siguen futuras/bloqueadas aunque existan accesos de lectura o papel.
+
 La matriz documental se refleja operativamente en el Screen Capability Registry
 frontend. Cada ruta visible debe existir aqui y en `apps/web/src/lib/screen-capabilities.ts`.
 El gate `npm run check:screens` valida ambos lados.
@@ -144,6 +151,7 @@ tener contrato minimo y flujo humano verificable.
 | Diagnosticos historicos | extension de problemas | contrato que separe problema activo, diagnostico historico y codificacion | no mezclar estado activo con diagnostico cerrado |
 | Ambulatorio minimo | `/consulta/agenda` | `ClinicalAppointment` con estados reales | implementado como agenda persistida; admision/preconsulta queda futura |
 | Consulta completa | `/consulta/pacientes/[patientId]/atencion` | cierre de encuentro, diagnostico/plan y documento si aplica | SOAP/plan/cierre con auditoria y sin receta valida automatica |
+| Resumen ambulatorio | `/consulta/pacientes/[patientId]/resumen` | lectura de record, citas y encuentros existentes | implementado como vista de lectura; seguimiento formal queda futuro |
 | Hospitalizacion critica | ingreso medico | `ClinicalEntry(kind=intake)` vinculado a encuentro hospitalario | papel carta, borrador y auditoria implementados; firma/cierre legal futuros |
 | Evolucion hospitalaria | hoja diaria/evolucion por problema | entradas por problema vinculadas a ingreso | no reemplazar firma real; mantener borrador trazable |
 | Alta/epicrisis | epicrisis borrador | `ClinicalEntry(kind=discharge_summary)` vinculado a hospitalizacion activa | salida imprimible como borrador no firmado; firma/cierre legal futuros |
@@ -151,6 +159,7 @@ tener contrato minimo y flujo humano verificable.
 | Imagenes/informes | informes como documentos clinicos | contrato documental o resultado estructurado minimo | no crear PACS ni visor complejo |
 | Seguridad clinica | alertas/riesgos | contrato por riesgo/evento y severidad | fuente, severidad, limite y accion humana |
 | Papel tradicional | ingreso, evolucion, indicacion, epicrisis | estado documental, actor/fecha si existen y ruta print | hoja carta, sin fallback silencioso y footer de desarrollo si no firmado |
+| Indice de documentos | `/pacientes/[patientId]/documentos` | rutas print existentes y entradas del record | implementado como indice; adjuntos externos y consentimientos quedan futuros |
 
 ## Contratos minimos antes de UI amplia
 

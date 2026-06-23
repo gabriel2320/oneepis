@@ -66,6 +66,7 @@ Reglas:
 - El guard `npm run check:screens` debe fallar si una ruta visible queda sin fila documentada, sin `ScreenCapability` o duplicada en el mapa/registry.
 - Una pantalla preparada debe mostrar su estado pendiente en UI y quedar cubierta por E2E si es visible.
 - Una pantalla completa exige contrato backend antes de UI amplia si maneja datos clinicos nuevos.
+- Una pantalla promovida a completa debe actualizar en el mismo PR: `docs/SCREEN_TREE.md`, Screen Capability Registry, E2E smoke y `docs/CURRENT_STATE.md`.
 - Si escribe, debe tener permisos, auditoria, actor, `correlation_id`, OpenAPI y test API.
 - Si produce documento clinico, debe tener papel carta o declarar explicitamente que no tiene papel aun.
 - No se promueve una pantalla por apariencia: debe cerrar un acto clinico real.
@@ -127,6 +128,20 @@ Regla para el siguiente bloque clinico tradicional:
 - recien despues agregar UI minima y papel si la superficie produce documento clinico
 - no mezclar agenda, ingreso medico y epicrisis en el mismo PR
 - si la superficie no cumple su contrato, permanece `preparada`, `futura` o `bloqueada`
+
+## Lecciones Post #15-#17
+
+Los avances de agenda, resumen ambulatorio e indice de papel mostraron errores
+evitables que no deben repetirse:
+
+- no promover una ruta sin reconciliar todos los documentos canonicos afectados
+- no dejar textos de pantalla preparada cuando la UI ya muestra datos reales
+- no usar selectores E2E ambiguos si el mismo texto aparece en badges,
+  descripciones o listas; usar `exact: true` o scope por card/region
+- no seguir agregando comportamiento a archivos entre 300 y 350 lineas; primero
+  extraer componentes pequenos y luego agregar funcionalidad
+- no contar adjuntos, firma, receta valida o consentimientos como completos solo
+  porque exista un indice de papel
 
 ## Seguridad CI Report-Only
 
