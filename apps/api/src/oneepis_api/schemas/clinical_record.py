@@ -57,6 +57,12 @@ from oneepis_api.schemas.clinical_record_contracts.assistant import (
     AssistantTimelineItemType,
     AssistantTimelineResponse,
 )
+from oneepis_api.schemas.clinical_record_contracts.clinical_risk import (
+    ClinicalRiskBase,
+    ClinicalRiskCreate,
+    ClinicalRiskRead,
+    ClinicalRiskUpdate,
+)
 from oneepis_api.schemas.clinical_record_contracts.entries_events import (
     ClinicalEntryBase,
     ClinicalEntryCreate,
@@ -170,6 +176,10 @@ __all__ = [
     "ClinicalPatchSource",
     "ClinicalPatchTarget",
     "ClinicalProblemContext",
+    "ClinicalRiskBase",
+    "ClinicalRiskCreate",
+    "ClinicalRiskRead",
+    "ClinicalRiskUpdate",
     "ClinicalReviewItem",
     "ClinicalReviewItemDecisionRequest",
     "ClinicalReviewItemDecisionResponse",

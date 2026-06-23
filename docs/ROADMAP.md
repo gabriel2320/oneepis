@@ -234,13 +234,24 @@ OneEpis ya tiene una base clinica E2E real:
 
 ### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
 
-- Estado: contrato docs-only definido antes de implementar.
-- Decision: crear entidad futura de riesgos clinicos si se implementa; no usar
-  `ActiveProblem` para mezclar diagnosticos con riesgos activos.
-- Alcance futuro permitido: riesgos de caida, UPP, TEV, aislamiento, evento
+- Estado: contrato docs-only definido y promovido por `PROG-CLINICAL-RISK-01`.
+- Decision: crear entidad propia de riesgos clinicos; no usar `ActiveProblem`
+  para mezclar diagnosticos con riesgos activos.
+- Alcance implementado minimo: riesgos de caida, UPP, TEV, aislamiento, evento
   adverso y otros, con severidad, estado, fuente y accion humana.
 - Fuera de alcance: scores automaticos, ordenes, receta, firma, IA externa,
   dashboard global o `ClinicalPatch`.
+
+### PROG-CLINICAL-RISK-01: riesgos clinicos minimos
+
+- Estado: implementado como minimo gobernado.
+- Decision: agregar `ClinicalRisk` bajo paciente con API, permisos, auditoria,
+  OpenAPI, tipos TS y tarjeta compacta dentro de ficha.
+- Resultado: listar, crear, leer y corregir riesgos; `solo_lectura` solo lee,
+  `enfermeria/medico/admin/dev` escriben, las fuentes referenciadas deben
+  pertenecer al paciente y no existe `DELETE`.
+- Fuera de alcance: dashboard de seguridad, scores, aislamientos automaticos,
+  IA nueva, `ClinicalPatch`, receta, firma u orden ejecutable.
 
 ## Principios aprendidos
 

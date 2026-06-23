@@ -6,6 +6,7 @@ import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiInsightPanel } from "@/components/clinical/ai-insight-panel";
 import { AiSafetyPanel } from "@/components/clinical/ai-safety-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { ClinicalRiskPreview } from "@/components/clinical/clinical-risk-preview";
 import { FullTimelinePreview } from "@/components/clinical/full-timeline-preview";
 import { LabResultsPreview } from "@/components/clinical/lab-results-preview";
 import { PatientAntecedentsPreview } from "@/components/clinical/patient-antecedents-preview";
@@ -33,7 +34,12 @@ import { EmptyState, ErrorState } from "@/components/clinical/states";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { DEMO_MODE } from "@/lib/api/client";
-import { canManageClinicalEntries, canManagePatient, canUseClinicalAi } from "@/lib/permissions";
+import {
+  canManageClinicalEntries,
+  canManageClinicalRisks,
+  canManagePatient,
+  canUseClinicalAi,
+} from "@/lib/permissions";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 import {
@@ -88,6 +94,7 @@ function PatientSectionContent({
   const canWriteSoap = canManageClinicalEntries(user);
   const canUseAi = canUseClinicalAi(user);
   const canEditPatient = canManagePatient(user);
+  const canWriteRisks = canManageClinicalRisks(user);
 
   if (section === "ficha") {
     return (
@@ -141,6 +148,7 @@ function PatientSectionContent({
             <ClinicalSectionCard title="Medicacion activa">
               <MedicationList medications={record.active_medications} />
             </ClinicalSectionCard>
+            <ClinicalRiskPreview patientId={patientId} canWrite={canWriteRisks} />
             <LabResultsPreview patientId={patientId} />
             <PatientAiSuggestionsPanel patientId={patientId} canUseAi={canUseAi} />
           </aside>

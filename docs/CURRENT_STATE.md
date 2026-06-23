@@ -65,9 +65,9 @@ Estado real al 2026-06-23:
 - la preconsulta minima queda limitada a permisos existentes `medico/admin/dev`;
   `enfermeria` queda aprobada solo para PR backend/permisos/tests y `admision`
   sigue futura hasta existir rol administrativo
-- `PROG-CLINICAL-RISK-00` define contrato docs-only de riesgos clinicos;
-  riesgos siguen futuros hasta un PR con entidad/API bajo paciente, permisos,
-  auditoria, registry, UI minima y E2E
+- `PROG-CLINICAL-RISK-01` implementa riesgos clinicos minimos con entidad/API
+  bajo paciente, permisos, auditoria, OpenAPI, UI compacta en ficha y E2E
+  visible; no crea dashboard, scores automaticos ni IA nueva
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -107,6 +107,7 @@ Dominios CRUD:
 - clinical entries con vinculo opcional a encuentro
 - clinical events como hechos longitudinales
 - laboratorio/examenes estructurados minimos como paneles y resultados
+- riesgos clinicos minimos
 - problemas activos
 - alergias
 - medicacion
@@ -270,12 +271,20 @@ Documentos/papel:
 
 Seguridad clinica:
 
-- riesgos clinicos estructurados tienen contrato minimo: caida, UPP, TEV,
+- riesgos clinicos estructurados tienen implementacion minima: caida, UPP, TEV,
   aislamiento, evento adverso y otro
-- la fuente futura debe ser inspeccionable y cada alerta debe mostrar severidad,
-  estado, razon, limite y accion humana
-- no existe todavia modelo, endpoint ni UI de riesgos; no hay dashboard de
-  seguridad ni automatizacion por IA
+- existe `ClinicalRisk` con paciente, encuentro opcional, tipo, severidad,
+  estado, fuente inspeccionable, razon, accion humana, revision y `created_by`
+- existe API bajo paciente para listar, crear, leer y corregir riesgos; no
+  existe ruta global `/risks` ni dashboard de seguridad
+- lectura usa permisos de ficha, incluyendo `solo_lectura`; escritura usa
+  `admin`, `medico`, `enfermeria` o `dev`
+- cada escritura genera auditoria `clinical_risk.created` o
+  `clinical_risk.updated` con `before/after` cuando aplica
+- la ficha muestra una tarjeta compacta de riesgos activos; demo declara que no
+  simula seguridad clinica productiva
+- no hay scores automaticos, no hay bloqueo clinico inferido, no hay IA nueva y
+  no existe `ClinicalPatch` para riesgos
 
 ## Frontend
 
@@ -299,6 +308,7 @@ Capas:
 - `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
 - `/pacientes/[patientId]/medicacion` integra vademecum local, favoritos, sugeridos deterministicas, historial y copia de indicaciones previas como borrador humano
 - `/pacientes/[patientId]/medicacion/nueva` valida dosis contra reglas curadas y exige justificacion si hay bloqueo antes de guardar
+- `/pacientes/[patientId]/ficha` muestra riesgos clinicos minimos en el riel contextual; permite registro manual y marcar resuelto solo con permisos
 - `/pacientes/[patientId]/ai-chart` muestra inteligencia simulada, intenciones clinicas, propuestas revisables y hoja SOAP editable con margen inteligente
 - AI-Chart muestra un flujo visual guiado: leer contexto, seleccionar evidencia, revisar propuestas, generar borrador SOAP y confirmar como borrador no firmado
 - AI-Chart envia la barra clinica al BFF de Next, que delega la resolucion estructurada en FastAPI y transmite eventos tipados JSONL con AI SDK
@@ -333,6 +343,8 @@ Tests API:
 - fixtures compartidas en `apps/api/tests/conftest.py`
 - cobertura paciente separada por dominios: ficha, permisos, auditoria, IA y encuentros
 - cobertura hospitalizacion separada por board, camas y hoja diaria
+- cobertura de riesgos clinicos prueba permisos, ownership, fuente de otro
+  paciente, auditoria `before/after` y ausencia de `DELETE`
 - `ClinicalPatch` cubre aceptacion, rechazo, target no soportado, bloqueo por falta de confirmacion humana y bloqueo de evolucion no borrador; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported` o `ai.clinical_patch.blocked`
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:

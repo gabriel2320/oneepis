@@ -280,10 +280,11 @@ Reglas de ejecucion:
 | 4 | `PROG-AMB-PRECONSULTA-PERMISSIONS-00` | `codex/preconsult-permissions-decision` | `[codex] decide preconsult permissions path` | `npm run check:size` | decision docs-only: enfermeria aprobada para PR backend; admision administrativa futura |
 | 5 | `PROG-AMB-PRECONSULTA-PERMISSIONS-01` | `codex/preconsult-nursing-permissions` | `[codex] allow nursing preconsult backend` | `npm run check:api`, `npm run check:web`, `npm run check:contract` | backend/permisos/tests habilitan enfermeria sin ruta nueva ni rol admision |
 | 6 | `PROG-CLINICAL-RISK-01` | `codex/clinical-risk-minimal` | `[codex] implement minimal clinical risks` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/OpenAPI/UI compacta listas, sin dashboard ni IA |
+| 7 | `PROG-PATIENT-CORE-NEXT-00` | `codex/patient-core-next-plan` | `[codex] plan next patient core block` | `npm run check:size` | decidir si sigue linea de tiempo avanzada, antecedentes estructurados o enfermeria en preconsulta |
 
 Bloques ya cerrados en esta cola: `PROG-CONSOLIDATE-01`,
-`PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00` y
-`PROG-AMB-PRECONSULTA-01`.
+`PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00`,
+`PROG-AMB-PRECONSULTA-01` y `PROG-CLINICAL-RISK-01`.
 
 ## PROG-AMB-PRECONSULTA-00
 
@@ -458,7 +459,7 @@ Gates de cierre:
 
 ## PROG-CLINICAL-RISK-00
 
-Estado: contrato docs-only definido.
+Estado: contrato docs-only definido y promovido por `PROG-CLINICAL-RISK-01`.
 
 Objetivo: definir riesgos clinicos estructurados antes de crear UI, API o
 tablas.
@@ -492,9 +493,43 @@ Fuera de alcance:
 Gates para promover a implementacion:
 
 - `docs/SCREEN_TREE.md` contiene el contrato minimo
-- `docs/CURRENT_STATE.md` declara que riesgos siguen futuros hasta PR de API/UI
+- `docs/CURRENT_STATE.md` declara estado real de riesgos tras PR de API/UI
 - `docs/GOVERNANCE.md` mantiene reglas de no automatizacion y fuente visible
 - `npm run check:size` verde
+
+## PROG-CLINICAL-RISK-01
+
+Estado: implementado como minimo gobernado.
+
+Objetivo: crear riesgos clinicos minimos sin abrir dashboard, scores automaticos
+ni IA nueva.
+
+Resultado:
+
+- entidad `ClinicalRisk` con paciente, encuentro opcional, tipo, severidad,
+  estado, fuente, razon, accion humana, revision, creador y timestamps
+- API bajo paciente: listar, crear, leer y corregir riesgos
+- sin endpoint `DELETE` y sin ruta global `/risks`
+- permisos: lectura de ficha, escritura para `admin`, `medico`, `enfermeria` y
+  `dev`; `solo_lectura` no escribe
+- validacion de pertenencia para paciente, encuentro y fuentes referenciadas
+- auditoria `clinical_risk.created` y `clinical_risk.updated` con snapshots
+  `before/after`
+- OpenAPI actualizado y tipos TS minimos separados de `clinical-record.ts`
+- tarjeta compacta de riesgos en ficha con registro manual y marcar resuelto
+- demo honesta: no simula seguridad clinica productiva
+
+Fuera de alcance:
+
+- dashboard de seguridad, scores, reglas automaticas, aislamientos automaticos,
+  ordenes, receta, firma, IA nueva o `ClinicalPatch`
+
+Gates de cierre:
+
+- `npm run check:api`
+- `npm run check:web`
+- `npm run check:contract`
+- smoke E2E visible de ficha
 
 ## Plan post-auditoria 2026-06-23
 
@@ -512,9 +547,10 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. Cerrar `PROG-AMB-PRECONSULTA-PERMISSIONS-00` con PR verde.
-2. Si se continua preconsulta: `PROG-AMB-PRECONSULTA-PERMISSIONS-01` backend/permisos para enfermeria.
-3. Si se congela preconsulta: avanzar a `PROG-CLINICAL-RISK-01`.
+1. Cerrar `PROG-CLINICAL-RISK-01` con PR verde.
+2. Decidir el siguiente bloque paciente-core: linea de tiempo avanzada,
+   antecedentes estructurados minimos o permiso de enfermeria para preconsulta.
+3. Evitar nueva IA hasta cerrar otro tramo tradicional.
 
 Hecho en este foco:
 

@@ -9,6 +9,7 @@ from oneepis_api.models.clinical_record import (
     Medication,
     VitalSign,
 )
+from oneepis_api.models.clinical_risk import ClinicalRisk
 from oneepis_api.models.hospitalization import HospitalBed, HospitalDailySheet, HospitalIndication
 from oneepis_api.models.lab import LabPanel, LabResult
 from oneepis_api.models.medication_catalog import MedicationCatalogItem, MedicationDoseRule
@@ -21,6 +22,7 @@ __all__ = [
     "ClinicalAppointment",
     "ClinicalEvent",
     "ClinicalEntry",
+    "ClinicalRisk",
     "LabPanel",
     "LabResult",
     "HospitalBed",
