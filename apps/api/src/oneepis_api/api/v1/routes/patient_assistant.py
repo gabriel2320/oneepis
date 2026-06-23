@@ -14,11 +14,16 @@ from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
     ClinicalEntry,
     ClinicalEvent,
+    ClinicalEventType,
     Medication,
     RecordStatus,
     VitalSign,
 )
 from oneepis_api.schemas.clinical_record import (
+    AssistantChartPoint,
+    AssistantChartRequest,
+    AssistantChartResponse,
+    AssistantChartSeries,
     AssistantSearchResponse,
     AssistantSearchResult,
     AssistantTimelineItem,
@@ -29,6 +34,14 @@ from .patient_shared import PATIENT_ROUTER_OPTIONS, LimitQuery, SessionDep, requ
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 AssistantSearchQuery = Annotated[str, Query(alias="q", min_length=2, max_length=120)]
+VITAL_CHART_SERIES = {
+    "temperature_c": ("Temperatura", "C", "temperature_c"),
+    "systolic_bp": ("Presion sistolica", "mmHg", "systolic_bp"),
+    "diastolic_bp": ("Presion diastolica", "mmHg", "diastolic_bp"),
+    "heart_rate_bpm": ("Frecuencia cardiaca", "lpm", "heart_rate_bpm"),
+    "respiratory_rate_bpm": ("Frecuencia respiratoria", "rpm", "respiratory_rate_bpm"),
+    "oxygen_saturation_pct": ("Saturacion O2", "%", "oxygen_saturation_pct"),
+}
 
 
 @router.get("/{patient_id}/assistant/timeline", response_model=AssistantTimelineResponse)
@@ -270,6 +283,57 @@ def search_assistant_read_layer(
         missing_data=_search_missing_data(results),
         warnings=_search_warnings(has_more=has_more, limit=limit),
         limit=limit,
+        has_more=has_more,
+    )
+
+
+@router.post("/{patient_id}/assistant/chart", response_model=AssistantChartResponse)
+def get_assistant_chart_data(
+    patient_id: uuid.UUID,
+    payload: AssistantChartRequest,
+    session: SessionDep,
+) -> AssistantChartResponse:
+    require_patient(session, patient_id)
+    selected = {_normalize_series_key(series) for series in payload.series if series.strip()}
+    query_limit = payload.limit + 1
+    vitals = list(
+        session.scalars(
+            select(VitalSign)
+            .where(VitalSign.patient_id == patient_id)
+            .order_by(VitalSign.measured_at.desc())
+            .limit(query_limit)
+        )
+    )
+    exam_events = list(
+        session.scalars(
+            select(ClinicalEvent)
+            .where(
+                ClinicalEvent.patient_id == patient_id,
+                ClinicalEvent.event_type == ClinicalEventType.EXAM_RESULT,
+            )
+            .order_by(ClinicalEvent.occurred_at.desc())
+            .limit(query_limit)
+        )
+    )
+    series = [
+        *_vital_chart_series(patient_id, list(reversed(vitals)), selected),
+        *_exam_chart_series(patient_id, list(reversed(exam_events)), selected),
+    ]
+    has_more = len(vitals) > payload.limit or len(exam_events) > payload.limit
+    return AssistantChartResponse(
+        patient_id=patient_id,
+        series=series,
+        missing_data=_chart_missing_data(
+            series=series,
+            vitals=vitals,
+            exam_events=exam_events,
+        ),
+        warnings=_chart_warnings(
+            selected=selected,
+            has_more=has_more,
+            limit=payload.limit,
+        ),
+        limit=payload.limit,
         has_more=has_more,
     )
 
@@ -590,6 +654,79 @@ def _allergy_search_results(
     ]
 
 
+def _vital_chart_series(
+    patient_id: uuid.UUID,
+    vitals: list[VitalSign],
+    selected: set[str],
+) -> list[AssistantChartSeries]:
+    include_all = not selected
+    series = []
+    for key, (label, unit, attribute) in VITAL_CHART_SERIES.items():
+        if not include_all and key not in selected:
+            continue
+        points = [
+            AssistantChartPoint(
+                occurred_at=vital.measured_at,
+                value=value,
+                source_type="vital_sign",
+                source_id=vital.id,
+                source_path=f"/api/v1/patients/{patient_id}/vital-signs/{vital.id}",
+                note=vital.notes,
+            )
+            for vital in vitals
+            if (value := _numeric_value(getattr(vital, attribute))) is not None
+        ]
+        if points:
+            series.append(
+                AssistantChartSeries(
+                    key=key,
+                    label=label,
+                    unit=unit,
+                    source_label="vital_signs",
+                    points=points,
+                )
+            )
+    return series
+
+
+def _exam_chart_series(
+    patient_id: uuid.UUID,
+    events: list[ClinicalEvent],
+    selected: set[str],
+) -> list[AssistantChartSeries]:
+    include_all = not selected or "exam_result" in selected
+    grouped: dict[str, AssistantChartSeries] = {}
+    for event in events:
+        for result in _exam_results(event.payload):
+            marker = _exam_marker(result)
+            value = _numeric_value(result.get("value"))
+            if marker is None or value is None:
+                continue
+            key = f"exam:{_normalize_series_key(marker)}"
+            if not include_all and key not in selected:
+                continue
+            series = grouped.setdefault(
+                key,
+                AssistantChartSeries(
+                    key=key,
+                    label=marker,
+                    unit=_payload_text(result.get("unit")),
+                    source_label="clinical_events.exam_result",
+                ),
+            )
+            series.points.append(
+                AssistantChartPoint(
+                    occurred_at=event.occurred_at,
+                    value=value,
+                    source_type="clinical_event",
+                    source_id=event.id,
+                    source_path=f"/api/v1/patients/{patient_id}/clinical-events",
+                    note=event.summary,
+                )
+            )
+    return list(grouped.values())
+
+
 def _entry_sections(entry: ClinicalEntry) -> list[str]:
     return [
         text
@@ -679,6 +816,38 @@ def _search_warnings(*, has_more: bool, limit: int) -> list[str]:
     return [f"Busqueda limitada a {limit} resultados; afina la consulta o abre dominios fuente."]
 
 
+def _chart_missing_data(
+    *,
+    series: list[AssistantChartSeries],
+    vitals: list[VitalSign],
+    exam_events: list[ClinicalEvent],
+) -> list[str]:
+    missing = []
+    if not vitals:
+        missing.append("No hay signos vitales estructurados para graficar.")
+    if not exam_events:
+        missing.append("No hay eventos exam_result estructurados para graficar.")
+    if not series:
+        missing.append("No hay datos numericos graficables para las series solicitadas.")
+    return missing
+
+
+def _chart_warnings(*, selected: set[str], has_more: bool, limit: int) -> list[str]:
+    warnings = []
+    unsupported = sorted(
+        series
+        for series in selected
+        if series not in VITAL_CHART_SERIES
+        and series != "exam_result"
+        and not series.startswith("exam:")
+    )
+    if unsupported:
+        warnings.append(f"Series no soportadas: {', '.join(unsupported)}.")
+    if has_more:
+        warnings.append(f"Datos graficables limitados a {limit} registros por dominio.")
+    return warnings
+
+
 def _match_columns(pattern: str, *columns: object):
     return or_(*(column.ilike(pattern, escape="\\") for column in columns))
 
@@ -714,6 +883,37 @@ def _collapse(value: str) -> str:
 def _normalize_for_match(value: str) -> str:
     decomposed = normalize("NFD", value.casefold())
     return "".join(character for character in decomposed if not combining(character))
+
+
+def _normalize_series_key(value: str) -> str:
+    return _normalize_for_match(value.strip()).replace(" ", "_")
+
+
+def _numeric_value(value: object) -> float | None:
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _exam_results(payload: dict[str, object]) -> list[dict[str, object]]:
+    raw_results = payload.get("results")
+    if isinstance(raw_results, list):
+        return [result for result in raw_results if isinstance(result, dict)]
+    return [payload]
+
+
+def _exam_marker(payload: dict[str, object]) -> str | None:
+    return _payload_text(payload.get("code") or payload.get("name") or payload.get("marker"))
+
+
+def _payload_text(value: object | None) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
 
 
 def _truncate(value: str, max_length: int = 320) -> str:

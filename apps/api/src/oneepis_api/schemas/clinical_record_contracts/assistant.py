@@ -39,6 +39,38 @@ class AssistantTimelineResponse(APIModel):
     applies_changes: bool = False
 
 
+class AssistantChartRequest(APIModel):
+    series: list[str] = Field(default_factory=list, max_length=16)
+    limit: int = Field(default=100, ge=1, le=500)
+
+
+class AssistantChartPoint(APIModel):
+    occurred_at: datetime
+    value: float
+    source_type: Literal["vital_sign", "clinical_event"]
+    source_id: uuid.UUID
+    source_path: str = Field(min_length=1, max_length=240)
+    note: str | None = Field(default=None, max_length=160)
+
+
+class AssistantChartSeries(APIModel):
+    key: str = Field(min_length=1, max_length=80)
+    label: str = Field(min_length=1, max_length=160)
+    unit: str | None = Field(default=None, max_length=40)
+    source_label: str = Field(min_length=1, max_length=160)
+    points: list[AssistantChartPoint] = Field(default_factory=list)
+
+
+class AssistantChartResponse(APIModel):
+    patient_id: uuid.UUID
+    series: list[AssistantChartSeries] = Field(default_factory=list)
+    missing_data: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    limit: int = Field(ge=1, le=500)
+    has_more: bool = False
+    applies_changes: bool = False
+
+
 class AssistantSearchResult(APIModel):
     item_type: AssistantTimelineItemType
     item_id: uuid.UUID

@@ -27,12 +27,14 @@ Estado real al 2026-06-23:
 
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
+- existe `POST /api/v1/patients/{patient_id}/assistant/chart`
 - no existe todavia ruta `/pacientes/[patientId]/contexto`
-- no hay chart ni correlacion assistant dedicados
+- no hay correlacion assistant dedicada
 - no se autoriza escritura clinica desde el programa
 - el timeline assistant es solo lectura, no crea auditoria ni escribe ficha
 - el timeline devuelve fuentes, limites y faltantes por dominio
 - la busqueda assistant es deterministica, solo lectura y devuelve fuentes/snippets
+- chart assistant devuelve series graficables simples, no imagenes ni graficos acoplados
 - `ClinicalPatch` v0 soporta escritura confirmada solo para `clinical_event` y `evolution`
 - el backend bloquea aceptar patches con `requires_human_confirmation=false`
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
@@ -111,14 +113,17 @@ Assistant Read Layer:
 
 - `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
+- `POST /api/v1/patients/{patient_id}/assistant/chart`
 - solo lectura con rol de lectura de paciente
 - une encuentros, evoluciones, eventos, signos vitales, medicacion activa, problemas activos y alergias activas
 - busca texto en encuentros, evoluciones, eventos, signos vitales con notas, medicacion activa, problemas activos y alergias activas
+- devuelve series de signos vitales y examenes numericos desde eventos `exam_result`
 - cada item expone tipo, fecha, resumen y ruta fuente existente
 - cada resultado de busqueda expone tipo, fecha, snippet, campos coincidentes y ruta fuente existente
+- cada punto graficable expone fecha, valor, fuente y ruta fuente existente
 - declara dominios faltantes y limite aplicado
 - no escribe ficha, no audita modificacion y no depende de Ollama
-- pendientes: `chart`, `correlate`, cliente web y UI minima
+- pendientes: `correlate`, cliente web y UI minima
 
 Hospitalizacion:
 
@@ -213,9 +218,9 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, mesa `/pacientes` v2, temas visuales v2, AI-Chart Core Nivel 0, PR #1 mergeado y endurecimiento `ClinicalPatch`.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- Validacion reciente local Assistant Read timeline/search: ruff API, 75 tests API y OpenAPI actualizado.
+- Validacion reciente local Assistant Read timeline/search/chart: ruff API, 79 tests API y OpenAPI actualizado.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Siguiente paso recomendado: continuar `PROG-ASSISTANT-READ-01` con datos graficables simples, no como chat, RAG, dashboard ni escritura.
+- Siguiente paso recomendado: continuar `PROG-ASSISTANT-READ-01` con correlacion deterministica, no como chat, RAG, dashboard ni escritura.
 - Siguiente bloque de producto despues de Assistant Read: diseno de examenes/laboratorio estructurados con entidad dedicada, manteniendo compatibilidad de `clinical_events.exam_result`.
 
 ## Historial
