@@ -259,7 +259,7 @@ branch, titulo, gates y criterio de merge.
 Fuera de alcance:
 
 - API/OpenAPI/modelos nuevos
-- IA nueva, dashboards, adjuntos, firma, receta valida o preconsulta implementada
+- IA nueva, dashboards, adjuntos, firma, receta valida o features clinicas nuevas
 
 ### Cola de ejecucion automatica
 
@@ -318,9 +318,46 @@ Fuera de alcance:
 Gates para promover a implementacion:
 
 - `docs/SCREEN_TREE.md` contiene el contrato minimo
-- `docs/CURRENT_STATE.md` declara que preconsulta sigue futura hasta PR de UI/API
+- `docs/CURRENT_STATE.md` declara si preconsulta sigue futura o queda
+  implementada como panel minimo
 - `docs/GOVERNANCE.md` mantiene la regla de contrato antes de UI amplia
 - `npm run check:size` verde
+
+## PROG-AMB-PRECONSULTA-01
+
+Estado: implementacion minima integrada en atencion ambulatoria.
+
+Objetivo: agregar preconsulta ambulatoria compacta dentro de
+`/consulta/pacientes/[patientId]/atencion`, sin ruta nueva, sin tabla nueva y
+sin endpoint compuesto.
+
+Decision de implementacion:
+
+- reutilizar citas del paciente con estado `scheduled`, `check_in` o
+  `in_progress`
+- crear `ClinicalEncounter(type=ambulatory, status=in_progress)` con el motivo
+  de la cita o el motivo breve ingresado
+- registrar signos vitales opcionales en `VitalSign`; campos vacios no se
+  convierten en cero
+- registrar el resumen de preconsulta como `ClinicalEvent(event_type=clinical_note)`
+  con `payload.preconsult`
+- actualizar la cita a `in_progress`
+- no emitir diagnostico, receta, orden, firma ni `ClinicalPatch`
+
+Nota de permisos:
+
+- la UI inicial habilita escritura solo cuando el usuario cumple permisos de
+  encuentro, evento y signos; hoy eso equivale a `medico/admin/dev`
+- habilitar `enfermeria` o rol futuro `admision` exige PR backend de permisos,
+  tests API y actualizacion de `SCREEN_TREE`
+
+Gates de cierre:
+
+- `npm run check:size`
+- `npm run check:web`
+- E2E visible de atencion con panel de preconsulta en modo demo
+- `CURRENT_STATE`, `SCREEN_TREE`, `GOVERNANCE`, `CODEX_PLAN` y registry
+  reconciliados
 
 ## PROG-CLINICAL-RISK-00
 

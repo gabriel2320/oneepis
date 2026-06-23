@@ -208,6 +208,13 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByText("Encuentro ambulatorio y evolucion SOAP vinculada.")).toBeVisible();
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
+  await expect(page.getByText("Preconsulta ambulatoria")).toBeVisible();
+  await expect(page.getByText("Check-in clinico minimo")).toBeVisible();
+  await expect(page.getByLabel("Cita para preconsulta")).toContainText(
+    "Control ambulatorio demo",
+  );
+  await expect(page.getByRole("button", { name: "Registrar preconsulta" })).toBeDisabled();
+  await expect(page.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(page.getByText("Cierre de consulta")).toBeVisible();
   await expect(page.getByRole("button", { name: "Cerrar encuentro" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();

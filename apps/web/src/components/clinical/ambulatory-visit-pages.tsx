@@ -6,6 +6,7 @@ import { Save } from "lucide-react";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AmbulatoryClosePanel } from "@/components/clinical/ambulatory-close-panel";
+import { AmbulatoryPreconsultPanel } from "@/components/clinical/ambulatory-preconsult-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import { ClinicalTimeline, EncounterList, PatientLongitudinalSummary } from "@/components/clinical/patient-widgets";
@@ -160,6 +161,7 @@ function AmbulatoryVisitWorkspace({
         </ClinicalSectionCard>
       </div>
       <div className="space-y-5">
+        <AmbulatoryPreconsultPanel patientId={patientId} />
         <ClinicalSectionCard
           title="Nueva atencion"
           description="Guarda encuentro ambulatorio y SOAP como borrador auditable."
