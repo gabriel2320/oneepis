@@ -10159,6 +10159,17 @@
           "environment": {
             "type": "string",
             "title": "Environment"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
           }
         },
         "type": "object",

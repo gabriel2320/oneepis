@@ -5,3 +5,4 @@ class HealthCheck(APIModel):
     status: str
     service: str
     environment: str
+    correlation_id: str | None = None

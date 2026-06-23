@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import {
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -100,19 +99,19 @@ export function SeriesChart({ series }: { series: AssistantChartSeries }) {
     return null;
   }
   return (
-    <div className="mb-3 h-56 rounded-md border bg-background p-3">
+    <div className="mb-3 rounded-md border bg-background p-3">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">{series.label}</p>
         {series.unit ? <Badge variant="outline">{series.unit}</Badge> : null}
       </div>
-      <ResponsiveContainer width="100%" height="82%">
-        <LineChart data={data}>
+      <div className="min-w-0 overflow-x-auto">
+        <LineChart width={520} height={160} data={data}>
           <XAxis dataKey="time" tickLine={false} axisLine={false} />
           <YAxis tickLine={false} axisLine={false} width={36} />
           <Tooltip />
           <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} />
         </LineChart>
-      </ResponsiveContainer>
+      </div>
     </div>
   );
 }
@@ -179,10 +178,19 @@ export function LabPanelList({ panels }: { panels: LabPanel[] }) {
                   {result.value ?? "Sin valor textual"}
                   {result.unit ? ` ${result.unit}` : ""}
                 </p>
+                {result.reference_range ? (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Rango ref.: {result.reference_range}
+                  </p>
+                ) : null}
                 <SourceLine
                   label="lab_result"
                   path={`/api/v1/patients/${panel.patient_id}/lab-panels/${panel.id}/results/${result.id}`}
-                  detail={result.status === "entered_in_error" ? "Corregido; fuera de tendencias" : undefined}
+                  detail={
+                    result.status === "entered_in_error"
+                      ? "Corregido; fuera de tendencias"
+                      : `Estado: ${result.status}`
+                  }
                 />
               </div>
             ))}

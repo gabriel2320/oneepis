@@ -43,6 +43,8 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await expect(page.getByText("Examenes estructurados recientes")).toBeVisible();
   await expect(page.getByText("Perfil renal")).toBeVisible();
   await expect(page.getByText("Creatinina")).toBeVisible();
+  await expect(page.getByText("Rango ref.: 0.7-1.3")).toBeVisible();
+  await expect(page.getByText(/Estado: active/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Abrir fuente lab_result" })).toBeVisible();
 
   await page.getByRole("tab", { name: /Correlacion/ }).click();

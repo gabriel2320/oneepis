@@ -215,9 +215,9 @@ P1 activo permitido: Assistant Read Layer, solo lectura. Debe entregar timeline 
 
 P2 implementado minimo: examenes/laboratorio estructurados ya tienen entidad dedicada, migracion Alembic, permisos, auditoria si escribe, OpenAPI, test API y lectura puente. Mantener `clinical_events.exam_result` como compatibilidad legacy, no migrar historicos automaticamente y no ampliar UI mas alla de lectura/correccion controlada hasta cerrar `v0.4-assistant-read`.
 
-P3 pendiente: accesibilidad, performance y observabilidad. Agregar checklist vivo en docs existentes cuando empiece el bloque. Accesibilidad: teclado, foco visible, contraste, labels y Playwright + axe. Performance: dataset sintetico grande, limites/paginacion por dominio e indices revisados por query real. Observabilidad: logs sin PHI, correlation ID frontend/backend, health checks utiles y errores trazables.
+P3 iniciado como checklist vivo en `CURRENT_STATE`. Accesibilidad: teclado, foco visible, contraste, labels y Playwright + axe cuando el paquete quede incorporado. Performance: dataset sintetico grande, limites/paginacion por dominio e indices revisados por query real. Observabilidad: logs sin PHI, correlation ID frontend/backend, health checks utiles y errores trazables.
 
-P4 pendiente: releases y validacion humana. Releases demo previstos: `v0.1-base-ficha`, `v0.2-hospitalizacion`, `v0.3-ai-chart-core`, `v0.4-assistant-read`. Cada release exige tag, changelog, CI verde, checklist de demo y rollback. Ritual semanal: paciente, hospitalizacion, evolucion, signo vital, evento, AI-Chart, impresion y auditoria; hallazgos van a `CURRENT_STATE` o issues, no a documentos dispersos.
+P4 iniciado como release gate `v0.4-assistant-read`: tag, changelog, CI verde, checklist de demo y rollback. Ritual semanal: paciente, hospitalizacion, evolucion, signo vital, evento, laboratorio estructurado, AI-Chart/Assistant Read, impresion y auditoria; hallazgos van a `CURRENT_STATE` o issues, no a documentos dispersos.
 
 ## Foco Inmediato
 

@@ -35,6 +35,10 @@ def clear_audit_request_context() -> None:
     _audit_request_context.set(None)
 
 
+def get_audit_request_context() -> AuditRequestContext | None:
+    return _audit_request_context.get()
+
+
 def record_audit_event(
     session: Session,
     *,

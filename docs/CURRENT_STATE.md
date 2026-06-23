@@ -235,6 +235,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
 - `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon.
 - `npm run check:contract` verifica OpenAPI y drift minimo Assistant Read contra los tipos TS manuales.
+- Playwright E2E corre con `workers: 1` para evitar 404 transitorios del dev server al compilar rutas dinamicas en paralelo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
 - `apps/api/src/oneepis_api/services/clinical_intent.py` ya concentra reglas deterministicas; nuevas reglas deben agruparse por dominio o extraerse antes de crecer mucho mas.
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
@@ -247,9 +248,17 @@ Release gates demo:
 
 - Releases previstos: `v0.1-base-ficha`, `v0.2-hospitalizacion`, `v0.3-ai-chart-core`, `v0.4-assistant-read`.
 - Cada release exige tag, changelog, CI verde, checklist de demo y plan de rollback.
-- El checklist demo debe recorrer paciente, hospitalizacion, evolucion, signo vital, evento, AI-Chart, impresion y auditoria.
+- Checklist `v0.4-assistant-read`: paciente, hospitalizacion, evolucion, signo vital, evento clinico, laboratorio estructurado reciente, AI-Chart/Assistant Read, impresion y auditoria.
+- Criterios `v0.4`: fuentes inspeccionables, limites/faltantes visibles, cero escritura automatica, cero chat libre, cero RAG, cero IA externa activa y compatibilidad `lab_results` + `clinical_events.exam_result`.
+- Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
 - Pantallas preparadas no cuentan como feature completa: `/consulta/agenda`, resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
 - Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
+
+Accesibilidad, performance y observabilidad pendientes:
+
+- Accesibilidad: validar teclado, foco visible, contraste y labels en `/pacientes`, ficha, AI-Chart y print; agregar Playwright + axe solo cuando el paquete y el flujo queden cerrados.
+- Performance: probar ficha y AI-Chart con dataset sintetico grande, revisar limites por dominio y confirmar indices contra queries reales.
+- Observabilidad: mantener logs sin PHI, exponer correlation ID frontend/backend, reforzar health checks utiles y errores trazables.
 
 ## Auditoria rapida 2026-06-23
 
@@ -258,8 +267,8 @@ Release gates demo:
 - Validacion reciente local Assistant Read UI: typecheck/lint web y contrato cliente manual actualizado.
 - Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Siguiente paso recomendado: validar Assistant Read y laboratorio estructurado minimo con walkthrough humano de `v0.4-assistant-read` antes de agregar UI amplia.
-- Siguiente bloque de producto despues del contrato de laboratorio: UI minima de lectura/carga controlada o importador, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
+- Siguiente paso recomendado: ejecutar walkthrough humano de `v0.4-assistant-read`, corregir hallazgos y preparar tag/changelog.
+- Siguiente bloque de producto despues de `v0.4`: correccion controlada de laboratorio o carga acotada, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
 
 ## Historial
 
