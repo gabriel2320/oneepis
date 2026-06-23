@@ -11,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from oneepis_api.db.base import Base
 from oneepis_api.models.base import IdMixin, TimestampMixin
+from oneepis_api.models.medication_catalog import MedicationCatalogItem
 from oneepis_api.models.patient import enum_values
 
 if TYPE_CHECKING:
@@ -189,6 +190,11 @@ class Medication(Base, IdMixin, TimestampMixin):
         ForeignKey("patients.id", ondelete="CASCADE"),
         index=True,
     )
+    catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("medication_catalog_items.id", ondelete="SET NULL"),
+        index=True,
+        nullable=True,
+    )
     name: Mapped[str] = mapped_column(String(160), nullable=False)
     dose: Mapped[str | None] = mapped_column(String(120), nullable=True)
     route: Mapped[str | None] = mapped_column(String(80), nullable=True)
@@ -200,8 +206,15 @@ class Medication(Base, IdMixin, TimestampMixin):
     )
     started_on: Mapped[date | None] = mapped_column(Date, nullable=True)
     ended_on: Mapped[date | None] = mapped_column(Date, nullable=True)
+    dose_check_snapshot: Mapped[dict[str, Any]] = mapped_column(
+        JSON,
+        default=dict,
+        nullable=False,
+    )
+    dose_override_reason: Mapped[str | None] = mapped_column(String(280), nullable=True)
 
     patient: Mapped[Patient] = relationship(back_populates="medications")
+    catalog_item: Mapped[MedicationCatalogItem | None] = relationship()
 
 
 class ActiveProblem(Base, IdMixin, TimestampMixin):

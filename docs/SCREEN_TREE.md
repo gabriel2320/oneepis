@@ -50,8 +50,8 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes/[patientId]/problemas/nuevo` | Nucleo paciente | completa | problemas activos | si | no | clasificacion diagnostica futura |
 | `/pacientes/[patientId]/alergias` | Seguridad clinica | completa | alergias activas | no | no | alertas criticas mas amplias |
 | `/pacientes/[patientId]/alergias/nueva` | Seguridad clinica | completa | alergias activas | si | no | reacciones adversas futuras |
-| `/pacientes/[patientId]/medicacion` | Nucleo paciente | completa | medicacion activa | no | no | conciliacion e historial farmacologico |
-| `/pacientes/[patientId]/medicacion/nueva` | Nucleo paciente | completa | medicacion activa | si | no | receta/orden no se deriva automaticamente |
+| `/pacientes/[patientId]/medicacion` | Nucleo paciente | completa/en expansion gobernada | medicacion activa + vademecum local curado | no | no | vademecum real curado, interacciones y receta futura |
+| `/pacientes/[patientId]/medicacion/nueva` | Nucleo paciente | completa/en expansion gobernada | medicacion activa + validacion dosis | si | no | receta/orden no se deriva automaticamente |
 | `/pacientes/[patientId]/signos-vitales` | Resultados/observaciones | completa | signos vitales | no | no | tabla/grafico mas amplio |
 | `/pacientes/[patientId]/signos-vitales/nuevo` | Resultados/observaciones | completa | signos vitales | si | no | escalas y monitoreo futuros |
 | `/pacientes/[patientId]/documentos` | Documentos | preparada | UI preparada | no | no | documentos reales, adjuntos, consentimientos |
@@ -96,6 +96,7 @@ tener contrato minimo y flujo humano verificable.
 | Agenda productiva | Ambulatorio | futura | citas/appointments | si | no | modelo de cita y estados |
 | Admision/preconsulta ambulatoria | Ambulatorio | futura | encuentro + observaciones | si | no | identidad, signos y pendientes |
 | Receta valida | Ambulatorio/documentos | futura | receta firmada | si | si | firma, folio, actor, fecha clinica y permisos |
+| Vademecum institucional real | Nucleo paciente | futura | catalogo local curado con fuentes FDA/ISP | si admin | no | curaduria humana, fuente, version y revision |
 | Ordenes ambulatorias | Ordenes | futura | ordenes clinicas | si | si | tipos de orden y estados no ejecutables/ejecutables |
 | Interconsultas/derivaciones | Ambulatorio/hospitalizado | futura | solicitudes/respuestas | si | si | pregunta clinica, prioridad, cierre |
 | Ingreso medico hospitalario | Hospitalizado | futura | documento ingreso | si | si | encuentro hospitalario y firma/borrador |

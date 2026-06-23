@@ -209,6 +209,22 @@ Papel obligatorio:
 - El papel no puede ocultar que una indicacion es borrador.
 - Si no hay folio, actor, fecha clinica y permisos claros, no se imprime como documento clinico valido.
 
+## Politica de Vademecum y Dosis
+
+El vademecum ayuda a registrar medicacion activa; no convierte OneEpis en motor de prescripcion.
+
+Reglas:
+
+- El catalogo operativo es local, versionado y curado por humanos.
+- FDA/openFDA, Drugs@FDA, FAERS, enforcement e ISP/ANAMED pueden citarse como evidencia, pero no autorizan reglas automaticas sin revision local.
+- La UI clinica no consulta FDA/openFDA en vivo.
+- Ningun rango de dosis entra sin fuente, version, estado de revision y responsable curador.
+- Si no hay regla aplicable, la UI debe decir que no hay regla segura disponible.
+- Alertas de dosis fuera de rango bloquean el guardado hasta que exista justificacion humana.
+- El override debe quedar auditado con snapshot de regla, fuente, severidad y razon.
+- Reglas pediatricas, embarazo, funcion renal/hepatica, interacciones y alergias cruzadas quedan fuera salvo regla explicita curada.
+- Favoritos, sugeridos e historial son apoyo de borrador; no crean receta valida, orden ejecutable, firma, folio ni despacho.
+
 ## Reglas de Crecimiento
 
 - Agrega dependencias solo si remueven complejidad real y no duplican capacidades existentes.

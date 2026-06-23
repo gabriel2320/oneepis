@@ -59,6 +59,8 @@ export const demoRecords: PatientRecordSnapshot[] = [
         status: "active",
         started_on: "2026-06-19",
         ended_on: null,
+        dose_check_snapshot: {},
+        dose_override_reason: null,
         created_at: "2026-06-19T10:00:00Z",
         updated_at: "2026-06-19T10:00:00Z",
       },

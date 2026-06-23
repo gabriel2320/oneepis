@@ -10,6 +10,7 @@ from oneepis_api.models.clinical_record import (
 )
 from oneepis_api.models.hospitalization import HospitalBed, HospitalDailySheet, HospitalIndication
 from oneepis_api.models.lab import LabPanel, LabResult
+from oneepis_api.models.medication_catalog import MedicationCatalogItem, MedicationDoseRule
 from oneepis_api.models.patient import Patient
 
 __all__ = [
@@ -25,6 +26,8 @@ __all__ = [
     "HospitalIndication",
     "ActiveProblem",
     "Medication",
+    "MedicationCatalogItem",
+    "MedicationDoseRule",
     "Patient",
     "VitalSign",
 ]

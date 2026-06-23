@@ -1,12 +1,6 @@
 import type { Patient } from "./patient";
 
-export type ClinicalEntryKind =
-  | "intake"
-  | "progress"
-  | "lab_result"
-  | "prescription"
-  | "procedure"
-  | "note";
+export type ClinicalEntryKind = "intake" | "progress" | "lab_result" | "prescription" | "procedure" | "note";
 export type ClinicalEntryStatus = "draft" | "signed" | "amended";
 export type ClinicalEventType =
   | "symptom"
@@ -18,12 +12,7 @@ export type ClinicalEventType =
   | "clinical_note"
   | "care_plan"
   | "administrative";
-export type ClinicalEventSourceType =
-  | "manual"
-  | "clinical_entry"
-  | "vital_sign"
-  | "imported_document"
-  | "ai_draft";
+export type ClinicalEventSourceType = "manual" | "clinical_entry" | "vital_sign" | "imported_document" | "ai_draft";
 export type RecordStatus = "active" | "inactive" | "resolved" | "entered_in_error";
 export type AllergySeverity = "mild" | "moderate" | "severe" | "unknown";
 export type EncounterType = "ambulatory" | "hospitalization" | "emergency" | "unknown";
@@ -152,6 +141,7 @@ export type Allergy = {
 export type AllergyUpdate = Partial<AllergyCreate>;
 
 export type MedicationCreate = {
+  catalog_item_id?: string | null;
   name: string;
   dose?: string | null;
   route?: string | null;
@@ -159,11 +149,13 @@ export type MedicationCreate = {
   status?: RecordStatus;
   started_on?: string | null;
   ended_on?: string | null;
+  dose_override_reason?: string | null;
 };
 
-export type Medication = {
+export type MedicationRead = {
   id: string;
   patient_id: string;
+  catalog_item_id?: string | null;
   name: string;
   dose?: string | null;
   route?: string | null;
@@ -171,9 +163,13 @@ export type Medication = {
   status: RecordStatus;
   started_on?: string | null;
   ended_on?: string | null;
+  dose_check_snapshot: Record<string, unknown>;
+  dose_override_reason?: string | null;
   created_at: string;
   updated_at: string;
 };
+
+export type Medication = MedicationRead;
 
 export type MedicationUpdate = Partial<MedicationCreate>;
 

@@ -9,6 +9,7 @@ const openApi = JSON.parse(
 const tsContracts = [
   "apps/web/src/lib/type-contracts/clinical-record.ts",
   "apps/web/src/lib/type-contracts/lab.ts",
+  "apps/web/src/lib/type-contracts/medication-catalog.ts",
 ]
   .map((contractPath) => readFileSync(path.join(repoRoot, contractPath), "utf8"))
   .join("\n");
@@ -32,6 +33,14 @@ const schemaNames = [
   "LabResultCreate",
   "LabResultRead",
   "LabResultUpdate",
+  "MedicationCatalogItemRead",
+  "MedicationCreate",
+  "MedicationDoseRuleRead",
+  "MedicationDoseWarning",
+  "MedicationDraftingContext",
+  "MedicationDraftValidationRequest",
+  "MedicationDraftValidationResponse",
+  "MedicationRead",
 ];
 
 const endpointContracts = [
@@ -91,6 +100,27 @@ const endpointContracts = [
     request: "LabResultUpdate",
     response: "LabResultRead",
   },
+  {
+    method: "get",
+    path: "/api/v1/medication-catalog",
+    responseList: "MedicationCatalogItemRead",
+  },
+  {
+    method: "get",
+    path: "/api/v1/medication-catalog/{catalog_item_id}",
+    response: "MedicationCatalogItemRead",
+  },
+  {
+    method: "get",
+    path: "/api/v1/patients/{patient_id}/medication-drafting-context",
+    response: "MedicationDraftingContext",
+  },
+  {
+    method: "post",
+    path: "/api/v1/patients/{patient_id}/medications/validate-draft",
+    request: "MedicationDraftValidationRequest",
+    response: "MedicationDraftValidationResponse",
+  },
 ];
 
 const errors = [];
@@ -124,6 +154,13 @@ assertFieldUnion(
   schema("AssistantCorrelationEvidence").properties.source_type.enum,
 );
 assertNamedUnion("LabResultFlag", schema("LabResultFlag").enum);
+assertNamedUnion("MedicationCatalogStatus", schema("MedicationCatalogStatus").enum);
+assertNamedUnion("MedicationDoseSeverity", schema("MedicationDoseSeverity").enum);
+assertNamedUnion(
+  "MedicationSourceReviewStatus",
+  schema("MedicationSourceReviewStatus").enum,
+);
+assertNamedUnion("MedicationSourceSystem", schema("MedicationSourceSystem").enum);
 
 for (const contract of endpointContracts) {
   const operation = openApi.paths?.[contract.path]?.[contract.method];

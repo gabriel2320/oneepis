@@ -94,6 +94,15 @@ from oneepis_api.schemas.clinical_record_contracts.longitudinal import (
     VitalSignRead,
     VitalSignUpdate,
 )
+from oneepis_api.schemas.clinical_record_contracts.medication_catalog import (
+    MedicationCatalogItemRead,
+    MedicationDoseRuleRead,
+    MedicationDoseWarning,
+    MedicationDraftingContext,
+    MedicationDraftValidationRequest,
+    MedicationDraftValidationResponse,
+    MedicationSourceReference,
+)
 
 __all__ = [
     "ActiveProblemBase",
@@ -173,8 +182,15 @@ __all__ = [
     "LabResultRead",
     "LabResultUpdate",
     "MedicationBase",
+    "MedicationCatalogItemRead",
     "MedicationCreate",
+    "MedicationDoseRuleRead",
+    "MedicationDoseWarning",
+    "MedicationDraftingContext",
+    "MedicationDraftValidationRequest",
+    "MedicationDraftValidationResponse",
     "MedicationRead",
+    "MedicationSourceReference",
     "MedicationUpdate",
     "VitalSignBase",
     "VitalSignCreate",

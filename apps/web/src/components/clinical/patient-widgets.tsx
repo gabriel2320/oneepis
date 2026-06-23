@@ -94,7 +94,12 @@ export function MedicationList({ medications }: { medications: Medication[] }) {
                   "Detalle pendiente"}
               </p>
             </div>
-            <Badge variant="outline">{medication.status}</Badge>
+            <div className="flex flex-col items-end gap-2">
+              {Boolean(medication.dose_check_snapshot?.blocking) ? (
+                <Badge variant="warning">alerta dosis</Badge>
+              ) : null}
+              <Badge variant="outline">{medication.status}</Badge>
+            </div>
           </div>
         </div>
       ))}

@@ -3616,6 +3616,170 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/medication-drafting-context": {
+      "get": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Get Medication Drafting Context",
+        "operationId": "get_medication_drafting_context_api_v1_patients__patient_id__medication_drafting_context_get",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationDraftingContext"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/medications/validate-draft": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Validate Medication Draft Route",
+        "operationId": "validate_medication_draft_route_api_v1_patients__patient_id__medications_validate_draft_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MedicationDraftValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationDraftValidationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/medications/{medication_id}": {
       "get": {
         "tags": [
@@ -6301,6 +6465,184 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HospitalIndicationRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/medication-catalog": {
+      "get": {
+        "tags": [
+          "medication-catalog"
+        ],
+        "summary": "List Medication Catalog",
+        "operationId": "list_medication_catalog_api_v1_medication_catalog_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedicationCatalogItemRead"
+                  },
+                  "title": "Response List Medication Catalog Api V1 Medication Catalog Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/medication-catalog/{catalog_item_id}": {
+      "get": {
+        "tags": [
+          "medication-catalog"
+        ],
+        "summary": "Get Medication Catalog Item",
+        "operationId": "get_medication_catalog_item_api_v1_medication_catalog__catalog_item_id__get",
+        "parameters": [
+          {
+            "name": "catalog_item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Catalog Item Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationCatalogItemRead"
                 }
               }
             }
@@ -11607,8 +11949,195 @@
         ],
         "title": "LoginResponse"
       },
+      "MedicationCatalogItemRead": {
+        "properties": {
+          "source_system": {
+            "$ref": "#/components/schemas/MedicationSourceSystem"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Source Label"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 400
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "review_status": {
+            "$ref": "#/components/schemas/MedicationSourceReviewStatus",
+            "default": "draft"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "display_name": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Display Name"
+          },
+          "generic_name": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Generic Name"
+          },
+          "form": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Form"
+          },
+          "strength": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MedicationCatalogStatus",
+            "default": "available"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "dose_rules": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationDoseRuleRead"
+            },
+            "type": "array",
+            "title": "Dose Rules"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_system",
+          "source_label",
+          "id",
+          "display_name",
+          "generic_name",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "MedicationCatalogItemRead"
+      },
+      "MedicationCatalogStatus": {
+        "type": "string",
+        "enum": [
+          "available",
+          "unavailable",
+          "draft"
+        ],
+        "title": "MedicationCatalogStatus"
+      },
       "MedicationCreate": {
         "properties": {
+          "catalog_item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Item Id"
+          },
           "name": {
             "type": "string",
             "maxLength": 160,
@@ -11678,6 +12207,18 @@
               }
             ],
             "title": "Ended On"
+          },
+          "dose_override_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dose Override Reason"
           }
         },
         "type": "object",
@@ -11686,8 +12227,424 @@
         ],
         "title": "MedicationCreate"
       },
+      "MedicationDoseRuleRead": {
+        "properties": {
+          "source_system": {
+            "$ref": "#/components/schemas/MedicationSourceSystem"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Source Label"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 400
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "review_status": {
+            "$ref": "#/components/schemas/MedicationSourceReviewStatus",
+            "default": "draft"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "catalog_item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Catalog Item Id"
+          },
+          "population": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Population"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "min_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Value"
+          },
+          "max_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Value"
+          },
+          "frequency_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency Text"
+          },
+          "usual_dose_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usual Dose Text"
+          },
+          "avoid_dose_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avoid Dose Text"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/MedicationDoseSeverity",
+            "default": "warning"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_system",
+          "source_label",
+          "id",
+          "catalog_item_id",
+          "population",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "MedicationDoseRuleRead"
+      },
+      "MedicationDoseSeverity": {
+        "type": "string",
+        "enum": [
+          "info",
+          "warning",
+          "critical"
+        ],
+        "title": "MedicationDoseSeverity"
+      },
+      "MedicationDoseWarning": {
+        "properties": {
+          "severity": {
+            "$ref": "#/components/schemas/MedicationDoseSeverity"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "requires_override": {
+            "type": "boolean",
+            "title": "Requires Override",
+            "default": false
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MedicationSourceReference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "severity",
+          "message"
+        ],
+        "title": "MedicationDoseWarning"
+      },
+      "MedicationDraftValidationRequest": {
+        "properties": {
+          "catalog_item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Item Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "dose": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dose"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route"
+          },
+          "frequency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MedicationDraftValidationRequest"
+      },
+      "MedicationDraftValidationResponse": {
+        "properties": {
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationDoseWarning"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "blocking": {
+            "type": "boolean",
+            "title": "Blocking",
+            "default": false
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "source_refs": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationSourceReference"
+            },
+            "type": "array",
+            "title": "Source Refs"
+          },
+          "normalized_dose": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Normalized Dose"
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "MedicationDraftValidationResponse"
+      },
+      "MedicationDraftingContext": {
+        "properties": {
+          "active_medications": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationRead"
+            },
+            "type": "array",
+            "title": "Active Medications"
+          },
+          "recent_medications": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationRead"
+            },
+            "type": "array",
+            "title": "Recent Medications"
+          },
+          "previous_day_indication_texts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Previous Day Indication Texts"
+          },
+          "suggested_catalog_items": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationCatalogItemRead"
+            },
+            "type": "array",
+            "title": "Suggested Catalog Items"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "MedicationDraftingContext"
+      },
       "MedicationRead": {
         "properties": {
+          "catalog_item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Item Id"
+          },
           "name": {
             "type": "string",
             "maxLength": 160,
@@ -11757,6 +12714,18 @@
               }
             ],
             "title": "Ended On"
+          },
+          "dose_override_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dose Override Reason"
           },
           "id": {
             "type": "string",
@@ -11767,6 +12736,11 @@
             "type": "string",
             "format": "uuid",
             "title": "Patient Id"
+          },
+          "dose_check_snapshot": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dose Check Snapshot"
           },
           "created_at": {
             "type": "string",
@@ -11789,8 +12763,123 @@
         ],
         "title": "MedicationRead"
       },
+      "MedicationSourceReference": {
+        "properties": {
+          "source_system": {
+            "$ref": "#/components/schemas/MedicationSourceSystem"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Source Label"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 400
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "review_status": {
+            "$ref": "#/components/schemas/MedicationSourceReviewStatus",
+            "default": "draft"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_system",
+          "source_label"
+        ],
+        "title": "MedicationSourceReference"
+      },
+      "MedicationSourceReviewStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "reviewed",
+          "deprecated"
+        ],
+        "title": "MedicationSourceReviewStatus"
+      },
+      "MedicationSourceSystem": {
+        "type": "string",
+        "enum": [
+          "local_curated",
+          "fda_openfda_label",
+          "fda_drugsfda",
+          "fda_enforcement",
+          "fda_faers",
+          "isp_anamed"
+        ],
+        "title": "MedicationSourceSystem"
+      },
       "MedicationUpdate": {
         "properties": {
+          "catalog_item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Item Id"
+          },
           "name": {
             "anyOf": [
               {
@@ -11873,6 +12962,18 @@
               }
             ],
             "title": "Ended On"
+          },
+          "dose_override_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dose Override Reason"
           }
         },
         "type": "object",

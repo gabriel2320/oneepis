@@ -43,6 +43,7 @@ class AllergyRead(AllergyBase):
 
 
 class MedicationBase(APIModel):
+    catalog_item_id: uuid.UUID | None = None
     name: str = Field(min_length=1, max_length=160)
     dose: str | None = Field(default=None, max_length=120)
     route: str | None = Field(default=None, max_length=80)
@@ -50,6 +51,7 @@ class MedicationBase(APIModel):
     status: RecordStatus = RecordStatus.ACTIVE
     started_on: date | None = None
     ended_on: date | None = None
+    dose_override_reason: str | None = Field(default=None, max_length=280)
 
 
 class MedicationCreate(MedicationBase):
@@ -57,6 +59,7 @@ class MedicationCreate(MedicationBase):
 
 
 class MedicationUpdate(APIModel):
+    catalog_item_id: uuid.UUID | None = None
     name: str | None = Field(default=None, min_length=1, max_length=160)
     dose: str | None = Field(default=None, max_length=120)
     route: str | None = Field(default=None, max_length=80)
@@ -64,11 +67,13 @@ class MedicationUpdate(APIModel):
     status: RecordStatus | None = None
     started_on: date | None = None
     ended_on: date | None = None
+    dose_override_reason: str | None = Field(default=None, max_length=280)
 
 
 class MedicationRead(MedicationBase):
     id: uuid.UUID
     patient_id: uuid.UUID
+    dose_check_snapshot: dict = Field(default_factory=dict)
     created_at: datetime
     updated_at: datetime
 

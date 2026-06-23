@@ -64,6 +64,20 @@ Dominios CRUD:
 - medicacion
 - signos vitales
 
+Medicacion con vademecum:
+
+- existe catalogo local versionado `MedicationCatalogItem`/`MedicationDoseRule`
+- existe `GET /api/v1/medication-catalog`
+- existe `GET /api/v1/medication-catalog/{catalog_item_id}`
+- existe `GET /api/v1/patients/{patient_id}/medication-drafting-context`
+- existe `POST /api/v1/patients/{patient_id}/medications/validate-draft`
+- `POST /api/v1/patients/{patient_id}/medications` revalida dosis antes de guardar
+- una dosis fuera de rango curado bloquea sin `dose_override_reason`
+- el override guarda snapshot de regla, fuente, alerta y justificacion en auditoria
+- el fixture incluido es demo sintetico y declara `no uso clinico`
+- FDA/openFDA, Drugs@FDA, FAERS, enforcement e ISP/ANAMED quedan como fuentes de evidencia para curaduria local; no se consultan en vivo desde UI clinica
+- receta valida, orden ejecutable, firma, folio, despacho y administracion siguen bloqueados/futuros
+
 Auditoria:
 
 - cada escritura usa `record_audit_event`
@@ -199,6 +213,8 @@ Capas:
 - navegacion paciente agrupada visualmente en Ficha, Datos, IA y Control; mobile usa selector compacto de seccion clinica
 - `/pacientes/[patientId]/ficha` se organiza como hoja clinica viva: cabecera critica, linea longitudinal y riel contextual de faltantes/IA/acciones
 - `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
+- `/pacientes/[patientId]/medicacion` integra vademecum local, favoritos, sugeridos deterministicas, historial y copia de indicaciones previas como borrador humano
+- `/pacientes/[patientId]/medicacion/nueva` valida dosis contra reglas curadas y exige justificacion si hay bloqueo antes de guardar
 - `/pacientes/[patientId]/ai-chart` muestra inteligencia simulada, intenciones clinicas, propuestas revisables y hoja SOAP editable con margen inteligente
 - AI-Chart muestra un flujo visual guiado: leer contexto, seleccionar evidencia, revisar propuestas, generar borrador SOAP y confirmar como borrador no firmado
 - AI-Chart envia la barra clinica al BFF de Next, que delega la resolucion estructurada en FastAPI y transmite eventos tipados JSONL con AI SDK

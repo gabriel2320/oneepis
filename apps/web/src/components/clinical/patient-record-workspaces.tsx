@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { AuditTimeline } from "@/components/clinical/audit-widgets";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { MedicationVademecumPanel } from "@/components/clinical/medication-vademecum-panel";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
 import {
   AllergyList,
@@ -103,20 +104,24 @@ export function MedicationWorkspace({
 }) {
   const canWrite = canManageMedications(user);
   return (
-    <ClinicalSectionCard
-      title="Medicacion"
-      action={
-        canWrite ? (
-          <Button asChild size="sm">
-            <Link href={`/pacientes/${patientId}/medicacion/nueva`}>Agregar</Link>
-          </Button>
-        ) : (
-          <NoPermissionButton label="Sin permiso" />
-        )
-      }
-    >
-      <MedicationList medications={record.active_medications} />
-    </ClinicalSectionCard>
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
+      <ClinicalSectionCard
+        title="Medicacion"
+        description="Lista activa; receta y orden ejecutable siguen bloqueadas."
+        action={
+          canWrite ? (
+            <Button asChild size="sm">
+              <Link href={`/pacientes/${patientId}/medicacion/nueva`}>Agregar</Link>
+            </Button>
+          ) : (
+            <NoPermissionButton label="Sin permiso" />
+          )
+        }
+      >
+        <MedicationList medications={record.active_medications} />
+      </ClinicalSectionCard>
+      <MedicationVademecumPanel patientId={patientId} canWrite={canWrite} />
+    </div>
   );
 }
 
