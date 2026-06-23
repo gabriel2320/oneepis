@@ -90,30 +90,45 @@ function PatientSectionContent({
       <div className="space-y-4">
         <CriticalAlerts record={record} />
         <VitalsStrip vital={record.latest_vitals} />
-        <div className="flex justify-end" data-print-hidden="true">
-          {canEditPatient ? (
+        <div className="flex flex-col gap-3 border-b pb-4 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold">Hoja clinica viva</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Lectura longitudinal del paciente: datos criticos arriba, evolucion clinica al centro
+              y apoyo IA como riel contextual.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2" data-print-hidden="true">
+            {canEditPatient ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/pacientes/${patientId}/estado`}>Editar estado</Link>
+              </Button>
+            ) : (
+              <NoPermissionButton label="Estado bloqueado" />
+            )}
             <Button asChild variant="outline" size="sm">
-              <Link href={`/pacientes/${patientId}/estado`}>Editar estado</Link>
+              <Link href={`/print/pacientes/${patientId}/ficha`}>Ver papel</Link>
             </Button>
-          ) : (
-            <NoPermissionButton label="Estado bloqueado" />
-          )}
+          </div>
         </div>
         <PatientLongitudinalSummary record={record} />
-        <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
-          <ClinicalSectionCard
-            title="Linea clinica"
-            action={
-              canWriteSoap ? (
-                <QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />
-              ) : (
-                <NoPermissionButton label="SOAP no permitido" />
-              )
-            }
-          >
-            <ClinicalTimeline entries={record.recent_entries} />
-          </ClinicalSectionCard>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-4">
+            <ClinicalSectionCard
+              title="Linea clinica longitudinal"
+              description="Evoluciones recientes como cuerpo principal de la ficha."
+              action={
+                canWriteSoap ? (
+                  <QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />
+                ) : (
+                  <NoPermissionButton label="SOAP no permitido" />
+                )
+              }
+            >
+              <ClinicalTimeline entries={record.recent_entries} />
+            </ClinicalSectionCard>
+          </div>
+          <aside className="space-y-4">
             <ClinicalSectionCard title="Alergias">
               <AllergyList allergies={record.active_allergies} />
             </ClinicalSectionCard>
@@ -121,7 +136,7 @@ function PatientSectionContent({
               <MedicationList medications={record.active_medications} />
             </ClinicalSectionCard>
             <PatientAiSuggestionsPanel patientId={patientId} canUseAi={canUseAi} />
-          </div>
+          </aside>
         </div>
       </div>
     );

@@ -192,8 +192,11 @@ Capas:
 - `src/components/clinical/patient-clinical-shell.tsx`: mesa clinica por paciente
 - `src/components/clinical/patient-*-pages.tsx`: pantallas paciente importadas directo por App Router
 - `/pacientes` funciona como mesa clinica de entrada con buscador, metricas operativas y lista escaneable
+- navegacion paciente agrupada visualmente en Ficha, Datos, IA y Control; mobile usa selector compacto de seccion clinica
+- `/pacientes/[patientId]/ficha` se organiza como hoja clinica viva: cabecera critica, linea longitudinal y riel contextual de faltantes/IA/acciones
 - `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
 - `/pacientes/[patientId]/ai-chart` muestra inteligencia simulada, intenciones clinicas, propuestas revisables y hoja SOAP editable con margen inteligente
+- AI-Chart muestra un flujo visual guiado: leer contexto, seleccionar evidencia, revisar propuestas, generar borrador SOAP y confirmar como borrador no firmado
 - AI-Chart envia la barra clinica al BFF de Next, que delega la resolucion estructurada en FastAPI y transmite eventos tipados JSONL con AI SDK
 - AI-Chart no guarda propuestas desde campos sueltos; envia `ClinicalPatch` al backend para aceptar/rechazar/guardar
 - AI-Chart muestra estado operativo de eventos, evoluciones, seleccion, modo y permisos antes de generar o guardar
@@ -217,6 +220,7 @@ Capas:
 - `src/components/clinical/ambulatory-visit-pages.tsx`: atencion ambulatoria minima sobre encuentros y SOAP
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
+- modo papel mantiene toolbar uniforme "Vista papel" y hoja carta con footer de desarrollo cuando aplica
 - las rutas print no hacen fallback silencioso a otro documento cuando el ID solicitado no existe
 
 Tests API:
@@ -250,6 +254,7 @@ Release gates demo:
 - Cada release exige tag, changelog, CI verde, checklist de demo y plan de rollback.
 - Checklist `v0.4-assistant-read`: paciente, hospitalizacion, evolucion, signo vital, evento clinico, laboratorio estructurado reciente, AI-Chart/Assistant Read, impresion y auditoria.
 - Criterios `v0.4`: fuentes inspeccionables, limites/faltantes visibles, cero escritura automatica, cero chat libre, cero RAG, cero IA externa activa y compatibilidad `lab_results` + `clinical_events.exam_result`.
+- Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
 - Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
 - Pantallas preparadas no cuentan como feature completa: `/consulta/agenda`, resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
 - Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
@@ -266,6 +271,8 @@ Accesibilidad, performance y observabilidad pendientes:
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - Validacion reciente local Assistant Read UI: typecheck/lint web y contrato cliente manual actualizado.
 - Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
+- Rediseño grafico-web inicial: navegacion paciente agrupada, ficha como hoja clinica viva, AI-Chart con pasos guiados, paridad papel basica y tokens clinicos V2 documentados.
+- Validacion reciente rediseño visual: `npm run check:size`, `npm run check:web`, `npm run check:e2e`, `npm run check:contract` y `npm run check:api`.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
 - Siguiente paso recomendado: ejecutar walkthrough humano de `v0.4-assistant-read`, corregir hallazgos y preparar tag/changelog.
 - Siguiente bloque de producto despues de `v0.4`: correccion controlada de laboratorio o carga acotada, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.

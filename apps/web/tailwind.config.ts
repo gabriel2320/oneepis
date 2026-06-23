@@ -44,6 +44,22 @@ const config: Config = {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
+        clinical: {
+          critical: "hsl(var(--clinical-critical))",
+          stable: "hsl(var(--clinical-stable))",
+          pending: "hsl(var(--clinical-pending))",
+          draft: "hsl(var(--clinical-draft))",
+          readonly: "hsl(var(--clinical-readonly))",
+        },
+        paper: {
+          background: "hsl(var(--paper-background))",
+          line: "hsl(var(--paper-line))",
+          margin: "hsl(var(--paper-margin))",
+        },
+        ai: {
+          source: "hsl(var(--ai-source))",
+          missing: "hsl(var(--ai-missing))",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

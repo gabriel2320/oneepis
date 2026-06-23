@@ -36,6 +36,7 @@
 Estado:
 
 - `/pacientes`, `/pacientes/nuevo`, estado clinico, ficha, eventos, AI-Chart, encuentros, evoluciones, problemas activos, alergias, medicacion, signos vitales, IA y auditoria estan conectadas a la base E2E.
+- Navegacion paciente se agrupa visualmente en Ficha, Datos, IA y Control sin cambiar rutas.
 - AI-Chart usa eventos clinicos, reglas locales, fuentes, faltantes, propuestas revisables y hoja SOAP con margen inteligente.
 - documentos existe como ruta preparada, sin backend definitivo.
 

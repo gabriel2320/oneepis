@@ -22,7 +22,7 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await page.goto(`/pacientes/${patientId}/ai-chart`);
 
   await expect(page.getByRole("heading", { name: "AI-Chart Core" })).toBeVisible();
-  await expect(page.getByText("Assistant Read")).toBeVisible();
+  await expect(page.getByText("Assistant Read", { exact: true })).toBeVisible();
   await expect(page.getByText("Assistant Read no disponible en demo")).not.toBeVisible();
   await expect(page.getByText("Solo lectura")).toBeVisible();
   await expect(page.getByText("Fuentes inspeccionables")).toBeVisible();

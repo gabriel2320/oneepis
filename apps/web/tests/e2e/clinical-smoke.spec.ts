@@ -18,14 +18,46 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
 
   await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
+  await expect(page.getByText("Hoja clinica viva")).toBeVisible();
+  await expect(page.getByText("Linea clinica longitudinal")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver papel", exact: true })).toBeVisible();
   await expect(page.getByText("Sugerencias Ollama")).toBeVisible();
   await expect(page.getByText(/Borrador IA/)).toBeVisible();
+});
+
+test("patient navigation groups clinical areas on desktop", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "desktop sidebar only");
+
+  await page.goto(`/pacientes/${demoPatientId}/ficha`);
+
+  const nav = page.getByRole("navigation", { name: "Navegacion paciente" });
+  await expect(nav.getByText("Ficha", { exact: true })).toBeVisible();
+  await expect(nav.getByText("Datos", { exact: true })).toBeVisible();
+  await expect(nav.getByText("IA", { exact: true })).toBeVisible();
+  await expect(nav.getByText("Control", { exact: true })).toBeVisible();
+  await expect(nav.getByRole("link", { name: /AI-Chart/ })).toBeVisible();
+  await expect(nav.getByRole("link", { name: /Auditoria/ })).toBeVisible();
+});
+
+test("patient navigation mobile selector changes sections", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "mobile selector only");
+
+  await page.goto(`/pacientes/${demoPatientId}/ficha`);
+
+  const selector = page.getByLabel("Seccion clinica");
+  await expect(selector).toBeVisible();
+  await selector.selectOption("problemas");
+  await expect(page).toHaveURL(new RegExp(`/pacientes/${demoPatientId}/problemas$`));
+  await expect(page.getByText("Problemas activos")).toBeVisible();
 });
 
 test("AI-Chart renders event proposals from written entries", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/ai-chart`);
 
   await expect(page.getByRole("heading", { name: "AI-Chart Core" })).toBeVisible();
+  await expect(page.getByText("Leer contexto")).toBeVisible();
+  await expect(page.getByText("Seleccionar evidencia")).toBeVisible();
+  await expect(page.getByText("Revisar propuestas")).toBeVisible();
   await expect(page.getByText("Eventos desde evolucion")).toBeVisible();
   await expect(page.getByText("Estado operativo")).toBeVisible();
   await expect(page.getByText("Seleccionados")).toBeVisible();
@@ -164,6 +196,7 @@ test("AI settings and print routes render", async ({ page }) => {
 
   await page.goto(`/print/pacientes/${demoPatientId}/ficha`);
   await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
+  await expect(page.getByText("Vista papel")).toBeVisible();
   await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 });
 

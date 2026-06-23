@@ -27,6 +27,16 @@
   --surface: 208 38% 96%;
   --surface-subtle: 210 28% 92%;
   --surface-raised: 0 0% 100%;
+  --clinical-critical: var(--destructive);
+  --clinical-stable: var(--success);
+  --clinical-pending: var(--warning);
+  --clinical-draft: var(--info);
+  --clinical-readonly: var(--muted-foreground);
+  --paper-background: 0 0% 100%;
+  --paper-line: 214 18% 84%;
+  --paper-margin: 210 18% 92%;
+  --ai-source: var(--primary);
+  --ai-missing: var(--warning);
   --border: 214 18% 84%;
   --input: 214 18% 84%;
   --ring: 184 69% 27%;

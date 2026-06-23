@@ -214,6 +214,11 @@ export function PatientAiChartPage() {
         {!DEMO_MODE && !userLoading && !canUseAi ? (
           <ErrorState description="Tu rol actual no permite usar IA clinica." />
         ) : null}
+        <AiChartStep
+          step="1"
+          title="Leer contexto"
+          description="Primero revisa fuentes, faltantes y limites antes de preparar cualquier borrador."
+        />
         <ClinicalSectionCard
           title="Intenciones clinicas"
           description="Barra dirigida: interpreta frases clinicas y propone acciones seguras."
@@ -252,6 +257,11 @@ export function PatientAiChartPage() {
           ) : null}
         </ClinicalSectionCard>
 
+        <AiChartStep
+          step="2"
+          title="Seleccionar evidencia"
+          description="Elige eventos clinicos y revisa lectura contextual; Assistant Read no escribe ficha."
+        />
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
           <EventSelectionPanel
             events={events}
@@ -275,6 +285,11 @@ export function PatientAiChartPage() {
           </div>
         </div>
 
+        <AiChartStep
+          step="3"
+          title="Revisar propuestas"
+          description="Las propuestas desde evoluciones son revisables y mantienen estados visibles."
+        />
         <EntryEventProposalsSection
           patientId={patientId}
           entries={recentEntries}
@@ -284,6 +299,17 @@ export function PatientAiChartPage() {
 
         {draftMutation.isError ? <ErrorState description="No se pudo generar el borrador SOAP." /> : null}
         {draft ? (
+          <>
+            <AiChartStep
+              step="4"
+              title="Generar borrador SOAP"
+              description="El borrador conserva fuentes y margen de revision; no equivale a firma clinica."
+            />
+            <AiChartStep
+              step="5"
+              title="Confirmar como borrador no firmado"
+              description="La escritura solo ocurre con confirmacion humana y auditoria backend."
+            />
           <DraftSoapPaper
             draft={draft}
             soap={soap}
@@ -293,8 +319,31 @@ export function PatientAiChartPage() {
             onSave={(review) => saveMutation.mutate(review)}
             onSoapChange={setSoap}
           />
+          </>
         ) : null}
       </div>
     </PatientClinicalShell>
+  );
+}
+
+function AiChartStep({
+  step,
+  title,
+  description,
+}: {
+  step: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
+        {step}
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+      </div>
+    </div>
   );
 }
