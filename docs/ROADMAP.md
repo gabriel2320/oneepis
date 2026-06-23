@@ -186,6 +186,17 @@ OneEpis ya tiene una base clinica E2E real:
 - Fuera de alcance: receta, orden, firma, triage automatico, IA externa,
   dashboard o modulo administrativo amplio.
 
+### PROG-AMB-PRECONSULTA-01: preconsulta minima
+
+- Estado: implementacion minima en `/consulta/pacientes/[patientId]/atencion`.
+- Decision: panel compacto que reutiliza citas del paciente, crea encuentro
+  ambulatorio, registra signos vitales opcionales y deja evento clinico con
+  `payload.preconsult`.
+- Alcance: preparar la atencion humana; no diagnostica, no receta, no firma,
+  no emite orden y no agrega IA.
+- Restriccion de permisos: usa permisos existentes `medico/admin/dev`;
+  `enfermeria`/`admision` quedan para PR backend especifico.
+
 ### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
 
 - Estado: contrato docs-only definido antes de implementar.

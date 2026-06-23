@@ -50,9 +50,9 @@ Estado real al 2026-06-23:
 - `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability` y que no haya rutas duplicadas en mapa/registry
 - la barra de intenciones clinicas bloquea ejecucion directa y re-ejecucion de intenciones que la pantalla actual no declare como permitidas
 - si no existe `ScreenCapability`, la UI bloquea intenciones IA por defecto
-- `PROG-AMB-PRECONSULTA-00` define contrato docs-only de preconsulta
-  ambulatoria; la preconsulta sigue futura hasta un PR de implementacion minima
-  con permisos, auditoria, registry y E2E
+- `PROG-AMB-PRECONSULTA-01` implementa preconsulta ambulatoria minima dentro de
+  `/consulta/pacientes/{patient_id}/atencion`, sin ruta, tabla ni endpoint nuevo
+  y reutilizando cita, encuentro, signos vitales y evento clinico
 - `PROG-CLINICAL-RISK-00` define contrato docs-only de riesgos clinicos;
   riesgos siguen futuros hasta un PR con entidad/API bajo paciente, permisos,
   auditoria, registry, UI minima y E2E
@@ -241,8 +241,12 @@ Consulta:
 - la misma pantalla permite cerrar un encuentro ambulatorio en curso como `completed` usando el PATCH existente de encuentros; es cierre administrativo auditado, no firma ni receta valida
 - agenda ambulatoria minima existe como `ClinicalAppointment`, con persistencia, estados, permisos y auditoria
 - `/consulta/agenda` lista citas por dia, permite crear cita programada y enlaza a la atencion del paciente
-- admision/preconsulta tiene contrato minimo: reutilizar cita, encuentro
-  ambulatorio, signos vitales y evento clinico; no hay ruta ni tabla nueva
+- preconsulta ambulatoria minima esta integrada dentro de la atencion: toma cita
+  programada/en check-in/en curso, crea encuentro ambulatorio, registra signos
+  opcionales y deja evento clinico `clinical_note` con payload `preconsult`
+- la implementacion inicial usa permisos existentes de encuentro/evento/signos
+  (`medico/admin/dev` desde UI); rol `admision` y preconsulta avanzada por
+  enfermeria requieren PR backend/permisos propio
 - agenda avanzada por equipos/recursos y no-show operacional siguen futuras
 - `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden
 - seguimiento formal, interconsultas y cierre documental ambulatorio siguen futuros
