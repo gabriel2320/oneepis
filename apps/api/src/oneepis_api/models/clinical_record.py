@@ -82,6 +82,15 @@ class EncounterStatus(enum.StrEnum):
     CANCELLED = "cancelled"
 
 
+class AppointmentStatus(enum.StrEnum):
+    SCHEDULED = "scheduled"
+    CHECK_IN = "check_in"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    NO_SHOW = "no_show"
+
+
 class ClinicalEntry(Base, IdMixin, TimestampMixin):
     __tablename__ = "clinical_entries"
 
@@ -276,6 +285,33 @@ class ClinicalEncounter(Base, IdMixin, TimestampMixin):
         back_populates="encounter",
         passive_deletes=True,
     )
+
+
+class ClinicalAppointment(Base, IdMixin, TimestampMixin):
+    __tablename__ = "clinical_appointments"
+
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        index=True,
+    )
+    status: Mapped[AppointmentStatus] = mapped_column(
+        Enum(AppointmentStatus, values_callable=enum_values, name="appointment_status"),
+        default=AppointmentStatus.SCHEDULED,
+        nullable=False,
+    )
+    starts_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        index=True,
+        nullable=False,
+    )
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reason: Mapped[str] = mapped_column(String(200), nullable=False)
+    location_label: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    clinician_label: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
+
+    patient: Mapped[Patient] = relationship(back_populates="appointments")
 
 
 class VitalSign(Base, IdMixin, TimestampMixin):

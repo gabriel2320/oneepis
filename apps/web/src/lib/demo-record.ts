@@ -1,4 +1,5 @@
 import type {
+  ClinicalAppointment,
   ClinicalEncounter,
   HospitalBed,
   HospitalDailySheet,
@@ -216,6 +217,37 @@ export const demoEncounters: ClinicalEncounter[] = [
     notes: "Registro ficticio para asignacion de cama.",
     created_at: "2026-06-20T09:30:00Z",
     updated_at: "2026-06-20T09:30:00Z",
+  },
+];
+
+export const demoAppointments: ClinicalAppointment[] = [
+  {
+    id: "a1111111-1111-4111-8111-111111111111",
+    patient_id: "11111111-1111-4111-8111-111111111111",
+    starts_at: "2026-06-24T09:00:00Z",
+    ends_at: "2026-06-24T09:30:00Z",
+    reason: "Control ambulatorio demo",
+    location_label: "Box demo 1",
+    clinician_label: "Equipo ambulatorio",
+    notes: "Cita ficticia para validar agenda.",
+    status: "scheduled",
+    created_by: "sistema",
+    created_at: "2026-06-20T10:00:00Z",
+    updated_at: "2026-06-20T10:00:00Z",
+  },
+  {
+    id: "a2222222-2222-4222-8222-222222222222",
+    patient_id: "12222222-2222-4222-8222-222222222222",
+    starts_at: "2026-06-24T10:00:00Z",
+    ends_at: "2026-06-24T10:20:00Z",
+    reason: "Revision post alta futura demo",
+    location_label: "Box demo 2",
+    clinician_label: "Equipo demo",
+    notes: "No representa flujo productivo real.",
+    status: "check_in",
+    created_by: "sistema",
+    created_at: "2026-06-20T10:00:00Z",
+    updated_at: "2026-06-20T10:00:00Z",
   },
 ];
 

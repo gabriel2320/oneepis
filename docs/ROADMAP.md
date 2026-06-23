@@ -85,7 +85,7 @@ OneEpis ya tiene una base clinica E2E real:
 - No existe firma real, receta valida ni ejecucion de orden hospitalaria.
 - Atencion ambulatoria minima quedo conectada usando endpoints existentes:
   crea encuentro ambulatorio y evolucion SOAP vinculada.
-- No se creo agenda productiva ni API nueva para consulta.
+- No se habia creado agenda productiva ni API nueva para consulta en esta etapa.
 
 ### PR-063: limpieza de identidad local
 
@@ -152,9 +152,10 @@ OneEpis ya tiene una base clinica E2E real:
 - Epicrisis preliminar entra como borrador
   `ClinicalEntry(kind=discharge_summary)` vinculado a hospitalizacion activa,
   con papel carta propio por ID estricto.
-- Agenda real, alta/epicrisis firmada y papel firmado/legal quedan pendientes
-  de contrato backend antes de UI amplia.
-- El mapa maestro registra contratos minimos bloqueantes para agenda real,
+- Agenda ambulatoria minima queda implementada con `ClinicalAppointment`.
+- Agenda avanzada/productiva, alta/epicrisis firmada y papel firmado/legal
+  quedan pendientes de contrato backend antes de UI amplia.
+- El mapa maestro registra contratos minimos bloqueantes para agenda avanzada,
   atencion ambulatoria cerrable, ingreso medico hospitalario, epicrisis borrador
   implementada y papel tradicional.
 
@@ -176,7 +177,7 @@ El siguiente crecimiento recomendado despues de `v0.4-assistant-read`:
 - mantener paciente, ficha y papel como centro.
 - congelar nueva IA hasta completar el nucleo paciente tradicional.
 - complejizar antecedentes, diagnosticos historicos y linea longitudinal dentro de ficha.
-- preparar contratos de agenda, firma/cierre legal de epicrisis y papel amplio antes de crear UI amplia.
+- preparar contratos de agenda avanzada, firma/cierre legal de epicrisis y papel amplio antes de crear UI amplia.
 - elegir solo uno de esos contratos por PR cuando empiece la implementacion.
 - seguir `docs/AI_CHART_INTERACTION_VISION.md` para intenciones clinicas, fuentes, certeza, faltantes, confirmacion humana y gateway externo futuro.
 - tratar `docs/SIMULATED_CLINICAL_INTELLIGENCE.md` como Nivel 0 obligatorio: reglas, plantillas, timeline, validadores, preferencias y auditoria antes de depender de Ollama.

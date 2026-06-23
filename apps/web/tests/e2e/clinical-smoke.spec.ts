@@ -188,6 +188,19 @@ test("hospital indications render governed draft workspace", async ({ page }) =>
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeDisabled();
 });
 
+test("ambulatory agenda renders persisted appointment workflow", async ({ page }) => {
+  await page.goto("/consulta/agenda");
+
+  await expect(page.getByRole("heading", { name: "Agenda", exact: true })).toBeVisible();
+  await expect(page.getByText("Agenda ambulatoria persistida")).toBeVisible();
+  await expect(page.getByText("Control ambulatorio demo")).toBeVisible();
+  await expect(page.getByText("Programada", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Abrir atencion" }).first()).toBeVisible();
+  await expect(page.getByText("Nueva cita")).toBeVisible();
+  await expect(page.getByLabel("Paciente de la cita")).toContainText("Paciente Demo Alfa");
+  await expect(page.getByRole("button", { name: "Guardar cita" })).toBeDisabled();
+});
+
 test("ambulatory visit renders linked encounter workspace", async ({ page }) => {
   await page.goto(`/consulta/pacientes/${demoPatientId}/atencion`);
 
@@ -201,11 +214,6 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
 });
 
 test("prepared screens declare pending status", async ({ page }) => {
-  await page.goto("/consulta/agenda");
-  await expect(page.getByRole("heading", { name: "Agenda" })).toBeVisible();
-  await expect(page.getByText("Pantalla preparada: agenda ambulatoria")).toBeVisible();
-  await expect(page.getByText("no simula flujo productivo")).toBeVisible();
-
   await page.goto(`/consulta/pacientes/${demoPatientId}/resumen`);
   await expect(page.getByRole("heading", { name: "Resumen ambulatorio" })).toBeVisible();
   await expect(page.getByText("Pantalla preparada: resumen pendiente")).toBeVisible();

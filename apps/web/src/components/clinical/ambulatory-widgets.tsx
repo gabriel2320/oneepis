@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 export function AppointmentList() {
   return (
     <EmptyState
-      title="Pantalla preparada: agenda ambulatoria"
-      description="Agenda lista para integracion posterior; no simula flujo productivo."
+      title="Agenda ambulatoria"
+      description="La agenda persistida vive en su pantalla dedicada."
+      action={
+        <Button asChild size="sm" variant="outline">
+          <Link href="/consulta/agenda">Abrir agenda</Link>
+        </Button>
+      }
     />
   );
 }
