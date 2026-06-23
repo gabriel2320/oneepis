@@ -223,6 +223,15 @@ OneEpis ya tiene una base clinica E2E real:
   declaran limites visibles.
 - Fuera de alcance: escritura, IA nueva, dashboard, rutas y OpenAPI.
 
+### PROG-AMB-PRECONSULTA-PERMISSIONS-00: decision de permisos
+
+- Estado: decision docs-only.
+- Decision: aprobar una futura habilitacion de `enfermeria` para preconsulta
+  avanzada, pero solo con backend/permisos/tests.
+- Decision: mantener `admision` futura hasta existir rol administrativo y
+  limites de escritura propios.
+- Fuera de alcance: cambios de API, UI, OpenAPI, permisos reales o rol nuevo.
+
 ### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
 
 - Estado: contrato docs-only definido antes de implementar.

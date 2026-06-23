@@ -83,8 +83,9 @@ Foco actual:
 Cola de ejecucion automatica:
 
 1. Cerrar `PROG-PATIENT-CORE-POLISH-01`: ficha de solo lectura con fuentes, limites y faltantes mas visibles.
-2. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decision docs-only sobre `enfermeria`/`admision`.
-3. `PROG-CLINICAL-RISK-01`: implementar riesgos clinicos solo si el contrato sigue aprobado.
+2. Cerrar `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: enfermeria aprobada solo via backend/permisos/tests; admision futura.
+3. `PROG-AMB-PRECONSULTA-PERMISSIONS-01`: backend/permisos para enfermeria si se decide continuar preconsulta.
+4. `PROG-CLINICAL-RISK-01`: implementar riesgos clinicos solo si el contrato sigue aprobado.
 
 Reglas para avanzar:
 
@@ -93,7 +94,7 @@ Reglas para avanzar:
 - no mezclar contrato docs-only con implementacion
 - no agregar UI amplia antes de contrato, permisos, auditoria y pruebas
 - preconsulta debe seguir reutilizando cita, encuentro, signos y eventos antes de crear tabla o endpoint compuesto
-- la implementacion minima usa permisos existentes `medico/admin/dev`; no prometer flujo `admision` o `enfermeria` sin PR backend
+- la implementacion minima usa permisos existentes `medico/admin/dev`; enfermeria requiere PR backend y admision no se promete todavia
 - riesgos clinicos deben mostrar fuente, severidad, estado y accion humana; no scores automaticos ni `ClinicalPatch`
 - no ampliar IA durante esta cola
 - usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge
