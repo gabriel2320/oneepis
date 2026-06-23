@@ -30,6 +30,7 @@ sin datos reales
 - Todo cambio de API debe actualizar `packages/contracts/openapi.json`.
 - Frontend no debe usar datos demo salvo `NEXT_PUBLIC_DEMO_MODE=true`.
 - Ninguna ruta clinica o print con ID en URL puede mostrar un primer registro como fallback.
+- Ningun archivo clinico nuevo debe superar 350 lineas sin excepcion explicita en `scripts/check-file-size.mjs`.
 
 ## Loop de trabajo
 
@@ -58,6 +59,7 @@ Reglas para nuevos cambios:
 - mantener `patient-ai-chart-pages.tsx` como orquestador
 - no agregar bloques UI inline grandes en la pagina
 - preferir componentes existentes antes de crear rutas nuevas
+- mantener subpaneles de AI-Chart bajo presupuesto; si crecen, extraer secciones antes de sumar conducta
 - no sumar reglas clinicas al frontend; si una regla interpreta datos, vive en API
 - todo nuevo output debe tener fuente, faltante/limite, accion humana y auditoria
 - no tocar Ollama/API externa hasta cerrar Fase 1 del plan progresivo

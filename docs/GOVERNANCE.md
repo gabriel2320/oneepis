@@ -230,6 +230,8 @@ Todo PR debe responder:
 ## Presupuesto de Complejidad
 
 - Un archivo de aplicacion no deberia superar 300 lineas sin una razon clara.
+- El gate `npm run check:size` aplica un limite duro de 350 lineas en `apps/api/src/oneepis_api` y `apps/web/src`.
+- Toda excepcion al limite debe vivir en `scripts/check-file-size.mjs` con razon y tope explicito; no se aceptan excepciones implicitas en PR.
 - Un componente UI debe preferir composicion antes que props infinitas.
 - Un servicio backend debe expresar reglas de dominio, no consultas mezcladas con controladores grandes.
 - Si un modulo queda a medias, no entra: debe tener flujo humano minimo, permisos, auditoria si escribe y estado empty/error/loading cuando aplique.
