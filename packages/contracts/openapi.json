@@ -2530,6 +2530,95 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/assistant/timeline": {
+      "get": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Get Assistant Timeline",
+        "operationId": "get_assistant_timeline_api_v1_patients__patient_id__assistant_timeline_get",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantTimelineResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/allergies": {
       "get": {
         "tags": [
@@ -5989,6 +6078,120 @@
         },
         "type": "object",
         "title": "AllergyUpdate"
+      },
+      "AssistantTimelineItem": {
+        "properties": {
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "encounter",
+              "clinical_entry",
+              "clinical_event",
+              "vital_sign",
+              "medication",
+              "problem",
+              "allergy"
+            ],
+            "title": "Item Type"
+          },
+          "item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Item Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Source Label"
+          },
+          "source_path": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Source Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_type",
+          "item_id",
+          "occurred_at",
+          "label",
+          "summary",
+          "source_label",
+          "source_path"
+        ],
+        "title": "AssistantTimelineItem"
+      },
+      "AssistantTimelineResponse": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantTimelineItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Data"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Limit"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "default": false
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "limit"
+        ],
+        "title": "AssistantTimelineResponse"
       },
       "AuditEventRead": {
         "properties": {

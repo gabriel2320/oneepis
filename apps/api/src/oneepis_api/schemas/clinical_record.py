@@ -35,6 +35,11 @@ from oneepis_api.schemas.clinical_record_contracts.ai import (
     EventProposalFromEntryRequest,
     EventProposalsFromEntryResponse,
 )
+from oneepis_api.schemas.clinical_record_contracts.assistant import (
+    AssistantTimelineItem,
+    AssistantTimelineItemType,
+    AssistantTimelineResponse,
+)
 from oneepis_api.schemas.clinical_record_contracts.entries_events import (
     ClinicalEntryBase,
     ClinicalEntryCreate,
@@ -78,6 +83,9 @@ __all__ = [
     "AllergyCreate",
     "AllergyRead",
     "AllergyUpdate",
+    "AssistantTimelineItem",
+    "AssistantTimelineItemType",
+    "AssistantTimelineResponse",
     "ClinicalChangeSet",
     "ClinicalContextSection",
     "ClinicalEncounterBase",
