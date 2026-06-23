@@ -153,11 +153,25 @@ OneEpis ya tiene una base clinica E2E real:
   `ClinicalEntry(kind=discharge_summary)` vinculado a hospitalizacion activa,
   con papel carta propio por ID estricto.
 - Agenda ambulatoria minima queda implementada con `ClinicalAppointment`.
+- Resumen ambulatorio dedicado deja de ser placeholder y queda como lectura real
+  de snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion.
+- Documentos/papel deja de ser placeholder y queda como indice de ficha, resumen,
+  evoluciones, ingreso y epicrisis imprimibles cuando la fuente existe.
 - Agenda avanzada/productiva, alta/epicrisis firmada y papel firmado/legal
   quedan pendientes de contrato backend antes de UI amplia.
 - El mapa maestro registra contratos minimos bloqueantes para agenda avanzada,
   atencion ambulatoria cerrable, ingreso medico hospitalario, epicrisis borrador
   implementada y papel tradicional.
+
+### PROG-CONSOLIDATE-01: consolidacion post #15-#17
+
+- Estado: siguiente bloque inmediato antes de abrir otra feature clinica.
+- Objetivo: reconciliar documentacion canonica, podar componentes cerca del
+  limite de tamano, reforzar guardrails y dejar cola de avance automatico.
+- Alcance permitido: docs canonicos, extraccion de componentes sin cambio de
+  conducta, reporte near-limit no bloqueante y reglas E2E mas precisas.
+- Fuera de alcance: endpoints nuevos, OpenAPI, IA nueva, adjuntos, firma,
+  receta valida, agenda avanzada o pantallas grandes.
 
 ## Principios aprendidos
 

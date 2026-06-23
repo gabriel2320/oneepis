@@ -33,7 +33,11 @@ Estado real al 2026-06-23:
 - prototipo visual aprobado como base de ficha clinica tradicional gobernada
 - release `v0.4-assistant-read` cerrado y tagueado en `main`
 - el siguiente objetivo de producto es `v0.5-patient-core`
-- falta expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio, hospitalizacion, documentos/papel, resultados y seguridad clinica
+- avances iniciales de `v0.5-patient-core` ya mergeados:
+  - PR #15: agenda ambulatoria minima persistida con `ClinicalAppointment`
+  - PR #16: resumen ambulatorio real de solo lectura
+  - PR #17: indice de documentos/papel existente desde rutas print
+- sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
 - una pantalla preparada no cuenta como feature final y debe declarar su estado pendiente
@@ -63,6 +67,14 @@ Estado real al 2026-06-23:
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
 - la UI de propuestas desde evolucion exige permiso AI para confirmar patches
 - el siguiente bloque debe partir desde `main` verde y ser micro-PR logico
+
+Lecciones post #15-#17:
+
+- cada pantalla promovida a `completa` debe actualizar `SCREEN_TREE`, `screen-capabilities.ts`, E2E smoke y este documento en el mismo PR
+- no dejar placeholders visibles cuando una ruta empieza a mostrar datos reales
+- evitar selectores E2E ambiguos: usar texto exacto o scope por card cuando el texto aparece en badges y descripciones
+- vigilar archivos entre 300 y 350 lineas antes de agregarles comportamiento; extraer componentes pequenos primero
+- mantener los documentos canonicos sincronizados para no volver a declarar como `preparada` una superficie ya completa
 
 ## Backend
 
@@ -308,6 +320,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - adjuntos externos, consentimientos y receta siguen como bordes bloqueados/futuros; no expandir todos a la vez.
+- watchlist de tamano: componentes web cerca del limite deben extraerse antes de crecer; `patient-record-pages.tsx` quedo cerca del techo tras el indice de papel y requiere poda preventiva.
 - agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
