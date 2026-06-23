@@ -38,6 +38,12 @@ export function PatientAntecedentsPreview({
     .filter((event) => antecedentEventTypes.has(event.event_type))
     .slice(0, 4);
   const items = buildAntecedentItems(record, patientId, curatedEvents);
+  const sourceCounts = {
+    problemas: record.active_problems.length,
+    alergias: record.active_allergies.length,
+    medicacion: record.active_medications.length,
+    eventos: curatedEvents.length,
+  };
 
   return (
     <ClinicalSectionCard
@@ -66,6 +72,7 @@ export function PatientAntecedentsPreview({
         />
       ) : (
         <div className="space-y-2">
+          <AntecedentSourceSummary counts={sourceCounts} />
           {items.slice(0, 6).map((item) => (
             <article key={item.id} className="rounded-md border bg-background p-3">
               <div className="flex flex-wrap items-start justify-between gap-2">
@@ -92,9 +99,26 @@ export function PatientAntecedentsPreview({
       )}
       <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
         Faltantes declarados: antecedentes familiares/sociales, vacunas, dispositivos y diagnosticos
-        historicos codificados siguen pendientes de contrato propio.
+        historicos codificados siguen pendientes de contrato propio. Esta lectura no crea ni corrige
+        antecedentes estructurados.
       </div>
     </ClinicalSectionCard>
+  );
+}
+
+function AntecedentSourceSummary({
+  counts,
+}: {
+  counts: Record<"problemas" | "alergias" | "medicacion" | "eventos", number>;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 rounded-md border bg-muted/20 p-2 text-xs text-muted-foreground">
+      <span className="font-medium text-foreground">Fuentes usadas</span>
+      <span>Problemas: {counts.problemas}</span>
+      <span>Alergias: {counts.alergias}</span>
+      <span>Medicacion: {counts.medicacion}</span>
+      <span>Eventos curados: {counts.eventos}</span>
+    </div>
   );
 }
 

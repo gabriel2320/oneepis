@@ -45,6 +45,9 @@ export function FullTimelinePreview({ patientId }: { patientId: string }) {
         />
       ) : null}
       {timelineQuery.data ? <TimelineItemList timeline={timelineQuery.data} /> : null}
+      <p className="mt-3 text-xs text-muted-foreground">
+        Limite visible: 8 actos recientes combinando evoluciones y eventos; filtros avanzados quedan futuros.
+      </p>
     </ClinicalSectionCard>
   );
 }

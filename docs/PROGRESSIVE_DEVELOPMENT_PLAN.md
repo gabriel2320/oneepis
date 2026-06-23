@@ -408,6 +408,28 @@ Resultado inicial:
 - la lista y metricas de pacientes quedaron extraidas a un componente dedicado
 - no cambiaron rutas, API, OpenAPI, permisos, textos clinicos ni diseno visible
 
+## PROG-PATIENT-CORE-POLISH-01
+
+Estado: polish de lectura implementado en ficha.
+
+Objetivo: mejorar claridad de antecedentes, linea de tiempo y laboratorio sin
+crear entidad, ruta, endpoint, IA ni escritura.
+
+Resultado:
+
+- antecedentes muestran conteo de fuentes usadas: problemas, alergias,
+  medicacion y eventos curados
+- antecedentes declaran que no crean ni corrigen antecedentes estructurados
+- linea de tiempo y laboratorio declaran limites visibles y dejan la vista
+  avanzada como futura
+- smoke E2E de ficha cubre fuentes y limites
+
+Gates de cierre:
+
+- `npm run check:size`
+- `npm run check:web`
+- smoke E2E de ficha/clinico
+
 ## PROG-CLINICAL-RISK-00
 
 Estado: contrato docs-only definido.
@@ -464,8 +486,8 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. Cerrar `PROG-DIET-01` con PR verde y sin cambios observables.
-2. `PROG-PATIENT-CORE-POLISH-01`: nucleo paciente de solo lectura.
+1. Cerrar `PROG-PATIENT-CORE-POLISH-01` con PR verde.
+2. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decidir permisos de preconsulta avanzada.
 3. Mantener riesgos clinicos como contrato definido hasta PR propio de API/UI.
 
 Hecho en este foco:

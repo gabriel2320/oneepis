@@ -36,6 +36,9 @@ export function LabResultsPreview({ patientId }: { patientId: string }) {
         />
       ) : null}
       {labPanelsQuery.data ? <LabPanelPreviewList panels={labPanelsQuery.data} /> : null}
+      <p className="mt-3 text-xs text-muted-foreground">
+        Limite visible: 3 paneles recientes y hasta 4 resultados por panel; la vista amplia de laboratorio sigue futura.
+      </p>
     </ClinicalSectionCard>
   );
 }

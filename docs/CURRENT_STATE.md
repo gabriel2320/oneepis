@@ -45,6 +45,9 @@ Estado real al 2026-06-23:
 - `PROG-DIET-01` inicia con extraccion quirurgica de la mesa de pacientes:
   `patient-list-pages.tsx` deja de estar en el reporte near-limit sin cambiar
   conducta visible
+- `PROG-PATIENT-CORE-POLISH-01` mejora lectura de ficha sin nueva entidad:
+  antecedentes muestran fuentes usadas, timeline/laboratorio declaran limites
+  visibles y faltantes siguen explicitos
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
