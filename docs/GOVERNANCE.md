@@ -201,6 +201,7 @@ Papel obligatorio:
 - No crees un documento nuevo si puedes actualizar uno existente.
 - No agregues scripts nuevos si un comando existente puede expresar el gate.
 - Actualiza OpenAPI cuando cambie la API.
+- Mientras los tipos TS sigan manuales, todo cambio Assistant Read debe pasar el drift check de contrato.
 - Route Handlers de Next pueden actuar como BFF de interaccion/streaming IA, pero no deben duplicar permisos, auditoria ni escritura clinica de FastAPI.
 - Toda propuesta IA que pueda escribir ficha debe pasar por `ClinicalPatch` y confirmacion backend.
 - Todo patch aceptado debe declarar confirmacion humana obligatoria; las evoluciones AI-Chart solo pueden persistir como borrador no firmado.
