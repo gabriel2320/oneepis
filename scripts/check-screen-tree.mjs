@@ -28,6 +28,10 @@ const realRouteRows = extractRealRouteRows(screenTree);
 const documentedRoutes = new Set(realRouteRows.map((row) => row.route));
 const missingRoutes = visibleRoutes.filter((route) => !documentedRoutes.has(route));
 
+for (const route of duplicates(realRouteRows.map((row) => row.route))) {
+  errors.push(`Ruta duplicada en SCREEN_TREE: ${route}`);
+}
+
 for (const route of missingRoutes) {
   errors.push(`Ruta visible sin fila en SCREEN_TREE: ${route}`);
 }
@@ -102,4 +106,16 @@ function extractRealRouteRows(markdown) {
     });
   }
   return rows;
+}
+
+function duplicates(items) {
+  const seen = new Set();
+  const repeated = new Set();
+  for (const item of items) {
+    if (seen.has(item)) {
+      repeated.add(item);
+    }
+    seen.add(item);
+  }
+  return [...repeated].sort();
 }

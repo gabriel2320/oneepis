@@ -34,7 +34,7 @@ Estado real al 2026-06-23:
 - `npm run check:screens` valida que toda ruta visible de `apps/web/src/app` este documentada en `docs/SCREEN_TREE.md`
 - existe un Screen Capability Registry frontend en `apps/web/src/lib/screen-capabilities.ts`
 - el registry declara por ruta estado, permisos, escritura, auditoria, papel, complejidad futura e IA permitida
-- `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability`
+- `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability` y que no haya rutas duplicadas en mapa/registry
 - la barra de intenciones clinicas bloquea ejecucion directa y re-ejecucion de intenciones que la pantalla actual no declare como permitidas
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`

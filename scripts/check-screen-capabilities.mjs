@@ -8,8 +8,13 @@ const registryPath = path.join(repoRoot, "apps/web/src/lib/screen-capabilities.t
 
 const registry = readFileSync(registryPath, "utf8");
 const visibleRoutes = discoverVisibleRoutes();
-const registeredRoutes = extractRegisteredRoutes(registry);
+const registeredRouteList = extractRegisteredRoutes(registry);
+const registeredRoutes = new Set(registeredRouteList);
 const errors = [];
+
+for (const route of duplicates(registeredRouteList)) {
+  errors.push(`ScreenCapability duplicado: ${route}`);
+}
 
 for (const route of visibleRoutes) {
   if (!registeredRoutes.has(route)) {
@@ -55,11 +60,23 @@ function walk(root) {
 }
 
 function extractRegisteredRoutes(source) {
-  const routes = new Set();
+  const routes = [];
   const pattern = /capability\(\s*"([^"]+)"/g;
   let match;
   while ((match = pattern.exec(source)) !== null) {
-    routes.add(match[1]);
+    routes.push(match[1]);
   }
   return routes;
+}
+
+function duplicates(items) {
+  const seen = new Set();
+  const repeated = new Set();
+  for (const item of items) {
+    if (seen.has(item)) {
+      repeated.add(item);
+    }
+    seen.add(item);
+  }
+  return [...repeated].sort();
 }

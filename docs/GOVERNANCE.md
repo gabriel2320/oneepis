@@ -63,7 +63,7 @@ Reglas:
 - Ninguna pantalla nueva entra sin estado explicito en `docs/SCREEN_TREE.md`.
 - Todo PR que agregue, quite o mueva una ruta visible bajo `apps/web/src/app` debe actualizar `docs/SCREEN_TREE.md`.
 - Todo PR que agregue, quite o mueva una ruta visible bajo `apps/web/src/app` debe actualizar el Screen Capability Registry.
-- El guard `npm run check:screens` debe fallar si una ruta visible queda sin fila documentada o sin `ScreenCapability`.
+- El guard `npm run check:screens` debe fallar si una ruta visible queda sin fila documentada, sin `ScreenCapability` o duplicada en el mapa/registry.
 - Una pantalla preparada debe mostrar su estado pendiente en UI y quedar cubierta por E2E si es visible.
 - Una pantalla completa exige contrato backend antes de UI amplia si maneja datos clinicos nuevos.
 - Si escribe, debe tener permisos, auditoria, actor, `correlation_id`, OpenAPI y test API.
