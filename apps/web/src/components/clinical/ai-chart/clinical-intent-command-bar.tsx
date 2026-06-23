@@ -10,7 +10,11 @@ import type {
   ClinicalIntentType,
 } from "@/lib/types";
 import { DEMO_MODE } from "@/lib/api/client";
-import { findScreenCapability, isClinicalIntentAllowed } from "@/lib/screen-capabilities";
+import {
+  findScreenCapability,
+  isClinicalIntentAllowed,
+  type ScreenCapability,
+} from "@/lib/screen-capabilities";
 
 import { aiStatusLabel, clinicalActionKey, clinicalActionTarget, fallbackActionToIntent } from "./ai-chart-utils";
 
@@ -98,6 +102,7 @@ export function ClinicalIntentCommandBar({
         <ClinicalIntentRouteResult
           routedIntent={routedIntent}
           patientId={patientId}
+          screenCapability={screenCapability}
           onExecute={onExecuteIntent}
           isExecuting={isRouting || isExecuting}
         />
@@ -226,20 +231,28 @@ function eventLabel(event: AIStreamEvent) {
 function ClinicalIntentRouteResult({
   routedIntent,
   patientId,
+  screenCapability,
   onExecute,
   isExecuting,
 }: {
   routedIntent: ClinicalIntentRouteResponse;
   patientId: string;
+  screenCapability: ScreenCapability | null;
   onExecute: (intentType: ClinicalIntentType) => void;
   isExecuting: boolean;
 }) {
+  const routedIntentType = routedIntent.intent_type as ClinicalIntentType | null;
+  const isRoutedIntentAllowed =
+    !routedIntentType || isClinicalIntentAllowed(routedIntentType, screenCapability);
   const fallbackIntents = routedIntent.fallback_options
     .map((action) => ({
       label: action.label,
       intent: fallbackActionToIntent(action),
     }))
-    .filter((item): item is { label: string; intent: ClinicalIntentType } => Boolean(item.intent));
+    .filter((item): item is { label: string; intent: ClinicalIntentType } => {
+      if (!item.intent) return false;
+      return isClinicalIntentAllowed(item.intent, screenCapability);
+    });
   return (
     <div className="mb-4 rounded-md border bg-muted/30 p-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -251,18 +264,23 @@ function ClinicalIntentRouteResult({
             {routedIntent.explanation} Confianza: {routedIntent.confidence}.
           </p>
         </div>
-        {routedIntent.intent_type ? (
+        {routedIntentType ? (
           <Button
             type="button"
             variant="outline"
             size="sm"
-            disabled={isExecuting}
-            onClick={() => onExecute(routedIntent.intent_type as ClinicalIntentType)}
+            disabled={isExecuting || !isRoutedIntentAllowed}
+            onClick={() => onExecute(routedIntentType)}
           >
             {isExecuting ? "Ejecutando..." : "Reejecutar"}
           </Button>
         ) : null}
       </div>
+      {routedIntentType && !isRoutedIntentAllowed ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Esta pantalla no permite ejecutar esa intencion clinica.
+        </p>
+      ) : null}
       {!routedIntent.recognized ? (
         <div className="mt-3 flex flex-wrap gap-2">
           {fallbackIntents.map((action) => (
