@@ -42,6 +42,9 @@ Estado real al 2026-06-23:
   poda preventiva, reporte near-limit y cola de ejecucion automatica
 - `PROG-POST-PRECONSULTA-01` es el bloque activo docs-only para dejar #25
   consolidado y mover la cola a dieta quirurgica antes de nueva clinica
+- `PROG-DIET-01` inicia con extraccion quirurgica de la mesa de pacientes:
+  `patient-list-pages.tsx` deja de estar en el reporte near-limit sin cambiar
+  conducta visible
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
