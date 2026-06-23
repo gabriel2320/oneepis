@@ -63,7 +63,8 @@ Estado real al 2026-06-23:
   `/consulta/pacientes/{patient_id}/atencion`, sin ruta, tabla ni endpoint nuevo
   y reutilizando cita, encuentro, signos vitales y evento clinico
 - la preconsulta minima queda limitada a permisos existentes `medico/admin/dev`;
-  habilitar `enfermeria` o `admision` exige PR backend/permisos/tests
+  `enfermeria` queda aprobada solo para PR backend/permisos/tests y `admision`
+  sigue futura hasta existir rol administrativo
 - `PROG-CLINICAL-RISK-00` define contrato docs-only de riesgos clinicos;
   riesgos siguen futuros hasta un PR con entidad/API bajo paciente, permisos,
   auditoria, registry, UI minima y E2E
@@ -256,8 +257,8 @@ Consulta:
   programada/en check-in/en curso, crea encuentro ambulatorio, registra signos
   opcionales y deja evento clinico `clinical_note` con payload `preconsult`
 - la implementacion inicial usa permisos existentes de encuentro/evento/signos
-  (`medico/admin/dev` desde UI); rol `admision` y preconsulta avanzada por
-  enfermeria requieren PR backend/permisos propio
+  (`medico/admin/dev` desde UI); preconsulta avanzada por enfermeria requiere
+  PR backend/permisos propio y rol `admision` sigue futuro
 - agenda avanzada por equipos/recursos y no-show operacional siguen futuras
 - `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden
 - seguimiento formal, interconsultas y cierre documental ambulatorio siguen futuros

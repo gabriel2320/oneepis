@@ -277,8 +277,9 @@ Reglas de ejecucion:
 | 1 | `PROG-POST-PRECONSULTA-01` | `codex/post-preconsult-consolidation` | `[codex] consolidate post-preconsult queue` | `npm run check:size` | #25 registrado como completado, cola nueva documentada y sin API/UI nueva |
 | 2 | `PROG-DIET-01` | `codex/diet-near-limit-files` | `[codex] trim near-limit clinical files` | `npm run check:size`, `npm run check:web` | extraccion quirurgica sin cambio de conducta ni rutas/API |
 | 3 | `PROG-PATIENT-CORE-POLISH-01` | `codex/patient-core-read-polish` | `[codex] polish patient core read surfaces` | `npm run check:web`, E2E ficha | antecedentes, timeline y laboratorio mas claros sin entidad/ruta/escritura nueva |
-| 4 | `PROG-AMB-PRECONSULTA-PERMISSIONS-00` | `codex/preconsult-permissions-decision` | `[codex] decide preconsult permissions path` | `npm run check:size` | decision docs-only: congelar preconsulta minima o planear backend para `enfermeria`/`admision` |
-| 5 | `PROG-CLINICAL-RISK-01` | `codex/clinical-risk-minimal` | `[codex] implement minimal clinical risks` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/OpenAPI/UI compacta listas, sin dashboard ni IA |
+| 4 | `PROG-AMB-PRECONSULTA-PERMISSIONS-00` | `codex/preconsult-permissions-decision` | `[codex] decide preconsult permissions path` | `npm run check:size` | decision docs-only: enfermeria aprobada para PR backend; admision administrativa futura |
+| 5 | `PROG-AMB-PRECONSULTA-PERMISSIONS-01` | `codex/preconsult-nursing-permissions` | `[codex] allow nursing preconsult backend` | `npm run check:api`, `npm run check:web`, `npm run check:contract` | backend/permisos/tests habilitan enfermeria sin ruta nueva ni rol admision |
+| 6 | `PROG-CLINICAL-RISK-01` | `codex/clinical-risk-minimal` | `[codex] implement minimal clinical risks` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/OpenAPI/UI compacta listas, sin dashboard ni IA |
 
 Bloques ya cerrados en esta cola: `PROG-CONSOLIDATE-01`,
 `PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00` y
@@ -355,6 +356,31 @@ Nota de permisos:
   encuentro, evento y signos; hoy eso equivale a `medico/admin/dev`
 - habilitar `enfermeria` o rol futuro `admision` exige PR backend de permisos,
   tests API y actualizacion de `SCREEN_TREE`
+
+## PROG-AMB-PRECONSULTA-PERMISSIONS-00
+
+Estado: decision docs-only implementada.
+
+Decision:
+
+- `enfermeria` si debe poder registrar preconsulta avanzada, porque ya registra
+  signos vitales y participa en check-in clinico
+- la habilitacion debe ser backend-first: permisos, tests API, OpenAPI/contrato
+  si cambia superficie y ajuste UI posterior
+- `admision` no se habilita ahora: falta rol administrativo, limites de datos
+  y separacion clara entre check-in administrativo y acto clinico
+
+Fuera de alcance:
+
+- no cambiar permisos en este PR
+- no crear rol `admision`
+- no crear endpoint compuesto, tabla nueva, ruta nueva ni UI nueva
+
+Siguiente PR permitido:
+
+- `PROG-AMB-PRECONSULTA-PERMISSIONS-01`: permitir a `enfermeria` completar
+  solo el flujo existente de preconsulta, con tests API de permiso y rechazo
+  para `solo_lectura`
 
 Gates de cierre:
 
@@ -486,9 +512,9 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. Cerrar `PROG-PATIENT-CORE-POLISH-01` con PR verde.
-2. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decidir permisos de preconsulta avanzada.
-3. Mantener riesgos clinicos como contrato definido hasta PR propio de API/UI.
+1. Cerrar `PROG-AMB-PRECONSULTA-PERMISSIONS-00` con PR verde.
+2. Si se continua preconsulta: `PROG-AMB-PRECONSULTA-PERMISSIONS-01` backend/permisos para enfermeria.
+3. Si se congela preconsulta: avanzar a `PROG-CLINICAL-RISK-01`.
 
 Hecho en este foco:
 
