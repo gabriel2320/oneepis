@@ -322,6 +322,46 @@ Gates para promover a implementacion:
 - `docs/GOVERNANCE.md` mantiene la regla de contrato antes de UI amplia
 - `npm run check:size` verde
 
+## PROG-CLINICAL-RISK-00
+
+Estado: contrato docs-only definido.
+
+Objetivo: definir riesgos clinicos estructurados antes de crear UI, API o
+tablas.
+
+Decision de contrato:
+
+- crear entidad futura `ClinicalRisk` solo cuando empiece la implementacion;
+  no usar `ActiveProblem` como sustituto de riesgo activo
+- tipos iniciales: caida, UPP, TEV, aislamiento, evento adverso y otro
+- cada riesgo debe tener paciente, encuentro opcional, severidad, estado,
+  fuente inspeccionable, razon, accion humana y revision
+- la UI futura vive dentro de ficha, atencion u hospitalizacion; no habra
+  dashboard global de riesgos en el primer PR
+- IA solo puede resumir faltantes/fuentes; no calcula scores ni ejecuta
+  acciones clinicas
+
+Alcance permitido para implementacion futura:
+
+- listar riesgos activos en ficha/pantallas clinicas existentes
+- crear/corregir riesgo bajo paciente con permisos y auditoria
+- marcar riesgo como resuelto o `entered_in_error`; no delete fisico
+- mostrar fuente, severidad, fecha, limite y accion humana
+
+Fuera de alcance:
+
+- scores automaticos, ordenes, indicaciones, receta, aislamiento automatico,
+  firma o `ClinicalPatch`
+- ruta global `/riesgos`, dashboard de seguridad o modulo paralelo
+- farmacovigilancia FAERS como regla automatica
+
+Gates para promover a implementacion:
+
+- `docs/SCREEN_TREE.md` contiene el contrato minimo
+- `docs/CURRENT_STATE.md` declara que riesgos siguen futuros hasta PR de API/UI
+- `docs/GOVERNANCE.md` mantiene reglas de no automatizacion y fuente visible
+- `npm run check:size` verde
+
 ## Plan post-auditoria 2026-06-23
 
 P0 completado: PR #1 fue revisado en modo code review, corregido en su rama, validado local/remoto, marcado ready y mergeado por squash. No abrir otro PR grande de IA hasta que el siguiente bloque tenga alcance cerrado.
@@ -338,10 +378,8 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. `PROG-AMB-PRECONSULTA-00`: contrato docs-only antes de implementar preconsulta.
-2. `PROG-CLINICAL-RISK-00`: contrato docs-only de riesgos clinicos.
-3. `PROG-AMB-PRECONSULTA-01`: implementacion minima solo despues del contrato aprobado.
-4. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
+1. `PROG-AMB-PRECONSULTA-01`: implementacion minima solo despues del contrato aprobado.
+2. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
 
 Hecho en este foco:
 

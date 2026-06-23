@@ -138,6 +138,15 @@ Regla especifica de preconsulta ambulatoria:
 - Si la UI necesita un flujo mas complejo, primero se actualiza el contrato en
   `docs/SCREEN_TREE.md`; no se crea un modulo administrativo paralelo.
 
+Regla especifica de riesgos clinicos:
+
+- Los riesgos clinicos no son diagnosticos activos: no usar `ActiveProblem`
+  para representar caida, UPP, TEV, aislamiento o eventos adversos.
+- Cada alerta debe exponer fuente, severidad, estado, limite y accion humana;
+  una inferencia sin fuente no puede activar bloqueo clinico.
+- IA puede resumir faltantes o fuentes, pero no calcula scores, no ordena
+  acciones, no firma y no crea `ClinicalPatch` para riesgos.
+
 ## Lecciones Post #15-#17
 
 Los avances de agenda, resumen ambulatorio e indice de papel mostraron errores

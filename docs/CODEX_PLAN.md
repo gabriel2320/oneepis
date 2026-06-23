@@ -82,9 +82,8 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. `PROG-AMB-PRECONSULTA-00`: contrato docs-only de admision/preconsulta ya definido en `SCREEN_TREE`.
-2. `PROG-CLINICAL-RISK-00`: definir contrato docs-only de riesgos clinicos.
-3. `PROG-AMB-PRECONSULTA-01`: implementar preconsulta minima solo si el contrato sigue aprobado.
+1. `PROG-AMB-PRECONSULTA-01`: implementar preconsulta minima solo si el contrato sigue aprobado.
+2. Mantener riesgos clinicos como contrato definido; no implementar sin PR propio de API/UI.
 
 Reglas para avanzar:
 
@@ -93,5 +92,6 @@ Reglas para avanzar:
 - no mezclar contrato docs-only con implementacion
 - no agregar UI amplia antes de contrato, permisos, auditoria y pruebas
 - preconsulta debe reutilizar cita, encuentro, signos y eventos antes de crear tabla o endpoint compuesto
+- riesgos clinicos deben mostrar fuente, severidad, estado y accion humana; no scores automaticos ni `ClinicalPatch`
 - no ampliar IA durante esta cola
 - usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge

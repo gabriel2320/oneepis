@@ -136,7 +136,7 @@ tener contrato minimo y flujo humano verificable.
 | Alta/epicrisis firmada | Hospitalizacion/documentos | documento | futura | documento egreso firmado | si | medico/admin/dev futuro | si | carta | borrador revisable | epicrisis borrador ya existe; falta firma/cierre legal y alta formal |
 | Consentimientos | Documentos/papel | documento | futura | documentos firmados | si | medico/admin/dev futuro | si | carta | no | reglas de firma y custodia |
 | Adjuntos/documentos externos | Documentos/papel | documento | futura | almacenamiento documental | si | admin/dev futuro | si | segun tipo | resumen futuro | privacidad, virus scan y trazabilidad |
-| Seguridad clinica ampliada | Seguridad/auditoria | seguimiento | futura | alertas/riesgos/eventos | si | rol segun evento | si | no | fuentes/limites | caidas, UPP, TEV, aislamiento, adversos |
+| Seguridad clinica ampliada | Seguridad/auditoria | seguimiento | futura | riesgos clinicos estructurados | si | rol segun riesgo | si | no | fuentes/limites | contrato `PROG-CLINICAL-RISK-00` definido antes de UI |
 | Farmacovigilancia | Seguridad/auditoria | seguimiento | futura | eventos adversos + fuentes | si | medico/admin/dev | si | no | no automatica | no usar FAERS como contraindicacion automatica |
 | Auditoria de accesos | Seguridad/auditoria | seguimiento | futura | access logs | no | admin/dev | no | no | no | separar acceso de modificacion clinica |
 | Administracion clinica | Administracion clinica | seguimiento | futura | usuarios/catalogos/plantillas | si | admin/dev | si | no | no | no bloquear piloto clinico actual |
@@ -158,7 +158,7 @@ tener contrato minimo y flujo humano verificable.
 | Alta/epicrisis | epicrisis borrador | `ClinicalEntry(kind=discharge_summary)` vinculado a hospitalizacion activa | salida imprimible como borrador no firmado; firma/cierre legal futuros |
 | Laboratorio sobrio | resultados en ficha o AI-Chart | reutilizar `lab_panels`/`lab_results` existentes | lectura minima con fuente especifica por resultado; UI amplia queda futura y sin dashboard |
 | Imagenes/informes | informes como documentos clinicos | contrato documental o resultado estructurado minimo | no crear PACS ni visor complejo |
-| Seguridad clinica | alertas/riesgos | contrato por riesgo/evento y severidad | fuente, severidad, limite y accion humana |
+| Seguridad clinica | alertas/riesgos | contrato por riesgo/evento, severidad, estado y fuente | fuente, severidad, limite y accion humana |
 | Papel tradicional | ingreso, evolucion, indicacion, epicrisis | estado documental, actor/fecha si existen y ruta print | hoja carta, sin fallback silencioso y footer de desarrollo si no firmado |
 | Indice de documentos | `/pacientes/[patientId]/documentos` | rutas print existentes y entradas del record | implementado como indice; adjuntos externos y consentimientos quedan futuros |
 
@@ -176,6 +176,7 @@ el mapa debe declarar que sigue pendiente.
 | Ingreso medico hospitalario | `ClinicalEntry(kind=intake)` vinculado a encuentro `hospitalization`; no tabla nueva en primer PR | implementado reutilizando entradas clinicas vinculadas al ingreso | pantalla hospitalaria de ingreso como borrador editable, con secciones clinicas minimas | carta obligatoria de ingreso borrador | encuentro debe ser hospitalario, permisos medico/admin/dev, auditoria y print sin fallback |
 | Epicrisis borrador | `ClinicalEntry(kind=discharge_summary)` vinculado a encuentro `hospitalization`; no tabla nueva en primer PR | implementado reutilizando entradas clinicas vinculadas a la hospitalizacion | pantalla unica de epicrisis vinculada al ingreso, sin firma legal | carta obligatoria con estado draft y footer desarrollo | encuentro debe ser hospitalario, permisos medico/admin/dev, auditoria y print sin fallback |
 | Papel tradicional | documento clinico con fuente, estado, actor y fecha clinica cuando existan | no API nueva salvo documento fuente; print lee por ID especifico | boton `Ver papel` solo si la fuente existe o declara `sin papel aun` | carta por defecto | smoke print, sin fallback al primer registro, estado visible y footer si no firmado |
+| Riesgos clinicos | entidad futura `ClinicalRisk` con paciente, encuentro opcional, tipo, severidad, estado, fuente, accion humana y revision | endpoints bajo paciente solo cuando se implemente; sin ruta global de riesgos | resumen sobrio dentro de ficha/atencion/hospitalizacion; no dashboard | sin papel inicialmente; si se vuelve documento, hoja carta de resumen de riesgos | permisos por rol, auditoria before/after, fuentes inspeccionables, E2E de alerta visible y no automatica |
 
 ### Contrato `PROG-AMB-PRECONSULTA-00`
 
@@ -237,6 +238,69 @@ Criterio de promocion a `completa`:
 - UI minima en agenda/atencion, sin ruta nueva
 - E2E visible con selectores exactos: cita -> check-in -> preconsulta ->
   atencion
+- `SCREEN_TREE`, Screen Capability Registry y `CURRENT_STATE` actualizados en
+  el mismo PR
+
+### Contrato `PROG-CLINICAL-RISK-00`
+
+Objetivo: definir riesgos clinicos estructurados antes de crear UI, API o
+tablas. El foco inicial es seguridad visible, no scores automaticos ni alertas
+opacas.
+
+Tipos iniciales permitidos:
+
+- `fall`: riesgo de caida
+- `pressure_injury`: riesgo de UPP
+- `vte`: riesgo tromboembolico
+- `isolation`: aislamiento/precaucion
+- `adverse_event`: evento adverso o casi evento
+- `other`: riesgo clinico local no clasificado
+
+Modelo futuro minimo:
+
+- `patient_id` obligatorio y `encounter_id` opcional
+- `risk_type`, `severity` (`low|moderate|high|critical|unknown`) y `status`
+  (`active|resolved|entered_in_error`)
+- `source_kind` (`manual|vital_sign|clinical_event|clinical_entry|lab_result`)
+  y `source_ref` para inspeccionar la fuente
+- `reason`, `human_action`, `reviewed_at`, `created_by` y timestamps
+- no usar `ActiveProblem` como sustituto de riesgo activo; diagnostico y riesgo
+  clinico tienen ciclos de vida distintos
+
+API futura minima:
+
+- bajo paciente: listar, crear y corregir riesgos; no ruta global `/risks`
+- validar pertenencia de paciente, encuentro y fuente
+- `solo_lectura` puede ver, pero no crear ni corregir
+- escritura permitida por defecto a `enfermeria`, `medico`, `admin` y `dev`;
+  excepciones por tipo deben documentarse antes de implementar
+- correccion por estado `entered_in_error`, no delete fisico
+- auditoria con `before/after`, `patient_id`, `risk_id`, `risk_type`,
+  `severity`, `status`, fuente y `correlation_id`
+
+UI futura minima:
+
+- mostrar resumen compacto de riesgos activos en ficha y pantallas clinicas
+  existentes; no dashboard de seguridad
+- cada alerta muestra severidad, razon, fuente, fecha, limite y accion humana
+- no bloquear flujo clinico por inferencia automatica; solo resaltar y exigir
+  revision humana
+- resultados resueltos o `entered_in_error` siguen visibles en auditoria o
+  historial, pero no como alerta activa
+
+IA permitida:
+
+- solo lectura, resumen de faltantes y explicacion de fuentes
+- prohibido generar diagnostico, score automatico, orden, receta, aislamiento
+  automatico, indicacion ejecutable o `ClinicalPatch`
+- cualquier sugerencia debe decir "requiere revision" y mostrar fuente/limite
+
+Criterio de promocion a `completa/en expansion gobernada`:
+
+- entidad o reutilizacion justificada con contrato actualizado
+- API bajo paciente, permisos, auditoria, OpenAPI y tipos TS
+- UI minima en pantalla existente, sin ruta global
+- E2E con alerta activa, riesgo resuelto y ausencia de accion automatica
 - `SCREEN_TREE`, Screen Capability Registry y `CURRENT_STATE` actualizados en
   el mismo PR
 

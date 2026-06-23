@@ -186,6 +186,16 @@ OneEpis ya tiene una base clinica E2E real:
 - Fuera de alcance: receta, orden, firma, triage automatico, IA externa,
   dashboard o modulo administrativo amplio.
 
+### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
+
+- Estado: contrato docs-only definido antes de implementar.
+- Decision: crear entidad futura de riesgos clinicos si se implementa; no usar
+  `ActiveProblem` para mezclar diagnosticos con riesgos activos.
+- Alcance futuro permitido: riesgos de caida, UPP, TEV, aislamiento, evento
+  adverso y otros, con severidad, estado, fuente y accion humana.
+- Fuera de alcance: scores automaticos, ordenes, receta, firma, IA externa,
+  dashboard global o `ClinicalPatch`.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
