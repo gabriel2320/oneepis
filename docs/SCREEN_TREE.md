@@ -52,7 +52,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes` | Nucleo paciente | paciente | completa | API pacientes / demo | no | lectura paciente | no | no | no | buscador universal avanzado y ultimos abiertos |
 | `/pacientes/nuevo` | Nucleo paciente | paciente | completa | API pacientes | si | escritura paciente | si | no | no | identidad administrativa mas completa |
 | `/pacientes/[patientId]` | Nucleo paciente | paciente | completa | redirect App Router | no | lectura paciente | no | no | no | mantener como entrada a ficha |
-| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente | no | lectura paciente | no | carta | lectura/pendientes | antecedentes y resultados en lectura longitudinal |
+| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente | no | lectura paciente | no | carta | lectura/pendientes | antecedentes pendientes; resultados y timeline con lectura minima |
 | `/pacientes/[patientId]/estado` | Nucleo paciente | seguimiento | completa | API paciente | si | medico/admin/dev | si | no | no | estados clinicos mas finos |
 | `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | si | escritura clinica | si | no | lectura contextual | linea de tiempo completa futura |
 | `/pacientes/[patientId]/problemas` | Nucleo paciente | paciente | completa | problemas activos | no | lectura paciente | no | no | lectura contextual | diagnosticos historicos/CIE-10 futuros |

@@ -19,6 +19,16 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   const calls: string[] = [];
   await mockClinicalApi(page, calls);
 
+  await page.goto(`/pacientes/${patientId}/ficha`);
+  await expect(page.getByText("Resultados estructurados")).toBeVisible();
+  await expect(page.getByText("Perfil renal")).toBeVisible();
+  await expect(page.getByText("Creatinina")).toBeVisible();
+  await expect(page.getByText("Rango ref.: 0.7-1.3").first()).toBeVisible();
+  await expect(page.getByText(/Fuente: lab_result/).first()).toBeVisible();
+  await expect(page.getByText("Linea de tiempo completa")).toBeVisible();
+  await expect(page.getByText("Disnea y saturacion baja")).toBeVisible();
+  await expect(page.getByText("Fuente: clinical_events")).toBeVisible();
+
   await page.goto(`/pacientes/${patientId}/ai-chart`);
 
   await expect(page.getByRole("heading", { name: "AI-Chart Core" })).toBeVisible();
@@ -90,6 +100,10 @@ async function fulfillApi(route: Route) {
   }
   if (path === `/api/v1/patients/${patientId}/clinical-events`) {
     await route.fulfill({ json: clinicalEvents, headers: corsHeaders });
+    return;
+  }
+  if (path === `/api/v1/patients/${patientId}/timeline`) {
+    await route.fulfill({ json: clinicalTimeline, headers: corsHeaders });
     return;
   }
   if (path === `/api/v1/patients/${patientId}/assistant/timeline`) {
@@ -177,6 +191,11 @@ const clinicalEvents = [
     updated_at: createdAt,
   },
 ];
+
+const clinicalTimeline = {
+  events: clinicalEvents,
+  entries: [recentEntry],
+};
 
 const aiStatus = {
   provider: "local_rules",

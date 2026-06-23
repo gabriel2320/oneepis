@@ -6,6 +6,8 @@ import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiInsightPanel } from "@/components/clinical/ai-insight-panel";
 import { AiSafetyPanel } from "@/components/clinical/ai-safety-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { FullTimelinePreview } from "@/components/clinical/full-timeline-preview";
+import { LabResultsPreview } from "@/components/clinical/lab-results-preview";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import {
   AllergyWorkspace,
@@ -127,6 +129,7 @@ function PatientSectionContent({
             >
               <ClinicalTimeline entries={record.recent_entries} />
             </ClinicalSectionCard>
+            <FullTimelinePreview patientId={patientId} />
           </div>
           <aside className="space-y-4">
             <ClinicalSectionCard title="Alergias">
@@ -135,6 +138,7 @@ function PatientSectionContent({
             <ClinicalSectionCard title="Medicacion activa">
               <MedicationList medications={record.active_medications} />
             </ClinicalSectionCard>
+            <LabResultsPreview patientId={patientId} />
             <PatientAiSuggestionsPanel patientId={patientId} canUseAi={canUseAi} />
           </aside>
         </div>
