@@ -19,7 +19,7 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer,
     env: {
-      NEXT_PUBLIC_DEMO_MODE: "true",
+      NEXT_PUBLIC_DEMO_MODE: process.env.NEXT_PUBLIC_DEMO_MODE ?? "true",
       NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8000",
       NEXT_PUBLIC_ONEEPIS_ACTOR: "playwright.dev",
     },
