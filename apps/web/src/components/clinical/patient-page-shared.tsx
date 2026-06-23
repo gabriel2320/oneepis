@@ -175,7 +175,7 @@ export function usePatientRecordQuery(patientId: string) {
 
 function useDemoRecord(patientId: string) {
   return useMemo(
-    () => (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) ?? demoRecords[0] : null),
+    () => (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) : null),
     [patientId],
   );
 }

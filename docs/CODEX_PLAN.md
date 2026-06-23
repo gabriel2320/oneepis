@@ -29,6 +29,7 @@ sin datos reales
 - Toda escritura clinica debe tener actor, permisos, auditoria y `correlation_id`.
 - Todo cambio de API debe actualizar `packages/contracts/openapi.json`.
 - Frontend no debe usar datos demo salvo `NEXT_PUBLIC_DEMO_MODE=true`.
+- Ninguna ruta clinica o print con ID en URL puede mostrar un primer registro como fallback.
 
 ## Loop de trabajo
 
