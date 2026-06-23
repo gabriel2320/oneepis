@@ -82,9 +82,11 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. Cerrar `PROG-AMB-PRECONSULTA-01`: preconsulta minima en atencion, docs y gates.
-2. Mantener riesgos clinicos como contrato definido; no implementar sin PR propio de API/UI.
-3. Antes de ampliar preconsulta, decidir permisos backend para `enfermeria`/`admision`.
+1. `PROG-POST-PRECONSULTA-01`: consolidar memoria post-#25 y dejar cola actualizada.
+2. `PROG-DIET-01`: dieta quirurgica de archivos near-limit, sin cambio de conducta.
+3. `PROG-PATIENT-CORE-POLISH-01`: pulir nucleo paciente de solo lectura, sin entidad nueva.
+4. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decision docs-only sobre `enfermeria`/`admision`.
+5. `PROG-CLINICAL-RISK-01`: implementar riesgos clinicos solo si el contrato sigue aprobado.
 
 Reglas para avanzar:
 
@@ -97,3 +99,9 @@ Reglas para avanzar:
 - riesgos clinicos deben mostrar fuente, severidad, estado y accion humana; no scores automaticos ni `ClinicalPatch`
 - no ampliar IA durante esta cola
 - usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge
+
+Semaforo de cambio:
+
+- Verde: reutiliza entidades, no crea ruta, no cambia permisos, no agrega dependencia y tiene test claro. Puede entrar como micro-PR unico.
+- Amarillo: agrega endpoint, escritura, OpenAPI o UI nueva. Requiere tests API/contrato/E2E proporcionales.
+- Rojo: firma, receta valida, orden ejecutable, IA externa, RAG, adjuntos reales, datos sensibles o arquitectura nueva. Requiere contrato primero y nunca implementacion directa.
