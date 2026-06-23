@@ -25,6 +25,20 @@ This repository is designed to be maintained by human developers and AI agents w
    - Cross-cutting changes: `npm run check`
 5. Leave unrelated files untouched.
 
+## Post-pass Learning
+
+Every pass should leave executable memory, not just a summary. Before closing a PR, answer these points in the PR description or final note:
+
+- What changed, in concrete product terms?
+- Which touched file became more complex or moved closer to the size budget?
+- What was simplified, extracted, deleted, or intentionally not added?
+- What error, regression risk, or repeatable agent mistake appeared?
+- What test, gate, rule, or contract now prevents that mistake?
+- What must not be done in the next pass?
+- What is the next single minimum objective?
+
+Prefer hard memory first: tests, gates, contracts, types, and scripts. Use docs only for decisions or state that cannot be enforced directly. Do not create a new document when `CURRENT_STATE`, `GOVERNANCE`, `SCREEN_TREE`, `CODEX_PLAN`, or the PR template can hold the learning.
+
 ## Code Boundaries
 
 - `apps/web`: Next.js clinical workspace and UI components.
