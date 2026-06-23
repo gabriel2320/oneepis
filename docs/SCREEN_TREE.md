@@ -68,7 +68,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes/[patientId]/evoluciones` | Episodios | acto clinico | completa | clinical entries | no | lectura paciente | no | carta | lectura contextual | filtros por episodio/problema |
 | `/pacientes/[patientId]/evoluciones/nueva` | Episodios | acto clinico | completa | clinical entries | si | medico/admin/dev | si | carta | borrador revisable | firma real futura |
 | `/pacientes/[patientId]/evoluciones/desde-eventos` | Episodios | acto clinico | completa | eventos + AI-Chart | si | medico/admin/dev + permiso IA | si | carta | borrador revisable | mantener como borrador revisado |
-| `/pacientes/[patientId]/documentos` | Documentos/papel | documento | preparada | UI preparada | no | lectura paciente | no | no | no | documentos reales, adjuntos, consentimientos |
+| `/pacientes/[patientId]/documentos` | Documentos/papel | documento | completa | record + print routes | no | lectura paciente | no | carta | no | adjuntos externos, consentimientos y firma real futuros |
 | `/pacientes/[patientId]/ia` | IA clinica | seguimiento | completa | AI status/sugerencias | no | lectura paciente + permiso IA | no | no | apoyo contextual | IA como apoyo, no modulo central |
 | `/pacientes/[patientId]/ai-chart` | IA clinica | acto clinico | completa | AI-Chart + Assistant Read | si via `ClinicalPatch` | medico/admin/dev + permiso IA | si si confirma | SOAP carta | lectura, series, borrador | mantener `v0.4-assistant-read` cerrado; no expandir IA antes de nucleo paciente |
 | `/pacientes/[patientId]/auditoria` | Seguridad/auditoria | seguimiento | completa | audit events | no | lectura auditoria | no | no | no | auditoria de accesos futura |
