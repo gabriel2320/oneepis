@@ -183,3 +183,169 @@ def test_assistant_timeline_unknown_patient_returns_404(
     )
 
     assert response.status_code == 404
+
+
+def test_assistant_search_reads_sources_without_writing(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Assistant", last_name="Search")
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "reason": "Control diabetes",
+            "started_at": "2026-06-20T08:00:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    create_entry(
+        client,
+        auth,
+        patient_id,
+        title="Evolucion metabolica",
+        assessment="Diabetes mellitus en seguimiento longitudinal.",
+    )
+    create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Diabetes con ajuste educativo",
+        occurred_at="2026-06-20T10:45:00Z",
+    )
+    create_problem(client, auth, patient_id, title="Diabetes mellitus", code="E11")
+    medication_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={"name": "Metformina", "dose": "850 mg", "started_on": "2026-06-18"},
+    )
+    assert medication_response.status_code == 201
+    allergy_response = client.post(
+        f"/api/v1/patients/{patient_id}/allergies",
+        headers=auth,
+        json={
+            "substance": "Penicilina",
+            "reaction": "Exantema",
+            "recorded_at": "2026-06-19T09:00:00Z",
+        },
+    )
+    assert allergy_response.status_code == 201
+    vital_response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-20T11:00:00Z",
+            "heart_rate_bpm": 76,
+            "notes": "Control diabetes sin signos de alarma.",
+        },
+    )
+    assert vital_response.status_code == 201
+    before_audit = audit_events(client, auth, patient_id)
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/search?q= diabetes &limit=10",
+        headers=auth,
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["patient_id"] == patient_id
+    assert payload["query"] == "diabetes"
+    assert payload["applies_changes"] is False
+    assert payload["missing_data"] == []
+    assert payload["has_more"] is False
+    item_types = [item["item_type"] for item in payload["results"]]
+    assert {
+        "encounter",
+        "clinical_entry",
+        "clinical_event",
+        "problem",
+        "vital_sign",
+    }.issubset(set(item_types))
+    occurred_values = [item["occurred_at"] for item in payload["results"]]
+    assert occurred_values == sorted(occurred_values, reverse=True)
+    entry_item = next(item for item in payload["results"] if item["item_type"] == "clinical_entry")
+    assert entry_item["matched_fields"] == ["assessment"]
+    assert "Diabetes mellitus" in entry_item["snippet"]
+    assert entry_item["source_path"].endswith("/clinical-entries/" + entry_item["item_id"])
+    problem_item = next(item for item in payload["results"] if item["item_type"] == "problem")
+    assert problem_item["source_path"].endswith("/problems/" + problem_item["item_id"])
+    after_audit = audit_events(client, auth, patient_id)
+    assert after_audit == before_audit
+
+
+def test_assistant_search_allows_readonly_user(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Search", last_name="Lector")
+    create_event(client, auth, patient_id, summary="Antecedente familiar relevante")
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/search?q=familiar",
+        headers=readonly_auth,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["results"][0]["snippet"] == "Antecedente familiar relevante"
+
+
+def test_assistant_search_reports_limit_and_empty_results(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Search", last_name="Limit")
+    create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Dolor toracico inicial",
+        occurred_at="2026-06-20T10:00:00Z",
+    )
+    create_event(
+        client,
+        auth,
+        patient_id,
+        summary="Dolor toracico en reevaluacion",
+        occurred_at="2026-06-20T11:00:00Z",
+    )
+
+    limited_response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/search?q=dolor&limit=1",
+        headers=auth,
+    )
+    empty_response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/search?q=asma",
+        headers=auth,
+    )
+
+    assert limited_response.status_code == 200
+    limited_payload = limited_response.json()
+    assert len(limited_payload["results"]) == 1
+    assert limited_payload["results"][0]["snippet"] == "Dolor toracico en reevaluacion"
+    assert limited_payload["has_more"] is True
+    expected_warning = "Busqueda limitada a 1 resultados; afina la consulta o abre dominios fuente."
+    assert limited_payload["warnings"] == [expected_warning]
+    assert empty_response.status_code == 200
+    assert empty_response.json()["results"] == []
+    expected_missing = "No se encontraron coincidencias clinicas estructuradas para la busqueda."
+    assert empty_response.json()["missing_data"] == [expected_missing]
+
+
+def test_assistant_search_unknown_patient_returns_404(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+
+    response = client.get(
+        "/api/v1/patients/11111111-1111-4111-8111-111111111111/assistant/search?q=dolor",
+        headers=auth,
+    )
+
+    assert response.status_code == 404

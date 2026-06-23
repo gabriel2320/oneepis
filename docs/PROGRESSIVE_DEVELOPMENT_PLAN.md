@@ -87,6 +87,7 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. PR #1
 - bloquear aceptaciones `ClinicalPatch` sin confirmacion humana obligatoria
 - bloquear evoluciones AI-Chart que pretendan guardarse como firmadas/no borrador
 - leer timeline longitudinal assistant desde backend sin escritura clinica
+- buscar texto clinico assistant desde backend sin escritura clinica
 - funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y Ollama apagado
 - explicar por que un evento reciente se asocia o no a un problema activo dentro del Context Builder
 - mostrar faltantes contextualizados por atencion ambulatoria, hospitalizada o desconocida
@@ -125,18 +126,18 @@ Condicion de entrada:
 Orden obligatorio de ejecucion:
 
 1. Backend schemas + timeline de lectura. Estado: implementado.
-2. Busqueda deterministica. Estado: pendiente.
+2. Busqueda deterministica. Estado: implementado.
 3. Datos graficables. Estado: pendiente.
 4. Correlacion deterministica por presets. Estado: pendiente.
-5. OpenAPI y cliente web. Estado: OpenAPI timeline implementado; cliente web pendiente.
+5. OpenAPI y cliente web. Estado: OpenAPI timeline/search implementado; cliente web pendiente.
 6. UI minima solo si el backend esta verde. Estado: pendiente.
-7. Tests y documentacion canonica. Estado: tests API timeline implementados.
+7. Tests y documentacion canonica. Estado: tests API timeline/search implementados.
 
 Entregables backend permitidos:
 
 ```text
 GET  /api/v1/patients/{patient_id}/assistant/timeline
-POST /api/v1/patients/{patient_id}/assistant/search
+GET  /api/v1/patients/{patient_id}/assistant/search?q=...
 POST /api/v1/patients/{patient_id}/assistant/chart
 POST /api/v1/patients/{patient_id}/assistant/correlate
 ```
@@ -152,13 +153,17 @@ Implementado inicial:
 - lectura de encuentros, evoluciones, eventos, signos vitales, medicacion activa, problemas activos y alergias activas
 - cada item declara ruta fuente existente para inspeccion humana
 - probado con usuario `solo_lectura` y sin crear auditoria por lectura
+- `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
+- busqueda deterministica en dominios existentes con `results`, `missing_data`, `warnings`, `limit`, `has_more` y `applies_changes=false`
+- cada resultado declara snippet, campos coincidentes y ruta fuente existente para inspeccion humana
+- probado con usuario `solo_lectura`, limite, vacio, orden temporal y sin crear auditoria por lectura
 
 Alcance por endpoint:
 
 - `timeline`: unir encuentros, evoluciones, eventos, signos vitales,
   medicamentos activos, problemas activos, alergias e indicaciones si existen.
 - `search`: buscar texto deterministico en SOAP, eventos, problemas,
-  medicamentos, alergias, encuentros y notas/payload textual.
+  medicamentos, alergias, encuentros y notas textuales. Estado: implementado.
 - `chart`: devolver series de signos vitales, examenes desde eventos
   `exam_result` y marcas de medicamentos, como datos listos para UI.
 - `correlate`: describir relaciones temporales con presets cerrados
