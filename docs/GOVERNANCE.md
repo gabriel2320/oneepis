@@ -61,8 +61,10 @@ No construir ahora:
 - IA externa identificada
 - importador PDF completo
 
-El proximo avance debe consolidar AI-Chart Nivel 0 y Fase 2 con permisos,
-fuentes, faltantes y estados visuales claros. No debe crear un producto paralelo.
+PR #1 ya cerro AI-Chart Nivel 0. El proximo avance debe ser pequeno y partir
+desde `main` verde: Assistant Read Layer de solo lectura o una mejora puntual de
+Fase 2 con permisos, fuentes, faltantes y estados visuales claros. No debe crear
+un producto paralelo.
 
 Programa cerrado permitido: `PROG-ASSISTANT-READ-01`.
 
@@ -91,6 +93,7 @@ AI-Chart sin inflar `patient-ai-chart-pages.tsx`.
 
 Trabajo permitido inmediato:
 
+- construir Assistant Read Layer como micro-PR de solo lectura, sin chat libre ni RAG
 - explicar acciones bloqueadas por rol, modo demo o falta de revision humana
 - mostrar estado de propuesta y destino del patch antes de confirmar
 - mejorar textos de auditoria y trazabilidad en pantallas existentes
@@ -100,8 +103,11 @@ Trabajo no permitido inmediato:
 - nuevo dashboard
 - chat libre
 - RAG
+- laboratorio estructurado amplio dentro del PR de Assistant Read
 - editor generico de patches
 - agentes o paquetes IA nuevos
+- IA externa
+- otro PR grande que mezcle frontend, backend, contratos y roadmap sin particion clara
 
 ## Escalera OneEpis
 
@@ -196,6 +202,7 @@ Papel obligatorio:
 - Actualiza OpenAPI cuando cambie la API.
 - Route Handlers de Next pueden actuar como BFF de interaccion/streaming IA, pero no deben duplicar permisos, auditoria ni escritura clinica de FastAPI.
 - Toda propuesta IA que pueda escribir ficha debe pasar por `ClinicalPatch` y confirmacion backend.
+- Todo patch aceptado debe declarar confirmacion humana obligatoria; las evoluciones AI-Chart solo pueden persistir como borrador no firmado.
 
 ## Nuevas Dependencias
 

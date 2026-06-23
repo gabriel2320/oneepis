@@ -75,7 +75,7 @@ Condiciones de cierre:
 
 ## Estado Actual
 
-OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La base ya permite:
+OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. PR #1 fue revisado, endurecido y mergeado en `main` el 2026-06-23. La base ya permite:
 
 - leer ficha longitudinal por paciente
 - usar eventos clinicos como memoria estructurada
@@ -84,6 +84,8 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. La ba
 - generar propuestas revisables desde evoluciones escritas
 - persistir cambios IA solo mediante `ClinicalPatch` confirmado
 - auditar aceptacion, rechazo y guardado
+- bloquear aceptaciones `ClinicalPatch` sin confirmacion humana obligatoria
+- bloquear evoluciones AI-Chart que pretendan guardarse como firmadas/no borrador
 - funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y Ollama apagado
 - explicar por que un evento reciente se asocia o no a un problema activo dentro del Context Builder
 - mostrar faltantes contextualizados por atencion ambulatoria, hospitalizada o desconocida
@@ -96,7 +98,7 @@ chat libre, RAG, documentos o IA externa como atajo.
 
 ## PROG-ASSISTANT-READ-01
 
-Estado: programa aceptado como extension cerrada de Fase 2, no implementado.
+Estado: programa aceptado como extension cerrada de Fase 2, no implementado. La condicion P0 de gobernanza quedo cumplida con PR #1 mergeado y CI remoto verde.
 
 Objetivo: convertir OneEpis en una ficha medica tradicional aumentada que puede
 leer, buscar, mostrar, graficar y correlacionar su propia historia longitudinal,
@@ -115,10 +117,9 @@ Decision de arquitectura:
 
 Condicion de entrada:
 
-- no iniciar este programa sobre PR #1 mientras siga en draft o con CI remoto rojo
-- primero dejar verde `api`, `web`, `contracts-e2e` y contrato OpenAPI del PR base
-- si el programa se abre como PR nuevo, partir desde una base verde y mantenerlo
-  como micro-PR logico
+- partir desde `main` posterior al merge `14552489b3dce69c16f4c5cd90c27afe7ffba698`
+- conservar verde `api`, `web`, `contracts-e2e` y contrato OpenAPI
+- abrirlo como micro-PR logico, sin mezclar laboratorio, accesibilidad amplia ni releases
 
 Orden obligatorio de ejecucion:
 
@@ -173,14 +174,27 @@ Criterios de aceptacion:
 - los tests prueban solo lectura, permisos y faltantes
 - pasan `check:api`, `check:web`, `check:contract`, `check:e2e` y `check`
 
+## Plan post-auditoria 2026-06-23
+
+P0 completado: PR #1 fue revisado en modo code review, corregido en su rama, validado local/remoto, marcado ready y mergeado por squash. No abrir otro PR grande de IA hasta que el siguiente bloque tenga alcance cerrado.
+
+P1 activo permitido: Assistant Read Layer, solo lectura. Debe entregar timeline longitudinal, busqueda clinica, series graficables simples y correlacion explicable. Todo output debe exponer fuente, limite/faltante y accion humana opcional. No chat libre, no RAG documental amplio, no IA externa y no escritura automatica.
+
+P2 pendiente: examenes/laboratorio estructurados. Mantener `clinical_events.exam_result` como compatibilidad, pero disenar entidad dedicada antes de graficar tendencias clinicas serias. El primer PR debe ser diseno + contrato minimo: migracion Alembic, permisos, auditoria si escribe, OpenAPI, test API y lectura puente. No migrar historicos automaticamente en el primer paso.
+
+P3 pendiente: accesibilidad, performance y observabilidad. Agregar checklist vivo en docs existentes cuando empiece el bloque. Accesibilidad: teclado, foco visible, contraste, labels y Playwright + axe. Performance: dataset sintetico grande, limites/paginacion por dominio e indices revisados por query real. Observabilidad: logs sin PHI, correlation ID frontend/backend, health checks utiles y errores trazables.
+
+P4 pendiente: releases y validacion humana. Releases demo previstos: `v0.1-base-ficha`, `v0.2-hospitalizacion`, `v0.3-ai-chart-core`, `v0.4-assistant-read`. Cada release exige tag, changelog, CI verde, checklist de demo y rollback. Ritual semanal: paciente, hospitalizacion, evolucion, signo vital, evento, AI-Chart, impresion y auditoria; hallazgos van a `CURRENT_STATE` o issues, no a documentos dispersos.
+
 ## Foco Inmediato
 
-Prioridad antes de abrir Fase 2:
+Prioridad dentro de Fase 2:
 
-1. Context Builder serio: ampliar asociaciones por problema y explicar inferencias.
-2. AI Bridge unico: no crear nuevos Route Handlers de IA por caso de uso.
-3. Refactor minimo: extraer helpers de patch solo si aparece duplicacion real.
-4. Mantener permisos visibles y estados de patch en cada nueva accion.
+1. Assistant Read Layer de solo lectura, si se mantiene como micro-PR.
+2. Context Builder serio: ampliar asociaciones por problema y explicar inferencias.
+3. AI Bridge unico: no crear nuevos Route Handlers de IA por caso de uso.
+4. Refactor minimo: extraer helpers de patch solo si aparece duplicacion real.
+5. Mantener permisos visibles y estados de patch en cada nueva accion.
 
 Hecho en este foco:
 
@@ -193,13 +207,14 @@ Hecho en este foco:
 - la aplicacion de `ClinicalPatch` salio de la ruta HTTP y vive en servicio backend dedicado
 - la vista de operaciones `ClinicalPatch` quedo como componente reusable, no embebida en un panel especifico
 - `ClinicalPatch` rechaza targets no soportados sin escribir ficha, sin auditar aceptacion y con auditoria `unsupported`
+- `ClinicalPatch` bloquea aceptaciones inseguras sin escribir ficha: falta de confirmacion humana o evolucion no borrador
 - el smoke E2E cubre la presencia del flujo visual AI-Chart sin depender de Ollama
 
-Cola corta antes de Fase 2:
+Cola corta de mantenimiento:
 
-- correr gates completos despues del commit para comprobar contrato limpio
 - no crear nuevas superficies IA; usar AI-Chart y componentes existentes
 - mantener `ClinicalPatch` limitado a `clinical_event` y `evolution` hasta que exista duplicacion o necesidad real
+- no ampliar laboratorio ni accesibilidad amplia dentro del PR de Assistant Read
 
 Fuera de foco:
 
@@ -309,6 +324,8 @@ Implementado v0:
 - `POST /api/v1/patients/{patient_id}/ai/confirm-clinical-patch`
 - aceptacion crea evento clinico auditado
 - rechazo audita sin aplicar cambios
+- aceptacion exige `requires_human_confirmation=true`
+- `evolution` siempre guarda borrador `draft`, nunca firma ni cierra
 - la UI expone operaciones del patch antes de confirmarlo
 - `evolution` crea borradores SOAP no firmados desde texto revisado
 

@@ -1,6 +1,6 @@
 # Current State
 
-## Fase 1 cerrada, Fase 2 iniciada
+## Fase 1 cerrada, PR #1 mergeado, Fase 2 gobernada
 
 OneEpis ya tiene una base E2E real:
 
@@ -13,6 +13,9 @@ OneEpis ya tiene una base E2E real:
 
 El modo demo solo debe usarse con `NEXT_PUBLIC_DEMO_MODE=true`.
 
+PR #1 (`[codex] Close AI-Chart phase 1`) fue revisado como cambio de riesgo,
+endurecido y mergeado por squash en `main` el 2026-06-23.
+
 Programa de lectura aprobado, no implementado: `PROG-ASSISTANT-READ-01`.
 
 Este programa define una capa futura de asistente clinico de solo lectura para
@@ -20,13 +23,17 @@ leer, buscar, mostrar, graficar y correlacionar la historia longitudinal del
 paciente. Queda integrado en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` como
 extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
 
-Estado real al 2026-06-22:
+Estado real al 2026-06-23:
 
 - no existen todavia endpoints `/assistant/*`
 - no existe todavia ruta `/pacientes/[patientId]/contexto`
 - no hay busqueda, chart ni correlacion assistant dedicados
 - no se autoriza escritura clinica desde el programa
-- no debe implementarse encima de PR #1 mientras siga en draft o con CI remoto rojo
+- `ClinicalPatch` v0 soporta escritura confirmada solo para `clinical_event` y `evolution`
+- el backend bloquea aceptar patches con `requires_human_confirmation=false`
+- el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
+- la UI de propuestas desde evolucion exige permiso AI para confirmar patches
+- el siguiente bloque debe partir desde `main` verde y ser micro-PR logico
 
 ## Backend
 
@@ -94,6 +101,7 @@ IA:
 - contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
 - AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados, hoja SOAP con margen inteligente, propuestas de eventos desde evoluciones escritas y guardado por `ClinicalPatch` confirmado aunque Ollama este apagado
+- las aceptaciones `ClinicalPatch` quedan limitadas por contrato: confirmacion humana obligatoria, evolucion siempre borrador no firmado y auditoria de bloqueo cuando no aplica
 
 Hospitalizacion:
 
@@ -167,7 +175,7 @@ Tests API:
 - fixtures compartidas en `apps/api/tests/conftest.py`
 - cobertura paciente separada por dominios: ficha, permisos, auditoria, IA y encuentros
 - cobertura hospitalizacion separada por board, camas y hoja diaria
-- `ClinicalPatch` cubre aceptacion, rechazo y target no soportado; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported`
+- `ClinicalPatch` cubre aceptacion, rechazo, target no soportado, bloqueo por falta de confirmacion humana y bloqueo de evolucion no borrador; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported` o `ai.clinical_patch.blocked`
 
 Deuda visible a resolver antes de nuevo crecimiento clinico:
 
@@ -184,13 +192,14 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
-## Auditoria rapida 2026-06-22
+## Auditoria rapida 2026-06-23
 
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2, temas visuales v2 y AI-Chart Core Nivel 0.
+- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, mesa `/pacientes` v2, temas visuales v2, AI-Chart Core Nivel 0, PR #1 mergeado y endurecimiento `ClinicalPatch`.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- Validacion reciente: API 56 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
-- Siguiente paso recomendado: ampliar vocabulario local por problema y reglas por dominio clinico, midiendo falsos positivos, manteniendo AI Bridge unico y sin crear chat libre, RAG, agentes ni nuevos modulos.
-- Programa siguiente condicionado: `PROG-ASSISTANT-READ-01`, solo despues de base verde, para lectura longitudinal, busqueda, datos graficables y correlacion deterministica sin escritura clinica.
+- Validacion reciente local post-merge: ruff API, 66 tests API, web typecheck/lint/build, OpenAPI sin diff contractual y Playwright e2e 27 passed / 1 skipped.
+- Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
+- Siguiente paso recomendado: abrir `PROG-ASSISTANT-READ-01` como capa de lectura clinica, no como chat, RAG, dashboard ni escritura.
+- Siguiente bloque de producto despues de Assistant Read: diseno de examenes/laboratorio estructurados con entidad dedicada, manteniendo compatibilidad de `clinical_events.exam_result`.
 
 ## Historial
 

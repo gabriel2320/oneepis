@@ -26,6 +26,8 @@ paciente -> encuentro -> eventos clinicos -> contexto -> borrador SOAP
 - Next Route Handlers pueden transmitir vistas previas de interaccion, pero no son autoridad clinica.
 - El AI Bridge transmite eventos tipados: `status`, `source`, `warning`, `proposal`, `done`.
 - Toda propuesta que pueda terminar en escritura debe expresarse como `ClinicalPatch` revisable.
+- Toda aceptacion `ClinicalPatch` debe exigir confirmacion humana obligatoria en backend.
+- AI-Chart solo puede persistir evoluciones como borrador no firmado.
 
 ## Contratos principales
 
@@ -58,11 +60,13 @@ Estado actual:
 - Aceptar el patch crea un evento clinico auditado.
 - Guardar SOAP generado usa `target=evolution` y crea solo borrador no firmado.
 - Rechazar el patch audita la decision sin persistir cambios.
+- Aceptar un patch sin `requires_human_confirmation=true` queda bloqueado y auditado.
+- Aceptar una evolucion AI-Chart con estado distinto de `draft` queda bloqueado y auditado.
 - La UI no arma escrituras desde campos sueltos; envia la decision al backend.
 
 Siguiente mejora permitida:
 
-- hacer mas claros los permisos bloqueados y cubrir el flujo con E2E, sin agregar nuevas rutas IA.
+- Assistant Read Layer de solo lectura o mejoras puntuales de explicabilidad en Fase 2, sin agregar chat libre, RAG ni IA externa.
 
 ## AI Bridge
 

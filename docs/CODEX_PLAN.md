@@ -65,9 +65,12 @@ Reglas para nuevos cambios:
 
 Foco actual:
 
-- Fase 1 queda cerrada; el siguiente avance debe ser Fase 2 Context Builder explicable
+- Fase 1 queda cerrada y PR #1 fue mergeado; el siguiente avance debe ser micro-PR desde `main`
+- priorizar Assistant Read Layer de solo lectura antes de laboratorio estructurado amplio
+- si se toca Context Builder, debe ser una mejora explicable puntual dentro de Fase 2
 - mantener `ClinicalPatch` simple: `clinical_event` y `evolution`
+- no aceptar `ClinicalPatch` sin confirmacion humana obligatoria ni evoluciones que no sean borrador
 - tratar estados de propuesta como flujo local + auditoria hasta decidir persistencia propia
 - no crear editor generico de patches
 - no extraer `packages/ai-core` hasta que haya duplicacion real
-- no ampliar a RAG, documentos ni IA externa antes de cerrar Fase 1
+- no ampliar a RAG, documentos ni IA externa antes de cerrar Assistant Read y su validacion humana
