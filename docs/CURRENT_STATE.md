@@ -158,6 +158,8 @@ Assistant Read Layer:
 - no escribe ficha, no audita modificacion y no depende de Ollama
 - UI minima integrada en AI-Chart con tabs Timeline, Buscar, Series y Correlacion
 - el tab Series muestra fuentes accionables y lectura acotada de paneles de laboratorio recientes
+- backend Assistant Read esta dividido por dominio en rutas/helper de timeline, busqueda, series, correlacion y utilidades comunes
+- `patient_assistant.py` queda como agregador de routers y ya no requiere excepcion de tamano en `check:size`
 - pendiente: decidir si `/pacientes/[patientId]/contexto` aporta valor como vista dedicada sin crear dashboard
 
 Laboratorio estructurado:
@@ -269,7 +271,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
-- `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon.
+- `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon; Assistant Read backend ya no usa excepcion propia.
 - `npm run check:screens` bloquea rutas visibles sin fila en `SCREEN_TREE` o sin `ScreenCapability`.
 - `npm run check:contract` verifica OpenAPI y drift minimo Assistant Read contra los tipos TS manuales.
 - Playwright E2E corre con `workers: 1` para evitar 404 transitorios del dev server al compilar rutas dinamicas en paralelo.

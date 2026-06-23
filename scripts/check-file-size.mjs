@@ -9,10 +9,6 @@ const extensions = new Set([".py", ".ts", ".tsx"]);
 const ignoredSegments = new Set([".next", "node_modules"]);
 const exceptions = new Map([
   [
-    "apps/api/src/oneepis_api/api/v1/routes/patient_assistant.py",
-    { limit: 1320, reason: "Deuda heredada Assistant Read; extraer por dominios en PRs pequenos." },
-  ],
-  [
     "apps/api/src/oneepis_api/services/clinical_intent.py",
     { limit: 1090, reason: "Deuda heredada de reglas deterministicas; no crecer sin extraer dominios." },
   ],
