@@ -27,8 +27,14 @@ Estado real al 2026-06-23:
 
 - prototipo visual aprobado como base de ficha clinica tradicional gobernada
 - falta expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio, hospitalizacion, documentos/papel, resultados y seguridad clinica
-- el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz con estado `completa`, `preparada` o `futura`
+- el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
+- los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
 - una pantalla preparada no cuenta como feature final y debe declarar su estado pendiente
+- una pantalla bloqueada existe para evitar uso clinico hasta cumplir contrato clinico/legal; no cuenta como feature final
+- `npm run check:screens` valida que toda ruta visible de `apps/web/src/app` este documentada en `docs/SCREEN_TREE.md`
+- existe un Screen Capability Registry frontend en `apps/web/src/lib/screen-capabilities.ts`
+- el registry declara por ruta estado, permisos, escritura, auditoria, papel, complejidad futura e IA permitida
+- `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability`
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -211,6 +217,7 @@ Capas:
 - `src/components/clinical/patient-*-pages.tsx`: pantallas paciente importadas directo por App Router
 - `/pacientes` funciona como mesa clinica de entrada con buscador, metricas operativas y lista escaneable
 - navegacion paciente agrupada visualmente en Ficha, Datos, IA y Control; mobile usa selector compacto de seccion clinica
+- las pantallas visibles pueden mostrar badges comunes de estado, papel, escritura e IA permitida desde el Screen Capability Registry
 - `/pacientes/[patientId]/ficha` se organiza como hoja clinica viva: cabecera critica, linea longitudinal y riel contextual de faltantes/IA/acciones
 - `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
 - `/pacientes/[patientId]/medicacion` integra vademecum local, favoritos, sugeridos deterministicas, historial y copia de indicaciones previas como borrador humano
@@ -220,6 +227,7 @@ Capas:
 - AI-Chart envia la barra clinica al BFF de Next, que delega la resolucion estructurada en FastAPI y transmite eventos tipados JSONL con AI SDK
 - AI-Chart no guarda propuestas desde campos sueltos; envia `ClinicalPatch` al backend para aceptar/rechazar/guardar
 - AI-Chart muestra estado operativo de eventos, evoluciones, seleccion, modo y permisos antes de generar o guardar
+- AI-Chart consulta el registry para bloquear intenciones no permitidas por la pantalla antes de ejecutar botones dirigidos
 - Assistant Read mantiene el panel orquestador separado de sus secciones de timeline, busqueda, series y correlacion.
 - AI-Chart explica acciones bloqueadas con condicion o rol habilitante
 - AI-Chart inicia Context Builder serio mostrando explicaciones por problema: por que una evidencia se asocia o queda sin vinculo
@@ -255,12 +263,14 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - no agregar nueva clinica core sin flujo completo PostgreSQL/API/permisos/auditoria/OpenAPI/UI
 - no agregar pantallas clinicas nuevas sin registrar estado explicito en `docs/SCREEN_TREE.md`
 - promover pantallas preparadas a completas solo con contrato backend, permisos, auditoria si escribe, pruebas y papel cuando aplique
+- mover una ruta visible bajo `apps/web/src/app` exige actualizar el mapa maestro o falla `npm run check:screens`
 - mantener la regla de producto: paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
 - `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
 - `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon.
+- `npm run check:screens` bloquea rutas visibles sin fila en `SCREEN_TREE` o sin `ScreenCapability`.
 - `npm run check:contract` verifica OpenAPI y drift minimo Assistant Read contra los tipos TS manuales.
 - Playwright E2E corre con `workers: 1` para evitar 404 transitorios del dev server al compilar rutas dinamicas en paralelo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
@@ -296,7 +306,7 @@ Accesibilidad, performance y observabilidad pendientes:
 - Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
 - Rediseño grafico-web inicial: navegacion paciente agrupada, ficha como hoja clinica viva, AI-Chart con pasos guiados, paridad papel basica y tokens clinicos V2 documentados.
 - Validacion reciente rediseño visual: `npm run check:size`, `npm run check:web`, `npm run check:e2e`, `npm run check:contract` y `npm run check:api`.
-- Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y brechas futuras por modulo, estado, fuente de verdad, escritura, papel y pendiente.
+- Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y superficies futuras por modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
 - Siguiente paso recomendado: ejecutar walkthrough humano de `v0.4-assistant-read`, corregir hallazgos y preparar tag/changelog.
 - Siguiente bloque de producto despues de `v0.4`: correccion controlada de laboratorio o carga acotada, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
@@ -313,6 +323,7 @@ Regla IA: todo output de Ollama es borrador, requiere revision humana y no escri
 Comandos esperados antes de entregar cambios:
 
 ```bash
+npm run check:screens
 npm run check:api
 npm run check:web
 npm run check:contract

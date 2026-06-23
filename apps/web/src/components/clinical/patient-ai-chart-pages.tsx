@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiChartGovernancePanel } from "@/components/clinical/ai-chart/ai-chart-governance-panel";
+import { AiChartStep } from "@/components/clinical/ai-chart/ai-chart-step";
 import { AssistantReadPanel } from "@/components/clinical/ai-chart/assistant-read-panel";
 import type {
   HumanReviewConfirmation,
@@ -323,27 +324,5 @@ export function PatientAiChartPage() {
         ) : null}
       </div>
     </PatientClinicalShell>
-  );
-}
-
-function AiChartStep({
-  step,
-  title,
-  description,
-}: {
-  step: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
-        {step}
-      </span>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-      </div>
-    </div>
   );
 }

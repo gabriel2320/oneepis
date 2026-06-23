@@ -53,18 +53,32 @@ si no pasan antes por el plan progresivo y la escalera OneEpis.
 Toda pantalla clinica debe tener un estado explicito en `docs/SCREEN_TREE.md`:
 
 - `completa`: tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
+- `completa/en expansion gobernada`: funciona, pero tiene un subdominio acotado en crecimiento con guardrails activos.
 - `preparada`: existe como borde visible, declara que esta pendiente y no simula produccion.
+- `bloqueada`: existe o se nombra para evitar uso clinico hasta completar requisitos legales/clinicos.
 - `futura`: pertenece al mapa maestro, pero no tiene ruta o contrato listo.
 
 Reglas:
 
-- Ninguna pantalla nueva entra sin estado explicito.
+- Ninguna pantalla nueva entra sin estado explicito en `docs/SCREEN_TREE.md`.
+- Todo PR que agregue, quite o mueva una ruta visible bajo `apps/web/src/app` debe actualizar `docs/SCREEN_TREE.md`.
+- Todo PR que agregue, quite o mueva una ruta visible bajo `apps/web/src/app` debe actualizar el Screen Capability Registry.
+- El guard `npm run check:screens` debe fallar si una ruta visible queda sin fila documentada o sin `ScreenCapability`.
 - Una pantalla preparada debe mostrar su estado pendiente en UI y quedar cubierta por E2E si es visible.
 - Una pantalla completa exige contrato backend antes de UI amplia si maneja datos clinicos nuevos.
 - Si escribe, debe tener permisos, auditoria, actor, `correlation_id`, OpenAPI y test API.
 - Si produce documento clinico, debe tener papel carta o declarar explicitamente que no tiene papel aun.
 - No se promueve una pantalla por apariencia: debe cerrar un acto clinico real.
 - El orden del producto es `paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento`.
+- Receta valida, firma clinica, folio, despacho, administracion de medicamentos, ordenes ejecutables, agenda productiva e IA externa siguen bloqueadas/futuras hasta cumplir su contrato clinico/legal.
+
+Reglas IA por pantalla:
+
+- Cada ruta clinica visible debe declarar IA permitida en el Screen Capability Registry.
+- Las acciones IA permitidas son cerradas: lectura, resumen, busqueda, series, validacion, borrador y propuesta de patch.
+- Una pantalla sin capacidad declarada no puede ejecutar comandos IA dirigidos.
+- Ollama solo puede apoyar redaccion/resumen cuando la pantalla lo permita; las reglas locales y datos estructurados mantienen autoridad.
+- `ClinicalPatch` solo puede aparecer en pantallas que lo declaren y siempre requiere confirmacion humana y auditoria backend.
 
 ## Limites Activos
 

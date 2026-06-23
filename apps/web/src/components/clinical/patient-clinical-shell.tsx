@@ -23,11 +23,13 @@ import {
 import type { ReactNode } from "react";
 
 import { SessionButton } from "@/components/auth/session-button";
+import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
+import { findScreenCapability } from "@/lib/screen-capabilities";
 import type { PatientRecordSnapshot } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -96,6 +98,7 @@ export function PatientClinicalShell({
     record.active_allergies[0];
   const latestEntry = record.recent_entries[0];
   const activeNavItem = clinicalNav.find((item) => activeSection === item.key);
+  const screenCapability = findScreenCapability(pathname);
 
   return (
     <div className="min-h-screen bg-background">
@@ -189,6 +192,9 @@ export function PatientClinicalShell({
                   <span>{patient.sex_at_birth}</span>
                   {relevantAllergy ? <span>Alergia: {relevantAllergy.substance}</span> : null}
                   {latestEntry ? <span>Ultima evolucion: {formatShortDate(latestEntry.occurred_at)}</span> : null}
+                </div>
+                <div className="mt-2">
+                  <ScreenCapabilityBadges capability={screenCapability} compact />
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">

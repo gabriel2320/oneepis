@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Server } from "lucide-react";
 import type { ReactNode } from "react";
@@ -9,12 +10,14 @@ import { AppShell } from "@/components/layout/app-shell";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
 import { AppointmentList, VisitWorkspace } from "@/components/clinical/ambulatory-widgets";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
 import { API_BASE_URL } from "@/lib/api/client";
+import { findScreenCapability } from "@/lib/screen-capabilities";
 
 export function AmbulatoryHomePage() {
   return (
@@ -161,6 +164,7 @@ export function ModulePage({
   actions?: { href: string; label: string }[];
   children: ReactNode;
 }) {
+  const capability = findScreenCapability(usePathname());
   return (
     <AppShell>
       <div className="mx-auto max-w-6xl space-y-5 p-4 md:p-6">
@@ -168,6 +172,9 @@ export function ModulePage({
           <div>
             <h1 className="text-2xl font-semibold">{title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+            <div className="mt-2">
+              <ScreenCapabilityBadges capability={capability} compact />
+            </div>
           </div>
           {actions.length > 0 ? (
             <div className="flex flex-wrap gap-2">

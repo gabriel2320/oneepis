@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import type {
   ClinicalIntentType,
 } from "@/lib/types";
 import { DEMO_MODE } from "@/lib/api/client";
+import { findScreenCapability, isClinicalIntentAllowed } from "@/lib/screen-capabilities";
 
 import { aiStatusLabel, clinicalActionKey, clinicalActionTarget, fallbackActionToIntent } from "./ai-chart-utils";
 
@@ -58,6 +60,7 @@ export function ClinicalIntentCommandBar({
   onRoute,
   onExecuteIntent,
 }: ClinicalIntentCommandBarProps) {
+  const screenCapability = findScreenCapability(usePathname());
   const routeBlockedReason = clinicalCommandBlockedReason({
     isPending: isRouting,
     hasText: routerText.trim().length > 0,
@@ -126,7 +129,10 @@ export function ClinicalIntentCommandBar({
             type="button"
             variant="outline"
             size="sm"
-            disabled={Boolean(intentBlockedReason)}
+            disabled={
+              Boolean(intentBlockedReason) ||
+              !isClinicalIntentAllowed(action.intent, screenCapability)
+            }
             onClick={() => onExecuteIntent(action.intent)}
           >
             {action.label}
