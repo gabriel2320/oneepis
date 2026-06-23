@@ -5,6 +5,7 @@ from patient_ai_helpers import (
     audit_events,
     create_entry,
     create_event,
+    create_lab_panel,
     create_patient,
     create_problem,
     create_vitals,
@@ -242,6 +243,16 @@ def test_assistant_search_reads_sources_without_writing(
         },
     )
     assert vital_response.status_code == 201
+    panel = create_lab_panel(
+        client,
+        auth,
+        patient_id,
+        panel_name="Control diabetes",
+        result_name="Glicemia",
+        code="glucosa",
+        value="142",
+        unit="mg/dL",
+    )
     before_audit = audit_events(client, auth, patient_id)
 
     response = client.get(
@@ -263,6 +274,7 @@ def test_assistant_search_reads_sources_without_writing(
         "clinical_event",
         "problem",
         "vital_sign",
+        "lab_result",
     }.issubset(set(item_types))
     occurred_values = [item["occurred_at"] for item in payload["results"]]
     assert occurred_values == sorted(occurred_values, reverse=True)
@@ -274,6 +286,11 @@ def test_assistant_search_reads_sources_without_writing(
     assert event_item["source_path"].endswith("/clinical-events/" + event_item["item_id"])
     problem_item = next(item for item in payload["results"] if item["item_type"] == "problem")
     assert problem_item["source_path"].endswith("/problems/" + problem_item["item_id"])
+    lab_item = next(item for item in payload["results"] if item["item_type"] == "lab_result")
+    assert lab_item["item_id"] == panel["results"][0]["id"]
+    assert lab_item["matched_fields"] == ["panel_name"]
+    assert "/lab-panels/" in lab_item["source_path"]
+    assert lab_item["source_path"].endswith("/results/" + lab_item["item_id"])
     after_audit = audit_events(client, auth, patient_id)
     assert after_audit == before_audit
 

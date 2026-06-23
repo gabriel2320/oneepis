@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from unicodedata import combining, normalize
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from oneepis_api.models.clinical_record import (
@@ -16,6 +16,7 @@ from oneepis_api.schemas.clinical_record import (
     AssistantChartPoint,
     AssistantChartSeries,
     AssistantCorrelationEvidence,
+    AssistantSearchResult,
 )
 
 
@@ -38,6 +39,57 @@ def fetch_lab_results_for_assistant(
         .limit(limit)
     )
     return list(session.scalars(statement))
+
+
+def search_lab_results_for_assistant(
+    session: Session,
+    patient_id: uuid.UUID,
+    pattern: str,
+    limit: int,
+) -> list[LabResult]:
+    statement = (
+        select(LabResult)
+        .join(LabPanel)
+        .options(selectinload(LabResult.panel))
+        .where(
+            LabResult.patient_id == patient_id,
+            LabResult.status == RecordStatus.ACTIVE,
+            LabPanel.status == RecordStatus.ACTIVE,
+            or_(
+                LabResult.code.ilike(pattern),
+                LabResult.name.ilike(pattern),
+                LabResult.value.ilike(pattern),
+                LabResult.unit.ilike(pattern),
+                LabResult.reference_range.ilike(pattern),
+                LabResult.notes.ilike(pattern),
+                LabPanel.panel_name.ilike(pattern),
+                LabPanel.summary.ilike(pattern),
+            ),
+        )
+        .order_by(LabPanel.occurred_at.desc())
+        .limit(limit)
+    )
+    return list(session.scalars(statement))
+
+
+def lab_search_results(
+    query: str,
+    patient_id: uuid.UUID,
+    lab_results: list[LabResult],
+) -> list[AssistantSearchResult]:
+    return [
+        AssistantSearchResult(
+            item_type="lab_result",
+            item_id=result.id,
+            occurred_at=result.panel.occurred_at,
+            label=result.name,
+            snippet=_lab_summary(result),
+            matched_fields=_lab_matched_fields(query, result),
+            source_label="lab_results",
+            source_path=lab_result_source_path(patient_id, result.panel_id, result.id),
+        )
+        for result in lab_results
+    ]
 
 
 def exam_chart_series(
@@ -183,6 +235,25 @@ def _lab_results_matching(lab_results: list[LabResult], terms: tuple[str, ...]) 
             ),
             terms,
         )
+    ]
+
+
+def _lab_matched_fields(query: str, result: LabResult) -> list[str]:
+    values = {
+        "code": result.code,
+        "name": result.name,
+        "value": result.value,
+        "unit": result.unit,
+        "reference_range": result.reference_range,
+        "notes": result.notes,
+        "panel_name": result.panel.panel_name,
+        "panel_summary": result.panel.summary,
+    }
+    normalized_query = _normalize_for_match(query)
+    return [
+        field
+        for field, value in values.items()
+        if value and normalized_query in _normalize_for_match(str(value))
     ]
 
 

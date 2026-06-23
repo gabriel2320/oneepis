@@ -173,7 +173,8 @@ Alcance por endpoint:
 - `timeline`: unir encuentros, evoluciones, eventos, signos vitales,
   medicamentos activos, problemas activos, alergias e indicaciones si existen.
 - `search`: buscar texto deterministico en SOAP, eventos, problemas,
-  medicamentos, alergias, encuentros y notas textuales. Estado: implementado.
+  medicamentos, alergias, encuentros, notas textuales y `lab_results`.
+  Estado: implementado.
 - `chart`: devolver series de signos vitales, examenes desde `lab_results`
   activos y eventos legacy `exam_result`, y marcas de medicamentos como datos listos para UI. Estado: implementado inicial para signos vitales y examenes numericos; marcas de medicamentos quedan pendientes.
 - `correlate`: describir relaciones temporales con presets cerrados

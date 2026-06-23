@@ -7443,7 +7443,8 @@
               "vital_sign",
               "medication",
               "problem",
-              "allergy"
+              "allergy",
+              "lab_result"
             ],
             "title": "Item Type"
           },
@@ -7512,7 +7513,8 @@
               "vital_sign",
               "medication",
               "problem",
-              "allergy"
+              "allergy",
+              "lab_result"
             ],
             "title": "Item Type"
           },

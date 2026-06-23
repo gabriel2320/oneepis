@@ -123,7 +123,7 @@ Assistant Read Layer:
 - `POST /api/v1/patients/{patient_id}/assistant/correlate`
 - solo lectura con rol de lectura de paciente
 - une encuentros, evoluciones, eventos, signos vitales, medicacion activa, problemas activos y alergias activas
-- busca texto en encuentros, evoluciones, eventos, signos vitales con notas, medicacion activa, problemas activos y alergias activas
+- busca texto en encuentros, evoluciones, eventos, signos vitales con notas, medicacion activa, problemas activos, alergias activas y resultados de laboratorio estructurados
 - devuelve series de signos vitales y examenes numericos desde `lab_results` activos y eventos legacy `exam_result`
 - correlaciona por presets cerrados: fiebre/infeccion, renal/medicacion, respiratorio/oxigenacion, hemoglobina/sangrado y cambios de medicacion
 - cada item expone tipo, fecha, resumen y ruta fuente existente

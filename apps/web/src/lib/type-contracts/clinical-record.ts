@@ -257,7 +257,8 @@ export type AssistantTimelineItemType =
   | "vital_sign"
   | "medication"
   | "problem"
-  | "allergy";
+  | "allergy"
+  | "lab_result";
 
 export type AssistantTimelineItem = {
   item_type: AssistantTimelineItemType;

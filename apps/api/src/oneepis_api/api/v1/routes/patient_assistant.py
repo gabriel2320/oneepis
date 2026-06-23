@@ -39,6 +39,8 @@ from .patient_assistant_labs import (
     exam_events_matching,
     fetch_lab_results_for_assistant,
     lab_result_evidence,
+    lab_search_results,
+    search_lab_results_for_assistant,
 )
 from .patient_shared import PATIENT_ROUTER_OPTIONS, LimitQuery, SessionDep, require_patient
 
@@ -279,6 +281,7 @@ def search_assistant_read_layer(
             .limit(query_limit)
         )
     )
+    lab_results = search_lab_results_for_assistant(session, patient_id, pattern, query_limit)
     results = [
         *_encounter_search_results(query, patient_id, encounters),
         *_entry_search_results(query, patient_id, entries),
@@ -287,11 +290,21 @@ def search_assistant_read_layer(
         *_medication_search_results(query, patient_id, medications),
         *_problem_search_results(query, patient_id, problems),
         *_allergy_search_results(query, patient_id, allergies),
+        *lab_search_results(query, patient_id, lab_results),
     ]
     results.sort(key=lambda item: item.occurred_at, reverse=True)
     has_more = len(results) > limit or any(
         len(domain_items) > limit
-        for domain_items in (encounters, entries, events, vitals, medications, problems, allergies)
+        for domain_items in (
+            encounters,
+            entries,
+            events,
+            vitals,
+            medications,
+            problems,
+            allergies,
+            lab_results,
+        )
     )
     return AssistantSearchResponse(
         patient_id=patient_id,

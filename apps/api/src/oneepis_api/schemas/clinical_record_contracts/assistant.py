@@ -16,6 +16,7 @@ AssistantTimelineItemType = Literal[
     "medication",
     "problem",
     "allergy",
+    "lab_result",
 ]
 
 
