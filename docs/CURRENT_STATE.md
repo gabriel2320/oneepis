@@ -223,6 +223,14 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
+Release gates demo:
+
+- Releases previstos: `v0.1-base-ficha`, `v0.2-hospitalizacion`, `v0.3-ai-chart-core`, `v0.4-assistant-read`.
+- Cada release exige tag, changelog, CI verde, checklist de demo y plan de rollback.
+- El checklist demo debe recorrer paciente, hospitalizacion, evolucion, signo vital, evento, AI-Chart, impresion y auditoria.
+- Pantallas preparadas no cuentan como feature completa: `/consulta/agenda`, resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
+- Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
+
 ## Auditoria rapida 2026-06-23
 
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, mesa `/pacientes` v2, temas visuales v2, AI-Chart Core Nivel 0, PR #1 mergeado y endurecimiento `ClinicalPatch`.
