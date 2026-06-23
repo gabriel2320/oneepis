@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const defaultLimit = 350;
+const nearLimitThreshold = 300;
 const scanRoots = ["apps/api/src/oneepis_api", "apps/web/src"];
 const extensions = new Set([".py", ".ts", ".tsx"]);
 const ignoredSegments = new Set([".next", "node_modules"]);
@@ -24,6 +25,7 @@ const exceptions = new Map([
 
 const files = scanRoots.flatMap((root) => walk(path.join(repoRoot, root)));
 const offenders = [];
+const nearLimitFiles = [];
 
 for (const file of files) {
   const relativePath = toRepoPath(file);
@@ -36,6 +38,13 @@ for (const file of files) {
       lines,
       limit,
       reason: exception?.reason ?? "Sin excepcion explicita.",
+    });
+  }
+  if (lines >= nearLimitThreshold && lines <= limit) {
+    nearLimitFiles.push({
+      path: relativePath,
+      lines,
+      limit,
     });
   }
   if (exception && lines <= defaultLimit) {
@@ -72,6 +81,15 @@ if (offenders.length > 0) {
 console.log(
   `File size guard passed: ${files.length} files scanned, ${exceptions.size} explicit exceptions.`,
 );
+
+if (nearLimitFiles.length > 0) {
+  console.log(
+    `Near-limit files (non-blocking, ${nearLimitThreshold}+ lines; extract before adding behavior):`,
+  );
+  for (const file of nearLimitFiles.sort((a, b) => b.lines - a.lines)) {
+    console.log(`- ${file.path}: ${file.lines}/${file.limit} lines`);
+  }
+}
 
 function walk(root) {
   return readdirSync(root).flatMap((name) => {

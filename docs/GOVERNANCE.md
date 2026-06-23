@@ -288,6 +288,7 @@ Todo PR debe responder:
 
 - Un archivo de aplicacion no deberia superar 300 lineas sin una razon clara.
 - El gate `npm run check:size` aplica un limite duro de 350 lineas en `apps/api/src/oneepis_api` y `apps/web/src`.
+- El reporte near-limit de `check:size` no bloquea CI; cualquier archivo listado debe entrar a watchlist y extraerse antes de agregarle comportamiento nuevo.
 - Toda excepcion al limite debe vivir en `scripts/check-file-size.mjs` con razon y tope explicito; no se aceptan excepciones implicitas en PR.
 - Un componente UI debe preferir composicion antes que props infinitas.
 - Un servicio backend debe expresar reglas de dominio, no consultas mezcladas con controladores grandes.
