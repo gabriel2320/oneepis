@@ -75,7 +75,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/consulta` | Ambulatorio | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
 | `/consulta/agenda` | Ambulatorio | episodio | completa | `clinical_appointments` | si | medico/admin/dev | si | no | no | admision/preconsulta y agenda por equipos futuras |
 | `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP | si | medico/admin/dev | si | no | borrador revisable | cierre administrativo minimo implementado; diagnosticos finales futuros |
-| `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | preparada | UI preparada | no | lectura paciente | no | no | lectura resumida | resumen ambulatorio real si aporta sobre ficha |
+| `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | completa | record + appointments + encounters | no | lectura paciente | no | no | lectura resumida | seguimiento formal e interconsultas futuras |
 | `/hospitalizacion` | Hospitalizacion | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
 | `/hospitalizacion/camas` | Hospitalizacion | episodio | completa | hospitalizacion + camas | si | medico/admin/dev | si | no | no | censo por servicio/equipo |
 | `/hospitalizacion/camas/nueva` | Hospitalizacion | episodio | completa | camas | si | medico/admin/dev | si | no | no | administracion institucional futura |

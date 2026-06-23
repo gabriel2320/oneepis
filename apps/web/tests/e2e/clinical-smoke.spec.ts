@@ -213,12 +213,19 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
 });
 
-test("prepared screens declare pending status", async ({ page }) => {
+test("ambulatory summary renders real read-only patient context", async ({ page }) => {
   await page.goto(`/consulta/pacientes/${demoPatientId}/resumen`);
-  await expect(page.getByRole("heading", { name: "Resumen ambulatorio" })).toBeVisible();
-  await expect(page.getByText("Pantalla preparada: resumen pendiente")).toBeVisible();
-  await expect(page.getByText("no simula flujo productivo")).toBeVisible();
 
+  await expect(page.getByRole("heading", { name: "Resumen ambulatorio" })).toBeVisible();
+  await expect(page.getByText("Lectura consolidada de controles")).toBeVisible();
+  await expect(page.getByText("Snapshot ambulatorio")).toBeVisible();
+  await expect(page.getByText("Problema demo activo")).toBeVisible();
+  await expect(page.getByText("Control ambulatorio demo")).toBeVisible();
+  await expect(page.getByText("No emite receta valida")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Abrir atencion" })).toBeVisible();
+});
+
+test("prepared screens declare pending status", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/documentos`);
   await expect(
     page.getByText("Pantalla preparada: documentos sin uploads reales"),

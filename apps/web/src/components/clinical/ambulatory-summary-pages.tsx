@@ -1,0 +1,207 @@
+"use client";
+
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { CalendarClock } from "lucide-react";
+
+import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { formatDateTime } from "@/components/clinical/date-format";
+import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import {
+  AllergyList,
+  ClinicalTimeline,
+  CriticalAlerts,
+  EncounterList,
+  MedicationList,
+  PatientLongitudinalSummary,
+  ProblemList,
+  VitalsStrip,
+} from "@/components/clinical/patient-widgets";
+import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { listPatientAppointments } from "@/lib/api/appointments";
+import { DEMO_MODE } from "@/lib/api/client";
+import { listClinicalEncounters } from "@/lib/api/clinical-record";
+import { demoAppointments, demoEncounters } from "@/lib/demo-record";
+import type {
+  ClinicalAppointment,
+  ClinicalEncounter,
+  ClinicalEntry,
+  PatientRecordSnapshot,
+} from "@/lib/types";
+
+import {
+  BackLink,
+  PageTitle,
+  PatientLoadError,
+  usePatientId,
+  usePatientRecordQuery,
+} from "./patient-page-shared";
+
+export function AmbulatorySummaryPage() {
+  const patientId = usePatientId();
+  const { record, recordQuery } = usePatientRecordQuery(patientId);
+
+  if (recordQuery.isLoading && !DEMO_MODE) {
+    return <PatientClinicalLoading />;
+  }
+
+  if (!record) {
+    return <PatientLoadError />;
+  }
+
+  return (
+    <PatientClinicalShell record={record} activeSection="encuentros">
+      <div className="space-y-5">
+        <BackLink href="/consulta" label="Consulta" />
+        <PageTitle
+          title="Resumen ambulatorio"
+          description="Lectura consolidada de controles, citas, problemas y borradores; no crea recetas ni ordenes."
+          action={
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/consulta/pacientes/${patientId}/atencion`}>Abrir atencion</Link>
+            </Button>
+          }
+        />
+        <AmbulatorySummaryWorkspace patientId={patientId} record={record} />
+      </div>
+    </PatientClinicalShell>
+  );
+}
+
+function AmbulatorySummaryWorkspace({
+  patientId,
+  record,
+}: {
+  patientId: string;
+  record: PatientRecordSnapshot;
+}) {
+  const encountersQuery = useQuery({
+    queryKey: ["clinical-encounters", patientId],
+    queryFn: () => listClinicalEncounters(patientId),
+    enabled: !DEMO_MODE,
+  });
+  const appointmentsQuery = useQuery({
+    queryKey: ["patient-appointments", patientId],
+    queryFn: () => listPatientAppointments(patientId),
+    enabled: !DEMO_MODE,
+  });
+  const encounters = DEMO_MODE
+    ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
+    : (encountersQuery.data ?? []);
+  const appointments = DEMO_MODE
+    ? demoAppointments.filter((appointment) => appointment.patient_id === patientId)
+    : (appointmentsQuery.data ?? []);
+  const ambulatoryEncounters = encounters.filter((encounter) => encounter.type === "ambulatory");
+  const ambulatoryEntries = filterAmbulatoryEntries(record.recent_entries, ambulatoryEncounters);
+
+  return (
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
+      <div className="space-y-5">
+        <CriticalAlerts record={record} />
+        <ClinicalSectionCard title="Snapshot ambulatorio">
+          <div className="space-y-4">
+            <PatientLongitudinalSummary record={record} />
+            <VitalsStrip vital={record.latest_vitals} />
+          </div>
+        </ClinicalSectionCard>
+        <ClinicalSectionCard title="Problemas y tratamientos">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <ProblemList problems={record.active_problems} />
+            <AllergyList allergies={record.active_allergies} />
+            <MedicationList medications={record.active_medications} />
+          </div>
+        </ClinicalSectionCard>
+        <ClinicalSectionCard title="Evoluciones ambulatorias recientes">
+          <ClinicalTimeline entries={ambulatoryEntries} />
+        </ClinicalSectionCard>
+      </div>
+      <div className="space-y-5">
+        <ClinicalSectionCard title="Citas del paciente" description="Agenda minima persistida.">
+          {appointmentsQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
+          {appointmentsQuery.isError && !DEMO_MODE ? (
+            <ErrorState description="No se pudieron cargar las citas del paciente." />
+          ) : null}
+          {!appointmentsQuery.isLoading || DEMO_MODE ? (
+            <AppointmentSummaryList appointments={appointments} />
+          ) : null}
+        </ClinicalSectionCard>
+        <ClinicalSectionCard title="Encuentros ambulatorios">
+          {encountersQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
+          {encountersQuery.isError && !DEMO_MODE ? (
+            <ErrorState description="No se pudieron cargar los encuentros ambulatorios." />
+          ) : null}
+          {!encountersQuery.isLoading || DEMO_MODE ? (
+            <EncounterList encounters={ambulatoryEncounters} />
+          ) : null}
+        </ClinicalSectionCard>
+        <ClinicalSectionCard title="Limites declarados">
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>No emite receta valida, firma clinica, folio ni orden ejecutable.</li>
+            <li>Admision/preconsulta, seguimiento formal e interconsultas siguen futuros.</li>
+            <li>La ficha longitudinal sigue siendo la fuente completa del paciente.</li>
+          </ul>
+        </ClinicalSectionCard>
+      </div>
+    </div>
+  );
+}
+
+function AppointmentSummaryList({ appointments }: { appointments: ClinicalAppointment[] }) {
+  if (appointments.length === 0) {
+    return <EmptyState title="Sin citas" description="No hay citas ambulatorias registradas." />;
+  }
+
+  return (
+    <div className="space-y-2">
+      {sortAppointments(appointments).map((appointment) => (
+        <div key={appointment.id} className="rounded-md border p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <CalendarClock className="h-4 w-4 text-primary" />
+                {appointment.reason}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {formatDateTime(appointment.starts_at)}
+                {appointment.location_label ? ` - ${appointment.location_label}` : ""}
+              </p>
+              {appointment.clinician_label ? (
+                <p className="mt-1 text-xs text-muted-foreground">{appointment.clinician_label}</p>
+              ) : null}
+            </div>
+            <Badge variant={appointment.status === "cancelled" ? "outline" : "safe"}>
+              {appointmentStatusLabel(appointment.status)}
+            </Badge>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function filterAmbulatoryEntries(entries: ClinicalEntry[], encounters: ClinicalEncounter[]) {
+  const encounterIds = new Set(encounters.map((encounter) => encounter.id));
+  return entries.filter(
+    (entry) => entry.tags.includes("ambulatory") || Boolean(entry.encounter_id && encounterIds.has(entry.encounter_id)),
+  );
+}
+
+function sortAppointments(appointments: ClinicalAppointment[]) {
+  return appointments
+    .slice()
+    .sort((left, right) => new Date(left.starts_at).getTime() - new Date(right.starts_at).getTime());
+}
+
+function appointmentStatusLabel(status: ClinicalAppointment["status"]) {
+  const labels: Record<ClinicalAppointment["status"], string> = {
+    scheduled: "Programada",
+    check_in: "Check-in",
+    in_progress: "En curso",
+    completed: "Completada",
+    cancelled: "Cancelada",
+    no_show: "No show",
+  };
+  return labels[status];
+}

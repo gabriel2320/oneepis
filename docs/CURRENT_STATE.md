@@ -222,7 +222,8 @@ Consulta:
 - agenda ambulatoria minima existe como `ClinicalAppointment`, con persistencia, estados, permisos y auditoria
 - `/consulta/agenda` lista citas por dia, permite crear cita programada y enlaza a la atencion del paciente
 - agenda avanzada por equipos/recursos, admision/preconsulta y no-show operacional siguen futuras
-- resumen ambulatorio dedicado sigue preparado; la ficha paciente continua siendo el centro longitudinal
+- `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden
+- seguimiento formal, interconsultas y cierre documental ambulatorio siguen futuros
 
 ## Frontend
 
@@ -301,7 +302,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_intent.py` ya concentra reglas deterministicas; nuevas reglas deben agruparse por dominio o extraerse antes de crecer mucho mas.
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
-- `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados/bloqueados; no expandir todos a la vez.
+- documentos y receta siguen como bordes preparados/bloqueados; no expandir todos a la vez.
 - agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
@@ -315,7 +316,7 @@ Release gates demo:
 - Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
 - Estado `v0.4-assistant-read`: walkthrough humano aprobado el 2026-06-23; changelog y tag `v0.4-assistant-read` creados sobre `main`.
 - Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
-- Pantallas preparadas no cuentan como feature completa: resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
+- Pantallas preparadas no cuentan como feature completa: documentos deben declarar estado pendiente hasta tener backend/flujo real.
 - Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
 
 Accesibilidad, performance y observabilidad pendientes:
