@@ -94,6 +94,48 @@ def test_rejecting_entry_event_patch_audits_without_creating_event(
     )
 
 
+def test_accepting_patch_without_human_confirmation_is_blocked(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Patch", last_name="SinConfirmacion")
+    entry_id = create_entry(
+        client,
+        auth,
+        patient_id,
+        title="Evolucion con evento inseguro",
+        plan="Control telefonico en 48 horas.",
+    )
+    proposal = first_event_proposal_from_entry(client, auth, patient_id, entry_id)
+    proposal["patch"]["requires_human_confirmation"] = False
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/confirm-clinical-patch",
+        headers=auth,
+        json={
+            "decision": "accepted",
+            "patch": proposal["patch"],
+        },
+    )
+
+    assert response.status_code == 422
+    events_response = client.get(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+    )
+    assert events_response.status_code == 200
+    assert events_response.json() == []
+    patient_audit_events = audit_events(client, auth, patient_id)
+    assert any(
+        audit["action"] == "ai.clinical_patch.blocked"
+        and audit["extra_data"]["patch_id"] == proposal["patch"]["patch_id"]
+        and audit["extra_data"]["requires_human_confirmation"] is False
+        and audit["extra_data"]["applies_changes"] is False
+        for audit in patient_audit_events
+    )
+
+
 def test_accepting_evolution_patch_creates_reviewed_draft_entry(
     client: TestClient,
     auth_headers,
@@ -194,6 +236,72 @@ def test_accepting_evolution_patch_creates_reviewed_draft_entry(
         audit["action"] == "ai.clinical_patch.accepted"
         and audit["entity_type"] == "clinical_entry"
         and audit["extra_data"]["target"] == "evolution"
+        for audit in patient_audit_events
+    )
+
+
+def test_accepting_evolution_patch_must_remain_draft(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Soap", last_name="Firmado")
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/confirm-clinical-patch",
+        headers=auth,
+        json={
+            "decision": "accepted",
+            "patch": {
+                "patch_id": "soap-signed-test",
+                "target": "evolution",
+                "mode": "draft",
+                "operations": [
+                    {
+                        "op": "add",
+                        "path": "/kind",
+                        "value": "progress",
+                        "reason": "Borrador SOAP generado desde AI-Chart.",
+                    },
+                    {
+                        "op": "add",
+                        "path": "/status",
+                        "value": "signed",
+                        "reason": "Estado no permitido desde AI-Chart.",
+                    },
+                    {
+                        "op": "add",
+                        "path": "/occurred_at",
+                        "value": "2026-06-20T12:00:00Z",
+                        "reason": "Fecha de confirmacion humana.",
+                    },
+                    {
+                        "op": "add",
+                        "path": "/title",
+                        "value": "Evolucion SOAP firmada por patch",
+                        "reason": "Titulo editado por humano.",
+                    },
+                ],
+                "sources": [],
+                "warnings": [],
+                "requires_human_confirmation": True,
+            },
+        },
+    )
+
+    assert response.status_code == 422
+    entries_response = client.get(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+    )
+    assert entries_response.status_code == 200
+    assert entries_response.json() == []
+    patient_audit_events = audit_events(client, auth, patient_id)
+    assert any(
+        audit["action"] == "ai.clinical_patch.blocked"
+        and audit["extra_data"]["patch_id"] == "soap-signed-test"
+        and audit["extra_data"]["target"] == "evolution"
+        and audit["extra_data"]["applies_changes"] is False
         for audit in patient_audit_events
     )
 

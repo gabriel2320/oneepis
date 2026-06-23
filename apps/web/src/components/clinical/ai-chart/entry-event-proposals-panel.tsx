@@ -121,6 +121,7 @@ export function EntryEventProposalsPanel({
                   key={proposal.proposal_id}
                   proposal={proposal}
                   decision={decisions[proposal.proposal_id]}
+                  canUseAi={canUseAi}
                   canCreateEvents={canCreateEvents}
                   isMutating={isAccepting || isRejecting}
                   onAccept={onAccept}
@@ -143,6 +144,7 @@ export function EntryEventProposalsPanel({
 function ProposalRow({
   proposal,
   decision,
+  canUseAi,
   canCreateEvents,
   isMutating,
   onAccept,
@@ -150,12 +152,18 @@ function ProposalRow({
 }: {
   proposal: EventProposalFromEntry;
   decision?: EventProposalDecisionStatus;
+  canUseAi: boolean;
   canCreateEvents: boolean;
   isMutating: boolean;
   onAccept: (proposal: EventProposalFromEntry) => void;
   onReject: (proposal: EventProposalFromEntry) => void;
 }) {
-  const acceptBlockedReason = acceptProposalBlockedReason({ canCreateEvents, isMutating, decision });
+  const acceptBlockedReason = acceptProposalBlockedReason({
+    canUseAi,
+    canCreateEvents,
+    isMutating,
+    decision,
+  });
   const rejectBlockedReason = rejectProposalBlockedReason({ isMutating, decision });
   const status = decision ?? "pending";
   return (
@@ -228,10 +236,12 @@ function proposalGenerationBlockedReason({
 }
 
 function acceptProposalBlockedReason({
+  canUseAi,
   canCreateEvents,
   isMutating,
   decision,
 }: {
+  canUseAi: boolean;
   canCreateEvents: boolean;
   isMutating: boolean;
   decision?: EventProposalDecisionStatus;
@@ -241,6 +251,9 @@ function acceptProposalBlockedReason({
   }
   if (decision && decision !== "pending") {
     return "Esta propuesta ya tiene una decision en esta sesion.";
+  }
+  if (!canUseAi) {
+    return "Registrar propuestas AI-Chart requiere rol admin, medico o dev.";
   }
   if (!canCreateEvents) {
     return "Registrar eventos clinicos requiere rol admin, medico, enfermeria o dev.";

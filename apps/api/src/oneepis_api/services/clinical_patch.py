@@ -7,7 +7,7 @@ from fastapi import HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent
+from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEntryStatus, ClinicalEvent
 from oneepis_api.schemas.clinical_record import (
     ClinicalEntryCreate,
     ClinicalEventCreate,
@@ -48,6 +48,13 @@ def confirm_clinical_patch(
             applies_changes=False,
             message="Propuesta rechazada y auditada. No se aplicaron cambios a la ficha.",
         )
+
+    _ensure_patch_requires_human_confirmation(
+        session=session,
+        patient_id=patient_id,
+        payload=payload,
+        actor=actor,
+    )
 
     if payload.patch.target == "evolution":
         return _accept_evolution_patch(
@@ -99,6 +106,14 @@ def _accept_evolution_patch(
     validate_encounter: Callable[[uuid.UUID | None], None],
 ) -> ConfirmClinicalPatchResponse:
     entry_payload = _clinical_entry_create_from_patch(payload.patch)
+    if entry_payload.status != ClinicalEntryStatus.DRAFT:
+        _block_patch_acceptance(
+            session=session,
+            patient_id=patient_id,
+            payload=payload,
+            actor=actor,
+            reason="AI-Chart evolution patches must be saved as draft.",
+        )
     validate_encounter(entry_payload.encounter_id)
     entry_data = entry_payload.model_dump()
     entry_data["created_by"] = actor
@@ -257,3 +272,54 @@ def _validate_patch_payload(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=exc.errors(),
         ) from exc
+
+
+def _ensure_patch_requires_human_confirmation(
+    *,
+    session: Session,
+    patient_id: uuid.UUID,
+    payload: ConfirmClinicalPatchRequest,
+    actor: str,
+) -> None:
+    if payload.patch.requires_human_confirmation:
+        return
+    _block_patch_acceptance(
+        session=session,
+        patient_id=patient_id,
+        payload=payload,
+        actor=actor,
+        reason="Accepted ClinicalPatch payloads must require human confirmation.",
+    )
+
+
+def _block_patch_acceptance(
+    *,
+    session: Session,
+    patient_id: uuid.UUID,
+    payload: ConfirmClinicalPatchRequest,
+    actor: str,
+    reason: str,
+) -> None:
+    record_audit_event(
+        session,
+        action="ai.clinical_patch.blocked",
+        entity_type="patient",
+        entity_id=patient_id,
+        actor_id=actor,
+        metadata={
+            "patient_id": str(patient_id),
+            "patch_id": payload.patch.patch_id,
+            "target": payload.patch.target,
+            "operation_count": len(payload.patch.operations),
+            "source_count": len(payload.patch.sources),
+            "note": payload.note,
+            "applies_changes": False,
+            "requires_human_confirmation": payload.patch.requires_human_confirmation,
+            "reason": reason,
+        },
+    )
+    session.commit()
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail=reason,
+    )
