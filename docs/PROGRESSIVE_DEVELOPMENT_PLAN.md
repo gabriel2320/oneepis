@@ -86,6 +86,7 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. PR #1
 - auditar aceptacion, rechazo y guardado
 - bloquear aceptaciones `ClinicalPatch` sin confirmacion humana obligatoria
 - bloquear evoluciones AI-Chart que pretendan guardarse como firmadas/no borrador
+- leer timeline longitudinal assistant desde backend sin escritura clinica
 - funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y Ollama apagado
 - explicar por que un evento reciente se asocia o no a un problema activo dentro del Context Builder
 - mostrar faltantes contextualizados por atencion ambulatoria, hospitalizada o desconocida
@@ -98,7 +99,7 @@ chat libre, RAG, documentos o IA externa como atajo.
 
 ## PROG-ASSISTANT-READ-01
 
-Estado: programa aceptado como extension cerrada de Fase 2, no implementado. La condicion P0 de gobernanza quedo cumplida con PR #1 mergeado y CI remoto verde.
+Estado: programa aceptado como extension cerrada de Fase 2, iniciado por micro-PR backend. La condicion P0 de gobernanza quedo cumplida con PR #1 mergeado y CI remoto verde.
 
 Objetivo: convertir OneEpis en una ficha medica tradicional aumentada que puede
 leer, buscar, mostrar, graficar y correlacionar su propia historia longitudinal,
@@ -123,13 +124,13 @@ Condicion de entrada:
 
 Orden obligatorio de ejecucion:
 
-1. Backend schemas + timeline de lectura.
-2. Busqueda deterministica.
-3. Datos graficables.
-4. Correlacion deterministica por presets.
-5. OpenAPI y cliente web.
-6. UI minima solo si el backend esta verde.
-7. Tests y documentacion canonica.
+1. Backend schemas + timeline de lectura. Estado: implementado.
+2. Busqueda deterministica. Estado: pendiente.
+3. Datos graficables. Estado: pendiente.
+4. Correlacion deterministica por presets. Estado: pendiente.
+5. OpenAPI y cliente web. Estado: OpenAPI timeline implementado; cliente web pendiente.
+6. UI minima solo si el backend esta verde. Estado: pendiente.
+7. Tests y documentacion canonica. Estado: tests API timeline implementados.
 
 Entregables backend permitidos:
 
@@ -143,6 +144,14 @@ POST /api/v1/patients/{patient_id}/assistant/correlate
 Estas rutas deben consultar entidades existentes y no crear, actualizar ni
 eliminar pacientes, evoluciones, eventos, signos vitales, medicamentos,
 alergias, problemas, encuentros, indicaciones ni auditoria de modificacion.
+
+Implementado inicial:
+
+- `GET /api/v1/patients/{patient_id}/assistant/timeline`
+- respuesta con `items`, `missing_data`, `warnings`, `limit`, `has_more` y `applies_changes=false`
+- lectura de encuentros, evoluciones, eventos, signos vitales, medicacion activa, problemas activos y alergias activas
+- cada item declara ruta fuente existente para inspeccion humana
+- probado con usuario `solo_lectura` y sin crear auditoria por lectura
 
 Alcance por endpoint:
 

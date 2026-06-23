@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from oneepis_api.api.v1.routes.patient_ai import router as ai_router
 from oneepis_api.api.v1.routes.patient_allergies import router as allergies_router
+from oneepis_api.api.v1.routes.patient_assistant import router as assistant_router
 from oneepis_api.api.v1.routes.patient_audit import router as audit_router
 from oneepis_api.api.v1.routes.patient_core import router as core_router
 from oneepis_api.api.v1.routes.patient_encounters import router as encounters_router
@@ -18,6 +19,7 @@ router.include_router(encounters_router)
 router.include_router(entries_router)
 router.include_router(events_router)
 router.include_router(ai_router)
+router.include_router(assistant_router)
 router.include_router(allergies_router)
 router.include_router(medications_router)
 router.include_router(problems_router)
