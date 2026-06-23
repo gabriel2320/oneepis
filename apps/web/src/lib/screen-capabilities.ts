@@ -119,7 +119,7 @@ export function isClinicalIntentAllowed(
   intentType: ClinicalIntentType,
   capability: ScreenCapability | null | undefined,
 ) {
-  if (!capability) return true;
+  if (!capability) return false;
   const requiredAction = intentActionMap[intentType];
   return capability.aiCapabilities.some((item) => item.actions.includes(requiredAction));
 }

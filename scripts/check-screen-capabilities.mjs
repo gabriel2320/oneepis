@@ -12,6 +12,10 @@ const registeredRouteList = extractRegisteredRoutes(registry);
 const registeredRoutes = new Set(registeredRouteList);
 const errors = [];
 
+if (/if\s*\(\s*!capability\s*\)\s*return\s+true\s*;/.test(registry)) {
+  errors.push("isClinicalIntentAllowed debe bloquear IA cuando no existe ScreenCapability.");
+}
+
 for (const route of duplicates(registeredRouteList)) {
   errors.push(`ScreenCapability duplicado: ${route}`);
 }

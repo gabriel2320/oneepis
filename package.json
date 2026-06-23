@@ -10,12 +10,12 @@
   ],
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
-    "dev:api": ".venv/bin/python -m uvicorn oneepis_api.main:app --reload --app-dir apps/api/src",
-    "check:api": "python -m ruff check apps/api && python -m pytest apps/api/tests",
+    "dev:api": "node scripts/dev-api.mjs",
+    "check:api": "node scripts/check-api.mjs",
     "check:screens": "node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
     "check:size": "node scripts/check-file-size.mjs && npm run check:screens",
     "check:web": "npm run check:size && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
-    "check:contract": "python apps/api/scripts/export_openapi.py && node scripts/check-assistant-read-contract.mjs && git diff --exit-code packages/contracts/openapi.json",
+    "check:contract": "node scripts/export-openapi.mjs && node scripts/check-assistant-read-contract.mjs && git diff --exit-code packages/contracts/openapi.json",
     "check:e2e": "npm --workspace apps/web run test:e2e && npm --workspace apps/web run test:e2e:assistant-read",
     "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
   },
