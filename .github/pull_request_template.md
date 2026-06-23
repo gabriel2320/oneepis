@@ -44,3 +44,14 @@
 - [ ] `npm run check:contract` si cambia API/OpenAPI
 - [ ] `npm run check:e2e` si toca UI/rutas/print
 - [ ] `npm run check` para cambios transversales
+
+## Aprendizaje / cierre
+
+- [ ] Deje un test, gate, simplificacion, regla o pantalla menos ambigua.
+- [ ] Revise archivos near-limit reportados por `check:size`.
+- [ ] No cree documento nuevo si `CURRENT_STATE`, `GOVERNANCE`, `SCREEN_TREE` o `CODEX_PLAN` bastaban.
+
+- Regla aprendida:
+- Riesgo residual:
+- Codigo simplificado o deuda evitada:
+- Proximo cambio minimo:
