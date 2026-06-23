@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiChartGovernancePanel } from "@/components/clinical/ai-chart/ai-chart-governance-panel";
+import { AssistantReadPanel } from "@/components/clinical/ai-chart/assistant-read-panel";
 import type {
   HumanReviewConfirmation,
   SoapDraftState,
@@ -261,14 +262,17 @@ export function PatientAiChartPage() {
             onGenerate={() => draftMutation.mutate(undefined)}
             onSelectedIdsChange={setSelectedIds}
           />
-          <AiChartGovernancePanel
-            eventCount={events.length}
-            entryCount={recentEntries.length}
-            selectedEventCount={selectedIds.length}
-            canUseAi={canUseAi}
-            canWriteSoap={canWriteSoap}
-            canCreateEvents={canCreateEvents}
-          />
+          <div className="space-y-4">
+            <AiChartGovernancePanel
+              eventCount={events.length}
+              entryCount={recentEntries.length}
+              selectedEventCount={selectedIds.length}
+              canUseAi={canUseAi}
+              canWriteSoap={canWriteSoap}
+              canCreateEvents={canCreateEvents}
+            />
+            <AssistantReadPanel patientId={patientId} />
+          </div>
         </div>
 
         <EntryEventProposalsSection

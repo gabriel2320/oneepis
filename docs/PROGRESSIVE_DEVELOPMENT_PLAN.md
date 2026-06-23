@@ -131,8 +131,8 @@ Orden obligatorio de ejecucion:
 2. Busqueda deterministica. Estado: implementado.
 3. Datos graficables. Estado: implementado.
 4. Correlacion deterministica por presets. Estado: implementado.
-5. OpenAPI y cliente web. Estado: OpenAPI backend Assistant Read implementado; cliente web pendiente.
-6. UI minima solo si el backend esta verde. Estado: pendiente.
+5. OpenAPI y cliente web. Estado: implementado inicial.
+6. UI minima solo si el backend esta verde. Estado: implementado inicial en AI-Chart.
 7. Tests y documentacion canonica. Estado: tests API backend Assistant Read implementados.
 
 Entregables backend permitidos:
@@ -186,6 +186,13 @@ UI permitida:
 - permitir `/pacientes/[patientId]/contexto` solo como vista de ficha, no dashboard
 - bloques maximos iniciales: Timeline, Buscar, Graficar, Correlacionar
 - usar estados loading/empty/error y componentes clinicos existentes
+
+Implementado UI inicial:
+
+- panel `Assistant Read` integrado en `/pacientes/[patientId]/ai-chart`
+- tabs compactos: Timeline, Buscar, Series y Correlacion
+- cliente web tipado para timeline/search/chart/correlate
+- no se crea ruta `/contexto`, dashboard ni escritura clinica nueva
 
 Criterios de aceptacion:
 
