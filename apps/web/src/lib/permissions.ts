@@ -5,6 +5,7 @@ const patientWriters: UserRole[] = ["admin", "medico", "dev"];
 const medicalWriters: UserRole[] = ["admin", "medico", "dev"];
 const vitalSignWriters: UserRole[] = ["admin", "medico", "enfermeria", "dev"];
 const clinicalEventWriters: UserRole[] = ["admin", "medico", "enfermeria", "dev"];
+const clinicalRiskWriters: UserRole[] = ["admin", "medico", "enfermeria", "dev"];
 const clinicalAiUsers: UserRole[] = ["admin", "medico", "dev"];
 
 export function canCreatePatient(user?: AuthUser | null) {
@@ -49,6 +50,10 @@ export function canManageHospitalIndications(user?: AuthUser | null) {
 
 export function canRecordVitals(user?: AuthUser | null) {
   return hasAnyRole(user, vitalSignWriters);
+}
+
+export function canManageClinicalRisks(user?: AuthUser | null) {
+  return hasAnyRole(user, clinicalRiskWriters);
 }
 
 export function canUseClinicalAi(user?: AuthUser | null) {

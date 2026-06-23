@@ -27,6 +27,8 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Fuentes usadas")).toBeVisible();
   await expect(page.getByText("Faltantes declarados")).toBeVisible();
   await expect(page.getByText("Limite visible: 8 actos recientes")).toBeVisible();
+  await expect(page.getByText("Riesgos clinicos")).toBeVisible();
+  await expect(page.getByText("sin scores automaticos")).toBeVisible();
   await expect(page.getByText("Limite visible: 3 paneles recientes")).toBeVisible();
   await expect(page.getByRole("link", { name: "Ver papel", exact: true })).toBeVisible();
   await expect(page.getByText("Sugerencias Ollama")).toBeVisible();

@@ -120,6 +120,10 @@ def require_lab_result_write_access(user: CurrentUserDep) -> AuthenticatedUser:
     return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
 
 
+def require_clinical_risk_write_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
+
+
 def require_ai_access(user: CurrentUserDep) -> AuthenticatedUser:
     return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
 
@@ -152,6 +156,10 @@ HospitalIndicationWriteAccessDep = Annotated[
 ]
 VitalSignWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_vital_sign_write_access)]
 LabResultWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_lab_result_write_access)]
+ClinicalRiskWriteAccessDep = Annotated[
+    AuthenticatedUser,
+    Depends(require_clinical_risk_write_access),
+]
 
 
 def get_patient_write_actor(user: PatientWriteAccessDep) -> str:
@@ -198,6 +206,10 @@ def get_lab_result_write_actor(user: LabResultWriteAccessDep) -> str:
     return user.actor_id
 
 
+def get_clinical_risk_write_actor(user: ClinicalRiskWriteAccessDep) -> str:
+    return user.actor_id
+
+
 PatientActorDep = Annotated[str, Depends(get_patient_write_actor)]
 ClinicalEntryActorDep = Annotated[str, Depends(get_clinical_entry_write_actor)]
 ClinicalEventActorDep = Annotated[str, Depends(get_clinical_event_write_actor)]
@@ -209,6 +221,7 @@ HospitalDailySheetActorDep = Annotated[str, Depends(get_hospital_daily_sheet_wri
 HospitalIndicationActorDep = Annotated[str, Depends(get_hospital_indication_write_actor)]
 VitalSignActorDep = Annotated[str, Depends(get_vital_sign_write_actor)]
 LabResultActorDep = Annotated[str, Depends(get_lab_result_write_actor)]
+ClinicalRiskActorDep = Annotated[str, Depends(get_clinical_risk_write_actor)]
 
 
 def _extract_bearer_token(authorization: str | None) -> str | None:

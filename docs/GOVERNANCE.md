@@ -161,6 +161,8 @@ Regla especifica de riesgos clinicos:
   para representar caida, UPP, TEV, aislamiento o eventos adversos.
 - Cada alerta debe exponer fuente, severidad, estado, limite y accion humana;
   una inferencia sin fuente no puede activar bloqueo clinico.
+- La implementacion minima de `ClinicalRisk` vive bajo paciente y en ficha; no
+  habilita dashboard de seguridad, score automatico ni ruta global.
 - IA puede resumir faltantes o fuentes, pero no calcula scores, no ordena
   acciones, no firma y no crea `ClinicalPatch` para riesgos.
 

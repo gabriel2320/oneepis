@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         Medication,
         VitalSign,
     )
+    from oneepis_api.models.clinical_risk import ClinicalRisk
     from oneepis_api.models.lab import LabPanel, LabResult
 
 
@@ -105,6 +106,10 @@ class Patient(Base, IdMixin, TimestampMixin):
         cascade="all, delete-orphan",
     )
     active_problems: Mapped[list[ActiveProblem]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
+    clinical_risks: Mapped[list[ClinicalRisk]] = relationship(
         back_populates="patient",
         cascade="all, delete-orphan",
     )

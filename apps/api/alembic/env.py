@@ -7,7 +7,13 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from oneepis_api.core.config import get_settings
 from oneepis_api.db.base import Base
-from oneepis_api.models import audit, clinical_record, hospitalization, patient  # noqa: F401
+from oneepis_api.models import (  # noqa: F401
+    audit,
+    clinical_record,
+    clinical_risk,
+    hospitalization,
+    patient,
+)
 
 config = context.config
 
