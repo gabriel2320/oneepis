@@ -399,6 +399,32 @@ def test_assistant_chart_returns_vitals_and_exam_series_without_writing(
     )
     assert first_exam.status_code == 201
     assert second_exam.status_code == 201
+    lab_panel = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "occurred_at": "2026-06-20T08:00:00Z",
+            "panel_name": "Perfil renal estructurado",
+            "results": [
+                {
+                    "code": "creatinina",
+                    "name": "Creatinina",
+                    "value": "0.9",
+                    "numeric_value": "0.9",
+                    "unit": "mg/dL",
+                },
+                {
+                    "code": "creatinina",
+                    "name": "Creatinina corregida",
+                    "value": "9.9",
+                    "numeric_value": "9.9",
+                    "unit": "mg/dL",
+                    "status": "entered_in_error",
+                },
+            ],
+        },
+    )
+    assert lab_panel.status_code == 201
     before_audit = audit_events(client, auth, patient_id)
 
     response = client.post(
@@ -420,10 +446,17 @@ def test_assistant_chart_returns_vitals_and_exam_series_without_writing(
     assert heart_points[0]["source_path"].endswith("/vital-signs/" + heart_points[0]["source_id"])
     exam_series = series_by_key["exam:creatinina"]
     assert exam_series["unit"] == "mg/dL"
-    assert [point["value"] for point in exam_series["points"]] == [1.1, 1.6]
-    assert exam_series["points"][0]["source_type"] == "clinical_event"
-    assert exam_series["points"][0]["source_path"].endswith(
-        "/clinical-events/" + exam_series["points"][0]["source_id"]
+    assert [point["value"] for point in exam_series["points"]] == [0.9, 1.1, 1.6]
+    assert {point["source_type"] for point in exam_series["points"]} == {
+        "clinical_event",
+        "lab_result",
+    }
+    lab_point = exam_series["points"][0]
+    assert lab_point["source_type"] == "lab_result"
+    assert "/lab-panels/" in lab_point["source_path"]
+    legacy_point = exam_series["points"][1]
+    assert legacy_point["source_path"].endswith(
+        "/clinical-events/" + legacy_point["source_id"]
     )
     after_audit = audit_events(client, auth, patient_id)
     assert after_audit == before_audit
@@ -495,7 +528,7 @@ def test_assistant_chart_reports_missing_data_limit_and_unsupported_series(
     assert empty_response.status_code == 200
     empty_missing = empty_response.json()["missing_data"]
     assert "No hay signos vitales estructurados para graficar." in empty_missing
-    assert "No hay eventos exam_result estructurados para graficar." in empty_missing
+    assert "No hay examenes estructurados ni eventos exam_result para graficar." in empty_missing
     assert "No hay datos numericos graficables para las series solicitadas." in empty_missing
 
 
@@ -595,6 +628,64 @@ def test_assistant_correlate_allows_readonly_user(
 
     assert response.status_code == 200
     assert response.json()["correlations"][0]["missing_data"] == []
+
+
+def test_assistant_correlate_reads_structured_labs_without_legacy_event(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Correlate", last_name="Lab")
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T10:00:00Z",
+        temperature_c="38.4",
+    )
+    lab_panel = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "occurred_at": "2026-06-20T11:00:00Z",
+            "panel_name": "Panel inflamatorio",
+            "results": [
+                {
+                    "code": "pcr",
+                    "name": "Proteina C reactiva",
+                    "value": "180",
+                    "numeric_value": "180",
+                    "unit": "mg/L",
+                    "flag": "high",
+                }
+            ],
+        },
+    )
+    assert lab_panel.status_code == 201
+    before_audit = audit_events(client, auth, patient_id)
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/correlate",
+        headers=auth,
+        json={"presets": ["fever_infection"], "limit": 10},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["applies_changes"] is False
+    assert payload["missing_data"] == ["No hay medicacion activa estructurada para correlacionar."]
+    correlation = payload["correlations"][0]
+    assert correlation["missing_data"] == []
+    assert {item["source_type"] for item in correlation["evidence"]} == {
+        "vital_sign",
+        "lab_result",
+    }
+    lab_evidence = next(
+        item for item in correlation["evidence"] if item["source_type"] == "lab_result"
+    )
+    assert "/lab-panels/" in lab_evidence["source_path"]
+    after_audit = audit_events(client, auth, patient_id)
+    assert after_audit == before_audit
 
 
 def test_assistant_correlate_reports_limit_and_missing_evidence(

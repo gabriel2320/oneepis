@@ -53,6 +53,7 @@ Dominios CRUD:
 - encuentros clinicos
 - clinical entries con vinculo opcional a encuentro
 - clinical events como hechos longitudinales
+- laboratorio/examenes estructurados minimos como paneles y resultados
 - problemas activos
 - alergias
 - medicacion
@@ -105,6 +106,8 @@ IA:
 - `POST /api/v1/patients/{patient_id}/ai/draft-soap-from-events`
 - `POST /api/v1/patients/{patient_id}/ai/event-proposals-from-entry`
 - `POST /api/v1/patients/{patient_id}/ai/confirm-clinical-patch`
+- `GET/POST/PATCH /api/v1/patients/{patient_id}/lab-panels`
+- `GET/PATCH /api/v1/patients/{patient_id}/lab-panels/{panel_id}/results/{result_id}`
 - factory compatible en `services/ai/provider.py`
 - contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
@@ -120,7 +123,7 @@ Assistant Read Layer:
 - solo lectura con rol de lectura de paciente
 - une encuentros, evoluciones, eventos, signos vitales, medicacion activa, problemas activos y alergias activas
 - busca texto en encuentros, evoluciones, eventos, signos vitales con notas, medicacion activa, problemas activos y alergias activas
-- devuelve series de signos vitales y examenes numericos desde eventos `exam_result`
+- devuelve series de signos vitales y examenes numericos desde `lab_results` activos y eventos legacy `exam_result`
 - correlaciona por presets cerrados: fiebre/infeccion, renal/medicacion, respiratorio/oxigenacion, hemoglobina/sangrado y cambios de medicacion
 - cada item expone tipo, fecha, resumen y ruta fuente existente
 - cada resultado de busqueda expone tipo, fecha, snippet, campos coincidentes y ruta fuente existente
@@ -130,6 +133,19 @@ Assistant Read Layer:
 - no escribe ficha, no audita modificacion y no depende de Ollama
 - UI minima integrada en AI-Chart con tabs Timeline, Buscar, Series y Correlacion
 - pendiente: decidir si `/pacientes/[patientId]/contexto` aporta valor como vista dedicada sin crear dashboard
+
+Laboratorio estructurado:
+
+- existe entidad minima `LabPanel`/`LabResult` para paneles y resultados de examenes
+- no existe UI amplia ni navegacion propia de laboratorio todavia
+- `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
+- `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
+- lectura usa permisos de ficha, incluyendo `solo_lectura`
+- escritura usa `admin`, `medico`, `enfermeria` o `dev`
+- cada escritura genera auditoria `lab_panel.created`, `lab_panel.updated` o `lab_result.updated`
+- no migra historicos ni crea automaticamente `clinical_events.exam_result`
+- compatibilidad: Assistant Read combina resultados estructurados activos y eventos legacy `exam_result` para series/correlaciones
+- resultados no numericos se almacenan pero no se grafican como tendencia
 
 Hospitalizacion:
 
@@ -237,8 +253,8 @@ Release gates demo:
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - Validacion reciente local Assistant Read UI: typecheck/lint web y contrato cliente manual actualizado.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Siguiente paso recomendado: validar Assistant Read con walkthrough humano y luego disenar laboratorio estructurado.
-- Siguiente bloque de producto despues de Assistant Read: diseno de examenes/laboratorio estructurados con entidad dedicada, manteniendo compatibilidad de `clinical_events.exam_result`.
+- Siguiente paso recomendado: validar Assistant Read y laboratorio estructurado minimo con walkthrough humano antes de agregar UI amplia.
+- Siguiente bloque de producto despues del contrato de laboratorio: UI minima de lectura/carga controlada o importador, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
 
 ## Historial
 

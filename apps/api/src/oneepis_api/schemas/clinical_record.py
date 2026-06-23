@@ -62,6 +62,16 @@ from oneepis_api.schemas.clinical_record_contracts.entries_events import (
     ClinicalEventUpdate,
     ClinicalTimelineRead,
 )
+from oneepis_api.schemas.clinical_record_contracts.lab import (
+    LabPanelBase,
+    LabPanelCreate,
+    LabPanelRead,
+    LabPanelUpdate,
+    LabResultBase,
+    LabResultCreate,
+    LabResultRead,
+    LabResultUpdate,
+)
 from oneepis_api.schemas.clinical_record_contracts.longitudinal import (
     ActiveProblemBase,
     ActiveProblemCreate,
@@ -154,6 +164,14 @@ __all__ = [
     "EventProposalFromEntry",
     "EventProposalFromEntryRequest",
     "EventProposalsFromEntryResponse",
+    "LabPanelBase",
+    "LabPanelCreate",
+    "LabPanelRead",
+    "LabPanelUpdate",
+    "LabResultBase",
+    "LabResultCreate",
+    "LabResultRead",
+    "LabResultUpdate",
     "MedicationBase",
     "MedicationCreate",
     "MedicationRead",

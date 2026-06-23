@@ -20,6 +20,7 @@ if TYPE_CHECKING:
         Medication,
         VitalSign,
     )
+    from oneepis_api.models.lab import LabPanel, LabResult
 
 
 def enum_values(enum_class: type[enum.Enum]) -> list[str]:
@@ -83,6 +84,14 @@ class Patient(Base, IdMixin, TimestampMixin):
         cascade="all, delete-orphan",
     )
     clinical_events: Mapped[list[ClinicalEvent]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
+    lab_panels: Mapped[list[LabPanel]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
+    lab_results: Mapped[list[LabResult]] = relationship(
         back_populates="patient",
         cascade="all, delete-orphan",
     )

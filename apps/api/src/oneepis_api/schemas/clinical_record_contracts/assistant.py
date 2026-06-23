@@ -47,7 +47,7 @@ class AssistantChartRequest(APIModel):
 class AssistantChartPoint(APIModel):
     occurred_at: datetime
     value: float
-    source_type: Literal["vital_sign", "clinical_event"]
+    source_type: Literal["vital_sign", "clinical_event", "lab_result"]
     source_id: uuid.UUID
     source_path: str = Field(min_length=1, max_length=240)
     note: str | None = Field(default=None, max_length=160)
@@ -86,7 +86,7 @@ class AssistantCorrelationRequest(APIModel):
 
 
 class AssistantCorrelationEvidence(APIModel):
-    source_type: Literal["vital_sign", "clinical_event", "medication"]
+    source_type: Literal["vital_sign", "clinical_event", "lab_result", "medication"]
     source_id: uuid.UUID
     occurred_at: datetime
     label: str = Field(min_length=1, max_length=160)

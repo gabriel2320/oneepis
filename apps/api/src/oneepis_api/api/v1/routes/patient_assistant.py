@@ -34,6 +34,12 @@ from oneepis_api.schemas.clinical_record import (
     AssistantTimelineResponse,
 )
 
+from .patient_assistant_labs import (
+    exam_chart_series,
+    exam_events_matching,
+    fetch_lab_results_for_assistant,
+    lab_result_evidence,
+)
 from .patient_shared import PATIENT_ROUTER_OPTIONS, LimitQuery, SessionDep, require_patient
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
@@ -326,11 +332,21 @@ def get_assistant_chart_data(
             .limit(query_limit)
         )
     )
+    lab_results = fetch_lab_results_for_assistant(session, patient_id, query_limit)
     series = [
         *_vital_chart_series(patient_id, list(reversed(vitals)), selected),
-        *_exam_chart_series(patient_id, list(reversed(exam_events)), selected),
+        *exam_chart_series(
+            patient_id,
+            list(reversed(lab_results)),
+            list(reversed(exam_events)),
+            selected,
+        ),
     ]
-    has_more = len(vitals) > payload.limit or len(exam_events) > payload.limit
+    has_more = (
+        len(vitals) > payload.limit
+        or len(exam_events) > payload.limit
+        or len(lab_results) > payload.limit
+    )
     return AssistantChartResponse(
         patient_id=patient_id,
         series=series,
@@ -338,6 +354,7 @@ def get_assistant_chart_data(
             series=series,
             vitals=vitals,
             exam_events=exam_events,
+            lab_results=lab_results,
         ),
         warnings=_chart_warnings(
             selected=selected,
@@ -373,6 +390,7 @@ def correlate_assistant_read_layer(
             .limit(query_limit)
         )
     )
+    lab_results = fetch_lab_results_for_assistant(session, patient_id, query_limit)
     medications = list(
         session.scalars(
             select(Medication)
@@ -388,6 +406,7 @@ def correlate_assistant_read_layer(
             patient_id=patient_id,
             vitals=vitals[: payload.limit],
             events=events[: payload.limit],
+            lab_results=lab_results[: payload.limit],
             medications=medications[: payload.limit],
         )
         for preset in selected
@@ -395,6 +414,7 @@ def correlate_assistant_read_layer(
     has_more = (
         len(vitals) > payload.limit
         or len(events) > payload.limit
+        or len(lab_results) > payload.limit
         or len(medications) > payload.limit
     )
     return AssistantCorrelationResponse(
@@ -403,6 +423,7 @@ def correlate_assistant_read_layer(
         missing_data=_correlation_missing_data(
             vitals=vitals,
             events=events,
+            lab_results=lab_results,
             medications=medications,
         ),
         warnings=_correlation_warnings(has_more=has_more, limit=payload.limit),
@@ -762,50 +783,13 @@ def _vital_chart_series(
     return series
 
 
-def _exam_chart_series(
-    patient_id: uuid.UUID,
-    events: list[ClinicalEvent],
-    selected: set[str],
-) -> list[AssistantChartSeries]:
-    include_all = not selected or "exam_result" in selected
-    grouped: dict[str, AssistantChartSeries] = {}
-    for event in events:
-        for result in _exam_results(event.payload):
-            marker = _exam_marker(result)
-            value = _numeric_value(result.get("value"))
-            if marker is None or value is None:
-                continue
-            key = f"exam:{_normalize_series_key(marker)}"
-            if not include_all and key not in selected:
-                continue
-            series = grouped.setdefault(
-                key,
-                AssistantChartSeries(
-                    key=key,
-                    label=marker,
-                    unit=_payload_text(result.get("unit")),
-                    source_label="clinical_events.exam_result",
-                ),
-            )
-            series.points.append(
-                AssistantChartPoint(
-                    occurred_at=event.occurred_at,
-                    value=value,
-                    source_type="clinical_event",
-                    source_id=event.id,
-                    source_path=_clinical_event_source_path(patient_id, event.id),
-                    note=event.summary,
-                )
-            )
-    return list(grouped.values())
-
-
 def _correlate_preset(
     *,
     preset: str,
     patient_id: uuid.UUID,
     vitals: list[VitalSign],
     events: list[ClinicalEvent],
+    lab_results: list[object],
     medications: list[Medication],
 ) -> AssistantCorrelationResult:
     if preset == "fever_infection":
@@ -818,6 +802,12 @@ def _correlate_preset(
                     if vital.temperature_c is not None and float(vital.temperature_c) >= 38
                 ],
                 label="Fiebre",
+            ),
+            *lab_result_evidence(
+                patient_id,
+                lab_results,
+                ("pcr", "leucocito", "leucocytes", "crp"),
+                label="Marcador infeccioso estructurado",
             ),
             *_event_evidence(
                 patient_id,
@@ -833,9 +823,15 @@ def _correlate_preset(
         )
     if preset == "renal_medications":
         evidence = [
+            *lab_result_evidence(
+                patient_id,
+                lab_results,
+                ("creatinina", "creatinine", "urea", "egfr"),
+                label="Funcion renal",
+            ),
             *_event_evidence(
                 patient_id,
-                _exam_events_matching(events, "creatinina", "creatinine", "urea", "egfr"),
+                exam_events_matching(events, ("creatinina", "creatinine", "urea", "egfr")),
                 label="Funcion renal",
             ),
             *_medication_evidence(
@@ -891,9 +887,15 @@ def _correlate_preset(
         )
     if preset == "hemoglobin_bleeding":
         evidence = [
+            *lab_result_evidence(
+                patient_id,
+                lab_results,
+                ("hemoglobina", "hemoglobin", "hb", "hto"),
+                label="Serie roja",
+            ),
             *_event_evidence(
                 patient_id,
-                _exam_events_matching(events, "hemoglobina", "hemoglobin", "hb", "hto"),
+                exam_events_matching(events, ("hemoglobina", "hemoglobin", "hb", "hto")),
                 label="Serie roja",
             ),
             *_event_evidence(
@@ -1119,12 +1121,13 @@ def _chart_missing_data(
     series: list[AssistantChartSeries],
     vitals: list[VitalSign],
     exam_events: list[ClinicalEvent],
+    lab_results: list[object],
 ) -> list[str]:
     missing = []
     if not vitals:
         missing.append("No hay signos vitales estructurados para graficar.")
-    if not exam_events:
-        missing.append("No hay eventos exam_result estructurados para graficar.")
+    if not exam_events and not lab_results:
+        missing.append("No hay examenes estructurados ni eventos exam_result para graficar.")
     if not series:
         missing.append("No hay datos numericos graficables para las series solicitadas.")
     return missing
@@ -1150,13 +1153,14 @@ def _correlation_missing_data(
     *,
     vitals: list[VitalSign],
     events: list[ClinicalEvent],
+    lab_results: list[object],
     medications: list[Medication],
 ) -> list[str]:
     missing = []
     if not vitals:
         missing.append("No hay signos vitales estructurados para correlacionar.")
-    if not events:
-        missing.append("No hay eventos clinicos estructurados para correlacionar.")
+    if not events and not lab_results:
+        missing.append("No hay eventos clinicos ni examenes estructurados para correlacionar.")
     if not medications:
         missing.append("No hay medicacion activa estructurada para correlacionar.")
     return missing
@@ -1183,19 +1187,6 @@ def _events_matching(events: list[ClinicalEvent], *terms: str) -> list[ClinicalE
             terms,
         )
     ]
-
-
-def _exam_events_matching(events: list[ClinicalEvent], *terms: str) -> list[ClinicalEvent]:
-    matches = []
-    for event in events:
-        if event.event_type != ClinicalEventType.EXAM_RESULT:
-            continue
-        exam_text = " ".join(
-            " ".join(_payload_text_values(result)) for result in _exam_results(event.payload)
-        )
-        if _contains_any_terms(exam_text, terms):
-            matches.append(event)
-    return matches
 
 
 def _medications_matching(medications: list[Medication], *terms: str) -> list[Medication]:
@@ -1271,17 +1262,6 @@ def _numeric_value(value: object) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
-
-
-def _exam_results(payload: dict[str, object]) -> list[dict[str, object]]:
-    raw_results = payload.get("results")
-    if isinstance(raw_results, list):
-        return [result for result in raw_results if isinstance(result, dict)]
-    return [payload]
-
-
-def _exam_marker(payload: dict[str, object]) -> str | None:
-    return _payload_text(payload.get("code") or payload.get("name") or payload.get("marker"))
 
 
 def _payload_text(value: object | None) -> str | None:

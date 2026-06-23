@@ -6,10 +6,12 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const openApi = JSON.parse(
   readFileSync(path.join(repoRoot, "packages/contracts/openapi.json"), "utf8"),
 );
-const tsContracts = readFileSync(
-  path.join(repoRoot, "apps/web/src/lib/type-contracts/clinical-record.ts"),
-  "utf8",
-);
+const tsContracts = [
+  "apps/web/src/lib/type-contracts/clinical-record.ts",
+  "apps/web/src/lib/type-contracts/lab.ts",
+]
+  .map((contractPath) => readFileSync(path.join(repoRoot, contractPath), "utf8"))
+  .join("\n");
 
 const schemaNames = [
   "AssistantTimelineItem",
@@ -24,6 +26,12 @@ const schemaNames = [
   "AssistantCorrelationEvidence",
   "AssistantCorrelationResult",
   "AssistantCorrelationResponse",
+  "LabPanelCreate",
+  "LabPanelRead",
+  "LabPanelUpdate",
+  "LabResultCreate",
+  "LabResultRead",
+  "LabResultUpdate",
 ];
 
 const endpointContracts = [
@@ -48,6 +56,40 @@ const endpointContracts = [
     path: "/api/v1/patients/{patient_id}/assistant/correlate",
     request: "AssistantCorrelationRequest",
     response: "AssistantCorrelationResponse",
+  },
+  {
+    method: "get",
+    path: "/api/v1/patients/{patient_id}/lab-panels",
+    responseList: "LabPanelRead",
+  },
+  {
+    method: "post",
+    path: "/api/v1/patients/{patient_id}/lab-panels",
+    request: "LabPanelCreate",
+    response: "LabPanelRead",
+    responseStatus: "201",
+  },
+  {
+    method: "get",
+    path: "/api/v1/patients/{patient_id}/lab-panels/{panel_id}",
+    response: "LabPanelRead",
+  },
+  {
+    method: "patch",
+    path: "/api/v1/patients/{patient_id}/lab-panels/{panel_id}",
+    request: "LabPanelUpdate",
+    response: "LabPanelRead",
+  },
+  {
+    method: "get",
+    path: "/api/v1/patients/{patient_id}/lab-panels/{panel_id}/results/{result_id}",
+    response: "LabResultRead",
+  },
+  {
+    method: "patch",
+    path: "/api/v1/patients/{patient_id}/lab-panels/{panel_id}/results/{result_id}",
+    request: "LabResultUpdate",
+    response: "LabResultRead",
   },
 ];
 
@@ -81,6 +123,7 @@ assertFieldUnion(
   "source_type",
   schema("AssistantCorrelationEvidence").properties.source_type.enum,
 );
+assertNamedUnion("LabResultFlag", schema("LabResultFlag").enum);
 
 for (const contract of endpointContracts) {
   const operation = openApi.paths?.[contract.path]?.[contract.method];
@@ -96,13 +139,22 @@ for (const contract of endpointContracts) {
       `${contract.method.toUpperCase()} ${contract.path} request`,
     );
   }
-  const responseRef =
-    operation.responses?.["200"]?.content?.["application/json"]?.schema?.$ref;
-  assertRef(
-    responseRef,
-    contract.response,
-    `${contract.method.toUpperCase()} ${contract.path} response`,
-  );
+  const responseStatus = contract.responseStatus ?? "200";
+  const responseSchema =
+    operation.responses?.[responseStatus]?.content?.["application/json"]?.schema;
+  if (contract.responseList) {
+    assertListRef(
+      responseSchema,
+      contract.responseList,
+      `${contract.method.toUpperCase()} ${contract.path} response`,
+    );
+  } else {
+    assertRef(
+      responseSchema?.$ref,
+      contract.response,
+      `${contract.method.toUpperCase()} ${contract.path} response`,
+    );
+  }
 }
 
 if (errors.length > 0) {
@@ -183,6 +235,11 @@ function assertRef(ref, expectedSchema, label) {
   if (ref !== expectedRef) {
     errors.push(`${label} expected ${expectedRef}, received ${ref ?? "missing ref"}.`);
   }
+}
+
+function assertListRef(schema, expectedSchema, label) {
+  const ref = schema?.items?.$ref;
+  assertRef(ref, expectedSchema, label);
 }
 
 function quotedValues(text) {

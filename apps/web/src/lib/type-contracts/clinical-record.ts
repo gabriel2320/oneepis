@@ -309,7 +309,7 @@ export type AssistantChartRequest = {
 export type AssistantChartPoint = {
   occurred_at: string;
   value: number;
-  source_type: "vital_sign" | "clinical_event";
+  source_type: "vital_sign" | "clinical_event" | "lab_result";
   source_id: string;
   source_path: string;
   note?: string | null;
@@ -346,7 +346,7 @@ export type AssistantCorrelationRequest = {
 };
 
 export type AssistantCorrelationEvidence = {
-  source_type: "vital_sign" | "clinical_event" | "medication";
+  source_type: "vital_sign" | "clinical_event" | "lab_result" | "medication";
   source_id: string;
   occurred_at: string;
   label: string;
