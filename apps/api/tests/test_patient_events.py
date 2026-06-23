@@ -86,6 +86,101 @@ def test_clinical_events_timeline_and_draft_are_audited(
     assert draft_audit["extra_data"]["section_sources"][0]["section"] == "subjective"
 
 
+def test_clinical_event_detail_is_readable_without_audit_write(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Evento",
+            "last_name": "Lectura",
+            "birth_date": "1985-05-12",
+            "sex_at_birth": "female",
+        },
+    ).json()
+    event = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Evento puntual para fuente inspeccionable",
+        },
+    ).json()
+    before_audit = client.get(
+        f"/api/v1/patients/{patient['id']}/audit-events",
+        headers=auth,
+    ).json()
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.get(
+        f"/api/v1/patients/{patient['id']}/clinical-events/{event['id']}",
+        headers=readonly_auth,
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["id"] == event["id"]
+    assert payload["summary"] == "Evento puntual para fuente inspeccionable"
+    after_audit = client.get(
+        f"/api/v1/patients/{patient['id']}/audit-events",
+        headers=auth,
+    ).json()
+    assert after_audit == before_audit
+
+
+def test_clinical_event_detail_requires_patient_ownership(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    first = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Primer",
+            "last_name": "Evento",
+            "birth_date": "1980-01-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    second = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Segundo",
+            "last_name": "Evento",
+            "birth_date": "1981-01-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    event = client.post(
+        f"/api/v1/patients/{first['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Evento de otro paciente",
+        },
+    ).json()
+
+    response = client.get(
+        f"/api/v1/patients/{second['id']}/clinical-events/{event['id']}",
+        headers=auth,
+    )
+    missing_response = client.get(
+        f"/api/v1/patients/{first['id']}/clinical-events/"
+        "11111111-1111-4111-8111-111111111111",
+        headers=auth,
+    )
+
+    assert response.status_code == 404
+    assert missing_response.status_code == 404
+
+
 def test_draft_rejects_events_from_other_patient(
     client: TestClient,
     auth_headers,

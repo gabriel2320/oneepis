@@ -273,7 +273,7 @@ function TimelineList({ items }: { items: AssistantTimelineItem[] }) {
           </div>
           <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(item.occurred_at)}</p>
           <p className="mt-1 text-sm">{item.summary}</p>
-          <p className="mt-2 text-[11px] text-muted-foreground">Fuente: {item.source_label}</p>
+          <SourceLine label={item.source_label} path={item.source_path} />
         </div>
       ))}
     </div>
@@ -291,9 +291,11 @@ function SearchList({ results }: { results: AssistantSearchResult[] }) {
           </div>
           <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(result.occurred_at)}</p>
           <p className="mt-1 text-sm">{result.snippet}</p>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            Fuente: {result.source_label} - Campos: {result.matched_fields.join(", ") || "fuente"}
-          </p>
+          <SourceLine
+            label={result.source_label}
+            path={result.source_path}
+            detail={`Campos: ${result.matched_fields.join(", ") || "fuente"}`}
+          />
         </div>
       ))}
     </div>
@@ -347,6 +349,7 @@ function SeriesList({ series }: { series: AssistantChartSeries[] }) {
                 {item.unit ? ` ${item.unit}` : ""} - {formatDateTime(latest.occurred_at)}
               </p>
             ) : null}
+            <SourceLine label={item.source_label} path={latest?.source_path} />
           </div>
         );
       })}
@@ -363,11 +366,23 @@ function EvidenceList({ evidence }: { evidence: AssistantCorrelationEvidence[] }
       {evidence.slice(0, 4).map((item) => (
         <li key={`${item.source_type}-${item.source_id}-${item.label}`}>
           <span className="font-medium text-foreground">{item.label}</span>: {item.summary} -{" "}
-          {formatDateTime(item.occurred_at)} - Fuente: {item.source_path}
+          {formatDateTime(item.occurred_at)} - {sourceText(item.source_type, item.source_path)}
         </li>
       ))}
     </ul>
   );
+}
+
+function SourceLine({ label, path, detail }: { label: string; path?: string; detail?: string }) {
+  return (
+    <p className="mt-2 truncate text-[11px] text-muted-foreground" title={path}>
+      {sourceText(label, path, detail)}
+    </p>
+  );
+}
+
+function sourceText(label: string, path?: string, detail?: string) {
+  return ["Fuente: " + label, detail, path].filter(Boolean).join(" - ");
 }
 
 function DataFootnotes({
