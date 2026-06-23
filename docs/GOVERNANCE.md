@@ -77,6 +77,7 @@ Reglas IA por pantalla:
 - Cada ruta clinica visible debe declarar IA permitida en el Screen Capability Registry.
 - Las acciones IA permitidas son cerradas: lectura, resumen, busqueda, series, validacion, borrador y propuesta de patch.
 - Una pantalla sin capacidad declarada no puede ejecutar comandos IA dirigidos.
+- Si la UI no encuentra `ScreenCapability`, debe bloquear IA por defecto.
 - Ollama solo puede apoyar redaccion/resumen cuando la pantalla lo permita; las reglas locales y datos estructurados mantienen autoridad.
 - `ClinicalPatch` solo puede aparecer en pantallas que lo declaren y siempre requiere confirmacion humana y auditoria backend.
 
@@ -141,6 +142,12 @@ Trabajo no permitido inmediato:
 - agentes o paquetes IA nuevos
 - IA externa
 - otro PR grande que mezcle frontend, backend, contratos y roadmap sin particion clara
+
+## Seguridad CI Report-Only
+
+- El job `security-report` debe entregar senales de secretos, dependencias y analisis estatico sin bloquear el piloto por ruido inicial.
+- Gitleaks, dependency review, CodeQL, `npm audit` y `pip-audit` quedan en modo reporte hasta que se establezca una politica de bloqueo explicita.
+- Un secreto real o PHI real detectado debe tratarse como incidente aunque el job este en modo report-only.
 
 ## Escalera OneEpis
 

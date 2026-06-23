@@ -36,6 +36,7 @@ Estado real al 2026-06-23:
 - el registry declara por ruta estado, permisos, escritura, auditoria, papel, complejidad futura e IA permitida
 - `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability` y que no haya rutas duplicadas en mapa/registry
 - la barra de intenciones clinicas bloquea ejecucion directa y re-ejecucion de intenciones que la pantalla actual no declare como permitidas
+- si no existe `ScreenCapability`, la UI bloquea intenciones IA por defecto
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -46,6 +47,7 @@ Estado real al 2026-06-23:
 - no se autoriza escritura clinica desde el programa
 - el timeline assistant es solo lectura, no crea auditoria ni escribe ficha
 - el timeline devuelve fuentes, limites y faltantes por dominio, incluyendo `lab_results` activos
+- la ficha muestra una linea de tiempo completa minima reutilizando eventos y evoluciones existentes, sin entidad nueva
 - la busqueda assistant es deterministica, solo lectura y devuelve fuentes/snippets
 - chart assistant devuelve series graficables simples, no imagenes ni graficos acoplados
 - correlate assistant devuelve relaciones descriptivas por presets cerrados, con fuentes y faltantes
@@ -168,6 +170,7 @@ Laboratorio estructurado:
 - existe entidad minima `LabPanel`/`LabResult` para paneles y resultados de examenes
 - no existe UI amplia ni navegacion propia de laboratorio todavia
 - existe lectura minima de paneles/resultados recientes dentro de Assistant Read, sin escritura ni carga masiva
+- existe lectura minima de paneles/resultados recientes dentro de la ficha, sin escritura, carga masiva ni navegacion nueva
 - `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
 - `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
 - lectura usa permisos de ficha, incluyendo `solo_lectura`
@@ -291,6 +294,7 @@ Release gates demo:
 - Checklist `v0.4-assistant-read`: paciente, hospitalizacion, evolucion, signo vital, evento clinico, laboratorio estructurado reciente, AI-Chart/Assistant Read, impresion y auditoria.
 - Criterios `v0.4`: fuentes inspeccionables, limites/faltantes visibles, cero escritura automatica, cero chat libre, cero RAG, cero IA externa activa y compatibilidad `lab_results` + `clinical_events.exam_result`.
 - Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
+- Estado `v0.4-assistant-read`: candidato automatizado; el tag final queda pendiente de walkthrough humano.
 - Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
 - Pantallas preparadas no cuentan como feature completa: `/consulta/agenda`, resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
 - Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
@@ -309,6 +313,7 @@ Accesibilidad, performance y observabilidad pendientes:
 - Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
 - Rediseño grafico-web inicial: navegacion paciente agrupada, ficha como hoja clinica viva, AI-Chart con pasos guiados, paridad papel basica y tokens clinicos V2 documentados.
 - Validacion reciente rediseño visual: `npm run check:size`, `npm run check:web`, `npm run check:e2e`, `npm run check:contract` y `npm run check:api`.
+- Seguridad CI: job `security-report` report-only con gitleaks, dependency review, CodeQL, `npm audit` y `pip-audit`; no bloquea merge durante piloto salvo decision explicita posterior.
 - Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y superficies futuras por modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
 - Siguiente paso recomendado: ejecutar walkthrough humano de `v0.4-assistant-read`, corregir hallazgos y preparar tag/changelog.
