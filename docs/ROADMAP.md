@@ -214,6 +214,15 @@ OneEpis ya tiene una base clinica E2E real:
 - Resultado: lista y metricas de pacientes extraidas a componente dedicado.
 - Fuera de alcance: cambios de conducta, textos, rutas, API, OpenAPI y diseno.
 
+### PROG-PATIENT-CORE-POLISH-01: ficha de lectura mas clara
+
+- Estado: polish implementado sin entidad ni endpoint nuevo.
+- Decision: reforzar fuentes, limites y faltantes en ficha antes de crear
+  antecedentes estructurados o laboratorio amplio.
+- Resultado: antecedentes muestran fuentes usadas; timeline y laboratorio
+  declaran limites visibles.
+- Fuera de alcance: escritura, IA nueva, dashboard, rutas y OpenAPI.
+
 ### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
 
 - Estado: contrato docs-only definido antes de implementar.

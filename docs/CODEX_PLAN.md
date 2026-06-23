@@ -82,10 +82,9 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. Cerrar `PROG-DIET-01`: primera dieta quirurgica ya saco `patient-list-pages.tsx` del near-limit.
-2. `PROG-PATIENT-CORE-POLISH-01`: pulir nucleo paciente de solo lectura, sin entidad nueva.
-3. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decision docs-only sobre `enfermeria`/`admision`.
-4. `PROG-CLINICAL-RISK-01`: implementar riesgos clinicos solo si el contrato sigue aprobado.
+1. Cerrar `PROG-PATIENT-CORE-POLISH-01`: ficha de solo lectura con fuentes, limites y faltantes mas visibles.
+2. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decision docs-only sobre `enfermeria`/`admision`.
+3. `PROG-CLINICAL-RISK-01`: implementar riesgos clinicos solo si el contrato sigue aprobado.
 
 Reglas para avanzar:
 
