@@ -16,7 +16,7 @@ El modo demo solo debe usarse con `NEXT_PUBLIC_DEMO_MODE=true`.
 PR #1 (`[codex] Close AI-Chart phase 1`) fue revisado como cambio de riesgo,
 endurecido y mergeado por squash en `main` el 2026-06-23.
 
-Programa de lectura aprobado, no implementado: `PROG-ASSISTANT-READ-01`.
+Programa de lectura aprobado e iniciado: `PROG-ASSISTANT-READ-01`.
 
 Este programa define una capa futura de asistente clinico de solo lectura para
 leer, buscar, mostrar, graficar y correlacionar la historia longitudinal del
@@ -26,11 +26,13 @@ extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
 Estado real al 2026-06-23:
 
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
+- existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - no existe todavia ruta `/pacientes/[patientId]/contexto`
-- no hay busqueda, chart ni correlacion assistant dedicados
+- no hay chart ni correlacion assistant dedicados
 - no se autoriza escritura clinica desde el programa
 - el timeline assistant es solo lectura, no crea auditoria ni escribe ficha
 - el timeline devuelve fuentes, limites y faltantes por dominio
+- la busqueda assistant es deterministica, solo lectura y devuelve fuentes/snippets
 - `ClinicalPatch` v0 soporta escritura confirmada solo para `clinical_event` y `evolution`
 - el backend bloquea aceptar patches con `requires_human_confirmation=false`
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
@@ -108,12 +110,15 @@ IA:
 Assistant Read Layer:
 
 - `GET /api/v1/patients/{patient_id}/assistant/timeline`
+- `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - solo lectura con rol de lectura de paciente
 - une encuentros, evoluciones, eventos, signos vitales, medicacion activa, problemas activos y alergias activas
+- busca texto en encuentros, evoluciones, eventos, signos vitales con notas, medicacion activa, problemas activos y alergias activas
 - cada item expone tipo, fecha, resumen y ruta fuente existente
+- cada resultado de busqueda expone tipo, fecha, snippet, campos coincidentes y ruta fuente existente
 - declara dominios faltantes y limite aplicado
 - no escribe ficha, no audita modificacion y no depende de Ollama
-- pendientes: `search`, `chart`, `correlate`, cliente web y UI minima
+- pendientes: `chart`, `correlate`, cliente web y UI minima
 
 Hospitalizacion:
 
@@ -208,9 +213,9 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 
 - Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, mesa `/pacientes` v2, temas visuales v2, AI-Chart Core Nivel 0, PR #1 mergeado y endurecimiento `ClinicalPatch`.
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- Validacion reciente local Assistant Read timeline: ruff API, 71 tests API y OpenAPI actualizado.
+- Validacion reciente local Assistant Read timeline/search: ruff API, 75 tests API y OpenAPI actualizado.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Siguiente paso recomendado: abrir `PROG-ASSISTANT-READ-01` como capa de lectura clinica, no como chat, RAG, dashboard ni escritura.
+- Siguiente paso recomendado: continuar `PROG-ASSISTANT-READ-01` con datos graficables simples, no como chat, RAG, dashboard ni escritura.
 - Siguiente bloque de producto despues de Assistant Read: diseno de examenes/laboratorio estructurados con entidad dedicada, manteniendo compatibilidad de `clinical_events.exam_result`.
 
 ## Historial
