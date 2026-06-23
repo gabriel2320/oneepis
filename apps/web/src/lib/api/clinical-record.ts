@@ -7,6 +7,12 @@ import type {
   AllergyCreate,
   AllergyUpdate,
   AuditEvent,
+  AssistantChartRequest,
+  AssistantChartResponse,
+  AssistantCorrelationRequest,
+  AssistantCorrelationResponse,
+  AssistantSearchResponse,
+  AssistantTimelineResponse,
   ClinicalEntry,
   ClinicalEntryCreate,
   ClinicalEntryUpdate,
@@ -87,6 +93,39 @@ export function updateClinicalEvent(
 
 export function getClinicalTimeline(patientId: string) {
   return apiFetch<ClinicalTimeline>(`/api/v1/patients/${patientId}/timeline?limit=50`);
+}
+
+export function getAssistantTimeline(patientId: string) {
+  return apiFetch<AssistantTimelineResponse>(
+    `/api/v1/patients/${patientId}/assistant/timeline?limit=20`,
+  );
+}
+
+export function searchAssistantTimeline(patientId: string, query: string) {
+  const params = new URLSearchParams({ q: query, limit: "20" });
+  return apiFetch<AssistantSearchResponse>(
+    `/api/v1/patients/${patientId}/assistant/search?${params.toString()}`,
+  );
+}
+
+export function getAssistantChart(patientId: string, payload: AssistantChartRequest = {}) {
+  return apiFetch<AssistantChartResponse>(`/api/v1/patients/${patientId}/assistant/chart`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function correlateAssistant(
+  patientId: string,
+  payload: AssistantCorrelationRequest = {},
+) {
+  return apiFetch<AssistantCorrelationResponse>(
+    `/api/v1/patients/${patientId}/assistant/correlate`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
 }
 
 export function draftSoapFromEvents(patientId: string, payload: DraftSoapFromEventsRequest) {
