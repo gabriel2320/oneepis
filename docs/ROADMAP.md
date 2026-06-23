@@ -206,6 +206,14 @@ OneEpis ya tiene una base clinica E2E real:
   dejar congelada la decision de permisos.
 - Fuera de alcance: UI, API, OpenAPI, IA, dashboard, firma, receta y riesgos.
 
+### PROG-DIET-01: dieta near-limit inicial
+
+- Estado: primera extraccion completada.
+- Decision: empezar por `patient-list-pages.tsx`, porque estaba en 344/350 y
+  es superficie probable de crecimiento futuro.
+- Resultado: lista y metricas de pacientes extraidas a componente dedicado.
+- Fuera de alcance: cambios de conducta, textos, rutas, API, OpenAPI y diseno.
+
 ### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
 
 - Estado: contrato docs-only definido antes de implementar.

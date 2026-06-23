@@ -82,11 +82,10 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. `PROG-POST-PRECONSULTA-01`: consolidar memoria post-#25 y dejar cola actualizada.
-2. `PROG-DIET-01`: dieta quirurgica de archivos near-limit, sin cambio de conducta.
-3. `PROG-PATIENT-CORE-POLISH-01`: pulir nucleo paciente de solo lectura, sin entidad nueva.
-4. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decision docs-only sobre `enfermeria`/`admision`.
-5. `PROG-CLINICAL-RISK-01`: implementar riesgos clinicos solo si el contrato sigue aprobado.
+1. Cerrar `PROG-DIET-01`: primera dieta quirurgica ya saco `patient-list-pages.tsx` del near-limit.
+2. `PROG-PATIENT-CORE-POLISH-01`: pulir nucleo paciente de solo lectura, sin entidad nueva.
+3. `PROG-AMB-PRECONSULTA-PERMISSIONS-00`: decision docs-only sobre `enfermeria`/`admision`.
+4. `PROG-CLINICAL-RISK-01`: implementar riesgos clinicos solo si el contrato sigue aprobado.
 
 Reglas para avanzar:
 

@@ -385,7 +385,7 @@ Gates de cierre:
 
 ## PROG-DIET-01
 
-Estado: siguiente bloque recomendado.
+Estado: primera extraccion quirurgica completada en mesa de pacientes.
 
 Objetivo: reducir presion de archivos near-limit sin cambiar conducta.
 
@@ -401,6 +401,12 @@ Gates de cierre:
 
 - `npm run check:size`
 - `npm run check:web`
+
+Resultado inicial:
+
+- `patient-list-pages.tsx` dejo de aparecer en el reporte near-limit
+- la lista y metricas de pacientes quedaron extraidas a un componente dedicado
+- no cambiaron rutas, API, OpenAPI, permisos, textos clinicos ni diseno visible
 
 ## PROG-CLINICAL-RISK-00
 
@@ -458,8 +464,8 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. `PROG-POST-PRECONSULTA-01`: cerrar memoria y cola post-#25.
-2. `PROG-DIET-01`: reducir presion near-limit antes de abrir nueva clinica.
+1. Cerrar `PROG-DIET-01` con PR verde y sin cambios observables.
+2. `PROG-PATIENT-CORE-POLISH-01`: nucleo paciente de solo lectura.
 3. Mantener riesgos clinicos como contrato definido hasta PR propio de API/UI.
 
 Hecho en este foco:
