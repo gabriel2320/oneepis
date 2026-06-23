@@ -2719,6 +2719,93 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/assistant/chart": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Get Assistant Chart Data",
+        "operationId": "get_assistant_chart_data_api_v1_patients__patient_id__assistant_chart_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantChartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantChartResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/allergies": {
       "get": {
         "tags": [
@@ -6178,6 +6265,180 @@
         },
         "type": "object",
         "title": "AllergyUpdate"
+      },
+      "AssistantChartPoint": {
+        "properties": {
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "vital_sign",
+              "clinical_event"
+            ],
+            "title": "Source Type"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Id"
+          },
+          "source_path": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Source Path"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "occurred_at",
+          "value",
+          "source_type",
+          "source_id",
+          "source_path"
+        ],
+        "title": "AssistantChartPoint"
+      },
+      "AssistantChartRequest": {
+        "properties": {
+          "series": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 16,
+            "title": "Series"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 100
+          }
+        },
+        "type": "object",
+        "title": "AssistantChartRequest"
+      },
+      "AssistantChartResponse": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantChartSeries"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Data"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Limit"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "default": false
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "limit"
+        ],
+        "title": "AssistantChartResponse"
+      },
+      "AssistantChartSeries": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Source Label"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantChartPoint"
+            },
+            "type": "array",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "source_label"
+        ],
+        "title": "AssistantChartSeries"
       },
       "AssistantSearchResponse": {
         "properties": {

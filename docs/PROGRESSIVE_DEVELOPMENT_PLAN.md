@@ -88,6 +88,7 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. PR #1
 - bloquear evoluciones AI-Chart que pretendan guardarse como firmadas/no borrador
 - leer timeline longitudinal assistant desde backend sin escritura clinica
 - buscar texto clinico assistant desde backend sin escritura clinica
+- devolver series graficables simples desde backend sin escritura clinica
 - funcionar con `ONEEPIS_AI_PROVIDER=local_rules` y Ollama apagado
 - explicar por que un evento reciente se asocia o no a un problema activo dentro del Context Builder
 - mostrar faltantes contextualizados por atencion ambulatoria, hospitalizada o desconocida
@@ -127,11 +128,11 @@ Orden obligatorio de ejecucion:
 
 1. Backend schemas + timeline de lectura. Estado: implementado.
 2. Busqueda deterministica. Estado: implementado.
-3. Datos graficables. Estado: pendiente.
+3. Datos graficables. Estado: implementado.
 4. Correlacion deterministica por presets. Estado: pendiente.
-5. OpenAPI y cliente web. Estado: OpenAPI timeline/search implementado; cliente web pendiente.
+5. OpenAPI y cliente web. Estado: OpenAPI timeline/search/chart implementado; cliente web pendiente.
 6. UI minima solo si el backend esta verde. Estado: pendiente.
-7. Tests y documentacion canonica. Estado: tests API timeline/search implementados.
+7. Tests y documentacion canonica. Estado: tests API timeline/search/chart implementados.
 
 Entregables backend permitidos:
 
@@ -157,6 +158,10 @@ Implementado inicial:
 - busqueda deterministica en dominios existentes con `results`, `missing_data`, `warnings`, `limit`, `has_more` y `applies_changes=false`
 - cada resultado declara snippet, campos coincidentes y ruta fuente existente para inspeccion humana
 - probado con usuario `solo_lectura`, limite, vacio, orden temporal y sin crear auditoria por lectura
+- `POST /api/v1/patients/{patient_id}/assistant/chart`
+- respuesta con series graficables simples, puntos numericos, fuente, limite, faltantes y `applies_changes=false`
+- lee signos vitales estructurados y eventos `clinical_events.exam_result` con payload numerico, sin migrar laboratorio historico
+- probado con usuario `solo_lectura`, limite, series no soportadas, vacio y sin crear auditoria por lectura
 
 Alcance por endpoint:
 
@@ -165,7 +170,7 @@ Alcance por endpoint:
 - `search`: buscar texto deterministico en SOAP, eventos, problemas,
   medicamentos, alergias, encuentros y notas textuales. Estado: implementado.
 - `chart`: devolver series de signos vitales, examenes desde eventos
-  `exam_result` y marcas de medicamentos, como datos listos para UI.
+  `exam_result` y marcas de medicamentos, como datos listos para UI. Estado: implementado inicial para signos vitales y examenes numericos; marcas de medicamentos quedan pendientes.
 - `correlate`: describir relaciones temporales con presets cerrados
   `fever_infection`, `renal_medications`, `respiratory_oxygen`,
   `hemoglobin_bleeding` y `medication_changes`.

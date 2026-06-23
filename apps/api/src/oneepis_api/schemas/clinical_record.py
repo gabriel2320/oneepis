@@ -36,6 +36,10 @@ from oneepis_api.schemas.clinical_record_contracts.ai import (
     EventProposalsFromEntryResponse,
 )
 from oneepis_api.schemas.clinical_record_contracts.assistant import (
+    AssistantChartPoint,
+    AssistantChartRequest,
+    AssistantChartResponse,
+    AssistantChartSeries,
     AssistantSearchResponse,
     AssistantSearchResult,
     AssistantTimelineItem,
@@ -85,6 +89,10 @@ __all__ = [
     "AllergyCreate",
     "AllergyRead",
     "AllergyUpdate",
+    "AssistantChartPoint",
+    "AssistantChartRequest",
+    "AssistantChartResponse",
+    "AssistantChartSeries",
     "AssistantSearchResponse",
     "AssistantSearchResult",
     "AssistantTimelineItem",

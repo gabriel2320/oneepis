@@ -349,3 +349,161 @@ def test_assistant_search_unknown_patient_returns_404(
     )
 
     assert response.status_code == 404
+
+
+def test_assistant_chart_returns_vitals_and_exam_series_without_writing(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Assistant", last_name="Chart")
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T10:00:00Z",
+        heart_rate_bpm=72,
+        oxygen_saturation_pct="96.0",
+    )
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T11:00:00Z",
+        heart_rate_bpm=80,
+        oxygen_saturation_pct="98.0",
+    )
+    first_exam = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-20T09:00:00Z",
+            "summary": "Creatinina basal",
+            "source_type": "manual",
+            "payload": {"code": "creatinina", "value": "1.1", "unit": "mg/dL"},
+        },
+    )
+    second_exam = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-20T12:00:00Z",
+            "summary": "Creatinina control",
+            "source_type": "manual",
+            "payload": {"results": [{"code": "creatinina", "value": "1.6", "unit": "mg/dL"}]},
+        },
+    )
+    assert first_exam.status_code == 201
+    assert second_exam.status_code == 201
+    before_audit = audit_events(client, auth, patient_id)
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=auth,
+        json={"series": ["heart_rate_bpm", "exam:creatinina"], "limit": 10},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["patient_id"] == patient_id
+    assert payload["applies_changes"] is False
+    assert payload["missing_data"] == []
+    assert payload["has_more"] is False
+    series_by_key = {series["key"]: series for series in payload["series"]}
+    assert set(series_by_key) == {"heart_rate_bpm", "exam:creatinina"}
+    heart_points = series_by_key["heart_rate_bpm"]["points"]
+    assert [point["value"] for point in heart_points] == [72.0, 80.0]
+    assert heart_points[0]["source_path"].endswith("/vital-signs/" + heart_points[0]["source_id"])
+    exam_series = series_by_key["exam:creatinina"]
+    assert exam_series["unit"] == "mg/dL"
+    assert [point["value"] for point in exam_series["points"]] == [1.1, 1.6]
+    assert exam_series["points"][0]["source_type"] == "clinical_event"
+    after_audit = audit_events(client, auth, patient_id)
+    assert after_audit == before_audit
+
+
+def test_assistant_chart_allows_readonly_user(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Chart", last_name="Lector")
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T10:00:00Z",
+        heart_rate_bpm=72,
+    )
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=readonly_auth,
+        json={"series": ["heart_rate_bpm"]},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["series"][0]["points"][0]["value"] == 72.0
+
+
+def test_assistant_chart_reports_missing_data_limit_and_unsupported_series(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Chart", last_name="Limit")
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T10:00:00Z",
+        heart_rate_bpm=72,
+    )
+    create_vitals(
+        client,
+        auth,
+        patient_id,
+        measured_at="2026-06-20T11:00:00Z",
+        heart_rate_bpm=80,
+    )
+
+    limited_response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=auth,
+        json={"series": ["heart_rate_bpm", "no_soportada"], "limit": 1},
+    )
+    empty_patient_id = create_patient(client, auth, first_name="Chart", last_name="Empty")
+    empty_response = client.post(
+        f"/api/v1/patients/{empty_patient_id}/assistant/chart",
+        headers=auth,
+        json={},
+    )
+
+    assert limited_response.status_code == 200
+    limited_payload = limited_response.json()
+    assert limited_payload["has_more"] is True
+    assert "Series no soportadas: no_soportada." in limited_payload["warnings"]
+    assert "Datos graficables limitados a 1 registros por dominio." in limited_payload["warnings"]
+    assert empty_response.status_code == 200
+    empty_missing = empty_response.json()["missing_data"]
+    assert "No hay signos vitales estructurados para graficar." in empty_missing
+    assert "No hay eventos exam_result estructurados para graficar." in empty_missing
+    assert "No hay datos numericos graficables para las series solicitadas." in empty_missing
+
+
+def test_assistant_chart_unknown_patient_returns_404(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+
+    response = client.post(
+        "/api/v1/patients/11111111-1111-4111-8111-111111111111/assistant/chart",
+        headers=auth,
+        json={},
+    )
+
+    assert response.status_code == 404
