@@ -225,12 +225,16 @@ test("ambulatory summary renders real read-only patient context", async ({ page 
   await expect(page.getByRole("link", { name: "Abrir atencion" })).toBeVisible();
 });
 
-test("prepared screens declare pending status", async ({ page }) => {
+test("patient documents render paper index and blocked future documents", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/documentos`);
-  await expect(
-    page.getByText("Pantalla preparada: documentos sin uploads reales"),
-  ).toBeVisible();
-  await expect(page.getByText("no simula flujo productivo")).toBeVisible();
+  await expect(page.getByText("Documentos y papel")).toBeVisible();
+  await expect(page.getByText("Ficha clinica")).toBeVisible();
+  await expect(page.getByText("Resumen paciente")).toBeVisible();
+  await expect(page.getByText("Control clinico demo")).toBeVisible();
+  await expect(page.getByText("Ingreso administrativo demo")).toBeVisible();
+  await expect(page.getByText("Receta valida")).toBeVisible();
+  await expect(page.getByText("Adjuntos externos", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver papel" }).first()).toBeVisible();
 });
 
 test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {

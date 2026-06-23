@@ -84,7 +84,7 @@ export const screenCapabilities: ScreenCapability[] = [
   capability("/pacientes/[patientId]/alergias", "Seguridad/auditoria", "paciente", "completa", "alergias activas", "none", "lectura paciente", "none", "none", AI.read, "alertas criticas mas amplias"),
   capability("/pacientes/[patientId]/alergias/nueva", "Seguridad/auditoria", "acto clinico", "completa", "alergias activas", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "reacciones adversas futuras"),
   capability("/pacientes/[patientId]/auditoria", "Seguridad/auditoria", "seguimiento", "completa", "audit events", "none", "lectura auditoria", "none", "none", AI.none, "auditoria de accesos futura"),
-  capability("/pacientes/[patientId]/documentos", "Documentos/papel", "documento", "preparada", "UI preparada", "none", "lectura paciente", "none", "none", AI.none, "documentos reales y adjuntos"),
+  capability("/pacientes/[patientId]/documentos", "Documentos/papel", "documento", "completa", "record + print routes", "none", "lectura paciente", "none", "carta", AI.none, "adjuntos externos y consentimientos futuros"),
   capability("/pacientes/[patientId]/encuentros", "Episodios", "episodio", "completa", "API encuentros", "none", "lectura paciente", "none", "none", AI.read, "episodio mas explicito"),
   capability("/pacientes/[patientId]/encuentros/nuevo", "Episodios", "episodio", "completa", "API encuentros", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "admision/preconsulta futura"),
   capability("/pacientes/[patientId]/estado", "Nucleo paciente", "seguimiento", "completa", "API paciente", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "estados clinicos mas finos"),
