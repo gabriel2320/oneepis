@@ -62,6 +62,16 @@ def test_assistant_timeline_reads_longitudinal_sources_without_writing(
         heart_rate_bpm=76,
         oxygen_saturation_pct="98.0",
     )
+    create_lab_panel(
+        client,
+        auth,
+        patient_id,
+        panel_name="Perfil renal timeline",
+        result_name="Creatinina",
+        code="creatinina",
+        value="1.20",
+        unit="mg/dL",
+    )
     create_problem(client, auth, patient_id, title="Hipertension arterial", code="I10")
     medication_response = client.post(
         f"/api/v1/patients/{patient_id}/medications",
@@ -106,6 +116,7 @@ def test_assistant_timeline_reads_longitudinal_sources_without_writing(
         "medication",
         "problem",
         "allergy",
+        "lab_result",
     }.issubset(set(item_types))
     occurred_values = [item["occurred_at"] for item in payload["items"]]
     assert occurred_values == sorted(occurred_values, reverse=True)
@@ -114,6 +125,11 @@ def test_assistant_timeline_reads_longitudinal_sources_without_writing(
     event_item = next(item for item in payload["items"] if item["item_type"] == "clinical_event")
     assert event_item["summary"] == "Evento longitudinal relevante"
     assert event_item["source_path"].endswith("/clinical-events/" + event_item["item_id"])
+    lab_item = next(item for item in payload["items"] if item["item_type"] == "lab_result")
+    assert lab_item["label"] == "Creatinina"
+    assert "Perfil renal timeline" in lab_item["summary"]
+    assert "/lab-panels/" in lab_item["source_path"]
+    assert lab_item["source_path"].endswith("/results/" + lab_item["item_id"])
     after_audit = audit_events(client, auth, patient_id)
     assert after_audit == before_audit
 

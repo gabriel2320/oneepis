@@ -171,7 +171,7 @@ Implementado inicial:
 Alcance por endpoint:
 
 - `timeline`: unir encuentros, evoluciones, eventos, signos vitales,
-  medicamentos activos, problemas activos, alergias e indicaciones si existen.
+  medicamentos activos, problemas activos, alergias, `lab_results` activos e indicaciones si existen.
 - `search`: buscar texto deterministico en SOAP, eventos, problemas,
   medicamentos, alergias, encuentros, notas textuales y `lab_results`.
   Estado: implementado.

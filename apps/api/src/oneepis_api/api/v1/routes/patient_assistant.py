@@ -34,6 +34,7 @@ from oneepis_api.schemas.clinical_record import (
     AssistantTimelineResponse,
 )
 
+from .patient_assistant_lab_timeline import fetch_lab_results_for_timeline, lab_timeline_items
 from .patient_assistant_labs import (
     exam_chart_series,
     exam_events_matching,
@@ -130,6 +131,7 @@ def get_assistant_timeline(
             .limit(query_limit)
         )
     )
+    lab_results = fetch_lab_results_for_timeline(session, patient_id, query_limit)
     items = [
         *_encounter_items(patient_id, encounters),
         *_entry_items(patient_id, entries),
@@ -138,11 +140,21 @@ def get_assistant_timeline(
         *_medication_items(patient_id, medications),
         *_problem_items(patient_id, problems),
         *_allergy_items(patient_id, allergies),
+        *lab_timeline_items(patient_id, lab_results),
     ]
     items.sort(key=lambda item: item.occurred_at, reverse=True)
     has_more = len(items) > limit or any(
         len(domain_items) > limit
-        for domain_items in (encounters, entries, events, vitals, medications, problems, allergies)
+        for domain_items in (
+            encounters,
+            entries,
+            events,
+            vitals,
+            medications,
+            problems,
+            allergies,
+            lab_results,
+        )
     )
     return AssistantTimelineResponse(
         patient_id=patient_id,

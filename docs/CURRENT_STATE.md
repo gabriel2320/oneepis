@@ -34,7 +34,7 @@ Estado real al 2026-06-23:
 - el panel Assistant Read expone badges de solo lectura, fuentes inspeccionables y ausencia de IA externa
 - no se autoriza escritura clinica desde el programa
 - el timeline assistant es solo lectura, no crea auditoria ni escribe ficha
-- el timeline devuelve fuentes, limites y faltantes por dominio
+- el timeline devuelve fuentes, limites y faltantes por dominio, incluyendo `lab_results` activos
 - la busqueda assistant es deterministica, solo lectura y devuelve fuentes/snippets
 - chart assistant devuelve series graficables simples, no imagenes ni graficos acoplados
 - correlate assistant devuelve relaciones descriptivas por presets cerrados, con fuentes y faltantes
