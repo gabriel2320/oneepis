@@ -7,6 +7,7 @@ import { Activity, Clock3, GitCompare, RefreshCw, Search } from "lucide-react";
 import {
   CorrelationList,
   DataFootnotes,
+  LabPanelList,
   PanelState,
   SearchList,
   SeriesChart,
@@ -14,6 +15,7 @@ import {
   TimelineList,
 } from "@/components/clinical/ai-chart/assistant-read-sections";
 import { EmptyState } from "@/components/clinical/states";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +23,7 @@ import {
   correlateAssistant,
   getAssistantChart,
   getAssistantTimeline,
+  listLabPanels,
   searchAssistantTimeline,
 } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
@@ -56,6 +59,11 @@ export function AssistantReadPanel({ patientId }: AssistantReadPanelProps) {
     queryFn: () => correlateAssistant(patientId, { limit: 80 }),
     enabled: Boolean(patientId) && !DEMO_MODE,
   });
+  const labPanelsQuery = useQuery({
+    queryKey: ["assistant-read", "lab-panels", patientId],
+    queryFn: () => listLabPanels(patientId, 3),
+    enabled: Boolean(patientId) && !DEMO_MODE,
+  });
   const chartSeries = useMemo(() => chartQuery.data?.series ?? [], [chartQuery.data?.series]);
   const primaryChartSeries = useMemo(
     () => chartSeries.find((series) => series.points.length >= 2) ?? chartSeries[0],
@@ -79,6 +87,11 @@ export function AssistantReadPanel({ patientId }: AssistantReadPanelProps) {
           <p className="mt-1 text-xs text-muted-foreground">
             Lectura longitudinal sin escritura clinica.
           </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge variant="safe">Solo lectura</Badge>
+            <Badge variant="outline">Fuentes inspeccionables</Badge>
+            <Badge variant="outline">Sin IA externa</Badge>
+          </div>
         </div>
         <Button
           type="button"
@@ -88,6 +101,7 @@ export function AssistantReadPanel({ patientId }: AssistantReadPanelProps) {
             void timelineQuery.refetch();
             void chartQuery.refetch();
             void correlateQuery.refetch();
+            void labPanelsQuery.refetch();
             if (submittedSearch.length >= 2) {
               void searchQuery.refetch();
             }
@@ -190,6 +204,22 @@ export function AssistantReadPanel({ patientId }: AssistantReadPanelProps) {
               missingData={chartQuery.data?.missing_data ?? []}
             />
           </PanelState>
+          <div className="mt-4">
+            <p className="text-sm font-medium">Examenes estructurados recientes</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Lectura de paneles activos/corregidos; las correcciones no alimentan tendencias.
+            </p>
+            <div className="mt-2">
+              <PanelState
+                isLoading={labPanelsQuery.isLoading}
+                isError={labPanelsQuery.isError}
+                empty={labPanelsQuery.data?.length === 0}
+                emptyTitle="Sin examenes estructurados"
+              >
+                <LabPanelList panels={labPanelsQuery.data ?? []} />
+              </PanelState>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="correlate">

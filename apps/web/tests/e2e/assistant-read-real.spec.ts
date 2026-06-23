@@ -5,6 +5,8 @@ const eventId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const entryId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const vitalId = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const medicationId = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+const labPanelId = "ffffffff-ffff-4fff-8fff-ffffffffffff";
+const labResultId = "99999999-9999-4999-8999-999999999999";
 
 test.skip(
   process.env.NEXT_PUBLIC_DEMO_MODE !== "false",
@@ -22,6 +24,9 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await expect(page.getByRole("heading", { name: "AI-Chart Core" })).toBeVisible();
   await expect(page.getByText("Assistant Read")).toBeVisible();
   await expect(page.getByText("Assistant Read no disponible en demo")).not.toBeVisible();
+  await expect(page.getByText("Solo lectura")).toBeVisible();
+  await expect(page.getByText("Fuentes inspeccionables")).toBeVisible();
+  await expect(page.getByText("Sin IA externa")).toBeVisible();
   await expect(page.getByText("Control longitudinal real").first()).toBeVisible();
   await expect(page.getByText("Fuente: clinical_entries")).toBeVisible();
 
@@ -35,6 +40,10 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await expect(page.getByText("Frecuencia cardiaca").first()).toBeVisible();
   await expect(page.getByText("84 lpm").first()).toBeVisible();
   await expect(page.getByText("Limite aplicado: 80")).toBeVisible();
+  await expect(page.getByText("Examenes estructurados recientes")).toBeVisible();
+  await expect(page.getByText("Perfil renal")).toBeVisible();
+  await expect(page.getByText("Creatinina")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Abrir fuente lab_result" })).toBeVisible();
 
   await page.getByRole("tab", { name: /Correlacion/ }).click();
   await expect(page.getByText("Respiratorio / oxigenacion")).toBeVisible();
@@ -46,6 +55,7 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   expect(calls.some((url) => url.includes("/assistant/search"))).toBe(true);
   expect(calls.some((url) => url.includes("/assistant/chart"))).toBe(true);
   expect(calls.some((url) => url.includes("/assistant/correlate"))).toBe(true);
+  expect(calls.some((url) => url.includes("/lab-panels"))).toBe(true);
 });
 
 async function mockClinicalApi(page: Page, calls: string[]) {
@@ -94,6 +104,10 @@ async function fulfillApi(route: Route) {
   }
   if (path === `/api/v1/patients/${patientId}/assistant/correlate`) {
     await route.fulfill({ json: assistantCorrelation, headers: corsHeaders });
+    return;
+  }
+  if (path === `/api/v1/patients/${patientId}/lab-panels`) {
+    await route.fulfill({ json: labPanels, headers: corsHeaders });
     return;
   }
   await route.fulfill({
@@ -281,3 +295,38 @@ const assistantCorrelation = {
   has_more: false,
   applies_changes: false,
 };
+
+const labPanels = [
+  {
+    id: labPanelId,
+    patient_id: patientId,
+    encounter_id: null,
+    occurred_at: "2026-06-20T08:30:00Z",
+    panel_name: "Perfil renal",
+    source_type: "manual",
+    source_ref: null,
+    status: "active",
+    summary: "Control de funcion renal.",
+    created_by: "playwright.dev",
+    results: [
+      {
+        id: labResultId,
+        panel_id: labPanelId,
+        patient_id: patientId,
+        code: "creatinina",
+        name: "Creatinina",
+        value: "1.10",
+        numeric_value: "1.10",
+        unit: "mg/dL",
+        reference_range: "0.7-1.3",
+        flag: "normal",
+        status: "active",
+        notes: null,
+        created_at: createdAt,
+        updated_at: createdAt,
+      },
+    ],
+    created_at: createdAt,
+    updated_at: createdAt,
+  },
+];

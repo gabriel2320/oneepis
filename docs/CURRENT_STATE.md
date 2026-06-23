@@ -31,6 +31,7 @@ Estado real al 2026-06-23:
 - existe `POST /api/v1/patients/{patient_id}/assistant/correlate`
 - no existe todavia ruta `/pacientes/[patientId]/contexto`
 - existe panel web minimo `Assistant Read` dentro de `/pacientes/[patientId]/ai-chart`
+- el panel Assistant Read expone badges de solo lectura, fuentes inspeccionables y ausencia de IA externa
 - no se autoriza escritura clinica desde el programa
 - el timeline assistant es solo lectura, no crea auditoria ni escribe ficha
 - el timeline devuelve fuentes, limites y faltantes por dominio
@@ -132,12 +133,14 @@ Assistant Read Layer:
 - declara dominios faltantes y limite aplicado
 - no escribe ficha, no audita modificacion y no depende de Ollama
 - UI minima integrada en AI-Chart con tabs Timeline, Buscar, Series y Correlacion
+- el tab Series muestra fuentes accionables y lectura acotada de paneles de laboratorio recientes
 - pendiente: decidir si `/pacientes/[patientId]/contexto` aporta valor como vista dedicada sin crear dashboard
 
 Laboratorio estructurado:
 
 - existe entidad minima `LabPanel`/`LabResult` para paneles y resultados de examenes
 - no existe UI amplia ni navegacion propia de laboratorio todavia
+- existe lectura minima de paneles/resultados recientes dentro de Assistant Read, sin escritura ni carga masiva
 - `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
 - `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
 - lectura usa permisos de ficha, incluyendo `solo_lectura`
@@ -253,7 +256,7 @@ Release gates demo:
 - Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
 - Validacion reciente local Assistant Read UI: typecheck/lint web y contrato cliente manual actualizado.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Siguiente paso recomendado: validar Assistant Read y laboratorio estructurado minimo con walkthrough humano antes de agregar UI amplia.
+- Siguiente paso recomendado: validar Assistant Read y laboratorio estructurado minimo con walkthrough humano de `v0.4-assistant-read` antes de agregar UI amplia.
 - Siguiente bloque de producto despues del contrato de laboratorio: UI minima de lectura/carga controlada o importador, pero solo si mantiene permisos, auditoria, OpenAPI y compatibilidad legacy.
 
 ## Historial

@@ -38,6 +38,7 @@ import type {
   EventProposalFromEntryRequest,
   EventProposalsFromEntryResponse,
   AIStreamEvent,
+  LabPanel,
   Medication,
   MedicationCreate,
   MedicationUpdate,
@@ -126,6 +127,11 @@ export function correlateAssistant(
       body: JSON.stringify(payload),
     },
   );
+}
+
+export function listLabPanels(patientId: string, limit = 3) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  return apiFetch<LabPanel[]>(`/api/v1/patients/${patientId}/lab-panels?${params.toString()}`);
 }
 
 export function draftSoapFromEvents(patientId: string, payload: DraftSoapFromEventsRequest) {

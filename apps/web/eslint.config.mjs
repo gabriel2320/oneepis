@@ -8,6 +8,8 @@ const eslintConfig = [
       "next-env.d.ts",
       "node_modules/**",
       "out/**",
+      "playwright-report/**",
+      "test-results/**",
     ],
   },
   ...nextVitals,

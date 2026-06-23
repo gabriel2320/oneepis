@@ -94,6 +94,7 @@ AI-Chart sin inflar `patient-ai-chart-pages.tsx`.
 Trabajo permitido inmediato:
 
 - construir Assistant Read Layer como micro-PR de solo lectura, sin chat libre ni RAG
+- mostrar lectura minima de laboratorio estructurado dentro de Assistant Read, sin pantalla propia ni carga masiva
 - explicar acciones bloqueadas por rol, modo demo o falta de revision humana
 - mostrar estado de propuesta y destino del patch antes de confirmar
 - mejorar textos de auditoria y trazabilidad en pantallas existentes

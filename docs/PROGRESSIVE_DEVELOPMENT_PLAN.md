@@ -161,7 +161,7 @@ Implementado inicial:
 - probado con usuario `solo_lectura`, limite, vacio, orden temporal y sin crear auditoria por lectura
 - `POST /api/v1/patients/{patient_id}/assistant/chart`
 - respuesta con series graficables simples, puntos numericos, fuente, limite, faltantes y `applies_changes=false`
-- lee signos vitales estructurados y eventos `clinical_events.exam_result` con payload numerico, sin migrar laboratorio historico
+- lee signos vitales estructurados, `lab_results` activos y eventos `clinical_events.exam_result` con payload numerico, sin migrar laboratorio historico
 - probado con usuario `solo_lectura`, limite, series no soportadas, vacio y sin crear auditoria por lectura
 - `POST /api/v1/patients/{patient_id}/assistant/correlate`
 - respuesta con correlaciones descriptivas por presets cerrados, evidencia fuente, faltantes, limite y `applies_changes=false`
@@ -174,8 +174,8 @@ Alcance por endpoint:
   medicamentos activos, problemas activos, alergias e indicaciones si existen.
 - `search`: buscar texto deterministico en SOAP, eventos, problemas,
   medicamentos, alergias, encuentros y notas textuales. Estado: implementado.
-- `chart`: devolver series de signos vitales, examenes desde eventos
-  `exam_result` y marcas de medicamentos, como datos listos para UI. Estado: implementado inicial para signos vitales y examenes numericos; marcas de medicamentos quedan pendientes.
+- `chart`: devolver series de signos vitales, examenes desde `lab_results`
+  activos y eventos legacy `exam_result`, y marcas de medicamentos como datos listos para UI. Estado: implementado inicial para signos vitales y examenes numericos; marcas de medicamentos quedan pendientes.
 - `correlate`: describir relaciones temporales con presets cerrados
   `fever_infection`, `renal_medications`, `respiratory_oxygen`,
   `hemoglobin_bleeding` y `medication_changes`. Estado: implementado.
@@ -192,6 +192,7 @@ Implementado UI inicial:
 - panel `Assistant Read` integrado en `/pacientes/[patientId]/ai-chart`
 - tabs compactos: Timeline, Buscar, Series y Correlacion
 - cliente web tipado para timeline/search/chart/correlate
+- el tab Series muestra fuentes accionables y una lectura minima de paneles de laboratorio recientes, sin crear navegacion nueva
 - no se crea ruta `/contexto`, dashboard ni escritura clinica nueva
 
 Criterios de aceptacion:
@@ -211,7 +212,7 @@ P0 completado: PR #1 fue revisado en modo code review, corregido en su rama, val
 
 P1 activo permitido: Assistant Read Layer, solo lectura. Debe entregar timeline longitudinal, busqueda clinica, series graficables simples y correlacion explicable. Todo output debe exponer fuente, limite/faltante y accion humana opcional. No chat libre, no RAG documental amplio, no IA externa y no escritura automatica.
 
-P2 pendiente: examenes/laboratorio estructurados. Mantener `clinical_events.exam_result` como compatibilidad, pero disenar entidad dedicada antes de graficar tendencias clinicas serias. El primer PR debe ser diseno + contrato minimo: migracion Alembic, permisos, auditoria si escribe, OpenAPI, test API y lectura puente. No migrar historicos automaticamente en el primer paso.
+P2 implementado minimo: examenes/laboratorio estructurados ya tienen entidad dedicada, migracion Alembic, permisos, auditoria si escribe, OpenAPI, test API y lectura puente. Mantener `clinical_events.exam_result` como compatibilidad legacy, no migrar historicos automaticamente y no ampliar UI mas alla de lectura/correccion controlada hasta cerrar `v0.4-assistant-read`.
 
 P3 pendiente: accesibilidad, performance y observabilidad. Agregar checklist vivo en docs existentes cuando empiece el bloque. Accesibilidad: teclado, foco visible, contraste, labels y Playwright + axe. Performance: dataset sintetico grande, limites/paginacion por dominio e indices revisados por query real. Observabilidad: logs sin PHI, correlation ID frontend/backend, health checks utiles y errores trazables.
 
