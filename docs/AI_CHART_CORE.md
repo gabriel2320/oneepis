@@ -66,7 +66,7 @@ Estado actual:
 
 Siguiente mejora permitida:
 
-- Assistant Read Layer de solo lectura o mejoras puntuales de explicabilidad en Fase 2, sin agregar chat libre, RAG ni IA externa.
+- Mantener AI-Chart estable mientras `PROG-PATIENT-CORE-01` completa nucleo paciente tradicional; solo se permiten mejoras puntuales de explicabilidad, sin agregar chat libre, RAG, IA externa ni nueva superficie IA.
 
 ## AI Bridge
 

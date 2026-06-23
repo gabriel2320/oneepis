@@ -52,9 +52,9 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes` | Nucleo paciente | paciente | completa | API pacientes / demo | no | lectura paciente | no | no | no | buscador universal avanzado y ultimos abiertos |
 | `/pacientes/nuevo` | Nucleo paciente | paciente | completa | API pacientes | si | escritura paciente | si | no | no | identidad administrativa mas completa |
 | `/pacientes/[patientId]` | Nucleo paciente | paciente | completa | redirect App Router | no | lectura paciente | no | no | no | mantener como entrada a ficha |
-| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente | no | lectura paciente | no | carta | lectura/pendientes | antecedentes pendientes; resultados y timeline con lectura minima |
+| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente | no | lectura paciente | no | carta | lectura/pendientes | antecedentes, resultados y timeline existen como lectura minima; version estructurada avanzada pendiente |
 | `/pacientes/[patientId]/estado` | Nucleo paciente | seguimiento | completa | API paciente | si | medico/admin/dev | si | no | no | estados clinicos mas finos |
-| `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | si | escritura clinica | si | no | lectura contextual | linea de tiempo completa futura |
+| `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | si | escritura clinica | si | no | lectura contextual | curaduria minima de antecedentes; clasificacion estructurada futura |
 | `/pacientes/[patientId]/problemas` | Nucleo paciente | paciente | completa | problemas activos | no | lectura paciente | no | no | lectura contextual | diagnosticos historicos/CIE-10 futuros |
 | `/pacientes/[patientId]/problemas/nuevo` | Nucleo paciente | acto clinico | completa | problemas activos | si | medico/admin/dev | si | no | no | clasificacion diagnostica futura |
 | `/pacientes/[patientId]/alergias` | Seguridad/auditoria | paciente | completa | alergias activas | no | lectura paciente | no | no | lectura contextual | alertas criticas mas amplias |
@@ -70,16 +70,17 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes/[patientId]/evoluciones/desde-eventos` | Episodios | acto clinico | completa | eventos + AI-Chart | si | medico/admin/dev + permiso IA | si | carta | borrador revisable | mantener como borrador revisado |
 | `/pacientes/[patientId]/documentos` | Documentos/papel | documento | preparada | UI preparada | no | lectura paciente | no | no | no | documentos reales, adjuntos, consentimientos |
 | `/pacientes/[patientId]/ia` | IA clinica | seguimiento | completa | AI status/sugerencias | no | lectura paciente + permiso IA | no | no | apoyo contextual | IA como apoyo, no modulo central |
-| `/pacientes/[patientId]/ai-chart` | IA clinica | acto clinico | completa | AI-Chart + Assistant Read | si via `ClinicalPatch` | medico/admin/dev + permiso IA | si si confirma | SOAP carta | lectura, series, borrador | cerrar `v0.4-assistant-read` |
+| `/pacientes/[patientId]/ai-chart` | IA clinica | acto clinico | completa | AI-Chart + Assistant Read | si via `ClinicalPatch` | medico/admin/dev + permiso IA | si si confirma | SOAP carta | lectura, series, borrador | mantener `v0.4-assistant-read` cerrado; no expandir IA antes de nucleo paciente |
 | `/pacientes/[patientId]/auditoria` | Seguridad/auditoria | seguimiento | completa | audit events | no | lectura auditoria | no | no | no | auditoria de accesos futura |
 | `/consulta` | Ambulatorio | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
 | `/consulta/agenda` | Ambulatorio | episodio | preparada | UI preparada | no | lectura paciente | no | no | no | agenda productiva |
-| `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP | si | medico/admin/dev | si | no | borrador revisable | cierre de consulta y diagnosticos finales |
+| `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP | si | medico/admin/dev | si | no | borrador revisable | cierre administrativo minimo implementado; diagnosticos finales futuros |
 | `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | preparada | UI preparada | no | lectura paciente | no | no | lectura resumida | resumen ambulatorio real si aporta sobre ficha |
 | `/hospitalizacion` | Hospitalizacion | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
 | `/hospitalizacion/camas` | Hospitalizacion | episodio | completa | hospitalizacion + camas | si | medico/admin/dev | si | no | no | censo por servicio/equipo |
 | `/hospitalizacion/camas/nueva` | Hospitalizacion | episodio | completa | camas | si | medico/admin/dev | si | no | no | administracion institucional futura |
 | `/hospitalizacion/rondas` | Hospitalizacion | seguimiento | completa | ingresos + camas + hojas | no | lectura paciente | no | carta | lectura contextual | read-model backend si escala |
+| `/hospitalizacion/pacientes/[patientId]/ingreso` | Hospitalizacion | documento | completa | `clinical_entries(kind=intake)` | si | medico/admin/dev | si | carta | borrador revisable | firma real y cierre legal futuros |
 | `/hospitalizacion/pacientes/[patientId]/hoja-diaria` | Hospitalizacion | acto clinico | completa | hojas diarias | si | medico/admin/dev | si | carta | lectura contextual | evolucion hospitalaria por problema |
 | `/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar` | Hospitalizacion | acto clinico | completa | hojas diarias | si | medico/admin/dev | si | carta | no | firma/bloqueo legal futuro |
 | `/hospitalizacion/pacientes/[patientId]/indicaciones` | Hospitalizacion | acto clinico | completa | indicaciones draft | si | medico/admin/dev | si | carta | apoyo no ejecutable | orden ejecutable y firma futura |
@@ -88,6 +89,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/print/pacientes/[patientId]/resumen` | Documentos/papel | documento | completa | record paciente | no | lectura paciente | no | carta | resumen no persistido | resumen IA no persistido |
 | `/print/pacientes/[patientId]/receta` | Documentos/papel | documento | bloqueada | politica receta | no | lectura paciente | no | bloqueado | no | receta valida requiere firma/folio |
 | `/print/hospitalizacion/rondas` | Documentos/papel | documento | completa | rondas lectura | no | lectura paciente | no | carta | no | read-model si escala |
+| `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` | Documentos/papel | documento | completa | `clinical_entries(kind=intake)` | no | lectura paciente | no | carta | no | firma real futura |
 | `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]` | Documentos/papel | documento | completa | hoja diaria | no | lectura paciente | no | carta | no | firma real futura |
 | `/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]` | Documentos/papel | documento | completa | indicacion draft | no | lectura paciente | no | carta | no | no equivale a orden firmada |
 
@@ -102,7 +104,7 @@ tener contrato minimo y flujo humano verificable.
 | Diagnosticos historicos/CIE-10 | Nucleo paciente | paciente | futura | problemas/diagnosticos | si | medico/admin/dev | si | no | lectura contextual | distinguir problema activo vs diagnostico |
 | Vacunas | Nucleo paciente | paciente | futura | entidad dedicada | si | medico/admin/dev | si | si si aplica | lectura contextual | permisos y esquema de inmunizacion |
 | Dispositivos/protesis/accesos | Nucleo paciente | paciente | futura | entidad dedicada o eventos | si | medico/admin/dev | si | no | lectura contextual | uso clinico claro |
-| Linea de tiempo completa | Nucleo paciente | seguimiento | futura | eventos + encuentros + documentos | no | lectura paciente | no | no | lectura contextual | partir leyendo fuentes existentes |
+| Linea de tiempo avanzada/filtrable | Nucleo paciente | seguimiento | futura | eventos + encuentros + documentos + resultados | no | lectura paciente | no | no | lectura contextual | la ficha ya tiene lectura minima; falta filtro, dominios y documentos |
 | Buscador longitudinal | Nucleo paciente | seguimiento | futura | eventos + entradas + resultados | no | lectura paciente | no | no | busqueda asistida | no duplicar Assistant Read |
 | Agenda productiva | Ambulatorio | episodio | futura | citas/appointments | si | admision/medico/admin/dev | si | no | no | modelo de cita y estados |
 | Admision/preconsulta ambulatoria | Ambulatorio | episodio | futura | encuentro + observaciones | si | admision/enfermeria/medico/admin/dev | si | no | faltantes | identidad, signos y pendientes |
@@ -111,13 +113,13 @@ tener contrato minimo y flujo humano verificable.
 | Receta valida | Ambulatorio/documentos | documento | bloqueada | receta firmada | si | medico/admin/dev futuro | si | carta/A5 | no | firma, folio, actor, fecha clinica y permisos |
 | Ordenes ambulatorias | Ordenes/resultados | acto clinico | futura | ordenes clinicas | si | medico/admin/dev | si | carta | apoyo no ejecutable | tipos de orden y estados |
 | Interconsultas/derivaciones | Ambulatorio/hospitalizacion | acto clinico | futura | solicitudes/respuestas | si | medico/admin/dev | si | carta | resumen/fuentes | pregunta clinica, prioridad, cierre |
-| Ingreso medico hospitalario | Hospitalizacion | documento | futura | documento ingreso | si | medico/admin/dev | si | carta | borrador revisable | encuentro hospitalario y firma/borrador |
+| Ingreso medico hospitalario firmado | Hospitalizacion | documento | futura | documento ingreso firmado | si | medico/admin/dev futuro | si | carta | borrador revisable | ingreso borrador ya existe; falta firma/cierre legal |
 | Evolucion hospitalaria por problema | Hospitalizacion | acto clinico | futura | clinical entries + encuentro | si | medico/admin/dev | si | carta | lectura contextual | no duplicar hoja diaria |
 | Evoluciones de enfermeria | Hospitalizacion | acto clinico | futura | notas enfermeria | si | enfermeria/admin/dev | si | carta si aplica | no generativa | permisos enfermeria y turno |
 | Kardex | Hospitalizacion | seguimiento | bloqueada | indicaciones ejecutables | si | enfermeria/medico/admin/dev futuro | si | no | no | requiere indicacion ejecutable y doble chequeo |
 | Administracion de medicamentos | Hospitalizacion | acto clinico | bloqueada | indicaciones ejecutables + MAR | si | enfermeria/admin/dev futuro | si | no | alertas/fuentes | seguridad medicamentosa y firma/ejecucion |
 | Balance hidrico | Hospitalizacion | seguimiento | futura | observaciones balance | si | enfermeria/admin/dev | si | no | no | periodos, totales y auditoria |
-| Resultados laboratorio UI | Ordenes/resultados | seguimiento | futura | `lab_panels`/`lab_results` | no inicialmente | lectura paciente | no | carta si aplica | series/fuentes | lectura sobria sin dashboard |
+| Resultados laboratorio UI amplia | Ordenes/resultados | seguimiento | futura | `lab_panels`/`lab_results` | no inicialmente | lectura paciente | no | carta si aplica | series/fuentes | la ficha/AI-Chart ya tienen lectura minima; falta vista amplia sin dashboard |
 | Imagenes e informes radiologicos | Ordenes/resultados | seguimiento | futura | informes/documentos | no inicialmente | lectura paciente | no | carta si aplica | resumen/fuentes | sin PACS real por ahora |
 | Microbiologia | Ordenes/resultados | seguimiento | futura | resultados estructurados | no inicialmente | lectura paciente | no | carta si aplica | series/fuentes | contrato antes de UI |
 | Anatomia patologica | Ordenes/resultados | seguimiento | futura | informes/documentos | no inicialmente | lectura paciente | no | carta si aplica | resumen/fuentes | contrato antes de UI |
@@ -135,18 +137,32 @@ tener contrato minimo y flujo humano verificable.
 
 | Bloque | Pantalla inicial | Contrato requerido | Criterio de promocion |
 | --- | --- | --- | --- |
-| Nucleo paciente faltante | antecedentes dentro de ficha o ruta dedicada minima | entidad/evento de antecedentes, permisos de escritura, OpenAPI y lectura en ficha | antecedentes visibles en ficha, auditados si escriben y sin duplicar eventos |
-| Linea de tiempo completa | vista longitudinal dentro de ficha | lectura compuesta de eventos, encuentros, entradas, documentos y resultados | filtros por dominio, fuente inspeccionable y sin escritura |
+| Nucleo paciente faltante | antecedentes dentro de ficha existente | reusar eventos/problemas/alergias/medicacion antes de entidad dedicada | antecedentes visibles en ficha como lectura minima, con faltantes declarados y sin duplicar eventos |
+| Linea de tiempo avanzada | vista longitudinal dentro de ficha | lectura compuesta de eventos, encuentros, entradas, documentos y resultados | filtros por dominio, fuente inspeccionable y sin escritura |
 | Diagnosticos historicos | extension de problemas | contrato que separe problema activo, diagnostico historico y codificacion | no mezclar estado activo con diagnostico cerrado |
 | Ambulatorio minimo | `/consulta/agenda` o admision/preconsulta | modelo de cita/estado o encuentro preconsulta | agenda deja de ser preparada solo si persiste estados reales y E2E |
 | Consulta completa | `/consulta/pacientes/[patientId]/atencion` | cierre de encuentro, diagnostico/plan y documento si aplica | SOAP/plan/cierre con auditoria y sin receta valida automatica |
-| Hospitalizacion critica | ingreso medico | documento de ingreso vinculado a encuentro hospitalario | papel carta, borrador/closed y auditoria |
+| Hospitalizacion critica | ingreso medico | `ClinicalEntry(kind=intake)` vinculado a encuentro hospitalario | papel carta, borrador y auditoria implementados; firma/cierre legal futuros |
 | Evolucion hospitalaria | hoja diaria/evolucion por problema | entradas por problema vinculadas a ingreso | no reemplazar firma real; mantener borrador trazable |
 | Alta/epicrisis | epicrisis borrador | documento egreso, estado, actor, fecha clinica y papel | salida imprimible como borrador no firmado |
-| Laboratorio UI minima | resultados en ficha o AI-Chart | reutilizar `lab_panels`/`lab_results` existentes | lectura sobria, fuentes por resultado y sin dashboard |
+| Laboratorio sobrio | resultados en ficha o AI-Chart | reutilizar `lab_panels`/`lab_results` existentes | lectura minima con fuente especifica por resultado; UI amplia queda futura y sin dashboard |
 | Imagenes/informes | informes como documentos clinicos | contrato documental o resultado estructurado minimo | no crear PACS ni visor complejo |
 | Seguridad clinica | alertas/riesgos | contrato por riesgo/evento y severidad | fuente, severidad, limite y accion humana |
 | Papel tradicional | ingreso, evolucion, indicacion, epicrisis | estado documental, actor/fecha si existen y ruta print | hoja carta, sin fallback silencioso y footer de desarrollo si no firmado |
+
+## Contratos minimos antes de UI amplia
+
+Estos contratos sirven como condicion de entrada para los proximos PRs y
+bloquean pantallas decorativas. Si una fila queda implementada parcialmente,
+el mapa debe declarar que sigue pendiente.
+
+| Superficie | Modelo minimo | API minima futura | UI minima permitida | Papel | Tests obligatorios |
+| --- | --- | --- | --- | --- | --- |
+| Agenda real | `ClinicalAppointment`: paciente, inicio, fin opcional, motivo, ubicacion, profesional/equipo opcional y estado `scheduled/check_in/in_progress/completed/cancelled/no_show` | listar por fecha/rango, crear, actualizar estado y listar por paciente | `/consulta/agenda` deja de ser preparada solo si muestra agenda persistida, estados reales y enlace a atencion | no aplica inicialmente | permisos, auditoria de escritura, E2E agenda -> paciente -> atencion |
+| Atencion ambulatoria cerrable | `ClinicalEncounter` existente con `status=completed`, `ended_at`, evolucion SOAP vinculada y plan documentado | implementado minimo reutilizando PATCH de encuentros y entradas clinicas existentes | `/consulta/pacientes/[patientId]/atencion` permite crear borrador y cerrar encuentro como no firmado | resumen carta futuro si produce documento | cierre exige actor, auditoria, no receta valida automatica y no orden ejecutable |
+| Ingreso medico hospitalario | `ClinicalEntry(kind=intake)` vinculado a encuentro `hospitalization`; no tabla nueva en primer PR | implementado reutilizando entradas clinicas vinculadas al ingreso | pantalla hospitalaria de ingreso como borrador editable, con secciones clinicas minimas | carta obligatoria de ingreso borrador | encuentro debe ser hospitalario, permisos medico/admin/dev, auditoria y print sin fallback |
+| Epicrisis borrador | `DischargeSummary` dedicada, porque es documento de egreso y no debe quedar escondida como nota generica | endpoints bajo paciente/encuentro hospitalario para crear, leer, actualizar y cerrar borrador | pantalla unica de epicrisis vinculada al ingreso, sin firma legal | carta obligatoria con estado draft/closed y footer desarrollo | no se puede cerrar sin ingreso hospitalario; auditoria before/after; print por ID estricto |
+| Papel tradicional | documento clinico con fuente, estado, actor y fecha clinica cuando existan | no API nueva salvo documento fuente; print lee por ID especifico | boton `Ver papel` solo si la fuente existe o declara `sin papel aun` | carta por defecto | smoke print, sin fallback al primer registro, estado visible y footer si no firmado |
 
 ## Reglas de promocion
 

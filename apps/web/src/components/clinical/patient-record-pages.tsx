@@ -8,6 +8,7 @@ import { AiSafetyPanel } from "@/components/clinical/ai-safety-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { FullTimelinePreview } from "@/components/clinical/full-timeline-preview";
 import { LabResultsPreview } from "@/components/clinical/lab-results-preview";
+import { PatientAntecedentsPreview } from "@/components/clinical/patient-antecedents-preview";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import {
   AllergyWorkspace,
@@ -129,6 +130,7 @@ function PatientSectionContent({
             >
               <ClinicalTimeline entries={record.recent_entries} />
             </ClinicalSectionCard>
+            <PatientAntecedentsPreview patientId={patientId} record={record} />
             <FullTimelinePreview patientId={patientId} />
           </div>
           <aside className="space-y-4">

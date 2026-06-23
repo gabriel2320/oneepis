@@ -97,12 +97,15 @@ OneEpis tiene Fase 1 cerrada a nivel de producto minimo y Fase 2 iniciada. PR #1
 - asociar evidencia a problemas por vocabulario clinico local explicable, no solo texto literal
 - usar codigos SNOMED CT y payloads derivados de repositorios terminologicos externos cuando existan
 
-El proximo trabajo puede preparar Fase 2 solo si conserva esta base. No agregar
-chat libre, RAG, documentos o IA externa como atajo.
+`PROG-ASSISTANT-READ-01` queda cerrado como release `v0.4-assistant-read`.
+El trabajo activo vuelve al nucleo clinico tradicional con
+`PROG-PATIENT-CORE-01`. No agregar chat libre, RAG, documentos, IA externa ni
+nuevas superficies IA como atajo.
 
 ## PROG-ASSISTANT-READ-01
 
-Estado: programa aceptado como extension cerrada de Fase 2, iniciado por micro-PR backend. La condicion P0 de gobernanza quedo cumplida con PR #1 mergeado y CI remoto verde.
+Estado: cerrado como release `v0.4-assistant-read` el 2026-06-23, con
+walkthrough humano aprobado, changelog y tag.
 
 Objetivo: convertir OneEpis en una ficha medica tradicional aumentada que puede
 leer, buscar, mostrar, graficar y correlacionar su propia historia longitudinal,
@@ -119,7 +122,7 @@ Decision de arquitectura:
 - todas las respuestas deben incluir fuentes y declarar faltantes o limites
 - la primera implementacion debe ser deterministica y funcionar con Ollama apagado
 
-Condicion de entrada:
+Condicion historica de entrada:
 
 - partir desde `main` posterior al merge `14552489b3dce69c16f4c5cd90c27afe7ffba698`
 - conservar verde `api`, `web`, `contracts-e2e` y contrato OpenAPI
@@ -196,7 +199,7 @@ Implementado UI inicial:
 - el tab Series muestra fuentes accionables y una lectura minima de paneles de laboratorio recientes, sin crear navegacion nueva
 - no se crea ruta `/contexto`, dashboard ni escritura clinica nueva
 
-Criterios de aceptacion:
+Criterios de aceptacion cumplidos:
 
 - el asistente lee historia longitudinal autorizada
 - la busqueda devuelve fuentes, no solo texto
@@ -207,27 +210,49 @@ Criterios de aceptacion:
 - los tests prueban solo lectura, permisos y faltantes
 - pasan `check:api`, `check:web`, `check:contract`, `check:e2e` y `check`
 
+## PROG-PATIENT-CORE-01
+
+Estado: activo.
+
+Objetivo: completar nucleo paciente tradicional sin crecer IA. El primer tramo
+debe usar fuentes existentes y pantallas actuales: ficha, eventos, problemas,
+alergias, medicacion, laboratorio y linea longitudinal.
+
+Trabajo permitido:
+
+- antecedentes clinicos de solo lectura dentro de ficha
+- curaduria minima de eventos como antecedentes, diagnosticos, procedimientos y planes
+- laboratorio sobrio con fuente especifica por panel/resultado
+- contratos futuros para agenda, ingreso medico, epicrisis y papel antes de UI amplia
+
+Fuera de alcance:
+
+- nueva IA, chat libre, RAG, IA externa o dashboard
+- pantalla dedicada de laboratorio
+- receta valida, firma, folio, orden ejecutable o administracion de medicamentos
+- agenda productiva, ingreso medico o epicrisis sin contrato backend previo
+
 ## Plan post-auditoria 2026-06-23
 
 P0 completado: PR #1 fue revisado en modo code review, corregido en su rama, validado local/remoto, marcado ready y mergeado por squash. No abrir otro PR grande de IA hasta que el siguiente bloque tenga alcance cerrado.
 
-P1 activo permitido: Assistant Read Layer, solo lectura. Debe entregar timeline longitudinal, busqueda clinica, series graficables simples y correlacion explicable. Todo output debe exponer fuente, limite/faltante y accion humana opcional. No chat libre, no RAG documental amplio, no IA externa y no escritura automatica.
+P1 completado: Assistant Read Layer, solo lectura. Entrega timeline longitudinal, busqueda clinica, series graficables simples y correlacion explicable. Todo output expone fuente, limite/faltante y accion humana opcional. No chat libre, no RAG documental amplio, no IA externa y no escritura automatica.
 
-P2 implementado minimo: examenes/laboratorio estructurados ya tienen entidad dedicada, migracion Alembic, permisos, auditoria si escribe, OpenAPI, test API y lectura puente. Mantener `clinical_events.exam_result` como compatibilidad legacy, no migrar historicos automaticamente y no ampliar UI mas alla de lectura/correccion controlada hasta cerrar `v0.4-assistant-read`.
+P2 implementado minimo: examenes/laboratorio estructurados ya tienen entidad dedicada, migracion Alembic, permisos, auditoria si escribe, OpenAPI, test API y lectura puente. Mantener `clinical_events.exam_result` como compatibilidad legacy, no migrar historicos automaticamente y no ampliar UI mas alla de lectura sobria hasta completar nucleo paciente.
 
 P3 iniciado como checklist vivo en `CURRENT_STATE`. Accesibilidad: teclado, foco visible, contraste, labels y Playwright + axe cuando el paquete quede incorporado. Performance: dataset sintetico grande, limites/paginacion por dominio e indices revisados por query real. Observabilidad: logs sin PHI, correlation ID frontend/backend, health checks utiles y errores trazables.
 
-P4 iniciado como release gate `v0.4-assistant-read`: tag, changelog, CI verde, checklist de demo y rollback. Ritual semanal: paciente, hospitalizacion, evolucion, signo vital, evento, laboratorio estructurado, AI-Chart/Assistant Read, impresion y auditoria; hallazgos van a `CURRENT_STATE` o issues, no a documentos dispersos.
+P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y walkthrough humano aprobado. Ritual semanal: paciente, hospitalizacion, evolucion, signo vital, evento, laboratorio estructurado, AI-Chart/Assistant Read, impresion y auditoria; hallazgos van a `CURRENT_STATE` o issues, no a documentos dispersos.
 
 ## Foco Inmediato
 
-Prioridad dentro de Fase 2:
+Prioridad actual:
 
-1. Assistant Read Layer de solo lectura, si se mantiene como micro-PR.
-2. Context Builder serio: ampliar asociaciones por problema y explicar inferencias.
-3. AI Bridge unico: no crear nuevos Route Handlers de IA por caso de uso.
-4. Refactor minimo: extraer helpers de patch solo si aparece duplicacion real.
-5. Mantener permisos visibles y estados de patch en cada nueva accion.
+1. `PROG-PATIENT-CORE-01`: antecedentes de solo lectura en ficha.
+2. Curaduria minima de eventos sin nueva tabla.
+3. Laboratorio sobrio con fuentes especificas, sin dashboard.
+4. Contratos futuros de agenda/ingreso/epicrisis antes de UI amplia.
+5. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
 
 Hecho en este foco:
 
@@ -247,7 +272,7 @@ Cola corta de mantenimiento:
 
 - no crear nuevas superficies IA; usar AI-Chart y componentes existentes
 - mantener `ClinicalPatch` limitado a `clinical_event` y `evolution` hasta que exista duplicacion o necesidad real
-- no ampliar laboratorio ni accesibilidad amplia dentro del PR de Assistant Read
+- no ampliar laboratorio a pantalla dedicada ni crear nueva IA durante paciente-core
 
 Fuera de foco:
 

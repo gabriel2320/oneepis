@@ -94,54 +94,39 @@ No construir ahora:
 - IA externa identificada
 - importador PDF completo
 
-PR #1 ya cerro AI-Chart Nivel 0. El proximo avance debe ser pequeno y partir
-desde `main` verde: Assistant Read Layer de solo lectura o una mejora puntual de
-Fase 2 con permisos, fuentes, faltantes y estados visuales claros. No debe crear
-un producto paralelo.
+PR #1, AI-Chart Nivel 0 y `PROG-ASSISTANT-READ-01` ya quedaron cerrados en
+`v0.4-assistant-read`. El proximo avance debe partir desde `main` verde y
+volver al tronco clinico tradicional.
 
-Programa cerrado permitido: `PROG-ASSISTANT-READ-01`.
+Programa activo permitido: `PROG-PATIENT-CORE-01`.
 
-Este programa solo puede avanzar como asistente de lectura de ficha. Su objetivo
-es que OneEpis pueda leer, buscar, mostrar, graficar y correlacionar su propia
-historia longitudinal sin aumentar escritura clinica.
-
-Reglas duras del programa:
-
-- no crea chat libre
-- no crea RAG
-- no usa IA externa
-- no agrega recetas, firma clinica ni ordenes ejecutables
-- no escribe ficha ni auditoria de modificacion desde endpoints `assistant`
-- no crea dashboard central
-- no suma dependencias salvo justificacion minima y necesaria
-- cada respuesta debe exponer fuentes y datos faltantes cuando apliquen
-- cualquier UI debe vivir dentro de la experiencia paciente/ficha y verse como
-  ficha clinica, no como laboratorio IA
-
-El backend de lectura puede agregar endpoints nuevos solo si el caso no cabe en
-el AI Bridge existente y queda probado como solo lectura. La UI nueva
-`/pacientes/[patientId]/contexto` queda permitida solo despues de tener backend,
-OpenAPI y tests verdes; si el alcance no lo justifica, debe integrarse en
-AI-Chart sin inflar `patient-ai-chart-pages.tsx`.
+Objetivo: completar nucleo paciente como ficha tradicional antes de ampliar IA:
+antecedentes leidos desde fuentes existentes, linea clinica, laboratorio sobrio,
+eventos curados y preparacion contractual de ambulatorio/hospitalizacion.
 
 Trabajo permitido inmediato:
 
-- construir Assistant Read Layer como micro-PR de solo lectura, sin chat libre ni RAG
-- mostrar lectura minima de laboratorio estructurado dentro de Assistant Read, sin pantalla propia ni carga masiva
-- explicar acciones bloqueadas por rol, modo demo o falta de revision humana
-- mostrar estado de propuesta y destino del patch antes de confirmar
-- mejorar textos de auditoria y trazabilidad en pantallas existentes
+- conciliar documentos canonicos post `v0.4`
+- mostrar antecedentes de solo lectura dentro de la ficha existente
+- curar eventos clinicos como antecedentes/diagnosticos/procedimientos sin crear tabla nueva
+- consolidar laboratorio minimo en ficha y AI-Chart con fuentes especificas
+- documentar contratos futuros antes de crear agenda, ingreso medico o epicrisis
 
 Trabajo no permitido inmediato:
 
-- nuevo dashboard
-- chat libre
-- RAG
-- laboratorio estructurado amplio dentro del PR de Assistant Read
-- editor generico de patches
-- agentes o paquetes IA nuevos
-- IA externa
+- nueva IA, chat libre, RAG, IA externa o paquetes/agentes nuevos
+- dashboard central o pantalla dedicada de laboratorio
+- receta valida, firma clinica, folio, despacho, orden ejecutable o administracion de medicamentos
+- agenda productiva, ingreso medico o epicrisis sin contrato backend previo
 - otro PR grande que mezcle frontend, backend, contratos y roadmap sin particion clara
+
+Regla para el siguiente bloque clinico tradicional:
+
+- elegir una sola superficie de `docs/SCREEN_TREE.md` -> `Contratos minimos antes de UI amplia`
+- implementar primero el contrato backend o reutilizacion explicita de entidades existentes
+- recien despues agregar UI minima y papel si la superficie produce documento clinico
+- no mezclar agenda, ingreso medico y epicrisis en el mismo PR
+- si la superficie no cumple su contrato, permanece `preparada`, `futura` o `bloqueada`
 
 ## Seguridad CI Report-Only
 

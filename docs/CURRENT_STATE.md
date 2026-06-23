@@ -16,16 +16,23 @@ El modo demo solo debe usarse con `NEXT_PUBLIC_DEMO_MODE=true`.
 PR #1 (`[codex] Close AI-Chart phase 1`) fue revisado como cambio de riesgo,
 endurecido y mergeado por squash en `main` el 2026-06-23.
 
-Programa de lectura aprobado e iniciado: `PROG-ASSISTANT-READ-01`.
+Programa de lectura `PROG-ASSISTANT-READ-01`: cerrado como release
+`v0.4-assistant-read` el 2026-06-23, con walkthrough humano aprobado,
+changelog y tag publicados.
 
-Este programa define una capa futura de asistente clinico de solo lectura para
-leer, buscar, mostrar, graficar y correlacionar la historia longitudinal del
-paciente. Queda integrado en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` como
-extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
+Programa activo: `PROG-PATIENT-CORE-01`.
+
+Este programa inicia el crecimiento tradicional posterior a `v0.4`: nucleo
+paciente, antecedentes leidos desde fuentes existentes, linea clinica, ficha
+sobria, laboratorio minimo y preparacion contractual de ambulatorio/
+hospitalizacion. No autoriza IA nueva, dashboard, chat libre ni escritura
+automatica.
 
 Estado real al 2026-06-23:
 
 - prototipo visual aprobado como base de ficha clinica tradicional gobernada
+- release `v0.4-assistant-read` cerrado y tagueado en `main`
+- el siguiente objetivo de producto es `v0.5-patient-core`
 - falta expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio, hospitalizacion, documentos/papel, resultados y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
@@ -171,6 +178,8 @@ Laboratorio estructurado:
 - no existe UI amplia ni navegacion propia de laboratorio todavia
 - existe lectura minima de paneles/resultados recientes dentro de Assistant Read, sin escritura ni carga masiva
 - existe lectura minima de paneles/resultados recientes dentro de la ficha, sin escritura, carga masiva ni navegacion nueva
+- la ficha inicia antecedentes clinicos de solo lectura desde problemas, alergias, medicacion y eventos curados; antecedentes familiares/sociales, vacunas, dispositivos y diagnosticos codificados siguen pendientes de contrato
+- `docs/SCREEN_TREE.md` registra contratos minimos bloqueantes para agenda real, atencion ambulatoria cerrable, ingreso medico hospitalario, epicrisis borrador y papel tradicional; no se debe crear UI amplia de esas superficies antes de cumplirlos
 - `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
 - `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
 - lectura usa permisos de ficha, incluyendo `solo_lectura`
@@ -190,6 +199,9 @@ Hospitalizacion:
 - camas estructuradas con sala/habitacion/cama y asignacion auditada a encuentros activos
 - UI `/hospitalizacion/camas` administra estados y `/hospitalizacion/camas/nueva` crea camas
 - camas disponibles pueden asignarse a ingresos activos sin cama; una cama ocupada debe liberarse antes de reasignarse
+- ingreso medico hospitalario minimo existe como `ClinicalEntry(kind=intake)` vinculado a encuentro `hospitalization` en curso
+- `/hospitalizacion/pacientes/[patientId]/ingreso` crea borradores de ingreso con permisos medico/admin/dev y auditoria de `clinical_entry.created`
+- `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` imprime hoja carta por ID estricto y no equivale a firma legal
 - hoja diaria hospitalizada tiene PostgreSQL, API, permisos, auditoria, OpenAPI, crear/listar/editar/cerrar UI y print
 - estado de hoja diaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
 - fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado usando fecha clinica local `America/Santiago`, no el dia UTC crudo
@@ -203,6 +215,7 @@ Hospitalizacion:
 Consulta:
 
 - `/consulta/pacientes/{patient_id}/atencion` usa endpoints existentes para crear encuentro ambulatorio y evolucion SOAP vinculada
+- la misma pantalla permite cerrar un encuentro ambulatorio en curso como `completed` usando el PATCH existente de encuentros; es cierre administrativo auditado, no firma ni receta valida
 - no hay agenda productiva todavia; `/consulta/agenda` sigue como borde preparado
 - resumen ambulatorio dedicado sigue preparado; la ficha paciente continua siendo el centro longitudinal
 
@@ -284,6 +297,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.
+- agenda real, epicrisis y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
@@ -294,7 +308,7 @@ Release gates demo:
 - Checklist `v0.4-assistant-read`: paciente, hospitalizacion, evolucion, signo vital, evento clinico, laboratorio estructurado reciente, AI-Chart/Assistant Read, impresion y auditoria.
 - Criterios `v0.4`: fuentes inspeccionables, limites/faltantes visibles, cero escritura automatica, cero chat libre, cero RAG, cero IA externa activa y compatibilidad `lab_results` + `clinical_events.exam_result`.
 - Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
-- Estado `v0.4-assistant-read`: walkthrough humano aprobado el 2026-06-23; listo para tag final si CI remoto se mantiene verde.
+- Estado `v0.4-assistant-read`: walkthrough humano aprobado el 2026-06-23; changelog y tag `v0.4-assistant-read` creados sobre `main`.
 - Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
 - Pantallas preparadas no cuentan como feature completa: `/consulta/agenda`, resumen ambulatorio y documentos deben declarar estado pendiente hasta tener backend/flujo real.
 - Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
@@ -316,8 +330,8 @@ Accesibilidad, performance y observabilidad pendientes:
 - Seguridad CI: job `security-report` report-only con gitleaks, dependency review, CodeQL, `npm audit` y `pip-audit`; no bloquea merge durante piloto salvo decision explicita posterior.
 - Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y superficies futuras por modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Release `v0.4-assistant-read`: changelog creado y walkthrough humano aprobado el 2026-06-23.
-- Siguiente bloque de producto despues de `v0.4`: nucleo paciente tradicional y laboratorio/ficha sobria, sin nueva IA ni dashboard.
+- Release `v0.4-assistant-read`: changelog creado, tag publicado y walkthrough humano aprobado el 2026-06-23.
+- Siguiente bloque de producto despues de `v0.4`: `PROG-PATIENT-CORE-01`, nucleo paciente tradicional y laboratorio/ficha sobria, sin nueva IA ni dashboard.
 
 ## Historial
 

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Save } from "lucide-react";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
+import { AmbulatoryClosePanel } from "@/components/clinical/ambulatory-close-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import { ClinicalTimeline, EncounterList, PatientLongitudinalSummary } from "@/components/clinical/patient-widgets";
@@ -158,34 +159,41 @@ function AmbulatoryVisitWorkspace({
           <ClinicalTimeline entries={record.recent_entries} />
         </ClinicalSectionCard>
       </div>
-      <ClinicalSectionCard
-        title="Nueva atencion"
-        description="Guarda encuentro ambulatorio y SOAP como borrador auditable."
-      >
-        {DEMO_MODE ? (
-          <ErrorState description="El modo demo no permite guardar atenciones reales." />
-        ) : null}
-        {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite crear atencion ambulatoria." />
-        ) : null}
-        <AmbulatoryVisitForm
-          formState={formState}
-          setFormState={setFormState}
-          disabled={mutation.isPending || DEMO_MODE || !canWrite}
-          submitLabel={mutation.isPending ? "Guardando..." : "Guardar atencion"}
-          onSubmit={() => mutation.mutate(formState)}
+      <div className="space-y-5">
+        <ClinicalSectionCard
+          title="Nueva atencion"
+          description="Guarda encuentro ambulatorio y SOAP como borrador auditable."
+        >
+          {DEMO_MODE ? (
+            <ErrorState description="El modo demo no permite guardar atenciones reales." />
+          ) : null}
+          {!DEMO_MODE && !userLoading && !canWrite ? (
+            <ErrorState description="Tu rol actual no permite crear atencion ambulatoria." />
+          ) : null}
+          <AmbulatoryVisitForm
+            formState={formState}
+            setFormState={setFormState}
+            disabled={mutation.isPending || DEMO_MODE || !canWrite}
+            submitLabel={mutation.isPending ? "Guardando..." : "Guardar atencion"}
+            onSubmit={() => mutation.mutate(formState)}
+          />
+          {mutation.isError ? (
+            <p className="mt-3 text-sm text-destructive">
+              No se pudo guardar la atencion. Revisa API y permisos.
+            </p>
+          ) : null}
+          {savedEntry ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Borrador SOAP vinculado: {savedEntry.title}
+            </p>
+          ) : null}
+        </ClinicalSectionCard>
+        <AmbulatoryClosePanel
+          patientId={patientId}
+          encounters={ambulatoryEncounters}
+          disabled={DEMO_MODE || !canWrite}
         />
-        {mutation.isError ? (
-          <p className="mt-3 text-sm text-destructive">
-            No se pudo guardar la atencion. Revisa API y permisos.
-          </p>
-        ) : null}
-        {savedEntry ? (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Borrador SOAP vinculado: {savedEntry.title}
-          </p>
-        ) : null}
-      </ClinicalSectionCard>
+      </div>
     </div>
   );
 }

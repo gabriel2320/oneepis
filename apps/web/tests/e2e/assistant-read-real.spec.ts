@@ -24,9 +24,11 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await expect(page.getByText("Perfil renal")).toBeVisible();
   await expect(page.getByText("Creatinina")).toBeVisible();
   await expect(page.getByText("Rango ref.: 0.7-1.3").first()).toBeVisible();
-  await expect(page.getByText(/Fuente: lab_result/).first()).toBeVisible();
+  await expect(
+    page.getByText(new RegExp(`/lab-panels/${labPanelId}/results/${labResultId}`)),
+  ).toBeVisible();
   await expect(page.getByText("Linea de tiempo completa")).toBeVisible();
-  await expect(page.getByText("Disnea y saturacion baja")).toBeVisible();
+  await expect(page.getByText("Disnea y saturacion baja").first()).toBeVisible();
   await expect(page.getByText("Fuente: clinical_events")).toBeVisible();
 
   await page.goto(`/pacientes/${patientId}/ai-chart`);
