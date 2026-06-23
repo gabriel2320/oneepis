@@ -274,10 +274,15 @@ Reglas de ejecucion:
 
 | Orden | Bloque | Branch sugerida | PR title sugerido | Gates esperados | Criterio de merge |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `PROG-CONSOLIDATE-01` | `codex/automatic-advance-queue` | `[codex] document automatic advance queue` | `npm run check:size` | #18-#20 mergeados, cola documentada y sin API/UI nueva |
-| 2 | `PROG-AMB-PRECONSULTA-00` | `codex/ambulatory-preconsult-contract` | `[codex] define ambulatory preconsult contract` | `npm run check:size` | contrato minimo aprobado en docs, sin rutas ni endpoints nuevos |
-| 3 | `PROG-CLINICAL-RISK-00` | `codex/clinical-risk-contract` | `[codex] define clinical risk contract` | `npm run check:size` | contrato de riesgos con fuente, permisos, auditoria, papel/IA y criterios de promocion |
-| 4 | `PROG-AMB-PRECONSULTA-01` | `codex/ambulatory-preconsult-minimal` | `[codex] implement minimal ambulatory preconsult` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/UI minima/papel declarado completos segun contrato |
+| 1 | `PROG-POST-PRECONSULTA-01` | `codex/post-preconsult-consolidation` | `[codex] consolidate post-preconsult queue` | `npm run check:size` | #25 registrado como completado, cola nueva documentada y sin API/UI nueva |
+| 2 | `PROG-DIET-01` | `codex/diet-near-limit-files` | `[codex] trim near-limit clinical files` | `npm run check:size`, `npm run check:web` | extraccion quirurgica sin cambio de conducta ni rutas/API |
+| 3 | `PROG-PATIENT-CORE-POLISH-01` | `codex/patient-core-read-polish` | `[codex] polish patient core read surfaces` | `npm run check:web`, E2E ficha | antecedentes, timeline y laboratorio mas claros sin entidad/ruta/escritura nueva |
+| 4 | `PROG-AMB-PRECONSULTA-PERMISSIONS-00` | `codex/preconsult-permissions-decision` | `[codex] decide preconsult permissions path` | `npm run check:size` | decision docs-only: congelar preconsulta minima o planear backend para `enfermeria`/`admision` |
+| 5 | `PROG-CLINICAL-RISK-01` | `codex/clinical-risk-minimal` | `[codex] implement minimal clinical risks` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/OpenAPI/UI compacta listas, sin dashboard ni IA |
+
+Bloques ya cerrados en esta cola: `PROG-CONSOLIDATE-01`,
+`PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00` y
+`PROG-AMB-PRECONSULTA-01`.
 
 ## PROG-AMB-PRECONSULTA-00
 
@@ -325,7 +330,7 @@ Gates para promover a implementacion:
 
 ## PROG-AMB-PRECONSULTA-01
 
-Estado: implementacion minima integrada en atencion ambulatoria.
+Estado: completado y mergeado como PR #25.
 
 Objetivo: agregar preconsulta ambulatoria compacta dentro de
 `/consulta/pacientes/[patientId]/atencion`, sin ruta nueva, sin tabla nueva y
@@ -358,6 +363,44 @@ Gates de cierre:
 - E2E visible de atencion con panel de preconsulta en modo demo
 - `CURRENT_STATE`, `SCREEN_TREE`, `GOVERNANCE`, `CODEX_PLAN` y registry
   reconciliados
+
+## PROG-POST-PRECONSULTA-01
+
+Estado: bloque activo de consolidacion docs-only.
+
+Objetivo: cerrar memoria ejecutable posterior a PR #25, sin tocar UI ni API.
+
+Decision de implementacion:
+
+- marcar `PROG-AMB-PRECONSULTA-01` como completado en cola y roadmap
+- registrar que la preconsulta minima queda congelada con permisos
+  `medico/admin/dev`
+- declarar que `enfermeria` o `admision` requieren PR backend/permisos/tests
+- promover el siguiente bloque a dieta quirurgica antes de nueva clinica
+
+Gates de cierre:
+
+- `npm run check:size`
+- worktree limpio y PR docs-only
+
+## PROG-DIET-01
+
+Estado: siguiente bloque recomendado.
+
+Objetivo: reducir presion de archivos near-limit sin cambiar conducta.
+
+Prioridad de seleccion:
+
+- elegir un solo archivo o familia cercana a 350 lineas desde el reporte de
+  `check:size`
+- preferir superficies que probablemente se tocaran despues: ficha/paciente,
+  eventos, papel o subpaneles AI-Chart
+- no modificar rutas, API, OpenAPI, permisos, textos clinicos ni diseño visible
+
+Gates de cierre:
+
+- `npm run check:size`
+- `npm run check:web`
 
 ## PROG-CLINICAL-RISK-00
 
@@ -415,8 +458,9 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. `PROG-AMB-PRECONSULTA-01`: implementacion minima solo despues del contrato aprobado.
-2. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
+1. `PROG-POST-PRECONSULTA-01`: cerrar memoria y cola post-#25.
+2. `PROG-DIET-01`: reducir presion near-limit antes de abrir nueva clinica.
+3. Mantener riesgos clinicos como contrato definido hasta PR propio de API/UI.
 
 Hecho en este foco:
 

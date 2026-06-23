@@ -37,8 +37,11 @@ Estado real al 2026-06-23:
   - PR #15: agenda ambulatoria minima persistida con `ClinicalAppointment`
   - PR #16: resumen ambulatorio real de solo lectura
   - PR #17: indice de documentos/papel existente desde rutas print
+  - PR #25: preconsulta ambulatoria minima dentro de atencion
 - `PROG-CONSOLIDATE-01` queda en cierre con documentacion reconciliada,
   poda preventiva, reporte near-limit y cola de ejecucion automatica
+- `PROG-POST-PRECONSULTA-01` es el bloque activo docs-only para dejar #25
+  consolidado y mover la cola a dieta quirurgica antes de nueva clinica
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
@@ -53,6 +56,8 @@ Estado real al 2026-06-23:
 - `PROG-AMB-PRECONSULTA-01` implementa preconsulta ambulatoria minima dentro de
   `/consulta/pacientes/{patient_id}/atencion`, sin ruta, tabla ni endpoint nuevo
   y reutilizando cita, encuentro, signos vitales y evento clinico
+- la preconsulta minima queda limitada a permisos existentes `medico/admin/dev`;
+  habilitar `enfermeria` o `admision` exige PR backend/permisos/tests
 - `PROG-CLINICAL-RISK-00` define contrato docs-only de riesgos clinicos;
   riesgos siguen futuros hasta un PR con entidad/API bajo paciente, permisos,
   auditoria, registry, UI minima y E2E

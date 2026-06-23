@@ -172,9 +172,10 @@ OneEpis ya tiene una base clinica E2E real:
   conducta, reporte near-limit no bloqueante y reglas E2E mas precisas.
 - Fuera de alcance: endpoints nuevos, OpenAPI, IA nueva, adjuntos, firma,
   receta valida, agenda avanzada o pantallas grandes.
-- Cola posterior: `PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00` y
-  `PROG-AMB-PRECONSULTA-01`, con branch, titulo, gates y criterio de merge
-  definidos en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`.
+- Cola posterior: consolidacion post-#25, dieta near-limit, polish de nucleo
+  paciente, decision de permisos de preconsulta y riesgos clinicos minimos,
+  con branch, titulo, gates y criterio de merge definidos en
+  `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`.
 
 ### PROG-AMB-PRECONSULTA-00: contrato de admision/preconsulta
 
@@ -188,7 +189,7 @@ OneEpis ya tiene una base clinica E2E real:
 
 ### PROG-AMB-PRECONSULTA-01: preconsulta minima
 
-- Estado: implementacion minima en `/consulta/pacientes/[patientId]/atencion`.
+- Estado: completado y mergeado como PR #25.
 - Decision: panel compacto que reutiliza citas del paciente, crea encuentro
   ambulatorio, registra signos vitales opcionales y deja evento clinico con
   `payload.preconsult`.
@@ -196,6 +197,14 @@ OneEpis ya tiene una base clinica E2E real:
   no emite orden y no agrega IA.
 - Restriccion de permisos: usa permisos existentes `medico/admin/dev`;
   `enfermeria`/`admision` quedan para PR backend especifico.
+
+### PROG-POST-PRECONSULTA-01: consolidacion post #25
+
+- Estado: siguiente micro-PR docs-only.
+- Decision: no abrir clinica nueva inmediatamente despues de preconsulta.
+- Alcance: registrar #25 como completado, mover la cola a dieta quirurgica y
+  dejar congelada la decision de permisos.
+- Fuera de alcance: UI, API, OpenAPI, IA, dashboard, firma, receta y riesgos.
 
 ### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
 

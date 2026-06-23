@@ -48,6 +48,18 @@ Responsabilidades canonicas:
 Los documentos largos de vision son cantera conceptual. No son backlog directo
 si no pasan antes por el plan progresivo y la escalera OneEpis.
 
+## Semaforo De Cambio
+
+Antes de implementar, clasificar cada pasada:
+
+- Verde: reutiliza entidades existentes, no crea ruta, no cambia permisos, no
+  agrega dependencia y tiene test claro. Puede entrar como micro-PR unico.
+- Amarillo: agrega endpoint, escritura, OpenAPI o UI nueva. Requiere tests
+  API/contrato/E2E proporcionales.
+- Rojo: firma, receta valida, orden ejecutable, IA externa, RAG, adjuntos
+  reales, datos sensibles o arquitectura nueva. Requiere contrato primero y no
+  entra como implementacion directa.
+
 ## Politica de Pantallas
 
 Toda pantalla clinica debe tener un estado explicito en `docs/SCREEN_TREE.md`:
