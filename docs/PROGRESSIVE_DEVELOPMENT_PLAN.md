@@ -235,7 +235,7 @@ Siguiente bloque obligatorio antes de otra feature: `PROG-CONSOLIDATE-01`.
 
 ## PROG-CONSOLIDATE-01
 
-Estado: en cierre.
+Estado: completado.
 
 Objetivo: consolidar #15-#17, aprender de errores y preparar avance automatico
 sin abrir nueva superficie clinica.
@@ -253,8 +253,8 @@ Avances completados:
 - PR #19: extraccion de `PatientPaperDocuments` sin cambio de conducta
 - PR #20: reporte near-limit no bloqueante en `check:size`
 
-Pendiente para cerrar el programa: PR-AUTO-01, documentar la cola de ejecucion
-automatica con branch, titulo, gates y criterio de merge.
+PR-AUTO-01 completo: la cola de ejecucion automatica quedo documentada con
+branch, titulo, gates y criterio de merge.
 
 Fuera de alcance:
 
@@ -279,6 +279,49 @@ Reglas de ejecucion:
 | 3 | `PROG-CLINICAL-RISK-00` | `codex/clinical-risk-contract` | `[codex] define clinical risk contract` | `npm run check:size` | contrato de riesgos con fuente, permisos, auditoria, papel/IA y criterios de promocion |
 | 4 | `PROG-AMB-PRECONSULTA-01` | `codex/ambulatory-preconsult-minimal` | `[codex] implement minimal ambulatory preconsult` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/UI minima/papel declarado completos segun contrato |
 
+## PROG-AMB-PRECONSULTA-00
+
+Estado: contrato docs-only definido.
+
+Objetivo: definir la admision/preconsulta ambulatoria minima antes de crear UI,
+API nueva o tablas nuevas.
+
+Decision de contrato:
+
+- reutilizar primero `ClinicalAppointment`, `ClinicalEncounter(type=ambulatory)`,
+  `VitalSign` y `ClinicalEvent(event_type=clinical_note)`
+- no crear ruta nueva, dashboard, modulo de admision amplio ni endpoint global
+- no crear tabla `preconsults` en el primer PR; solo considerarla si la UI
+  minima demuestra duplicacion real o falta de contrato estructurado
+- registrar observaciones de preconsulta como evento clinico con payload
+  `preconsult`, vinculado al encuentro ambulatorio cuando exista
+- signos vitales siguen viviendo en `VitalSign`, no dentro de texto libre
+- el estado operativo de llegada usa `ClinicalAppointment.status`: `check_in`,
+  `in_progress`, `completed`, `cancelled` o `no_show`
+
+Alcance permitido para `PROG-AMB-PRECONSULTA-01`:
+
+- panel compacto en `/consulta/agenda` o `/consulta/pacientes/[patientId]/atencion`
+- confirmar identidad local sin agregar identificadores sensibles nuevos
+- registrar motivo breve, prioridad textual, signos, alergias/medicacion revisadas
+  y faltantes
+- enlazar a atencion ambulatoria existente
+- mostrar fuentes y faltantes; IA solo lectura/resumen no persistido
+
+Fuera de alcance:
+
+- receta valida, orden ejecutable, firma, folio, despacho o administracion
+- diagnostico autonomo, triage automatico, chat libre, RAG o IA externa
+- agenda por recursos/equipos, caja, asegurador o facturacion
+- pantalla de admision grande o modulo administrativo nuevo
+
+Gates para promover a implementacion:
+
+- `docs/SCREEN_TREE.md` contiene el contrato minimo
+- `docs/CURRENT_STATE.md` declara que preconsulta sigue futura hasta PR de UI/API
+- `docs/GOVERNANCE.md` mantiene la regla de contrato antes de UI amplia
+- `npm run check:size` verde
+
 ## Plan post-auditoria 2026-06-23
 
 P0 completado: PR #1 fue revisado en modo code review, corregido en su rama, validado local/remoto, marcado ready y mergeado por squash. No abrir otro PR grande de IA hasta que el siguiente bloque tenga alcance cerrado.
@@ -295,11 +338,10 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. `PROG-CONSOLIDATE-01`: docs, poda preventiva, guardrails y cola automatica.
-2. `PROG-AMB-PRECONSULTA-00`: contrato docs-only antes de implementar preconsulta.
-3. `PROG-CLINICAL-RISK-00`: contrato docs-only de riesgos clinicos.
-4. `PROG-AMB-PRECONSULTA-01`: implementacion minima solo despues del contrato aprobado.
-5. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
+1. `PROG-AMB-PRECONSULTA-00`: contrato docs-only antes de implementar preconsulta.
+2. `PROG-CLINICAL-RISK-00`: contrato docs-only de riesgos clinicos.
+3. `PROG-AMB-PRECONSULTA-01`: implementacion minima solo despues del contrato aprobado.
+4. Mantener permisos visibles, estados de patch y bloqueo de IA por pantalla.
 
 Hecho en este foco:
 

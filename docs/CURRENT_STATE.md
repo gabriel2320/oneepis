@@ -50,8 +50,9 @@ Estado real al 2026-06-23:
 - `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability` y que no haya rutas duplicadas en mapa/registry
 - la barra de intenciones clinicas bloquea ejecucion directa y re-ejecucion de intenciones que la pantalla actual no declare como permitidas
 - si no existe `ScreenCapability`, la UI bloquea intenciones IA por defecto
-- la proxima ejecucion funcional debe partir por contrato docs-only:
-  `PROG-AMB-PRECONSULTA-00`, no por UI amplia
+- `PROG-AMB-PRECONSULTA-00` define contrato docs-only de preconsulta
+  ambulatoria; la preconsulta sigue futura hasta un PR de implementacion minima
+  con permisos, auditoria, registry y E2E
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -237,7 +238,9 @@ Consulta:
 - la misma pantalla permite cerrar un encuentro ambulatorio en curso como `completed` usando el PATCH existente de encuentros; es cierre administrativo auditado, no firma ni receta valida
 - agenda ambulatoria minima existe como `ClinicalAppointment`, con persistencia, estados, permisos y auditoria
 - `/consulta/agenda` lista citas por dia, permite crear cita programada y enlaza a la atencion del paciente
-- agenda avanzada por equipos/recursos, admision/preconsulta y no-show operacional siguen futuras
+- admision/preconsulta tiene contrato minimo: reutilizar cita, encuentro
+  ambulatorio, signos vitales y evento clinico; no hay ruta ni tabla nueva
+- agenda avanzada por equipos/recursos y no-show operacional siguen futuras
 - `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden
 - seguimiento formal, interconsultas y cierre documental ambulatorio siguen futuros
 

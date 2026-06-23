@@ -116,7 +116,7 @@ tener contrato minimo y flujo humano verificable.
 | Linea de tiempo avanzada/filtrable | Nucleo paciente | seguimiento | futura | eventos + encuentros + documentos + resultados | no | lectura paciente | no | no | lectura contextual | la ficha ya tiene lectura minima; falta filtro, dominios y documentos |
 | Buscador longitudinal | Nucleo paciente | seguimiento | futura | eventos + entradas + resultados | no | lectura paciente | no | no | busqueda asistida | no duplicar Assistant Read |
 | Agenda avanzada/productiva | Ambulatorio | episodio | futura | citas + equipos + admision | si | admision/medico/admin/dev futuro | si | no | no | agenda minima ya existe; falta agenda por recursos/equipos y preconsulta |
-| Admision/preconsulta ambulatoria | Ambulatorio | episodio | futura | encuentro + observaciones | si | admision/enfermeria/medico/admin/dev | si | no | faltantes | identidad, signos y pendientes |
+| Admision/preconsulta ambulatoria | Ambulatorio | episodio | futura | cita + encuentro + signos + evento clinico | si | admision/enfermeria/medico/admin/dev | si | no | faltantes | contrato `PROG-AMB-PRECONSULTA-00` definido antes de UI |
 | Motivo de consulta estructurado | Ambulatorio | acto clinico | futura | encuentro + entrada clinica | si | medico/admin/dev | si | si si aplica | apoyo SOAP | contrato antes de UI amplia |
 | Cierre de consulta | Ambulatorio | firma/estado | futura | encuentro + estado | si | medico/admin/dev | si | si si aplica | no firma | diagnostico/plan/cierre borrador |
 | Receta valida | Ambulatorio/documentos | documento | bloqueada | receta firmada | si | medico/admin/dev futuro | si | carta/A5 | no | firma, folio, actor, fecha clinica y permisos |
@@ -151,6 +151,7 @@ tener contrato minimo y flujo humano verificable.
 | Diagnosticos historicos | extension de problemas | contrato que separe problema activo, diagnostico historico y codificacion | no mezclar estado activo con diagnostico cerrado |
 | Ambulatorio minimo | `/consulta/agenda` | `ClinicalAppointment` con estados reales | implementado como agenda persistida; admision/preconsulta queda futura |
 | Consulta completa | `/consulta/pacientes/[patientId]/atencion` | cierre de encuentro, diagnostico/plan y documento si aplica | SOAP/plan/cierre con auditoria y sin receta valida automatica |
+| Preconsulta ambulatoria | agenda/atencion existentes | reutilizar cita, encuentro ambulatorio, signos vitales y evento clinico de preconsulta | contrato definido; UI minima futura sin ruta nueva ni dashboard |
 | Resumen ambulatorio | `/consulta/pacientes/[patientId]/resumen` | lectura de record, citas y encuentros existentes | implementado como vista de lectura; seguimiento formal queda futuro |
 | Hospitalizacion critica | ingreso medico | `ClinicalEntry(kind=intake)` vinculado a encuentro hospitalario | papel carta, borrador y auditoria implementados; firma/cierre legal futuros |
 | Evolucion hospitalaria | hoja diaria/evolucion por problema | entradas por problema vinculadas a ingreso | no reemplazar firma real; mantener borrador trazable |
@@ -170,10 +171,74 @@ el mapa debe declarar que sigue pendiente.
 | Superficie | Modelo minimo | API minima futura | UI minima permitida | Papel | Tests obligatorios |
 | --- | --- | --- | --- | --- | --- |
 | Agenda real | `ClinicalAppointment`: paciente, inicio, fin opcional, motivo, ubicacion, profesional/equipo opcional y estado `scheduled/check_in/in_progress/completed/cancelled/no_show` | implementado: listar por fecha/rango, crear, actualizar estado y listar por paciente | `/consulta/agenda` muestra agenda persistida, estados reales y enlace a atencion | no aplica inicialmente | permisos, auditoria de escritura, E2E agenda -> paciente -> atencion |
+| Admision/preconsulta ambulatoria | Reutilizar `ClinicalAppointment`, `ClinicalEncounter(type=ambulatory)`, `VitalSign` y `ClinicalEvent(event_type=clinical_note)`; no tabla nueva en el primer PR | usar endpoints existentes de citas, encuentros, signos y eventos; endpoint compuesto solo si evita duplicar logica clinica real | panel sobrio dentro de agenda/atencion: confirmar identidad local, motivo breve, signos, revision alergias/medicacion, prioridad textual y pendientes | sin papel inicialmente; si se convierte en documento, resumen carta futuro con estado borrador | `solo_lectura` solo lee; admision/enfermeria/medico/admin/dev escriben segun dominio; 404 por paciente/cita/encuentro ajeno; auditoria en cada escritura; E2E agenda -> check-in -> preconsulta -> atencion |
 | Atencion ambulatoria cerrable | `ClinicalEncounter` existente con `status=completed`, `ended_at`, evolucion SOAP vinculada y plan documentado | implementado minimo reutilizando PATCH de encuentros y entradas clinicas existentes | `/consulta/pacientes/[patientId]/atencion` permite crear borrador y cerrar encuentro como no firmado | resumen carta futuro si produce documento | cierre exige actor, auditoria, no receta valida automatica y no orden ejecutable |
 | Ingreso medico hospitalario | `ClinicalEntry(kind=intake)` vinculado a encuentro `hospitalization`; no tabla nueva en primer PR | implementado reutilizando entradas clinicas vinculadas al ingreso | pantalla hospitalaria de ingreso como borrador editable, con secciones clinicas minimas | carta obligatoria de ingreso borrador | encuentro debe ser hospitalario, permisos medico/admin/dev, auditoria y print sin fallback |
 | Epicrisis borrador | `ClinicalEntry(kind=discharge_summary)` vinculado a encuentro `hospitalization`; no tabla nueva en primer PR | implementado reutilizando entradas clinicas vinculadas a la hospitalizacion | pantalla unica de epicrisis vinculada al ingreso, sin firma legal | carta obligatoria con estado draft y footer desarrollo | encuentro debe ser hospitalario, permisos medico/admin/dev, auditoria y print sin fallback |
 | Papel tradicional | documento clinico con fuente, estado, actor y fecha clinica cuando existan | no API nueva salvo documento fuente; print lee por ID especifico | boton `Ver papel` solo si la fuente existe o declara `sin papel aun` | carta por defecto | smoke print, sin fallback al primer registro, estado visible y footer si no firmado |
+
+### Contrato `PROG-AMB-PRECONSULTA-00`
+
+Objetivo: preparar la primera preconsulta ambulatoria minima sin crear una
+pantalla grande ni una capa nueva. La preconsulta ordena el paso desde cita a
+atencion, pero no firma, no receta, no emite orden y no reemplaza la consulta
+medica.
+
+Fuente de verdad inicial:
+
+- `ClinicalAppointment`: agenda, estado `check_in`/`in_progress`, motivo,
+  ubicacion y profesional/equipo textual.
+- `ClinicalEncounter(type=ambulatory)`: episodio clinico al que se vinculan
+  signos, eventos y evolucion posterior.
+- `VitalSign`: mediciones tomadas en admision o enfermeria.
+- `ClinicalEvent(event_type=clinical_note)`: nota de preconsulta con
+  `payload.preconsult` para prioridad textual, revision de alergias/medicacion,
+  faltantes y observaciones.
+
+Payload sugerido para el evento de preconsulta:
+
+```json
+{
+  "preconsult": {
+    "identity_checked": true,
+    "chief_complaint": "texto breve",
+    "triage_priority": "routine|priority|urgent|unknown",
+    "allergies_reviewed": true,
+    "medications_reviewed": true,
+    "missing_data": ["dato faltante"],
+    "human_action": "revisar en atencion"
+  }
+}
+```
+
+Permisos y auditoria:
+
+- lectura: mismos roles que lectura de paciente, incluyendo `solo_lectura`
+- escritura de preconsulta: `enfermeria`, `medico`, `admin`, `dev` y rol
+  futuro `admision` cuando exista
+- `solo_lectura` no puede cambiar estado de cita, signos ni evento
+- toda escritura usa endpoints existentes con auditoria de dominio
+- la UI debe validar pertenencia del paciente a cita, encuentro, signo y evento;
+  el backend debe responder `404` ante recursos ajenos
+
+IA permitida:
+
+- solo lectura de faltantes y resumen contextual con fuentes
+- Ollama/local puede redactar un resumen no persistido si la pantalla declara
+  esa capacidad en el registry
+- prohibido: chat libre, diagnostico autonomo, receta, orden, firma, cierre
+  automatico o `ClinicalPatch` desde preconsulta
+
+Criterio de promocion a `completa`:
+
+- contrato implementado con entidades existentes o justificacion explicita de
+  entidad nueva
+- permisos, auditoria y tests API si escribe
+- UI minima en agenda/atencion, sin ruta nueva
+- E2E visible con selectores exactos: cita -> check-in -> preconsulta ->
+  atencion
+- `SCREEN_TREE`, Screen Capability Registry y `CURRENT_STATE` actualizados en
+  el mismo PR
 
 ## Reglas de promocion
 

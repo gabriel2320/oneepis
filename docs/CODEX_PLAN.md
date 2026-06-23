@@ -82,10 +82,9 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. `PROG-CONSOLIDATE-01`: cerrar documentacion, poda preventiva, guardrails y cola automatica.
-2. `PROG-AMB-PRECONSULTA-00`: definir contrato docs-only de admision/preconsulta.
-3. `PROG-CLINICAL-RISK-00`: definir contrato docs-only de riesgos clinicos.
-4. `PROG-AMB-PRECONSULTA-01`: implementar preconsulta minima solo si el contrato ya fue aprobado.
+1. `PROG-AMB-PRECONSULTA-00`: contrato docs-only de admision/preconsulta ya definido en `SCREEN_TREE`.
+2. `PROG-CLINICAL-RISK-00`: definir contrato docs-only de riesgos clinicos.
+3. `PROG-AMB-PRECONSULTA-01`: implementar preconsulta minima solo si el contrato sigue aprobado.
 
 Reglas para avanzar:
 
@@ -93,5 +92,6 @@ Reglas para avanzar:
 - una rama y un PR por bloque
 - no mezclar contrato docs-only con implementacion
 - no agregar UI amplia antes de contrato, permisos, auditoria y pruebas
+- preconsulta debe reutilizar cita, encuentro, signos y eventos antes de crear tabla o endpoint compuesto
 - no ampliar IA durante esta cola
 - usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge

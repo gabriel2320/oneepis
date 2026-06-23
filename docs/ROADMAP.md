@@ -176,6 +176,16 @@ OneEpis ya tiene una base clinica E2E real:
   `PROG-AMB-PRECONSULTA-01`, con branch, titulo, gates y criterio de merge
   definidos en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`.
 
+### PROG-AMB-PRECONSULTA-00: contrato de admision/preconsulta
+
+- Estado: contrato docs-only definido antes de implementar.
+- Decision: reutilizar `ClinicalAppointment`, `ClinicalEncounter`,
+  `VitalSign` y `ClinicalEvent`; no crear tabla ni ruta nueva en el primer PR.
+- Alcance futuro permitido: panel compacto en agenda/atencion para check-in,
+  motivo, signos, revision alergias/medicacion y faltantes.
+- Fuera de alcance: receta, orden, firma, triage automatico, IA externa,
+  dashboard o modulo administrativo amplio.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
