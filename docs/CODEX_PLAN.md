@@ -612,6 +612,11 @@ Trabajo requerido si se implementa:
 - OpenAPI actualizado si cambia contrato
 - UI conserva advertencia previa
 
+Estado: implementado. `POST` y `PATCH` de `clinical_events` rechazan
+`source_type != manual` sin `source_ref`, incluyendo intentos de borrar la
+referencia de un evento derivado existente. La UI conserva la advertencia
+previa como ayuda, pero la regla vive en backend.
+
 #### C2-03 Encuentro activo en snapshot
 
 Objetivo: evitar que la ficha infiera episodio activo solo desde evoluciones.

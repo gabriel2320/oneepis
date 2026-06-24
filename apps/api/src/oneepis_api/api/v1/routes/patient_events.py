@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import ClinicalEventActorDep
-from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent
+from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, ClinicalEventSourceType
 from oneepis_api.schemas.clinical_record import (
     ClinicalEventCreate,
     ClinicalEventRead,
@@ -27,6 +27,18 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
+
+
+def validate_clinical_event_source(
+    source_type: ClinicalEventSourceType,
+    source_ref: str | None,
+) -> None:
+    if source_type == ClinicalEventSourceType.MANUAL or source_ref:
+        return
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail="source_ref is required when source_type is not manual",
+    )
 
 
 @router.get("/{patient_id}/clinical-events", response_model=list[ClinicalEventRead])
@@ -60,6 +72,7 @@ def create_clinical_event(
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
+    validate_clinical_event_source(payload.source_type, payload.source_ref)
     event_data = payload.model_dump()
     event_data["created_by"] = actor
     event = ClinicalEvent(patient_id=patient_id, **event_data)
@@ -97,7 +110,12 @@ def update_clinical_event(
     )
     if "encounter_id" in payload.model_dump(exclude_unset=True):
         validate_encounter_for_patient(session, patient_id, payload.encounter_id)
-    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+    payload_data = payload.model_dump(exclude_unset=True)
+    validate_clinical_event_source(
+        payload_data.get("source_type", event.source_type),
+        payload_data.get("source_ref", event.source_ref),
+    )
+    update_fields = sorted(payload_data.keys())
     before = audit_snapshot(event, update_fields)
     fields = apply_update(event, payload)
     before_changed, after_changed = changed_field_snapshots(

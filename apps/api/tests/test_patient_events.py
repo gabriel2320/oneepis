@@ -86,6 +86,85 @@ def test_clinical_events_timeline_and_draft_are_audited(
     assert draft_audit["extra_data"]["section_sources"][0]["section"] == "subjective"
 
 
+def test_derived_clinical_event_requires_source_ref(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Fuente",
+            "last_name": "Derivada",
+            "birth_date": "1984-02-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+
+    response = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Evento derivado sin referencia",
+            "source_type": "clinical_entry",
+        },
+    )
+
+    assert response.status_code == 422
+    assert "source_ref is required" in response.json()["detail"]
+
+
+def test_derived_clinical_event_cannot_clear_source_ref(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Fuente",
+            "last_name": "Persistente",
+            "birth_date": "1984-02-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    entry = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-entries",
+        headers=auth,
+        json={
+            "kind": "progress",
+            "status": "signed",
+            "occurred_at": "2026-06-22T09:00:00Z",
+            "title": "Evolucion fuente",
+            "subjective": "Control.",
+        },
+    ).json()
+    event = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Evento derivado con referencia",
+            "source_type": "clinical_entry",
+            "source_ref": entry["id"],
+        },
+    ).json()
+
+    response = client.patch(
+        f"/api/v1/patients/{patient['id']}/clinical-events/{event['id']}",
+        headers=auth,
+        json={"source_ref": None},
+    )
+
+    assert response.status_code == 422
+    assert "source_ref is required" in response.json()["detail"]
+
+
 def test_draft_rejects_events_from_other_patient(
     client: TestClient,
     auth_headers,
