@@ -656,6 +656,11 @@ Trabajo prohibido:
 - firma real
 - receta valida
 
+Estado: implementado. Los primitives de papel (`PrintPage`, toolbar, hoja,
+header/footer y bloque de texto) viven en `paper-primitives.tsx`; las rutas
+print siguen importando la misma superficie publica y `clinical-print.tsx`
+queda bajo presupuesto sin cambiar contenido clinico.
+
 #### C2-05 E2E smoke de trazabilidad
 
 Objetivo: cubrir navegacion minima de ficha expandida.
