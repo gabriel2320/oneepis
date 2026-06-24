@@ -82,11 +82,10 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. Cerrar el fix de bootstrap PostgreSQL si existen migraciones locales pendientes; no abrir clinica nueva con Alembic roto.
-2. `PROG-PATIENT-CORE-NEXT-00` queda decidido: seguir con linea de tiempo paciente avanzada de solo lectura.
-3. `PROG-PATIENT-TIMELINE-01`: reutilizar `assistant/timeline` dentro de ficha con filtros por dominio, fuente visible, limites y faltantes.
-4. Opciones secundarias posteriores: antecedentes estructurados minimos o permisos de enfermeria para preconsulta.
-5. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
+1. Mantener `main` verde despues del fix de bootstrap PostgreSQL.
+2. `PROG-PATIENT-TIMELINE-01`: integrar `assistant/timeline` dentro de ficha con filtros por dominio, fuente visible, limites y faltantes.
+3. Opciones secundarias posteriores: antecedentes estructurados minimos o permisos de enfermeria para preconsulta.
+4. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
 
 Reglas para avanzar:
 

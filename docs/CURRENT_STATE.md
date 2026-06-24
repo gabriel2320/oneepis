@@ -33,10 +33,9 @@ Estado real al 2026-06-24:
 - prototipo visual aprobado como base de ficha clinica tradicional gobernada
 - release `v0.4-assistant-read` cerrado y tagueado en `main`
 - el siguiente objetivo de producto es `v0.5-patient-core`
-- correccion de bootstrap PostgreSQL pendiente de cerrar: las migraciones
-  `202606200012_medication_catalog` y `202606200015_clinical_risks` ya migran
-  desde una base temporal limpia hasta `202606200015`; validar con
-  `npm run check:api`, migracion Alembic limpia y `npm run check:contract`
+- PR #31 corrige el bootstrap PostgreSQL: las migraciones
+  `202606200012_medication_catalog` y `202606200015_clinical_risks` migran
+  desde una base temporal limpia hasta `202606200015`
 - avances iniciales de `v0.5-patient-core` ya mergeados:
   - PR #15: agenda ambulatoria minima persistida con `ClinicalAppointment`
   - PR #16: resumen ambulatorio real de solo lectura
@@ -72,10 +71,9 @@ Estado real al 2026-06-24:
 - `PROG-CLINICAL-RISK-01` implementa riesgos clinicos minimos con entidad/API
   bajo paciente, permisos, auditoria, OpenAPI, UI compacta en ficha y E2E
   visible; no crea dashboard, scores automaticos ni IA nueva
-- `PROG-PATIENT-CORE-NEXT-00` queda decidido: el siguiente bloque clinico
-  tradicional sera linea de tiempo paciente avanzada de solo lectura,
-  reutilizando `assistant/timeline` dentro de ficha antes de crear API, entidad
-  o ruta nueva
+- `PROG-PATIENT-CORE-NEXT-00` queda decidido y `PROG-PATIENT-TIMELINE-01`
+  integra linea de tiempo paciente avanzada de solo lectura dentro de ficha,
+  reutilizando `assistant/timeline` sin crear API, entidad o ruta nueva
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -86,7 +84,8 @@ Estado real al 2026-06-24:
 - no se autoriza escritura clinica desde el programa
 - el timeline assistant es solo lectura, no crea auditoria ni escribe ficha
 - el timeline devuelve fuentes, limites y faltantes por dominio, incluyendo `lab_results` activos
-- la ficha muestra una linea de tiempo completa minima reutilizando eventos y evoluciones existentes, sin entidad nueva
+- la ficha muestra linea de tiempo avanzada con filtros por dominio, fuentes,
+  limites y faltantes desde `assistant/timeline`, sin entidad nueva
 - la busqueda assistant es deterministica, solo lectura y devuelve fuentes/snippets
 - chart assistant devuelve series graficables simples, no imagenes ni graficos acoplados
 - correlate assistant devuelve relaciones descriptivas por presets cerrados, con fuentes y faltantes
@@ -94,8 +93,8 @@ Estado real al 2026-06-24:
 - el backend bloquea aceptar patches con `requires_human_confirmation=false`
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
 - la UI de propuestas desde evolucion exige permiso AI para confirmar patches
-- el siguiente bloque debe partir desde `main` verde y ser micro-PR logico; si
-  hay correcciones de migracion pendientes, cerrarlas antes de nueva clinica
+- el siguiente bloque debe partir desde `main` verde y ser micro-PR logico,
+  evitando nueva escritura clinica hasta tener contrato, permisos y gates
 
 Lecciones post #15-#17:
 

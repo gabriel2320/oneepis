@@ -27,9 +27,16 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await expect(
     page.getByText(new RegExp(`/lab-panels/${labPanelId}/results/${labResultId}`)),
   ).toBeVisible();
-  await expect(page.getByText("Linea de tiempo completa")).toBeVisible();
+  await expect(page.getByText("Linea de tiempo avanzada")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Todo 2/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Evoluciones 1/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Eventos 1/ })).toBeVisible();
+  await expect(page.getByText("Control longitudinal real").first()).toBeVisible();
+  await expect(page.getByText("Fuente: clinical_entries").first()).toBeVisible();
+  await page.getByRole("button", { name: /Eventos 1/ }).click();
   await expect(page.getByText("Disnea y saturacion baja").first()).toBeVisible();
   await expect(page.getByText("Fuente: clinical_events")).toBeVisible();
+  await expect(page.getByText("Limite aplicado: 20").first()).toBeVisible();
 
   await page.goto(`/pacientes/${patientId}/ai-chart`);
 
@@ -225,6 +232,15 @@ const assistantTimeline = {
       summary: "Paciente refiere disnea leve.",
       source_label: "clinical_entries",
       source_path: `/api/v1/patients/${patientId}/clinical-entries/${entryId}`,
+    },
+    {
+      item_type: "clinical_event",
+      item_id: eventId,
+      occurred_at: "2026-06-20T10:20:00Z",
+      label: "Disnea y saturacion baja",
+      summary: "Evento longitudinal con fuente visible.",
+      source_label: "clinical_events",
+      source_path: `/api/v1/patients/${patientId}/clinical-events/${eventId}`,
     },
   ],
   missing_data: [],

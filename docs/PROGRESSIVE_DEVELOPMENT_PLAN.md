@@ -281,6 +281,7 @@ Reglas de ejecucion:
 | 5 | `PROG-AMB-PRECONSULTA-PERMISSIONS-01` | `codex/preconsult-nursing-permissions` | `[codex] allow nursing preconsult backend` | `npm run check:api`, `npm run check:web`, `npm run check:contract` | backend/permisos/tests habilitan enfermeria sin ruta nueva ni rol admision |
 | 6 | `PROG-CLINICAL-RISK-01` | `codex/clinical-risk-minimal` | `[codex] implement minimal clinical risks` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/OpenAPI/UI compacta listas, sin dashboard ni IA |
 | 7 | `PROG-PATIENT-CORE-NEXT-00` | `codex/patient-core-next-plan` | `[codex] plan next patient core block` | `npm run check:size` | decidir si sigue linea de tiempo avanzada, antecedentes estructurados o enfermeria en preconsulta |
+| 8 | `PROG-PATIENT-TIMELINE-01` | `codex/patient-timeline-read` | `[codex] integrate patient timeline read` | `npm run check:web`, `npm run check:size`, smoke ficha | ficha reutiliza `assistant/timeline` con dominios, fuentes, limites y faltantes; sin API ni escritura nueva |
 
 Bloques ya cerrados en esta cola: `PROG-CONSOLIDATE-01`,
 `PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00`,
@@ -297,7 +298,7 @@ existentes, no crea escritura nueva y mantiene el foco paciente/ficha/papel.
 
 ## PROG-PATIENT-CORE-NEXT-00
 
-Estado: decidido docs-only.
+Estado: decidido docs-only; ejecutado por `PROG-PATIENT-TIMELINE-01`.
 
 Decision: el siguiente bloque de producto sera `PROG-PATIENT-TIMELINE-01`.
 
@@ -312,6 +313,24 @@ Contrato minimo:
 
 Gates esperados para `PROG-PATIENT-TIMELINE-01`: `npm run check:web` y smoke
 E2E de ficha. `npm run check:contract` solo aplica si cambia API.
+
+## PROG-PATIENT-TIMELINE-01
+
+Estado: implementado en ficha.
+
+Resultado:
+
+- `/pacientes/[patientId]/ficha` reutiliza `GET /api/v1/patients/{patient_id}/assistant/timeline`
+- la linea de tiempo avanzada muestra filtros por dominio, conteos, fuente,
+  ruta, limite, advertencias y faltantes
+- no crea tabla, endpoint, ruta visible, dependencia, IA nueva ni escritura
+  clinica
+
+Gates de cierre:
+
+- `npm run check:web`
+- `npm run check:size`
+- smoke E2E de ficha
 
 ## PROG-AMB-PRECONSULTA-00
 
