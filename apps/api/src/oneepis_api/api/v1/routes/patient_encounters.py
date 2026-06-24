@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import EncounterActorDep
-from oneepis_api.models.clinical_record import ClinicalEncounter, EncounterStatus
+from oneepis_api.api.deps import CurrentUserDep, EncounterActorDep
+from oneepis_api.models.clinical_record import ClinicalEncounter, EncounterStatus, EncounterType
 from oneepis_api.schemas.clinical_record import (
     ClinicalEncounterCreate,
     ClinicalEncounterRead,
     ClinicalEncounterUpdate,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.auth import AuthenticatedUser, UserRole
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -53,9 +54,10 @@ def create_clinical_encounter(
     patient_id: uuid.UUID,
     payload: ClinicalEncounterCreate,
     session: SessionDep,
-    actor: EncounterActorDep,
+    user: CurrentUserDep,
 ) -> ClinicalEncounter:
     require_patient(session, patient_id)
+    actor = _authorize_encounter_creation(payload, user)
     encounter = ClinicalEncounter(patient_id=patient_id, **payload.model_dump())
     session.add(encounter)
     session.flush()
@@ -75,6 +77,30 @@ def create_clinical_encounter(
     session.commit()
     session.refresh(encounter)
     return encounter
+
+
+def _authorize_encounter_creation(
+    payload: ClinicalEncounterCreate,
+    user: AuthenticatedUser,
+) -> str:
+    if user.roles.intersection({UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV}):
+        return user.actor_id
+    if UserRole.ENFERMERIA in user.roles and _is_ambulatory_preconsult(payload):
+        return user.actor_id
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Insufficient role for this action",
+    )
+
+
+def _is_ambulatory_preconsult(payload: ClinicalEncounterCreate) -> bool:
+    notes = payload.notes or ""
+    return (
+        payload.type == EncounterType.AMBULATORY
+        and payload.status == EncounterStatus.IN_PROGRESS
+        and payload.ended_at is None
+        and notes.startswith("Preconsulta vinculada a cita ")
+    )
 
 
 @router.get("/{patient_id}/encounters/{encounter_id}", response_model=ClinicalEncounterRead)

@@ -131,6 +131,101 @@ def test_clinical_entry_can_be_linked_and_unlinked_from_encounter(
     assert any(item["extra_data"]["after"] == {"encounter_id": None} for item in updates)
 
 
+def test_nursing_can_create_ambulatory_preconsult_encounter(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=nursing_auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Preconsulta ambulatoria",
+            "started_at": "2026-06-20T12:00:00Z",
+            "notes": "Preconsulta vinculada a cita 11111111-1111-4111-8111-111111111111.",
+        },
+    )
+
+    assert response.status_code == 201
+    created = response.json()
+    assert created["type"] == "ambulatory"
+    assert created["status"] == "in_progress"
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=nursing_auth)
+    assert audit_response.status_code == 200
+    created_audit = next(
+        item for item in audit_response.json() if item["action"] == "encounter.created"
+    )
+    assert created_audit["actor_id"] == "enfermeria@oneepis.local"
+
+
+def test_nursing_preconsult_permission_does_not_open_general_encounters(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+
+    general_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=nursing_auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Control ambulatorio",
+            "started_at": "2026-06-20T12:00:00Z",
+        },
+    )
+    assert general_response.status_code == 403
+
+    hospitalization_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=nursing_auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso hospitalario",
+            "started_at": "2026-06-20T12:05:00Z",
+            "notes": "Preconsulta vinculada a cita 11111111-1111-4111-8111-111111111111.",
+        },
+    )
+    assert hospitalization_response.status_code == 403
+
+    preconsult_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=nursing_auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Preconsulta ambulatoria",
+            "started_at": "2026-06-20T12:10:00Z",
+            "notes": "Preconsulta vinculada a cita 22222222-2222-4222-8222-222222222222.",
+        },
+    )
+    assert preconsult_response.status_code == 201
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/encounters/{preconsult_response.json()['id']}",
+        headers=nursing_auth,
+        json={"status": "completed"},
+    )
+    assert update_response.status_code == 403
+
+
 def test_discharge_summary_requires_hospitalization_encounter(
     client: TestClient,
     auth_headers,
