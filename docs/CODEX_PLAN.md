@@ -763,6 +763,16 @@ Estado: implementado. `npm run check:traceability` regenera
 dominios bloqueados permitidos: no se deben expandir a escritura productiva sin
 definir fuente primaria.
 
+#### C3-06 Snapshot usage report
+
+Objetivo: mapear que pantallas y papeles consumen snapshots, proyecciones o
+listas de entidades para orientar la siguiente consolidacion de lecturas.
+
+Estado: implementado. `npm run audit:snapshots` genera
+`reports/snapshot-usage-map.*` desde los clientes frontend existentes. No falla
+el build: es reporte de arquitectura para decidir que lectura debe convertirse
+en snapshot formal antes de crear mas pantallas.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.
