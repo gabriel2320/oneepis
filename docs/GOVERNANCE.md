@@ -145,11 +145,14 @@ Regla especifica de preconsulta ambulatoria:
 
 - `PROG-AMB-PRECONSULTA-01` debe reutilizar agenda, encuentro, signos y eventos
   antes de crear tablas o endpoints compuestos.
-- La primera implementacion usa permisos existentes de encuentro/evento/signos
+- La primera implementacion uso permisos existentes de encuentro/evento/signos
   (`medico/admin/dev`).
-- Decision post-#25: habilitar `enfermeria` para preconsulta avanzada es valido
-  solo mediante backend/permisos/tests; `admision` queda futura hasta existir
-  rol administrativo y limites de escritura propios.
+- Decision post-#35: `enfermeria` puede completar solo la preconsulta
+  ambulatoria minima existente. El backend permite crear el encuentro
+  ambulatorio tecnico de preconsulta, pero no abre gestion general de
+  encuentros ni hospitalizacion.
+- `admision` queda futura hasta existir rol administrativo y limites de
+  escritura propios.
 - La preconsulta puede preparar la atencion, pero no diagnostica, no firma, no
   receta, no ordena y no ejecuta acciones clinicas automaticamente.
 - Si la UI necesita un flujo mas complejo, primero se actualiza el contrato en

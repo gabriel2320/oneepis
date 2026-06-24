@@ -43,6 +43,9 @@ Estado real al 2026-06-24:
   - PR #25: preconsulta ambulatoria minima dentro de atencion
   - PR #32: linea de tiempo avanzada read-only dentro de ficha reutilizando
     `assistant/timeline`
+  - PR #34: polish read-only de ficha/antecedentes con fuentes y faltantes mas claros
+  - PR #35: enfermeria habilitada para completar solo preconsulta minima
+  - PR #36: dieta frontend de clientes/contratos Assistant Read e IA clinica
 - bloques de consolidacion, dieta y polish inicial de ficha quedan cerrados:
   documentacion reconciliada, `patient-list-pages.tsx` fuera del reporte
   near-limit, antecedentes con fuentes usadas y timeline/laboratorio con
@@ -61,12 +64,13 @@ Estado real al 2026-06-24:
 - `PROG-AMB-PRECONSULTA-01` implementa preconsulta ambulatoria minima dentro de
   `/consulta/pacientes/{patient_id}/atencion`, sin ruta, tabla ni endpoint nuevo
   y reutilizando cita, encuentro, signos vitales y evento clinico
-- la preconsulta minima queda limitada a permisos existentes `medico/admin/dev`;
-  `enfermeria` queda aprobada solo para PR backend/permisos/tests y `admision`
-  sigue futura hasta existir rol administrativo
-- la razon tecnica es explicita: enfermeria ya puede escribir signos y eventos
-  clinicos, pero `ClinicalEncounter` sigue restringido a `admin/medico/dev` y
-  el panel de preconsulta exige permisos de encuentro, evento y signos
+- la preconsulta minima puede ser completada por `enfermeria`, `medico`,
+  `admin` o `dev`
+- el permiso de `enfermeria` es estrecho: solo crea el encuentro ambulatorio
+  tecnico marcado como preconsulta y sigue bloqueado para encuentros generales,
+  SOAP, medicacion, alergias, problemas e IA clinica
+- `admision` sigue futura hasta existir rol administrativo y limites de
+  escritura propios
 - `PROG-CLINICAL-RISK-01` implementa riesgos clinicos minimos con entidad/API
   bajo paciente, permisos, auditoria, OpenAPI, UI compacta en ficha y E2E
   visible; no crea dashboard, scores automaticos ni IA nueva
@@ -93,11 +97,11 @@ Estado real al 2026-06-24:
 - el backend bloquea aceptar patches con `requires_human_confirmation=false`
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
 - la UI de propuestas desde evolucion exige permiso AI para confirmar patches
-- el siguiente bloque recomendado es `PR-034 / PROG-PATIENT-RECORD-READ-POLISH-02`:
-  pulir la ficha existente sin crear nuevo modulo; antecedentes ya existen como
-  lectura minima y solo deben mejorar jerarquia, fuentes y faltantes
-- alternativa posterior: `PROG-AMB-PRECONSULTA-PERMISSIONS-01` para enfermeria
-  con backend/permisos/tests
+- `PROG-PATIENT-RECORD-READ-POLISH-02` quedo cerrado por PR #34
+- `PROG-AMB-PRECONSULTA-PERMISSIONS-01` quedo cerrado por PR #35
+- `PROG-DIET-FRONTEND-CONTRACTS-01` quedo cerrado por PR #36
+- el siguiente bloque debe elegirse pequeno: dieta near-limit restante, papel
+  serio o contrato minimo paciente/ficha; no abrir IA nueva ni dominio amplio
 
 Lecciones post #15-#17:
 
@@ -158,7 +162,8 @@ Auth local:
 - rutas de paciente requieren autenticacion
 - escrituras clinicas se reparten por permiso fino; `admin` y `dev` pueden
   operar todo el entorno local gobernado, `medico` escribe actos medicos y
-  `enfermeria` queda acotada a signos/eventos/laboratorio/riesgos
+  `enfermeria` queda acotada a signos/eventos/laboratorio/riesgos y
+  preconsulta ambulatoria minima
 - IA clinica requiere `admin`, `medico` o `dev`
 - fuera de `development`, la API rechaza secreto default, usuarios default, actor dev y auth desactivada
 
@@ -174,7 +179,9 @@ Permisos finos:
 - enfermeria puede registrar signos vitales, eventos clinicos, laboratorio
   minimo y riesgos clinicos, pero no encuentros, SOAP, medicacion, alergias,
   problemas ni IA clinica
-- encuentros clinicos requieren rol medico/admin/dev
+- encuentros clinicos generales requieren rol medico/admin/dev; la excepcion
+  estrecha es la preconsulta ambulatoria minima, donde `enfermeria` puede crear
+  solo el encuentro tecnico de preconsulta
 - problemas activos requieren rol medico/admin/dev
 - estado de ficha y contexto asistencial se editan desde UI con rol medico/admin/dev
 - solo_lectura puede leer, pero no escribir
@@ -274,10 +281,10 @@ Consulta:
 - preconsulta ambulatoria minima esta integrada dentro de la atencion: toma cita
   programada/en check-in/en curso, crea encuentro ambulatorio, registra signos
   opcionales y deja evento clinico `clinical_note` con payload `preconsult`
-- la implementacion inicial usa permisos existentes de encuentro/evento/signos
-  (`medico/admin/dev` desde UI); preconsulta avanzada por enfermeria requiere
-  PR backend/permisos propio porque debe resolver permiso de encuentro, y rol
-  `admision` sigue futuro
+- la preconsulta minima puede completarla `enfermeria`, `medico`, `admin` o
+  `dev`; enfermeria solo obtiene el permiso tecnico necesario para ese flujo,
+  no gestion general de encuentros
+- rol `admision` sigue futuro
 - agenda avanzada por equipos/recursos y no-show operacional siguen futuras
 - `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden
 - seguimiento formal, interconsultas y cierre documental ambulatorio siguen futuros
@@ -313,7 +320,7 @@ Capas:
 - `src/app/api/ai/clinical-command/route.ts`: BFF streaming con Vercel AI SDK; orquesta FastAPI y no reemplaza la API clinica canonica
 - `src/lib/api/*`: clientes API por dominio
 - `src/lib/api/auth.ts`: login local y sesion actual
-- `src/lib/types.ts`: contrato TypeScript
+- `src/lib/types.ts`: agregador de contratos TypeScript por dominio
 - `src/components/auth/*`: login local y badge de sesion
 - `src/components/layout/app-shell.tsx`: navegacion global
 - temas visuales usan tokens de superficie (`surface`, `surface-subtle`, `surface-raised`) y selector con swatch
@@ -374,7 +381,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - mantener la regla de producto: paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
 - `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
-- `apps/web/src/lib/types.ts` supera 300 lineas por ser contrato manual compartido; vigilar antes de sumar muchos dominios.
+- los contratos frontend de Assistant Read e IA clinica ya se separaron de
+  `clinical-record.ts`; vigilar los nuevos near-limit antes de sumar dominios.
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
 - `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon; Assistant Read backend ya no usa excepcion propia.
 - `npm run check:screens` bloquea rutas visibles sin fila en `SCREEN_TREE` o sin `ScreenCapability`.

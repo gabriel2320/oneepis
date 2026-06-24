@@ -6,7 +6,7 @@ cronologica para humanos y agentes.
 
 ## Estado actual
 
-Fecha de corte: 2026-06-23.
+Fecha de corte: 2026-06-24.
 
 OneEpis ya tiene una base clinica E2E real:
 
@@ -158,6 +158,14 @@ OneEpis ya tiene una base clinica E2E real:
   de snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion.
 - Documentos/papel deja de ser placeholder y queda como indice de ficha, resumen,
   evoluciones, ingreso y epicrisis imprimibles cuando la fuente existe.
+- Linea de tiempo avanzada read-only queda integrada dentro de ficha usando
+  `assistant/timeline`.
+- Ficha/antecedentes read-only quedan pulidos con fuentes, limites y faltantes
+  mas claros, sin tabla ni ruta nueva.
+- Enfermeria puede completar solo la preconsulta ambulatoria minima; no gana
+  permisos generales de encuentro, SOAP, medicacion, alergias, problemas ni IA.
+- Los clientes/contratos frontend de Assistant Read e IA clinica se separaron
+  de `clinical-record.ts` para bajar riesgo de archivos near-limit.
 - Agenda avanzada/productiva, alta/epicrisis firmada y papel firmado/legal
   quedan pendientes de contrato backend antes de UI amplia.
 - El mapa maestro registra contratos minimos bloqueantes para agenda avanzada,
@@ -196,8 +204,9 @@ OneEpis ya tiene una base clinica E2E real:
   `payload.preconsult`.
 - Alcance: preparar la atencion humana; no diagnostica, no receta, no firma,
   no emite orden y no agrega IA.
-- Restriccion de permisos: usa permisos existentes `medico/admin/dev`;
-  `enfermeria`/`admision` quedan para PR backend especifico.
+- Restriccion inicial de permisos: uso `medico/admin/dev`.
+- Estado post PR #35: `enfermeria` puede completar solo la preconsulta minima;
+  `admision` sigue futura.
 
 ### PROG-POST-PRECONSULTA-01: consolidacion post #25
 
@@ -224,14 +233,18 @@ OneEpis ya tiene una base clinica E2E real:
   declaran limites visibles.
 - Fuera de alcance: escritura, IA nueva, dashboard, rutas y OpenAPI.
 
-### PROG-AMB-PRECONSULTA-PERMISSIONS-00: decision de permisos
+### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
-- Estado: decision docs-only.
-- Decision: aprobar una futura habilitacion de `enfermeria` para preconsulta
-  avanzada, pero solo con backend/permisos/tests.
+- Estado: decision docs-only cerrada y permiso estrecho implementado.
+- Decision: habilitar `enfermeria` solo para el flujo existente de preconsulta
+  minima, con backend/permisos/tests.
 - Decision: mantener `admision` futura hasta existir rol administrativo y
   limites de escritura propios.
-- Fuera de alcance: cambios de API, UI, OpenAPI, permisos reales o rol nuevo.
+- Resultado PR #35: `enfermeria` completa solo la preconsulta minima existente
+  creando el encuentro tecnico de preconsulta, signos opcionales y evento
+  clinico; sigue bloqueada para encuentros generales, hospitalizacion, SOAP,
+  medicacion, alergias, problemas e IA.
+- Fuera de alcance: rol `admision`, endpoint compuesto, tabla nueva o ruta nueva.
 
 ### PROG-CLINICAL-RISK-00: contrato de riesgos clinicos
 
