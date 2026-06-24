@@ -1,0 +1,412 @@
+{
+  "generated_at": "2026-06-24T22:00:29.281Z",
+  "scope": "clinical_write_permissions",
+  "rows": [
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization.py",
+      "function_name": "create_hospital_bed",
+      "method": "POST",
+      "path": "/beds",
+      "actor_or_access_dep": "EncounterActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization.py",
+      "function_name": "update_hospital_bed",
+      "method": "PATCH",
+      "path": "/beds/{bed_id}",
+      "actor_or_access_dep": "EncounterActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization_daily_sheets.py",
+      "function_name": "create_hospital_daily_sheet",
+      "method": "POST",
+      "path": "/patients/{patient_id}/daily-sheets",
+      "actor_or_access_dep": "HospitalDailySheetActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_hospital_daily_sheets.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization_daily_sheets.py",
+      "function_name": "update_hospital_daily_sheet",
+      "method": "PATCH",
+      "path": "/patients/{patient_id}/daily-sheets/{sheet_id}",
+      "actor_or_access_dep": "HospitalDailySheetActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_hospital_daily_sheets.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization_indications.py",
+      "function_name": "create_hospital_indication",
+      "method": "POST",
+      "path": "/patients/{patient_id}/indications",
+      "actor_or_access_dep": "HospitalIndicationActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_hospital_indications.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization_indications.py",
+      "function_name": "update_hospital_indication",
+      "method": "PATCH",
+      "path": "/patients/{patient_id}/indications/{indication_id}",
+      "actor_or_access_dep": "HospitalIndicationActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_hospital_indications.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_ai.py",
+      "function_name": "create_draft_soap_from_events",
+      "method": "POST",
+      "path": "/{patient_id}/ai/draft-soap-from-events",
+      "actor_or_access_dep": "AiAccessDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_ai.py",
+      "function_name": "create_event_proposals_from_entry",
+      "method": "POST",
+      "path": "/{patient_id}/ai/event-proposals-from-entry",
+      "actor_or_access_dep": "AiAccessDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_ai.py",
+      "function_name": "confirm_clinical_patch",
+      "method": "POST",
+      "path": "/{patient_id}/ai/confirm-clinical-patch",
+      "actor_or_access_dep": "AiAccessDep",
+      "audit": "delegated:confirm_patch_service",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_ai.py",
+      "function_name": "create_clinical_intent",
+      "method": "POST",
+      "path": "/{patient_id}/ai/clinical-intent",
+      "actor_or_access_dep": "AiAccessDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_ai.py",
+      "function_name": "route_patient_clinical_intent",
+      "method": "POST",
+      "path": "/{patient_id}/ai/clinical-intent-route",
+      "actor_or_access_dep": "AiAccessDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_ai.py",
+      "function_name": "decide_clinical_intent_action",
+      "method": "POST",
+      "path": "/{patient_id}/ai/action-decision",
+      "actor_or_access_dep": "AiAccessDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_ai.py",
+      "function_name": "decide_clinical_review_item",
+      "method": "POST",
+      "path": "/{patient_id}/ai/review-item-decision",
+      "actor_or_access_dep": "AiAccessDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py",
+      "function_name": "create_allergy",
+      "method": "POST",
+      "path": "/{patient_id}/allergies",
+      "actor_or_access_dep": "AllergyActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py",
+      "function_name": "update_allergy",
+      "method": "PATCH",
+      "path": "/{patient_id}/allergies/{allergy_id}",
+      "actor_or_access_dep": "AllergyActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py",
+      "function_name": "delete_allergy",
+      "method": "DELETE",
+      "path": "/{patient_id}/allergies/{allergy_id}",
+      "actor_or_access_dep": "AllergyActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_core.py",
+      "function_name": "create_patient",
+      "method": "POST",
+      "path": "",
+      "actor_or_access_dep": "PatientActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_core.py",
+      "function_name": "update_patient",
+      "method": "PATCH",
+      "path": "/{patient_id}",
+      "actor_or_access_dep": "PatientActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py",
+      "function_name": "create_clinical_encounter",
+      "method": "POST",
+      "path": "/{patient_id}/encounters",
+      "actor_or_access_dep": "EncounterActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py",
+      "function_name": "update_clinical_encounter",
+      "method": "PATCH",
+      "path": "/{patient_id}/encounters/{encounter_id}",
+      "actor_or_access_dep": "EncounterActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py",
+      "function_name": "cancel_clinical_encounter",
+      "method": "DELETE",
+      "path": "/{patient_id}/encounters/{encounter_id}",
+      "actor_or_access_dep": "EncounterActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_entries.py",
+      "function_name": "create_clinical_entry",
+      "method": "POST",
+      "path": "/{patient_id}/clinical-entries",
+      "actor_or_access_dep": "ClinicalEntryActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_entries.py",
+      "function_name": "update_clinical_entry",
+      "method": "PATCH",
+      "path": "/{patient_id}/clinical-entries/{entry_id}",
+      "actor_or_access_dep": "ClinicalEntryActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_entries.py",
+      "function_name": "delete_draft_clinical_entry",
+      "method": "DELETE",
+      "path": "/{patient_id}/clinical-entries/{entry_id}",
+      "actor_or_access_dep": "ClinicalEntryActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_events.py",
+      "function_name": "create_clinical_event",
+      "method": "POST",
+      "path": "/{patient_id}/clinical-events",
+      "actor_or_access_dep": "ClinicalEventActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_events.py",
+      "function_name": "update_clinical_event",
+      "method": "PATCH",
+      "path": "/{patient_id}/clinical-events/{event_id}",
+      "actor_or_access_dep": "ClinicalEventActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "no detectado",
+      "critical_gaps": [],
+      "warnings": [
+        "NO_403_TEST_DETECTED"
+      ]
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_medications.py",
+      "function_name": "create_medication",
+      "method": "POST",
+      "path": "/{patient_id}/medications",
+      "actor_or_access_dep": "MedicationActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_medications.py",
+      "function_name": "update_medication",
+      "method": "PATCH",
+      "path": "/{patient_id}/medications/{medication_id}",
+      "actor_or_access_dep": "MedicationActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_medications.py",
+      "function_name": "delete_medication",
+      "method": "DELETE",
+      "path": "/{patient_id}/medications/{medication_id}",
+      "actor_or_access_dep": "MedicationActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_problems.py",
+      "function_name": "create_active_problem",
+      "method": "POST",
+      "path": "/{patient_id}/problems",
+      "actor_or_access_dep": "ProblemActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_problems.py",
+      "function_name": "update_active_problem",
+      "method": "PATCH",
+      "path": "/{patient_id}/problems/{problem_id}",
+      "actor_or_access_dep": "ProblemActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_problems.py",
+      "function_name": "delete_active_problem",
+      "method": "DELETE",
+      "path": "/{patient_id}/problems/{problem_id}",
+      "actor_or_access_dep": "ProblemActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_vitals.py",
+      "function_name": "create_vital_sign",
+      "method": "POST",
+      "path": "/{patient_id}/vital-signs",
+      "actor_or_access_dep": "VitalSignActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_vitals.py",
+      "function_name": "update_vital_sign",
+      "method": "PATCH",
+      "path": "/{patient_id}/vital-signs/{vital_sign_id}",
+      "actor_or_access_dep": "VitalSignActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_vitals.py",
+      "function_name": "delete_vital_sign",
+      "method": "DELETE",
+      "path": "/{patient_id}/vital-signs/{vital_sign_id}",
+      "actor_or_access_dep": "VitalSignActorDep",
+      "audit": "record_audit_event",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
+      "critical_gaps": [],
+      "warnings": []
+    }
+  ],
+  "summary": {
+    "routes_checked": 35,
+    "critical_gaps": 0,
+    "warnings": 8
+  }
+}

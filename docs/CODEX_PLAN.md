@@ -721,8 +721,16 @@ pantalla, papel, permisos, auditoria, tests y gaps. Resultado esperado inicial:
 
 #### C3-02 Permission guard
 
-Siguiente objetivo: crear `check:permissions` para rutas `POST/PATCH/DELETE`
+Objetivo: crear `check:permissions` para rutas `POST/PATCH/DELETE`
 clinicas, separando este gate del inventario `domain-map`.
+
+Estado: implementado. `npm run check:permissions` inspecciona rutas mutantes
+clinicas en FastAPI y genera `reports/permissions-map.*`. El gate falla por
+brechas criticas de actor/permiso o auditoria ausente. En la primera pasada
+revisa 35 rutas, con 0 brechas criticas y 8 advertencias por tests 403 no
+detectados de forma especifica. Esas advertencias quedan visibles para el
+siguiente endurecimiento, pero no bloquean aun para no mezclar guard
+arquitectonico con expansion de cobertura.
 
 ## AI-Chart despues de R-01
 
