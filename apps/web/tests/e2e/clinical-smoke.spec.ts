@@ -18,6 +18,9 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
 
   await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
+  await expect(page.getByText("Episodio clinico")).toBeVisible();
+  await expect(page.getByText(/Encuentro demo - ambulatory iniciado/)).toBeVisible();
+  await expect(page.getByText("1 encuentros recientes; 1 evoluciones recientes vinculadas; 1 sin encuentro.")).toBeVisible();
   await expect(page.getByText("Sugerencias Ollama")).toBeVisible();
   await expect(page.getByText(/Borrador IA/)).toBeVisible();
 });
@@ -50,6 +53,8 @@ test("patient encounters render list and creation screen", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/encuentros`);
 
   await expect(page.getByText("Encuentro demo")).toBeVisible();
+  await expect(page.getByText("Episodio activo")).toBeVisible();
+  await expect(page.getByText("Usa este encuentro al registrar SOAP o eventos del episodio actual.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Nuevo" })).toBeVisible();
 
   await page.goto(`/pacientes/${demoPatientId}/encuentros/nuevo`);
@@ -135,8 +140,32 @@ test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Nueva evolucion SOAP" })).toBeVisible();
   const encounterSelect = page.locator('select[name="encounter_id"]');
   await expect(encounterSelect).toContainText("Encuentro demo - ambulatory");
+  await expect(
+    page.getByText("Selecciona un encuentro si este acto pertenece a una consulta, ingreso o urgencia."),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Revisar con Ollama" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeVisible();
+});
+
+test("patient events expose source trace", async ({ page }) => {
+  await page.goto(`/pacientes/${demoPatientId}/eventos`);
+
+  await expect(page.getByRole("heading", { name: "Eventos clinicos" })).toBeVisible();
+  await expect(page.getByText("Fuente manual: este evento nace del registro humano actual.")).toBeVisible();
+  await expect(page.getByText("Timeline de eventos")).toBeVisible();
+  await expect(page.getByText("Sin eventos registrados")).toBeVisible();
+});
+
+test("patient vital signs expose source trace", async ({ page }) => {
+  await page.goto(`/pacientes/${demoPatientId}/signos-vitales`);
+
+  await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
+  await expect(page.getByText("Controles registrados")).toBeVisible();
+  await expect(page.getByText("Fuente vital_sign")).toBeVisible();
+  await expect(
+    page.getByText("Si este control explica un cambio clinico, proyectalo como evento longitudinal"),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Registrar" })).toBeVisible();
 });
 
 test("AI settings and print routes render", async ({ page }) => {
@@ -165,6 +194,8 @@ test("prepared and blocked routes expose visible governance state", async ({ pag
   await page.goto(`/print/pacientes/${demoPatientId}/receta`);
   await expect(page.getByRole("heading", { name: "Receta bloqueada" })).toBeVisible();
   await expect(page.getByText("Documento bloqueado: no valido para prescribir")).toBeVisible();
+  await expect(page.getByText("Requisitos pendientes")).toBeVisible();
+  await expect(page.getByText("modelo/API de receta con auditoria y OpenAPI")).toBeVisible();
 });
 
 test("login route renders local auth form", async ({ page }) => {

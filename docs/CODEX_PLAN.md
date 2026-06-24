@@ -680,6 +680,10 @@ npm run check:e2e
 npm run check:web
 ```
 
+Estado: implementado. El smoke E2E cubre episodio activo en ficha/encuentros,
+SOAP vinculado a encuentro, eventos con fuente, signos vitales como fuente
+estructurada y receta bloqueada con requisitos pendientes.
+
 #### C2-06 Publicacion limpia
 
 Objetivo: preparar salida a rama/PR sin mezclar siguiente feature.
