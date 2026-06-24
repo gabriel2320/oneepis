@@ -3,6 +3,7 @@ export type ScreenLifecycle = "complete" | "prepared" | "blocked";
 export type ScreenKind = "app" | "print";
 export type ScreenWritePolicy = "none" | "existing-api" | "blocked";
 export type ScreenPaperPolicy = "none" | "carta";
+export type ScreenPrintClinicalUse = "development-only" | "blocked";
 
 export type ScreenCapability = {
   route: string;
@@ -12,6 +13,11 @@ export type ScreenCapability = {
   writePolicy: ScreenWritePolicy;
   paperPolicy: ScreenPaperPolicy;
   printRoute?: string;
+  printOwnerEntity?: string;
+  printReadModel?: string;
+  printApiClient?: string;
+  printDocumentState?: string;
+  printClinicalUse?: ScreenPrintClinicalUse;
   apiTestEvidence?: string[];
   blockExpectation?: string[];
 };
@@ -373,6 +379,11 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "print",
     writePolicy: "none",
     paperPolicy: "carta",
+    printOwnerEntity: "PatientRecordSnapshot",
+    printReadModel: "GET /api/v1/patients/{patient_id}/record",
+    printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
+    printDocumentState: "Documento de desarrollo / no uso clinico real",
+    printClinicalUse: "development-only",
   },
   {
     route: "/print/pacientes/[patientId]/evolucion/[entryId]",
@@ -381,6 +392,11 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "print",
     writePolicy: "none",
     paperPolicy: "carta",
+    printOwnerEntity: "ClinicalEntry via PatientRecordSnapshot.recent_entries",
+    printReadModel: "GET /api/v1/patients/{patient_id}/record",
+    printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
+    printDocumentState: "Borrador/firmada/enmendada visible; sin firma legal digital",
+    printClinicalUse: "development-only",
   },
   {
     route: "/print/pacientes/[patientId]/resumen",
@@ -389,6 +405,11 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "print",
     writePolicy: "none",
     paperPolicy: "carta",
+    printOwnerEntity: "PatientRecordSnapshot",
+    printReadModel: "GET /api/v1/patients/{patient_id}/record",
+    printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
+    printDocumentState: "Documento de desarrollo / no uso clinico real",
+    printClinicalUse: "development-only",
   },
   {
     route: "/print/pacientes/[patientId]/receta",
@@ -397,6 +418,11 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "print",
     writePolicy: "blocked",
     paperPolicy: "carta",
+    printOwnerEntity: "BlockedPrescriptionPlaceholder",
+    printReadModel: "GET /api/v1/patients/{patient_id}/record",
+    printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
+    printDocumentState: "Documento bloqueado: no valido para prescribir",
+    printClinicalUse: "blocked",
     blockExpectation: ["Receta bloqueada", "Documento bloqueado: no valido para prescribir"],
   },
   {
@@ -406,6 +432,11 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "print",
     writePolicy: "none",
     paperPolicy: "carta",
+    printOwnerEntity: "HospitalizationBoardItem + latest HospitalDailySheet",
+    printReadModel: "GET /api/v1/hospitalization/active + GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+    printApiClient: "apps/web/src/lib/api/hospitalization.ts:listActiveHospitalizations,listHospitalDailySheets",
+    printDocumentState: "Documento operacional de desarrollo / no uso clinico real",
+    printClinicalUse: "development-only",
   },
   {
     route: "/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]",
@@ -414,6 +445,11 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "print",
     writePolicy: "none",
     paperPolicy: "carta",
+    printOwnerEntity: "HospitalDailySheet + PatientRecordSnapshot",
+    printReadModel: "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+    printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalDailySheets",
+    printDocumentState: "Borrador/cerrada visible; sin firma legal digital",
+    printClinicalUse: "development-only",
   },
   {
     route: "/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]",
@@ -422,5 +458,10 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "print",
     writePolicy: "none",
     paperPolicy: "carta",
+    printOwnerEntity: "HospitalIndication + PatientRecordSnapshot",
+    printReadModel: "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/indications",
+    printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalIndications",
+    printDocumentState: "Borrador/cerrada visible; no equivale a orden ejecutable ni firma legal",
+    printClinicalUse: "development-only",
   },
 ];

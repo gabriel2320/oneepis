@@ -732,6 +732,16 @@ detectados de forma especifica. Esas advertencias quedan visibles para el
 siguiente endurecimiento, pero no bloquean aun para no mezclar guard
 arquitectonico con expansion de cobertura.
 
+#### C3-03 Paper source guard
+
+Objetivo: impedir que las rutas `/print` crezcan como modulo clinico paralelo.
+
+Estado: implementado. `npm run check:paper` revisa toda capacidad
+`screenKind=print` con `paperPolicy=carta` y exige entidad duena, read model,
+cliente API, estado documental y uso clinico declarado. El reporte
+`reports/paper-source-map.*` deja trazable cada papel a su fuente y mantiene
+receta como documento bloqueado.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

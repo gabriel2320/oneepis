@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-06-24T22:07:14.678Z",
+  "scope": "paper_source_policy",
+  "summary": {
+    "print_routes_checked": 7,
+    "app_routes_with_paper_policy": 9,
+    "gaps": 0
+  },
+  "rows": [
+    {
+      "route": "/print/pacientes/[patientId]/ficha",
+      "linked_app_route": "/pacientes/[patientId]/ficha",
+      "owner_entity": "PatientRecordSnapshot",
+      "read_model": "GET /api/v1/patients/{patient_id}/record",
+      "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord",
+      "document_state": "Documento de desarrollo / no uso clinico real",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/pacientes/[patientId]/evolucion/[entryId]",
+      "linked_app_route": "/consulta/pacientes/[patientId]/atencion, /pacientes/[patientId]/evoluciones/desde-eventos, /pacientes/[patientId]/evoluciones/nueva",
+      "owner_entity": "ClinicalEntry via PatientRecordSnapshot.recent_entries",
+      "read_model": "GET /api/v1/patients/{patient_id}/record",
+      "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord",
+      "document_state": "Borrador/firmada/enmendada visible; sin firma legal digital",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/pacientes/[patientId]/resumen",
+      "linked_app_route": "/consulta/pacientes/[patientId]/resumen",
+      "owner_entity": "PatientRecordSnapshot",
+      "read_model": "GET /api/v1/patients/{patient_id}/record",
+      "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord",
+      "document_state": "Documento de desarrollo / no uso clinico real",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/pacientes/[patientId]/receta",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "BlockedPrescriptionPlaceholder",
+      "read_model": "GET /api/v1/patients/{patient_id}/record",
+      "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord",
+      "document_state": "Documento bloqueado: no valido para prescribir",
+      "clinical_use": "blocked",
+      "gaps": []
+    },
+    {
+      "route": "/print/hospitalizacion/rondas",
+      "linked_app_route": "/hospitalizacion/rondas",
+      "owner_entity": "HospitalizationBoardItem + latest HospitalDailySheet",
+      "read_model": "GET /api/v1/hospitalization/active + GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+      "api_client": "apps/web/src/lib/api/hospitalization.ts:listActiveHospitalizations,listHospitalDailySheets",
+      "document_state": "Documento operacional de desarrollo / no uso clinico real",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]",
+      "linked_app_route": "/hospitalizacion/pacientes/[patientId]/hoja-diaria, /hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar",
+      "owner_entity": "HospitalDailySheet + PatientRecordSnapshot",
+      "read_model": "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+      "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalDailySheets",
+      "document_state": "Borrador/cerrada visible; sin firma legal digital",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]",
+      "linked_app_route": "/hospitalizacion/pacientes/[patientId]/indicaciones",
+      "owner_entity": "HospitalIndication + PatientRecordSnapshot",
+      "read_model": "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/indications",
+      "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalIndications",
+      "document_state": "Borrador/cerrada visible; no equivale a orden ejecutable ni firma legal",
+      "clinical_use": "development-only",
+      "gaps": []
+    }
+  ]
+}
