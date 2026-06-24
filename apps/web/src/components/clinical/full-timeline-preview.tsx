@@ -1,111 +1,225 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { formatDateTime } from "@/components/clinical/date-format";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
 import { Badge } from "@/components/ui/badge";
-import { getClinicalTimeline } from "@/lib/api/clinical-record";
+import { Button } from "@/components/ui/button";
+import { getAssistantTimeline } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
-import type { ClinicalEntry, ClinicalEvent, ClinicalTimeline } from "@/lib/types";
+import type {
+  AssistantTimelineItem,
+  AssistantTimelineItemType,
+  AssistantTimelineResponse,
+} from "@/lib/types";
 
-type TimelineItem = {
-  id: string;
-  kind: "evolucion" | "evento";
-  occurredAt: string;
-  title: string;
-  summary: string;
-  source: string;
+type TimelineFilter = AssistantTimelineItemType | "all";
+
+const TIMELINE_FILTERS: Array<{ value: TimelineFilter; label: string }> = [
+  { value: "all", label: "Todo" },
+  { value: "clinical_entry", label: "Evoluciones" },
+  { value: "clinical_event", label: "Eventos" },
+  { value: "encounter", label: "Encuentros" },
+  { value: "vital_sign", label: "Signos" },
+  { value: "medication", label: "Medicacion" },
+  { value: "problem", label: "Problemas" },
+  { value: "allergy", label: "Alergias" },
+  { value: "lab_result", label: "Laboratorio" },
+];
+
+const TYPE_LABELS: Record<AssistantTimelineItemType, string> = {
+  encounter: "Encuentro",
+  clinical_entry: "Evolucion",
+  clinical_event: "Evento",
+  vital_sign: "Signos vitales",
+  medication: "Medicacion",
+  problem: "Problema",
+  allergy: "Alergia",
+  lab_result: "Laboratorio",
 };
 
 export function FullTimelinePreview({ patientId }: { patientId: string }) {
   const timelineQuery = useQuery({
-    queryKey: ["clinical-timeline", patientId, "ficha-preview"],
-    queryFn: () => getClinicalTimeline(patientId),
+    queryKey: ["assistant-timeline", patientId, "ficha-preview"],
+    queryFn: () => getAssistantTimeline(patientId),
     enabled: !DEMO_MODE,
   });
 
   return (
     <ClinicalSectionCard
-      title="Linea de tiempo completa"
-      description="Lectura combinada de evoluciones y eventos clinicos existentes."
+      title="Linea de tiempo avanzada"
+      description="Lectura longitudinal de fuentes clinicas existentes, sin escritura automatica."
     >
+      <div className="mb-3 flex flex-wrap gap-2">
+        <Badge variant="safe">Solo lectura</Badge>
+        <Badge variant="outline">Fuentes visibles</Badge>
+        <Badge variant="outline">Sin IA protagonista</Badge>
+      </div>
       {DEMO_MODE ? (
         <EmptyState
-          title="Timeline completo disponible con API real"
-          description="La ficha demo muestra solo evoluciones recientes."
+          title="Timeline avanzado disponible con API real"
+          description="La ficha demo no simula datos longitudinales avanzados."
         />
       ) : null}
       {timelineQuery.isLoading ? <LoadingRows rows={3} /> : null}
       {timelineQuery.isError ? (
         <ErrorState
-          description="No se pudo cargar la linea de tiempo completa."
+          description="No se pudo cargar la linea de tiempo avanzada."
           onRetry={() => timelineQuery.refetch()}
         />
       ) : null}
-      {timelineQuery.data ? <TimelineItemList timeline={timelineQuery.data} /> : null}
-      <p className="mt-3 text-xs text-muted-foreground">
-        Limite visible: 8 actos recientes combinando evoluciones y eventos; filtros avanzados quedan futuros.
-      </p>
+      {timelineQuery.data ? <TimelineWorkspace timeline={timelineQuery.data} /> : null}
     </ClinicalSectionCard>
   );
 }
 
-function TimelineItemList({ timeline }: { timeline: ClinicalTimeline }) {
-  const items = [
-    ...timeline.entries.map(entryItem),
-    ...timeline.events.map(eventItem),
-  ].sort((left, right) => Date.parse(right.occurredAt) - Date.parse(left.occurredAt));
+function TimelineWorkspace({ timeline }: { timeline: AssistantTimelineResponse }) {
+  const [activeFilter, setActiveFilter] = useState<TimelineFilter>("all");
+  const counts = useMemo(() => countByType(timeline.items), [timeline.items]);
+  const filteredItems = useMemo(() => {
+    if (activeFilter === "all") {
+      return timeline.items;
+    }
+    return timeline.items.filter((item) => item.item_type === activeFilter);
+  }, [activeFilter, timeline.items]);
 
+  if (timeline.items.length === 0) {
+    return (
+      <>
+        <EmptyState
+          title="Sin datos longitudinales"
+          description="La linea avanzada se llenara con actos clinicos reales."
+        />
+        <TimelineFootnotes timeline={timeline} />
+      </>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <TimelineFilters
+        activeFilter={activeFilter}
+        counts={counts}
+        onChange={setActiveFilter}
+        totalCount={timeline.items.length}
+      />
+      <TimelineItemList activeFilter={activeFilter} items={filteredItems} />
+      <TimelineFootnotes timeline={timeline} />
+    </div>
+  );
+}
+
+function TimelineFilters({
+  activeFilter,
+  counts,
+  onChange,
+  totalCount,
+}: {
+  activeFilter: TimelineFilter;
+  counts: Partial<Record<AssistantTimelineItemType, number>>;
+  onChange: (filter: TimelineFilter) => void;
+  totalCount: number;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2" aria-label="Filtros de linea de tiempo">
+      {TIMELINE_FILTERS.map((filter) => {
+        const count = filter.value === "all" ? totalCount : (counts[filter.value] ?? 0);
+        const isActive = activeFilter === filter.value;
+        return (
+          <Button
+            key={filter.value}
+            type="button"
+            variant={isActive ? "default" : "outline"}
+            size="sm"
+            onClick={() => onChange(filter.value)}
+            aria-pressed={isActive}
+          >
+            {filter.label}
+            <span className="text-[11px] opacity-80">{count}</span>
+          </Button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TimelineItemList({
+  activeFilter,
+  items,
+}: {
+  activeFilter: TimelineFilter;
+  items: AssistantTimelineItem[];
+}) {
   if (items.length === 0) {
     return (
       <EmptyState
-        title="Sin eventos ni evoluciones"
-        description="La linea completa se llenara con actos clinicos reales."
+        title="Sin datos para este filtro"
+        description={`No hay registros recientes en ${filterLabel(activeFilter).toLowerCase()}.`}
       />
     );
   }
 
   return (
     <div className="space-y-2">
-      {items.slice(0, 8).map((item) => (
-        <div key={`${item.kind}-${item.id}`} className="rounded-md border bg-background p-3">
+      {items.map((item) => (
+        <article
+          key={`${item.item_type}-${item.item_id}-${item.occurred_at}`}
+          className="rounded-md border bg-background p-3"
+        >
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-sm font-medium">{item.title}</p>
+              <p className="text-sm font-medium">{item.label}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {formatDateTime(item.occurredAt)}
+                {formatDateTime(item.occurred_at)}
               </p>
             </div>
-            <Badge variant="outline">{item.kind}</Badge>
+            <Badge variant="outline">{TYPE_LABELS[item.item_type]}</Badge>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">{item.summary}</p>
-          <p className="mt-2 text-[11px] text-muted-foreground">Fuente: {item.source}</p>
-        </div>
+          <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+            <p>Fuente: {item.source_label}</p>
+            <p className="break-all">Ruta: {item.source_path}</p>
+          </div>
+        </article>
       ))}
     </div>
   );
 }
 
-function entryItem(entry: ClinicalEntry): TimelineItem {
-  return {
-    id: entry.id,
-    kind: "evolucion",
-    occurredAt: entry.occurred_at,
-    title: entry.title,
-    summary: entry.assessment || entry.plan || entry.subjective || "Evolucion sin resumen.",
-    source: "clinical_entries",
-  };
+function TimelineFootnotes({ timeline }: { timeline: AssistantTimelineResponse }) {
+  const notes = [
+    `Limite aplicado: ${timeline.limit}`,
+    timeline.has_more ? "Hay mas datos longitudinales fuera de esta vista." : null,
+    ...timeline.warnings.map((warning) => `Advertencia: ${warning}`),
+    ...timeline.missing_data.map((item) => `Faltante: ${item}`),
+  ].filter((item): item is string => Boolean(item));
+
+  if (notes.length === 0) {
+    return null;
+  }
+
+  return (
+    <ul className="space-y-1 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+      {notes.slice(0, 6).map((note) => (
+        <li key={note}>{note}</li>
+      ))}
+    </ul>
+  );
 }
 
-function eventItem(event: ClinicalEvent): TimelineItem {
-  return {
-    id: event.id,
-    kind: "evento",
-    occurredAt: event.occurred_at,
-    title: event.event_type,
-    summary: event.summary,
-    source: "clinical_events",
-  };
+function countByType(items: AssistantTimelineItem[]) {
+  return items.reduce<Partial<Record<AssistantTimelineItemType, number>>>((counts, item) => {
+    counts[item.item_type] = (counts[item.item_type] ?? 0) + 1;
+    return counts;
+  }, {});
+}
+
+function filterLabel(filter: TimelineFilter) {
+  if (filter === "all") {
+    return "todo";
+  }
+  return TYPE_LABELS[filter];
 }

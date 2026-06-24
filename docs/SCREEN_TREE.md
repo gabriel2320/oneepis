@@ -59,7 +59,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes` | Nucleo paciente | paciente | completa | API pacientes / demo | no | lectura paciente | no | no | no | buscador universal avanzado y ultimos abiertos |
 | `/pacientes/nuevo` | Nucleo paciente | paciente | completa | API pacientes | si | escritura paciente | si | no | no | identidad administrativa mas completa |
 | `/pacientes/[patientId]` | Nucleo paciente | paciente | completa | redirect App Router | no | lectura paciente | no | no | no | mantener como entrada a ficha |
-| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente | no | lectura paciente | no | carta | lectura/pendientes | antecedentes, resultados y timeline existen como lectura minima; version estructurada avanzada pendiente |
+| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente + assistant timeline | no | lectura paciente | no | carta | lectura/pendientes | antecedentes, resultados y timeline avanzada existen en ficha; documentos longitudinales siguen futuros |
 | `/pacientes/[patientId]/estado` | Nucleo paciente | seguimiento | completa | API paciente | si | medico/admin/dev | si | no | no | estados clinicos mas finos |
 | `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | si | escritura clinica | si | no | lectura contextual | curaduria minima de antecedentes; clasificacion estructurada futura |
 | `/pacientes/[patientId]/problemas` | Nucleo paciente | paciente | completa | problemas activos | no | lectura paciente | no | no | lectura contextual | diagnosticos historicos/CIE-10 futuros |
@@ -113,7 +113,7 @@ tener contrato minimo y flujo humano verificable.
 | Diagnosticos historicos/CIE-10 | Nucleo paciente | paciente | futura | problemas/diagnosticos | si | medico/admin/dev | si | no | lectura contextual | distinguir problema activo vs diagnostico |
 | Vacunas | Nucleo paciente | paciente | futura | entidad dedicada | si | medico/admin/dev | si | si si aplica | lectura contextual | permisos y esquema de inmunizacion |
 | Dispositivos/protesis/accesos | Nucleo paciente | paciente | futura | entidad dedicada o eventos | si | medico/admin/dev | si | no | lectura contextual | uso clinico claro |
-| Linea de tiempo avanzada/filtrable | Nucleo paciente | seguimiento | futura | eventos + encuentros + documentos + resultados | no | lectura paciente | no | no | lectura contextual | la ficha ya tiene lectura minima; falta filtro, dominios y documentos |
+| Linea de tiempo avanzada/filtrable | Nucleo paciente | seguimiento | completa/en expansion gobernada | eventos + encuentros + resultados | no | lectura paciente | no | no | lectura contextual | filtros y dominios viven dentro de ficha; documentos longitudinales siguen futuros |
 | Buscador longitudinal | Nucleo paciente | seguimiento | futura | eventos + entradas + resultados | no | lectura paciente | no | no | busqueda asistida | no duplicar Assistant Read |
 | Agenda avanzada/productiva | Ambulatorio | episodio | futura | citas + equipos + admision | si | admision/medico/admin/dev futuro | si | no | no | agenda y preconsulta minimas ya existen; falta agenda por recursos/equipos |
 | Preconsulta ambulatoria avanzada de enfermeria | Ambulatorio | episodio | futura | cita + encuentro + signos + evento clinico | si | enfermeria/medico/admin/dev futuro | si | no | faltantes | decision aprobada para PR backend/permisos; admision administrativa sigue futura |
