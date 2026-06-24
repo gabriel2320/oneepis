@@ -9,9 +9,8 @@ import { GitBranch, Plus } from "lucide-react";
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
-import { EmptyState, ErrorState } from "@/components/clinical/states";
+import { ErrorState } from "@/components/clinical/states";
 import { AppShell } from "@/components/layout/app-shell";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,9 +22,10 @@ import {
 import { DEMO_MODE } from "@/lib/api/client";
 import { demoEncounters } from "@/lib/demo-record";
 import { canManageClinicalEvents } from "@/lib/permissions";
-import type { ClinicalEvent, ClinicalEventType } from "@/lib/types";
+import type { ClinicalEventType } from "@/lib/types";
 
 import { BackLink, Field, PageTitle, emptyToNull, toDatetimeLocal, usePatientId, usePatientRecordQuery } from "./patient-page-shared";
+import { PatientEventCurationPanel, PatientEventList } from "./patient-event-sections";
 
 const eventTypeOptions: { value: ClinicalEventType; label: string }[] = [
   { value: "symptom", label: "Sintoma" },
@@ -37,38 +37,6 @@ const eventTypeOptions: { value: ClinicalEventType; label: string }[] = [
   { value: "clinical_note", label: "Nota clinica" },
   { value: "care_plan", label: "Plan de cuidado" },
   { value: "administrative", label: "Administrativo" },
-];
-
-const eventCurationPresets: {
-  label: string;
-  event_type: ClinicalEventType;
-  summary: string;
-  details: string;
-}[] = [
-  {
-    label: "Diagnostico historico",
-    event_type: "diagnosis",
-    summary: "Diagnostico historico por precisar",
-    details: "Antecedente leido desde historia clinica. Completar fecha, estado y fuente.",
-  },
-  {
-    label: "Procedimiento previo",
-    event_type: "procedure",
-    summary: "Procedimiento o cirugia previa por precisar",
-    details: "Registrar procedimiento, fecha aproximada, complicaciones y fuente.",
-  },
-  {
-    label: "Antecedente familiar/social",
-    event_type: "clinical_note",
-    summary: "Antecedente familiar/social por precisar",
-    details: "Registrar tipo de antecedente, dato relevante, limite y fuente.",
-  },
-  {
-    label: "Plan o seguimiento",
-    event_type: "care_plan",
-    summary: "Plan de cuidado longitudinal por precisar",
-    details: "Registrar accion humana pendiente, responsable, fecha y fuente.",
-  },
 ];
 
 export function PatientEventsPage() {
@@ -167,33 +135,17 @@ export function PatientEventsPage() {
                 Formulario prellenado desde AI-Chart. Revisa y edita antes de guardar.
               </div>
             ) : null}
-            <div className="mb-4 rounded-md border bg-muted/20 p-3">
-              <p className="text-xs font-semibold">Curaduria minima para ficha tradicional</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Usa eventos existentes para antecedentes hasta definir contrato propio.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {eventCurationPresets.map((preset) => (
-                  <Button
-                    key={preset.label}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={DEMO_MODE || !canWriteEvents}
-                    onClick={() =>
-                      setForm((current) => ({
-                        ...current,
-                        event_type: preset.event_type,
-                        summary: current.summary.trim() ? current.summary : preset.summary,
-                        details: current.details.trim() ? current.details : preset.details,
-                      }))
-                    }
-                  >
-                    {preset.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <PatientEventCurationPanel
+              disabled={DEMO_MODE || !canWriteEvents}
+              onPresetSelect={(preset) =>
+                setForm((current) => ({
+                  ...current,
+                  event_type: preset.event_type,
+                  summary: current.summary.trim() ? current.summary : preset.summary,
+                  details: current.details.trim() ? current.details : preset.details,
+                }))
+              }
+            />
             <form
               className="space-y-4"
               onSubmit={(event) => {
@@ -281,7 +233,7 @@ export function PatientEventsPage() {
           </ClinicalSectionCard>
 
           <ClinicalSectionCard title="Timeline de eventos" description="Fuente nueva para AI-Chart Core.">
-            <EventList events={eventsQuery.data ?? []} />
+            <PatientEventList events={eventsQuery.data ?? []} />
             {eventsQuery.isError ? (
               <p className="mt-3 text-sm text-destructive">No se pudieron cargar eventos.</p>
             ) : null}
@@ -290,45 +242,6 @@ export function PatientEventsPage() {
       </div>
     </PatientClinicalShell>
   );
-}
-
-function EventList({ events }: { events: ClinicalEvent[] }) {
-  if (events.length === 0) {
-    return (
-      <EmptyState
-        title="Sin eventos registrados"
-        description="Registra sintomas, hallazgos, resultados o planes para construir contexto clinico."
-      />
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {events.map((event) => (
-        <article key={event.id} className="rounded-md border p-3">
-          <div className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
-            <div>
-              <p className="font-medium">{event.summary}</p>
-              <p className="text-xs text-muted-foreground">{formatDate(event.occurred_at)}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{event.event_type}</Badge>
-              <Badge variant="secondary">Fuente: {event.source_type}</Badge>
-            </div>
-          </div>
-          {typeof event.payload.details === "string" ? (
-            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
-              {event.payload.details}
-            </p>
-          ) : null}
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleString("es-CL", { dateStyle: "short", timeStyle: "short" });
 }
 
 function eventTypeFromQuery(value: string | null): ClinicalEventType {
