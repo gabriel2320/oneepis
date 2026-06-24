@@ -6,7 +6,7 @@ cronologica para humanos y agentes.
 
 ## Estado actual
 
-Fecha de corte: 2026-06-22.
+Fecha de corte: 2026-06-24.
 
 OneEpis ya tiene una base clinica E2E real:
 
@@ -125,6 +125,19 @@ OneEpis ya tiene una base clinica E2E real:
 - El borrador SOAP desde eventos se muestra como hoja carta editable con margen inteligente persistente.
 - El principio sigue siendo Nivel 0 primero: la ficha debe ser util aunque Ollama este apagado.
 
+### Bloque C3/C4: gobernanza ejecutable
+
+- Se agregaron mapas y gates para dominio, trazabilidad, papel, permisos,
+  contratos frontend y uso de snapshots.
+- `LabResult` y `ClinicalRisk` quedaron declarados como dominios bloqueados
+  permitidos hasta definir fuente primaria y flujo clinico completo.
+- `check:permissions` falla si una ruta mutante clinica queda sin actor,
+  auditoria o evidencia de test 403.
+- `check:architecture` agrupa `check:screens`, `check:permissions`,
+  `check:paper`, `check:contracts:drift` y `check:traceability`.
+- CI, bootstrap Ubuntu/Windows, README, PR template y `npm run check` quedaron
+  alineados con el gate arquitectonico.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
@@ -136,16 +149,19 @@ OneEpis ya tiene una base clinica E2E real:
 
 ## Proximo rumbo
 
-El siguiente crecimiento recomendado despues de PR-066 y AI-Chart Core:
+El siguiente crecimiento recomendado despues de AI-Chart Core y C3/C4 no es mas
+IA ni dashboard. El foco debe ser ficha clinica formal, trazabilidad de acceso,
+episodio y seguridad preproduccion:
 
-- sostener `/pacientes` como mesa clinica de entrada, no como dashboard;
-- no crear dashboard nuevo ni laboratorio visual pegado al core;
-- mantener paciente, ficha y papel como centro.
-- evolucionar AI-Chart como memoria clinica activa, no como chat generico.
-- seguir `docs/AI_CHART_INTERACTION_VISION.md` para intenciones clinicas, fuentes, certeza, faltantes, confirmacion humana y gateway externo futuro.
-- tratar `docs/SIMULATED_CLINICAL_INTELLIGENCE.md` como Nivel 0 obligatorio: reglas, plantillas, timeline, validadores, preferencias y auditoria antes de depender de Ollama.
-- usar `docs/GOVERNANCE.md` como mapa de decision para evitar inflar codigo o documentos.
-- vincular frases del borrador SOAP con fuentes concretas antes de ampliar documentos, alta, preferencias o API externa.
+- C5: auditoria de lectura report-only para ficha, papel, documentos sensibles,
+  auditoria, AI-Chart y hospitalizacion.
+- C6: ficha paciente formal v0.5 como caratula clinica, no dashboard.
+- C7: `encounter_id` como eje de episodio ambulatorio/hospitalario.
+- C8: documentos clinicos no firmados con estado visible de borrador/desarrollo.
+- C9: seguridad preproduccion, PHI-safe logging, backup/restore, retencion,
+  cifrado y auditorias de dependencias progresivamente bloqueantes.
+- IA sigue como ayuda secundaria: fuente, faltante, limite, accion humana y
+  auditoria antes que chat libre, RAG o escritura automatica.
 
 Despues de eso, cualquier expansion debe pasar por la escalera OneEpis:
 

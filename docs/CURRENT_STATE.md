@@ -20,7 +20,7 @@ leer, buscar, mostrar, graficar y correlacionar la historia longitudinal del
 paciente. Queda integrado en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` como
 extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
 
-Estado real al 2026-06-22:
+Estado real al 2026-06-24:
 
 - no existen todavia endpoints `/assistant/*`
 - no existe todavia ruta `/pacientes/[patientId]/contexto`
@@ -184,13 +184,42 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
-## Auditoria rapida 2026-06-22
+## Auditoria clinica rapida 2026-06-24
 
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, endurecimiento post-auditoria, mesa `/pacientes` v2, temas visuales v2 y AI-Chart Core Nivel 0.
-- Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- Validacion reciente: API 56 tests, web typecheck/lint/build, OpenAPI actualizado y `git diff --check` sin errores.
-- Siguiente paso recomendado: ampliar vocabulario local por problema y reglas por dominio clinico, midiendo falsos positivos, manteniendo AI Bridge unico y sin crear chat libre, RAG, agentes ni nuevos modulos.
-- Programa siguiente condicionado: `PROG-ASSISTANT-READ-01`, solo despues de base verde, para lectura longitudinal, busqueda, datos graficables y correlacion deterministica sin escritura clinica.
+Veredicto operativo: OneEpis es un scaffold clinico avanzado y gobernado, no una
+ficha medica productiva. La direccion es correcta porque mantiene PostgreSQL
+como verdad clinica, FastAPI como frontera, OpenAPI como contrato, Next.js como
+proyeccion, papel como vista documental, auditoria como memoria e IA como ayuda
+limitada.
+
+Fortalezas actuales:
+
+- flujo paciente -> ficha -> SOAP -> PostgreSQL -> auditoria -> React Query ya existe
+- permisos por rol y rechazos 403 estan cubiertos por gate ejecutable
+- pantallas, papel, contratos frontend y trazabilidad tienen reportes/gates propios
+- `npm run check:architecture` agrupa `check:screens`, `check:permissions`, `check:paper`, `check:contracts:drift` y `check:traceability`
+- `npm run check` incluye API, web, contrato, arquitectura y E2E
+
+Validacion registrada:
+
+- `npm run check:api`: 72 tests pasados, con una advertencia conocida de Starlette/httpx
+- `npm run check:architecture`: verde con 0 brechas criticas en pantallas, permisos, papel, contratos y trazabilidad
+
+Bloqueantes clinicos/productivos:
+
+- no usar con datos reales de pacientes
+- no existe todavia auditoria de lectura/acceso a ficha como trail formal
+- no existen firma clinica legal, receta valida ni orden ejecutable
+- `LabResult` y `ClinicalRisk` siguen como dominios bloqueados hasta definir fuente primaria y flujo completo
+- falta politica preproduccion de cifrado, backup, retencion, PHI-safe logging y compliance
+
+Rumbo recomendado:
+
+- C5: documentar y disenar auditoria de lectura report-only antes de escribir nuevas superficies sensibles
+- C6: fortalecer ficha paciente formal v0.5 como caratula clinica, no dashboard
+- C7: consolidar `encounter_id` como eje de episodio ambulatorio/hospitalario
+- C8: mantener documentos clinicos no firmados como borradores visibles
+- C9: elevar seguridad preproduccion de report-only a politica bloqueante progresiva
 
 ## Historial
 

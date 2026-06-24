@@ -833,6 +833,85 @@ Estado: implementado. `bootstrap:ubuntu`, `bootstrap:windows`, README y
 contrato. No se agrega E2E al bootstrap para mantenerlo como preparacion local
 rapida y no forzar Playwright en cada instalacion inicial.
 
+### Ciclo 5: auditoria de lectura y ficha formal
+
+El siguiente ciclo no debe abrir IA nueva, dashboard, RAG, receta, firma ni
+ordenes ejecutables. El objetivo es cerrar trazabilidad de acceso y preparar una
+ficha formal mas solida sobre fuentes ya existentes.
+
+#### C5-01 Read access audit design
+
+Objetivo: crear primero un diseno/report-only para auditoria de lectura clinica.
+Debe responder quien vio una ficha, desde que ruta, con que rol, que paciente o
+documento se consulto y que `correlation_id` permite reconstruir la sesion.
+
+Reglas:
+
+- no registrar lectura productiva todavia sin revisar volumen, privacidad y ruido
+- no auditar health checks, assets ni endpoints tecnicos
+- priorizar lectura sensible: ficha, papel, auditoria, AI-Chart, hospitalizacion y documentos
+- declarar impacto esperado en almacenamiento y retencion antes de escribir eventos
+
+#### C5-02 Read audit guard proposal
+
+Objetivo: definir la politica futura para que rutas sensibles de lectura tengan
+clasificacion explicita: auditable, no auditable o tecnica. La primera entrega
+debe ser reporte y recomendaciones, no bloqueo duro.
+
+Reglas:
+
+- partir como `report-only`
+- no fallar CI hasta que el reporte tenga 0 falsos positivos claros
+- diferenciar acceso a ficha de lectura de catalogos o configuracion
+- mantener la auditoria de escritura intacta
+
+#### C6 Ficha paciente formal v0.5
+
+Objetivo: fortalecer `/pacientes/[patientId]/ficha` como caratula clinica formal.
+Debe mostrar identidad clinica, contexto asistencial, alertas, problemas,
+medicacion, alergias, signos vitales recientes, ultimas evoluciones y estado
+documental sin convertirse en dashboard.
+
+Reglas:
+
+- usar datos existentes del snapshot o entidades dueñas
+- no duplicar variables ni crear tabla nueva
+- mantener papel como proyeccion y no como fuente primaria
+
+#### C7 Encounter como eje clinico
+
+Objetivo: consolidar `encounter_id` como eje de episodios ambulatorios y
+hospitalarios. Las nuevas escrituras clinicas relevantes deben poder explicitar
+si pertenecen a un encuentro activo, historico o no aplicable.
+
+Reglas:
+
+- no forzar `encounter_id` donde el modelo actual lo permite nulo sin decision clinica
+- reportar brechas antes de migrar contratos o modelos
+- no romper flujos existentes de ficha longitudinal
+
+#### C8 Documentos clinicos no firmados
+
+Objetivo: sostener ingreso, evolucion, hoja diaria, indicacion y epicrisis como
+documentos de desarrollo o borradores cuando no exista firma legal.
+
+Reglas:
+
+- todo papel no firmado debe declarar estado visible
+- no crear receta valida, folio, firma ni orden ejecutable
+- cualquier documento nuevo requiere fuente, permiso, auditoria, OpenAPI y test
+
+#### C9 Seguridad preproduccion
+
+Objetivo: transformar la auditoria de seguridad desde report-only a plan
+bloqueante gradual antes de cualquier uso real.
+
+Reglas:
+
+- definir PHI-safe logging, backup/restore, retencion y cifrado
+- mantener `gitleaks` como bloqueo duro
+- subir dependency review, CodeQL, npm audit y pip-audit de forma progresiva, no todo de una vez
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.
