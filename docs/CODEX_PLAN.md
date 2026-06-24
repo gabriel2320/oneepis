@@ -813,6 +813,16 @@ Estado: implementado. CI agrega un job `architecture` que corre
 de PR tambien lo lista para cambios en pantallas, permisos, papel, contratos
 frontend o trazabilidad.
 
+#### C4-05 Architecture in full local gate
+
+Objetivo: alinear el gate local completo con la gobernanza nueva para que
+`npm run check` no omita los guards arquitectonicos.
+
+Estado: implementado. `npm run check` ahora ejecuta API, web, contrato,
+arquitectura y E2E. El gate de arquitectura queda antes de E2E para fallar
+rapido ante drift de pantallas, permisos, papel, contratos frontend o
+trazabilidad.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.
