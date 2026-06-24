@@ -183,11 +183,12 @@ evitables que no deben repetirse:
 - no contar adjuntos, firma, receta valida o consentimientos como completos solo
   porque exista un indice de papel
 
-## Seguridad CI Report-Only
+## Seguridad CI Minima
 
-- El job `security-report` debe entregar senales de secretos, dependencias y analisis estatico sin bloquear el piloto por ruido inicial.
-- Gitleaks, dependency review, CodeQL, `npm audit` y `pip-audit` quedan en modo reporte hasta que se establezca una politica de bloqueo explicita.
-- Un secreto real o PHI real detectado debe tratarse como incidente aunque el job este en modo report-only.
+- El job `security-report` entrega senales de secretos, dependencias y analisis estatico sin mezclar politica clinica con producto.
+- Gitleaks es bloqueo duro: un secreto real, token, llave privada, muestra PHI o identificador clinico debe detener el PR y tratarse como incidente.
+- Dependency review, CodeQL, `npm audit` y `pip-audit` quedan en modo reporte hasta que cada senal tenga politica de bloqueo y manejo de falsos positivos.
+- Report-only no significa ignorado: hallazgos de alto riesgo deben triagearse antes de cualquier hito productivo sanitario.
 
 ## Escalera OneEpis
 
