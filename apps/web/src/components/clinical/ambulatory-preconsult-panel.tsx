@@ -16,7 +16,7 @@ import { DEMO_MODE } from "@/lib/api/client";
 import { demoAppointments } from "@/lib/demo-record";
 import {
   canManageClinicalEvents,
-  canManageEncounters,
+  canManagePreconsult,
   canRecordVitals,
 } from "@/lib/permissions";
 import type { AppointmentStatus, ClinicalAppointment } from "@/lib/types";
@@ -32,7 +32,7 @@ export function AmbulatoryPreconsultPanel({ patientId }: { patientId: string }) 
   const queryClient = useQueryClient();
   const { user, isLoading: userLoading } = useCurrentUser();
   const canWrite =
-    canManageEncounters(user) && canManageClinicalEvents(user) && canRecordVitals(user);
+    canManagePreconsult(user) && canManageClinicalEvents(user) && canRecordVitals(user);
   const appointmentsQuery = useQuery({
     queryKey: ["patient-appointments", patientId, "preconsult"],
     queryFn: () => listPatientAppointments(patientId),
