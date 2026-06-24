@@ -84,7 +84,7 @@ Cola de ejecucion automatica:
 
 1. Mantener `main` verde despues del fix de bootstrap PostgreSQL.
 2. `PROG-PATIENT-TIMELINE-01` queda cerrado por PR #32.
-3. Siguiente bloque recomendado: `PROG-PATIENT-ANTECEDENTS-READ-01`, antecedentes read-only dentro de ficha usando fuentes existentes.
+3. Siguiente bloque recomendado: `PR-034 / PROG-PATIENT-RECORD-READ-POLISH-02`, pulir la ficha existente sin crear modulo nuevo; antecedentes ya existen como lectura minima.
 4. Alternativa posterior: `PROG-AMB-PRECONSULTA-PERMISSIONS-01`, habilitar enfermeria solo con backend/permisos/tests porque el encuentro aun bloquea ese rol.
 5. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
 

@@ -283,7 +283,7 @@ Reglas de ejecucion:
 | 7 | `PROG-PATIENT-CORE-NEXT-00` | `codex/patient-core-next-plan` | `[codex] plan next patient core block` | `npm run check:size` | decidir si sigue linea de tiempo avanzada, antecedentes estructurados o enfermeria en preconsulta |
 | 8 | `PROG-PATIENT-TIMELINE-01` | `codex/patient-timeline-read` | `[codex] integrate patient timeline read` | `npm run check:web`, `npm run check:size`, smoke ficha | ficha reutiliza `assistant/timeline` con dominios, fuentes, limites y faltantes; sin API ni escritura nueva |
 | 9 | `PROG-PATIENT-CONTINUITY-01` | `codex/patient-core-continuity` | `[codex] reconcile patient core continuity` | `git diff --check`, `npm run check:size` | docs-only: cola reconciliada despues de PR #32 y preconsulta de enfermeria marcada como pendiente real |
-| 10 | `PROG-PATIENT-ANTECEDENTS-READ-01` | `codex/patient-antecedents-read` | `[codex] integrate patient antecedents read` | `npm run check:web`, smoke ficha | antecedentes read-only en ficha usando problemas, alergias, medicacion, eventos curados y timeline; sin API ni escritura |
+| 10 | `PROG-PATIENT-RECORD-READ-POLISH-02` | `codex/patient-record-read-polish` | `[codex] polish patient record read surfaces` | `npm run check:web`, smoke ficha | mejora la ficha existente: antecedentes, fuentes y faltantes mas claros; sin API ni escritura |
 | 11 | `PROG-DIET-NEXT-01` | `codex/diet-next-near-limit` | `[codex] trim next near-limit surface` | `npm run check:size`, `npm run check:web` si toca web | solo si el proximo cambio toca un archivo near-limit |
 
 Bloques ya cerrados en esta cola: `PROG-CONSOLIDATE-01`,
@@ -350,22 +350,23 @@ Resultado esperado:
 - `PROG-AMB-PRECONSULTA-PERMISSIONS-01` queda registrado como pendiente real
 - razon tecnica visible: el panel de preconsulta exige permisos de encuentro,
   evento y signos; enfermeria ya escribe eventos/signos, pero no encuentros
-- siguiente bloque recomendado: `PROG-PATIENT-ANTECEDENTS-READ-01`
+- siguiente bloque recomendado: `PR-034 / PROG-PATIENT-RECORD-READ-POLISH-02`,
+  pulir ficha y antecedentes existentes sin crear modulo nuevo
 
 Gates de cierre:
 
 - `git diff --check`
 - `npm run check:size`
 
-## PROG-PATIENT-ANTECEDENTS-READ-01
+## PROG-PATIENT-RECORD-READ-POLISH-02
 
 Estado: siguiente bloque recomendado.
 
 Contrato minimo:
 
-- integrar antecedentes read-only dentro de `/pacientes/[patientId]/ficha`
-- reutilizar problemas, alergias, medicacion, eventos curados y timeline
-  existente antes de crear entidad dedicada
+- mejorar la lectura read-only ya integrada en `/pacientes/[patientId]/ficha`
+- mantener problemas, alergias, medicacion, eventos curados y timeline como
+  fuentes existentes antes de crear entidad dedicada
 - mostrar fuente, limite y faltante por dominio
 - no crear tabla, endpoint, ruta visible, dependencia, IA nueva ni escritura
   clinica
@@ -538,8 +539,8 @@ Resultado:
 - antecedentes muestran conteo de fuentes usadas: problemas, alergias,
   medicacion y eventos curados
 - antecedentes declaran que no crean ni corrigen antecedentes estructurados
-- linea de tiempo y laboratorio declaran limites visibles y dejan la vista
-  avanzada como futura
+- linea de tiempo y laboratorio declaran limites visibles; la vista avanzada de
+  timeline quedo superada por PR #32 y ya existe dentro de ficha
 - smoke E2E de ficha cubre fuentes y limites
 
 Gates de cierre:
@@ -639,8 +640,8 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 Prioridad actual:
 
 1. Cerrar `PROG-PATIENT-CONTINUITY-01` como PR docs-only.
-2. Ejecutar `PROG-PATIENT-ANTECEDENTS-READ-01` como siguiente bloque
-   paciente-core read-only.
+2. Ejecutar `PROG-PATIENT-RECORD-READ-POLISH-02` como siguiente bloque
+   paciente-core read-only, puliendo antecedentes existentes.
 3. Mantener `PROG-AMB-PRECONSULTA-PERMISSIONS-01` pendiente hasta tocar
    backend/permisos/tests de encuentro para enfermeria.
 4. Evitar nueva IA hasta cerrar otro tramo tradicional.

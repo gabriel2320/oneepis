@@ -12,6 +12,9 @@ npm run check:api
 .venv/bin/python apps/api/scripts/export_openapi.py
 ```
 
+En Windows/PowerShell usa `.venv\Scripts\python` para comandos Python
+directos. Los scripts npm resuelven Python mediante `scripts/python-command.mjs`.
+
 ## Boundaries
 
 - Routes validate and orchestrate request/response flow.

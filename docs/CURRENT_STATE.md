@@ -93,10 +93,11 @@ Estado real al 2026-06-24:
 - el backend bloquea aceptar patches con `requires_human_confirmation=false`
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
 - la UI de propuestas desde evolucion exige permiso AI para confirmar patches
-- el siguiente bloque recomendado es `PROG-PATIENT-ANTECEDENTS-READ-01`:
-  antecedentes read-only dentro de ficha con fuentes existentes; alternativa
-  posterior: `PROG-AMB-PRECONSULTA-PERMISSIONS-01` para enfermeria con
-  backend/permisos/tests
+- el siguiente bloque recomendado es `PR-034 / PROG-PATIENT-RECORD-READ-POLISH-02`:
+  pulir la ficha existente sin crear nuevo modulo; antecedentes ya existen como
+  lectura minima y solo deben mejorar jerarquia, fuentes y faltantes
+- alternativa posterior: `PROG-AMB-PRECONSULTA-PERMISSIONS-01` para enfermeria
+  con backend/permisos/tests
 
 Lecciones post #15-#17:
 
@@ -155,7 +156,9 @@ Auth local:
 - `GET /api/v1/auth/me`
 - roles iniciales: `admin`, `medico`, `enfermeria`, `solo_lectura`, `dev`
 - rutas de paciente requieren autenticacion
-- escrituras clinicas requieren `admin`, `medico`, `enfermeria` o `dev`
+- escrituras clinicas se reparten por permiso fino; `admin` y `dev` pueden
+  operar todo el entorno local gobernado, `medico` escribe actos medicos y
+  `enfermeria` queda acotada a signos/eventos/laboratorio/riesgos
 - IA clinica requiere `admin`, `medico` o `dev`
 - fuera de `development`, la API rechaza secreto default, usuarios default, actor dev y auth desactivada
 
@@ -168,8 +171,9 @@ Higiene local:
 Permisos finos:
 
 - matriz viva en `docs/PERMISSIONS.md`
-- enfermeria puede registrar signos vitales y eventos clinicos, pero no
-  encuentros, SOAP, medicacion, alergias ni IA clinica
+- enfermeria puede registrar signos vitales, eventos clinicos, laboratorio
+  minimo y riesgos clinicos, pero no encuentros, SOAP, medicacion, alergias,
+  problemas ni IA clinica
 - encuentros clinicos requieren rol medico/admin/dev
 - problemas activos requieren rol medico/admin/dev
 - estado de ficha y contexto asistencial se editan desde UI con rol medico/admin/dev

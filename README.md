@@ -70,8 +70,9 @@ python -m venv .venv
 .venv/bin/python -m pip install -e "apps/api[dev]"
 ```
 
-En Windows/PowerShell usa `.venv\Scripts\python` para los comandos Python
-directos. Los scripts npm del repo usan `.venv/bin/python`.
+En Windows/PowerShell usa `.venv\Scripts\python` para comandos Python
+directos. Los scripts npm resuelven Python de forma cross-platform mediante
+`scripts/python-command.mjs`.
 
 4. Ejecuta migraciones:
 
