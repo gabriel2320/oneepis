@@ -13,14 +13,6 @@ const exceptions = new Map([
     "apps/api/src/oneepis_api/services/clinical_intent.py",
     { limit: 1090, reason: "Deuda heredada de reglas deterministicas; no crecer sin extraer dominios." },
   ],
-  [
-    "apps/web/src/lib/api/clinical-record.ts",
-    { limit: 370, reason: "Cliente API manual compartido; migrar a contrato generado." },
-  ],
-  [
-    "apps/web/src/lib/type-contracts/clinical-record.ts",
-    { limit: 380, reason: "Tipos manuales compartidos; migrar a contrato generado." },
-  ],
 ]);
 
 const files = scanRoots.flatMap((root) => walk(path.join(repoRoot, root)));
