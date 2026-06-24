@@ -199,6 +199,7 @@ Fortalezas actuales:
 - pantallas, papel, contratos frontend y trazabilidad tienen reportes/gates propios
 - auditoria de lectura ya tiene inventario report-only en `reports/read-access-map.*`
 - politica futura de auditoria de lectura esta propuesta en `reports/read-access-policy.*`
+- ficha paciente formal v0.5 tiene caratula compacta basada en `PatientRecordSnapshot`
 - `npm run check:architecture` agrupa `check:screens`, `check:permissions`, `check:paper`, `check:contracts:drift` y `check:traceability`
 - `npm run check` incluye API, web, contrato, arquitectura y E2E
 
@@ -220,7 +221,7 @@ Rumbo recomendado:
 - C5: documentar y disenar auditoria de lectura report-only antes de escribir nuevas superficies sensibles
 - C5-01: revisar `reports/read-access-map.*` antes de decidir middleware, tabla o politica de retencion para lectura
 - C5-02: revisar `reports/read-access-policy.*`; `blocking_ready=false` hasta cerrar retencion, volumen y tests
-- C6: fortalecer ficha paciente formal v0.5 como caratula clinica, no dashboard
+- C6: continuar ficha paciente formal v0.5 con mejoras de papel/paridad si no se duplica fuente
 - C7: consolidar `encounter_id` como eje de episodio ambulatorio/hospitalario
 - C8: mantener documentos clinicos no firmados como borradores visibles
 - C9: elevar seguridad preproduccion de report-only a politica bloqueante progresiva

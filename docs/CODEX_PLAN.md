@@ -894,6 +894,12 @@ Reglas:
 - no duplicar variables ni crear tabla nueva
 - mantener papel como proyeccion y no como fuente primaria
 
+Estado: primer corte implementado. `/pacientes/[patientId]/ficha` incorpora
+`PatientFormalCover`, una caratula compacta construida solo desde
+`PatientRecordSnapshot`: identidad, estado/contexto, contacto, problemas,
+medicacion, episodio activo, ultimo acto clinico y estado documental de
+desarrollo. No crea backend, tabla, ruta, contrato ni dependencia nueva.
+
 #### C7 Encounter como eje clinico
 
 Objetivo: consolidar `encounter_id` como eje de episodios ambulatorios y

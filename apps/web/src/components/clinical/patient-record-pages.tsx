@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
-
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiInsightPanel } from "@/components/clinical/ai-insight-panel";
 import { AiSafetyPanel } from "@/components/clinical/ai-safety-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { PatientFormalCover } from "@/components/clinical/patient-formal-cover";
 import {
   AllergyWorkspace,
   AuditWorkspace,
@@ -28,7 +27,6 @@ import {
 } from "@/components/clinical/patient-widgets";
 import { EmptyState, ErrorState } from "@/components/clinical/states";
 import { AppShell } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
 import { DEMO_MODE } from "@/lib/api/client";
 import { canManageClinicalEntries, canManagePatient, canUseClinicalAi } from "@/lib/permissions";
 import type { PatientRecordSnapshot } from "@/lib/types";
@@ -89,18 +87,10 @@ function PatientSectionContent({
   if (section === "ficha") {
     return (
       <div className="space-y-4">
+        <PatientFormalCover record={record} patientId={patientId} canEditPatient={canEditPatient} />
         <CriticalAlerts record={record} />
         <VitalsStrip vital={record.latest_vitals} />
         <EncounterTraceSummary record={record} patientId={patientId} />
-        <div className="flex justify-end" data-print-hidden="true">
-          {canEditPatient ? (
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/pacientes/${patientId}/estado`}>Editar estado</Link>
-            </Button>
-          ) : (
-            <NoPermissionButton label="Estado bloqueado" />
-          )}
-        </div>
         <PatientLongitudinalSummary record={record} />
         <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
           <ClinicalSectionCard
