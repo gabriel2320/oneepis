@@ -852,6 +852,13 @@ Reglas:
 - priorizar lectura sensible: ficha, papel, auditoria, AI-Chart, hospitalizacion y documentos
 - declarar impacto esperado en almacenamiento y retencion antes de escribir eventos
 
+Estado: implementado en modo report-only. `npm run audit:read-access` genera
+`reports/read-access-map.*` con rutas `GET` de FastAPI, clasifica lecturas
+clinicas sensibles como `READ_AUDIT_CANDIDATE` y mantiene exenciones tecnicas
+para health, estado IA y sesion. El reporte no esta en `check:architecture`
+porque aun falta revisar volumen, privacidad, retencion y falsos positivos antes
+de convertirlo en guard.
+
 #### C5-02 Read audit guard proposal
 
 Objetivo: definir la politica futura para que rutas sensibles de lectura tengan
