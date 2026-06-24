@@ -1,6 +1,6 @@
 # Variable Map - Dominio Paciente
 
-Generado: 2026-06-24T21:05:30.874Z
+Generado: 2026-06-24T21:46:13.423Z
 
 ## Resumen
 

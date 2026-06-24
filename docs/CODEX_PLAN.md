@@ -696,6 +696,12 @@ Checklist:
 - resumen de riesgos: `document_id_hash`, `LabResult`, `ClinicalRisk`
 - siguiente PR empieza despues de merge o commit limpio
 
+Estado: listo para PR. Reportes regenerados; no hay dependencias nuevas. Gate
+completo ejecutado con `npm run check`: API 68 tests, web typecheck/lint/build,
+contrato OpenAPI y E2E 33 passed / 1 skipped. Riesgos residuales: `document_id_hash`
+tipado y no visible por privacidad; `LabResult` y `ClinicalRisk` siguen sin tabla
+duena dedicada y no deben crecer como pantallas/producto hasta definir fuente primaria.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

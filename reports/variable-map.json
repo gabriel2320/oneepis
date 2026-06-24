@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T21:05:30.874Z",
+  "generated_at": "2026-06-24T21:46:13.423Z",
   "scope": "patient",
   "sources": {
     "model": "apps/api/src/oneepis_api/models/patient.py",
