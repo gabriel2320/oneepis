@@ -912,6 +912,14 @@ Reglas:
 - reportar brechas antes de migrar contratos o modelos
 - no romper flujos existentes de ficha longitudinal
 
+Estado: implementado como auditoria de arquitectura. `npm run
+audit:encounter-axis` genera `reports/encounter-axis-map.*` y clasifica 10
+dominios entre dueño de episodio, encuentro requerido, encuentro opcional,
+asignacion opcional y longitudinal de paciente. La primera pasada queda sin
+seguimientos: ClinicalEntry/ClinicalEvent validan encuentro opcional;
+HospitalDailySheet/HospitalIndication exigen ingreso activo; alergias,
+medicacion, problemas y signos vitales no fuerzan episodio.
+
 #### C8 Documentos clinicos no firmados
 
 Objetivo: sostener ingreso, evolucion, hoja diaria, indicacion y epicrisis como

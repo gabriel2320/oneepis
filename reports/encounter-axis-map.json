@@ -1,0 +1,143 @@
+{
+  "generated_at": "2026-06-24T23:03:23.771Z",
+  "scope": "clinical_encounter_axis",
+  "summary": {
+    "domains_reviewed": 10,
+    "required_encounter_ok": 2,
+    "optional_encounter_ok": 2,
+    "longitudinal_not_forced": 4,
+    "follow_up_required": 0
+  },
+  "rows": [
+    {
+      "domain": "ClinicalEncounter",
+      "table": "clinical_encounters",
+      "expectation": "EPISODE_OWNER",
+      "model_encounter_id": "not_applicable",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/clinical_record_contracts/longitudinal.py, apps/api/src/oneepis_api/schemas/hospitalization.py",
+      "route_evidence": "apps/api/src/oneepis_api/api/v1/routes/hospitalization.py, apps/api/src/oneepis_api/api/v1/routes/hospitalization_daily_sheets.py, apps/api/src/oneepis_api/api/v1/routes/hospitalization_indications.py",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/lib/type-contracts/hospitalization.ts, apps/web/src/components/clinical/patient-soap-page.tsx (+2 mas)",
+      "validation_evidence": "no aplica: entidad dueña",
+      "status": "OK",
+      "recommendation": "Es la entidad dueña del episodio; no debe tener encounter_id propio.",
+      "rationale": "Es la entidad dueña del episodio; no debe tener encounter_id propio."
+    },
+    {
+      "domain": "ClinicalEntry",
+      "table": "clinical_entries",
+      "expectation": "OPTIONAL_ENCOUNTER",
+      "model_encounter_id": "optional",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/clinical_record_contracts/entries_events.py",
+      "route_evidence": "apps/api/src/oneepis_api/api/v1/routes/patient_entries.py, apps/api/src/oneepis_api/api/v1/routes/patient_events.py",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/components/clinical/patient-soap-page.tsx, apps/web/src/components/clinical/patient-widgets.tsx",
+      "validation_evidence": "validate_encounter_for_patient",
+      "status": "OK",
+      "recommendation": "SOAP/evolucion puede ser longitudinal, pero debe vincularse cuando existe episodio activo.",
+      "rationale": "SOAP/evolucion puede ser longitudinal, pero debe vincularse cuando existe episodio activo."
+    },
+    {
+      "domain": "ClinicalEvent",
+      "table": "clinical_events",
+      "expectation": "OPTIONAL_ENCOUNTER",
+      "model_encounter_id": "optional",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/clinical_record_contracts/entries_events.py",
+      "route_evidence": "apps/api/src/oneepis_api/api/v1/routes/patient_events.py",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/components/clinical/patient-event-pages.tsx",
+      "validation_evidence": "validate_encounter_for_patient",
+      "status": "OK",
+      "recommendation": "Hecho longitudinal puede nacer fuera de un episodio, pero debe heredar encuentro cuando viene de acto clinico.",
+      "rationale": "Hecho longitudinal puede nacer fuera de un episodio, pero debe heredar encuentro cuando viene de acto clinico."
+    },
+    {
+      "domain": "HospitalBed",
+      "table": "hospital_beds",
+      "expectation": "OPTIONAL_ASSIGNMENT",
+      "model_encounter_id": "optional",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/hospitalization.py",
+      "route_evidence": "apps/api/src/oneepis_api/api/v1/routes/hospitalization.py",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/hospitalization.ts",
+      "validation_evidence": "no detectada",
+      "status": "OK",
+      "recommendation": "La cama puede existir sin paciente; encounter_id aparece solo cuando se asigna a ingreso.",
+      "rationale": "La cama puede existir sin paciente; encounter_id aparece solo cuando se asigna a ingreso."
+    },
+    {
+      "domain": "HospitalDailySheet",
+      "table": "hospital_daily_sheets",
+      "expectation": "REQUIRED_ENCOUNTER",
+      "model_encounter_id": "required",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/hospitalization.py",
+      "route_evidence": "apps/api/src/oneepis_api/api/v1/routes/hospitalization_daily_sheets.py",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/hospitalization.ts",
+      "validation_evidence": "_require_active_hospitalization",
+      "status": "OK",
+      "recommendation": "Hoja diaria hospitalaria pertenece a un ingreso hospitalario activo.",
+      "rationale": "Hoja diaria hospitalaria pertenece a un ingreso hospitalario activo."
+    },
+    {
+      "domain": "HospitalIndication",
+      "table": "hospital_indications",
+      "expectation": "REQUIRED_ENCOUNTER",
+      "model_encounter_id": "required",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/hospitalization.py",
+      "route_evidence": "apps/api/src/oneepis_api/api/v1/routes/hospitalization_indications.py",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/hospitalization.ts",
+      "validation_evidence": "_require_active_hospitalization",
+      "status": "OK",
+      "recommendation": "Indicacion hospitalaria minima pertenece a un ingreso hospitalario activo.",
+      "rationale": "Indicacion hospitalaria minima pertenece a un ingreso hospitalario activo."
+    },
+    {
+      "domain": "VitalSign",
+      "table": "vital_signs",
+      "expectation": "PATIENT_LONGITUDINAL",
+      "model_encounter_id": "not_applicable",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/clinical_record_contracts/longitudinal.py",
+      "route_evidence": "no detectado",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/components/clinical/patient-widgets.tsx",
+      "validation_evidence": "no detectada",
+      "status": "OK",
+      "recommendation": "Signo vital vive por paciente; si explica episodio, se proyecta como ClinicalEvent con source_type vital_sign.",
+      "rationale": "Signo vital vive por paciente; si explica episodio, se proyecta como ClinicalEvent con source_type vital_sign."
+    },
+    {
+      "domain": "Allergy",
+      "table": "allergies",
+      "expectation": "PATIENT_LONGITUDINAL",
+      "model_encounter_id": "not_applicable",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/clinical_record_contracts/longitudinal.py",
+      "route_evidence": "no detectado",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/components/clinical/patient-widgets.tsx",
+      "validation_evidence": "no detectada",
+      "status": "OK",
+      "recommendation": "Alergia es longitudinal del paciente; no forzar episodio sin decision clinica.",
+      "rationale": "Alergia es longitudinal del paciente; no forzar episodio sin decision clinica."
+    },
+    {
+      "domain": "Medication",
+      "table": "medications",
+      "expectation": "PATIENT_LONGITUDINAL",
+      "model_encounter_id": "not_applicable",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/clinical_record_contracts/longitudinal.py",
+      "route_evidence": "no detectado",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/components/clinical/patient-widgets.tsx",
+      "validation_evidence": "no detectada",
+      "status": "OK",
+      "recommendation": "Medicacion activa no es receta ni orden; no forzar episodio hasta definir prescripcion legal.",
+      "rationale": "Medicacion activa no es receta ni orden; no forzar episodio hasta definir prescripcion legal."
+    },
+    {
+      "domain": "ActiveProblem",
+      "table": "active_problems",
+      "expectation": "PATIENT_LONGITUDINAL",
+      "model_encounter_id": "not_applicable",
+      "schema_evidence": "apps/api/src/oneepis_api/schemas/clinical_record_contracts/longitudinal.py",
+      "route_evidence": "no detectado",
+      "frontend_evidence": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/components/clinical/patient-widgets.tsx",
+      "validation_evidence": "no detectada",
+      "status": "OK",
+      "recommendation": "Problema activo puede cruzar episodios; el origen debe trazarse con eventos/evoluciones si aplica.",
+      "rationale": "Problema activo puede cruzar episodios; el origen debe trazarse con eventos/evoluciones si aplica."
+    }
+  ]
+}
