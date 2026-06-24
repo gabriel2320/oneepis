@@ -46,10 +46,16 @@ Estado real al 2026-06-24:
   - PR #34: polish read-only de ficha/antecedentes con fuentes y faltantes mas claros
   - PR #35: enfermeria habilitada para completar solo preconsulta minima
   - PR #36: dieta frontend de clientes/contratos Assistant Read e IA clinica
+  - PR #39: dieta de utilidades AI-Chart; `ai-chart-utils.ts` queda como fachada
+    estable y las acciones/reglas visuales pasan a modulos enfocados
+  - PR #40: dieta de eventos paciente; presets de curaduria y timeline visual
+    salen de `patient-event-pages.tsx`
+  - PR #41: dieta de labs assistant; parsing, matching y resumen de valores de
+    laboratorio salen de `patient_assistant_labs.py`
 - bloques de consolidacion, dieta y polish inicial de ficha quedan cerrados:
-  documentacion reconciliada, `patient-list-pages.tsx` fuera del reporte
-  near-limit, antecedentes con fuentes usadas y timeline/laboratorio con
-  limites y faltantes visibles
+  documentacion reconciliada, `patient-list-pages.tsx`, utilidades AI-Chart,
+  eventos paciente y labs assistant fuera del reporte near-limit, antecedentes
+  con fuentes usadas y timeline/laboratorio con limites y faltantes visibles
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
@@ -100,6 +106,9 @@ Estado real al 2026-06-24:
 - `PROG-PATIENT-RECORD-READ-POLISH-02` quedo cerrado por PR #34
 - `PROG-AMB-PRECONSULTA-PERMISSIONS-01` quedo cerrado por PR #35
 - `PROG-DIET-FRONTEND-CONTRACTS-01` quedo cerrado por PR #36
+- `PROG-DIET-AI-CHART-UTILS-01` quedo cerrado por PR #39
+- `PROG-DIET-PATIENT-EVENTS-01` quedo cerrado por PR #40
+- `PROG-DIET-ASSISTANT-LABS-01` quedo cerrado por PR #41
 - el siguiente bloque debe elegirse pequeno: dieta near-limit restante, papel
   serio o contrato minimo paciente/ficha; no abrir IA nueva ni dominio amplio
 
@@ -393,7 +402,15 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - adjuntos externos, consentimientos y receta siguen como bordes bloqueados/futuros; no expandir todos a la vez.
-- watchlist de tamano: componentes web cerca del limite deben extraerse antes de crecer; `patient-record-pages.tsx` quedo cerca del techo tras el indice de papel y requiere poda preventiva.
+- watchlist de tamano actual tras PR #41: `clinical_intent.py`, `clinical_record.py`,
+  `clinical-intent-result-panel.tsx`, `patient-ai-chart-pages.tsx`,
+  `clinical_patch.py`, `clinical-print.tsx`, `ambulatory-appointment-pages.tsx`,
+  `demo-record.ts`, `assistant-read-sections.tsx`,
+  `patient-record-workspaces.tsx`, `ambulatory-visit-pages.tsx` y
+  `patient_assistant_correlation.py`.
+- `patient-list-pages.tsx`, `ai-chart-utils.ts`, `patient-event-pages.tsx` y
+  `patient_assistant_labs.py` ya salieron del reporte near-limit; no volver a
+  agregarles comportamiento sin revisar primero su presupuesto.
 - agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
