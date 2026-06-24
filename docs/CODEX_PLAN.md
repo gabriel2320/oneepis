@@ -794,6 +794,16 @@ Estado: implementado. `npm run check:permissions` falla por brechas criticas de
 actor/auditoria y tambien por cualquier ruta mutante clinica sin evidencia de
 test 403.
 
+#### C4-03 Architecture gate bundle
+
+Objetivo: agrupar los guards arquitectonicos en un comando unico para PRs que
+tocan pantallas, permisos, papel, contratos frontend o trazabilidad.
+
+Estado: implementado. `npm run check:architecture` ejecuta
+`check:screens`, `check:permissions`, `check:paper`, `check:contracts:drift` y
+`check:traceability`. No reemplaza `check:api`, `check:web`, `check:contract`
+ni `check:e2e`; los complementa como gate de gobernanza del repo.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.
