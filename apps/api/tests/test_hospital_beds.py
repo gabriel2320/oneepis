@@ -103,6 +103,50 @@ def test_hospital_bed_assignment_requires_active_hospitalization(
     assert invalid_assignment_response.status_code == 409
 
 
+def test_nursing_cannot_manage_hospital_beds(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+
+    create_response = client.post(
+        "/api/v1/hospitalization/beds",
+        headers=nursing_auth,
+        json={
+            "ward": "Medicina",
+            "room": "303",
+            "bed_label": "A",
+            "status": "available",
+        },
+    )
+    assert create_response.status_code == 403
+
+    allowed_create_response = client.post(
+        "/api/v1/hospitalization/beds",
+        headers=auth,
+        json={
+            "ward": "Medicina",
+            "room": "303",
+            "bed_label": "B",
+            "status": "available",
+        },
+    )
+    assert allowed_create_response.status_code == 201
+    bed_id = allowed_create_response.json()["id"]
+
+    update_response = client.patch(
+        f"/api/v1/hospitalization/beds/{bed_id}",
+        headers=nursing_auth,
+        json={"notes": "Intento enfermeria"},
+    )
+    assert update_response.status_code == 403
+
+
 def test_hospital_bed_can_be_assigned_released_and_reassigned(
     client: TestClient,
     auth_headers,

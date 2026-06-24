@@ -773,6 +773,18 @@ Estado: implementado. `npm run audit:snapshots` genera
 el build: es reporte de arquitectura para decidir que lectura debe convertirse
 en snapshot formal antes de crear mas pantallas.
 
+### Ciclo 4: permisos 403 seriales
+
+#### C4-01 Permission 403 hardening
+
+Objetivo: cerrar las advertencias de cobertura 403 detectadas por
+`check:permissions` sin cambiar permisos ni logica clinica.
+
+Estado: implementado. Se agregan tests 403 explicitos para camas hospitalarias,
+actualizacion de paciente, alergias y eventos clinicos. `npm run
+check:permissions` revisa 35 rutas mutantes clinicas con 0 brechas criticas y 0
+advertencias.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

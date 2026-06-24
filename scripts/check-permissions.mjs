@@ -147,6 +147,9 @@ function hasRouteSpecificForbiddenEvidence(text, routeFile, routePath) {
   if (routeFile === "patient_core.py" && routePath === "") {
     return text.includes('client.post(\n        "/api/v1/patients"') && text.includes("403");
   }
+  if (routeFile === "patient_core.py" && routePath === "/{patient_id}") {
+    return text.includes("client.patch(") && text.includes('f"/api/v1/patients/{patient_id}"') && text.includes("403");
+  }
   const routeSegments = routePath.split("/").filter((segment) => segment && !segment.startsWith("{"));
   return routeSegments.some((segment) => text.includes(segment)) && text.includes("403");
 }

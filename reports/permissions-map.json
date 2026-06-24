@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T22:00:29.281Z",
+  "generated_at": "2026-06-24T22:21:11.298Z",
   "scope": "clinical_write_permissions",
   "rows": [
     {
@@ -9,11 +9,9 @@
       "path": "/beds",
       "actor_or_access_dep": "EncounterActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_hospital_beds.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization.py",
@@ -22,11 +20,9 @@
       "path": "/beds/{bed_id}",
       "actor_or_access_dep": "EncounterActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_hospital_beds.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/hospitalization_daily_sheets.py",
@@ -156,11 +152,9 @@
       "path": "/{patient_id}/allergies",
       "actor_or_access_dep": "AllergyActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py",
@@ -169,11 +163,9 @@
       "path": "/{patient_id}/allergies/{allergy_id}",
       "actor_or_access_dep": "AllergyActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py",
@@ -182,11 +174,9 @@
       "path": "/{patient_id}/allergies/{allergy_id}",
       "actor_or_access_dep": "AllergyActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_core.py",
@@ -206,11 +196,9 @@
       "path": "/{patient_id}",
       "actor_or_access_dep": "PatientActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py",
@@ -285,11 +273,9 @@
       "path": "/{patient_id}/clinical-events",
       "actor_or_access_dep": "ClinicalEventActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_events.py",
@@ -298,11 +284,9 @@
       "path": "/{patient_id}/clinical-events/{event_id}",
       "actor_or_access_dep": "ClinicalEventActorDep",
       "audit": "record_audit_event",
-      "forbidden_test": "no detectado",
+      "forbidden_test": "apps/api/tests/test_patient_permissions.py",
       "critical_gaps": [],
-      "warnings": [
-        "NO_403_TEST_DETECTED"
-      ]
+      "warnings": []
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_medications.py",
@@ -407,6 +391,6 @@
   "summary": {
     "routes_checked": 35,
     "critical_gaps": 0,
-    "warnings": 8
+    "warnings": 0
   }
 }
