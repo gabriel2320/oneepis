@@ -40,8 +40,8 @@ El arbol completo de rutas y estado por superficie vive en `docs/SCREEN_TREE.md`
 
 ## Requisitos
 
-- Node.js 20+
-- npm 10+
+- Node.js 22 (`.nvmrc`)
+- npm 11.13.0 (`packageManager`)
 - Python 3.12+
 - PostgreSQL 15+ o Docker
 - Ollama opcional para IA local
@@ -71,7 +71,8 @@ python -m venv .venv
 ```
 
 En Windows/PowerShell usa `.venv\Scripts\python` para los comandos Python
-directos. Los scripts npm del repo usan `.venv/bin/python`.
+directos. Los scripts npm del repo detectan automaticamente `.venv/bin/python`
+o `.venv\Scripts\python.exe`.
 
 4. Ejecuta migraciones:
 
@@ -99,6 +100,50 @@ Credenciales locales iniciales:
 Estas credenciales son solo para desarrollo local. Cambia `ONEEPIS_AUTH_SECRET` y
 `ONEEPIS_AUTH_LOCAL_USERS` antes de cualquier entorno compartido.
 
+## Ubuntu sin Cursor
+
+OneEpis no depende de Cursor GUI. En Ubuntu, usa la terminal como flujo canonico:
+
+```bash
+nvm use
+npm i -g npm@11.13.0
+npm run bootstrap:ubuntu
+```
+
+El bootstrap verifica `node`, `npm`, `python3`, `docker` y `docker compose`,
+copia `.env.example` a `.env` si falta, levanta PostgreSQL, crea `.venv`,
+instala dependencias Python y npm, ejecuta migraciones y corre:
+
+```bash
+npm run check:api
+npm run check:web
+npm run check:contract
+```
+
+Para desarrollo diario despues del bootstrap:
+
+```bash
+npm run dev:api
+npm run dev:web
+```
+
+## Windows PowerShell
+
+En Windows, instala Node.js 22, npm 11.13.0, Python 3.12 y Docker Desktop.
+Despues ejecuta:
+
+```powershell
+npm i -g npm@11.13.0
+npm run bootstrap:windows
+```
+
+Para desarrollo diario:
+
+```powershell
+npm run dev:api
+npm run dev:web
+```
+
 ## IA local
 
 Ollama es opcional. OneEpis debe seguir funcionando con reglas, plantillas y
@@ -110,7 +155,7 @@ auditoria aunque Ollama este apagado. Configuracion y modelos sugeridos viven en
 Genera el contrato desde FastAPI:
 
 ```bash
-.venv/bin/python apps/api/scripts/export_openapi.py
+npm run check:contract
 ```
 
 El archivo estable queda en `packages/contracts/openapi.json`.
