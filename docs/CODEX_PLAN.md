@@ -742,6 +742,16 @@ cliente API, estado documental y uso clinico declarado. El reporte
 `reports/paper-source-map.*` deja trazable cada papel a su fuente y mantiene
 receta como documento bloqueado.
 
+#### C3-04 Contract drift guard
+
+Objetivo: detectar drift entre schemas OpenAPI y contratos TypeScript manuales
+antes de que una pantalla consuma campos fuera de contrato.
+
+Estado: implementado. `npm run check:contracts:drift` compara campos de schemas
+Read criticos de OpenAPI contra `apps/web/src/lib/type-contracts/*` y genera
+`reports/contract-drift-map.*`. La primera pasada corrige `ClinicalEntry.extra_data`
+en el tipo frontend para alinearlo con `ClinicalEntryRead`.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

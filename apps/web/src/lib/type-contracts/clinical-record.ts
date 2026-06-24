@@ -42,6 +42,7 @@ export type ClinicalEntry = {
   assessment?: string | null;
   plan?: string | null;
   tags: string[];
+  extra_data: Record<string, unknown>;
   created_by: string;
   created_at: string;
   updated_at: string;
