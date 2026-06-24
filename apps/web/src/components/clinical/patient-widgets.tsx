@@ -299,8 +299,10 @@ export function EncounterTraceSummary({
   record: PatientRecordSnapshot;
   patientId: string;
 }) {
+  const activeEncounter = record.active_encounter;
   const linkedEntries = record.recent_entries.filter((entry) => Boolean(entry.encounter_id)).length;
   const unlinkedEntries = record.recent_entries.length - linkedEntries;
+  const recentEncounterCount = record.recent_encounters.length;
   const hasUnlinkedEntries = unlinkedEntries > 0;
 
   return (
@@ -311,7 +313,15 @@ export function EncounterTraceSummary({
           Episodio clinico
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {linkedEntries} evoluciones recientes vinculadas a encuentro; {unlinkedEntries} sin encuentro.
+          {activeEncounter
+            ? `${activeEncounter.reason} - ${activeEncounter.type} iniciado ${formatDateTime(
+                activeEncounter.started_at,
+              )}.`
+            : "Sin encuentro activo informado por backend."}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {recentEncounterCount} encuentros recientes; {linkedEntries} evoluciones recientes vinculadas;{" "}
+          {unlinkedEntries} sin encuentro.
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">

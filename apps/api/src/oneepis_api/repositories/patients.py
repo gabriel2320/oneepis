@@ -8,8 +8,10 @@ from sqlalchemy.orm import Session
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
+    ClinicalEncounter,
     ClinicalEntry,
     ClinicalEvent,
+    EncounterStatus,
     Medication,
     RecordStatus,
     VitalSign,
@@ -60,6 +62,31 @@ def get_recent_events(
         select(ClinicalEvent)
         .where(ClinicalEvent.patient_id == patient_id)
         .order_by(ClinicalEvent.occurred_at.desc())
+        .limit(limit)
+    )
+    return list(session.scalars(statement))
+
+
+def get_active_encounter(session: Session, patient_id: uuid.UUID) -> ClinicalEncounter | None:
+    statement = (
+        select(ClinicalEncounter)
+        .where(
+            ClinicalEncounter.patient_id == patient_id,
+            ClinicalEncounter.status == EncounterStatus.IN_PROGRESS,
+        )
+        .order_by(ClinicalEncounter.started_at.desc())
+        .limit(1)
+    )
+    return session.scalars(statement).first()
+
+
+def get_recent_encounters(
+    session: Session, patient_id: uuid.UUID, limit: int = 5
+) -> list[ClinicalEncounter]:
+    statement = (
+        select(ClinicalEncounter)
+        .where(ClinicalEncounter.patient_id == patient_id)
+        .order_by(ClinicalEncounter.started_at.desc())
         .limit(limit)
     )
     return list(session.scalars(statement))

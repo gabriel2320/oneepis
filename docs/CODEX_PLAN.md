@@ -636,6 +636,10 @@ Trabajo requerido:
 
 No hacerlo si basta con la pantalla `/encuentros`.
 
+Estado: implementado. `GET /patients/{patient_id}/record` ahora entrega
+`active_encounter` y `recent_encounters`; ficha y demo consumen ese read model
+para mostrar episodio activo sin inferirlo solo desde evoluciones.
+
 #### C2-04 Papel y complejidad
 
 Objetivo: evitar que `clinical-print.tsx` siga creciendo.

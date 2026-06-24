@@ -230,6 +230,8 @@ export type ClinicalEncounter = {
 export type ClinicalEncounterUpdate = Partial<ClinicalEncounterCreate>;
 export type PatientRecordSnapshot = {
   patient: Patient;
+  active_encounter?: ClinicalEncounter | null;
+  recent_encounters: ClinicalEncounter[];
   latest_vitals?: VitalSign | null;
   active_allergies: Allergy[];
   active_medications: Medication[];
