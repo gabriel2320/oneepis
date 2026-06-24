@@ -872,6 +872,15 @@ Reglas:
 - diferenciar acceso a ficha de lectura de catalogos o configuracion
 - mantener la auditoria de escritura intacta
 
+Estado: implementado en modo report-only. `npm run audit:read-access-policy`
+regenera el inventario de lectura y produce `reports/read-access-policy.*`.
+La primera politica propone `AUDIT_REQUIRED_P0` para ficha, timeline, auditoria
+clinica y documentos hospitalarios; `AUDIT_REQUIRED_P1` para entidades clinicas
+de paciente; `REVIEW_VOLUME_POLICY` para listas/busquedas de alto volumen; y
+`EXEMPT_TECHNICAL` para health, sesion y estado IA. El reporte declara
+`blocking_ready=false` hasta definir retencion, volumen, metadata minima y
+tests de no regresion.
+
 #### C6 Ficha paciente formal v0.5
 
 Objetivo: fortalecer `/pacientes/[patientId]/ficha` como caratula clinica formal.
