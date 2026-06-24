@@ -7,6 +7,7 @@ const openApi = JSON.parse(
   readFileSync(path.join(repoRoot, "packages/contracts/openapi.json"), "utf8"),
 );
 const tsContracts = [
+  "apps/web/src/lib/type-contracts/assistant-read.ts",
   "apps/web/src/lib/type-contracts/clinical-record.ts",
   "apps/web/src/lib/type-contracts/lab.ts",
   "apps/web/src/lib/type-contracts/medication-catalog.ts",

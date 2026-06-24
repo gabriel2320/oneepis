@@ -1,4 +1,4 @@
-import { API_ACTOR, apiFetch, getStoredAuthToken } from "@/lib/api/client";
+import { apiFetch } from "@/lib/api/client";
 import type {
   ActiveProblem,
   ActiveProblemCreate,
@@ -7,12 +7,6 @@ import type {
   AllergyCreate,
   AllergyUpdate,
   AuditEvent,
-  AssistantChartRequest,
-  AssistantChartResponse,
-  AssistantCorrelationRequest,
-  AssistantCorrelationResponse,
-  AssistantSearchResponse,
-  AssistantTimelineResponse,
   ClinicalEntry,
   ClinicalEntryCreate,
   ClinicalEntryUpdate,
@@ -22,23 +16,7 @@ import type {
   ClinicalEvent,
   ClinicalEventCreate,
   ClinicalEventUpdate,
-  ConfirmClinicalPatchRequest,
-  ConfirmClinicalPatchResponse,
-  ClinicalIntentRequest,
-  ClinicalIntentActionDecisionRequest,
-  ClinicalIntentActionDecisionResponse,
-  ClinicalIntentRouteRequest,
-  ClinicalIntentRouteResponse,
-  ClinicalIntentResponse,
-  ClinicalReviewItemDecisionRequest,
-  ClinicalReviewItemDecisionResponse,
   ClinicalTimeline,
-  DraftSoapFromEventsRequest,
-  DraftSoapFromEventsResponse,
-  EventProposalFromEntryRequest,
-  EventProposalsFromEntryResponse,
-  AIStreamEvent,
-  LabPanel,
   Medication,
   MedicationCreate,
   MedicationUpdate,
@@ -46,6 +24,24 @@ import type {
   VitalSignCreate,
   VitalSignUpdate,
 } from "@/lib/types";
+
+export {
+  correlateAssistant,
+  getAssistantChart,
+  getAssistantTimeline,
+  listLabPanels,
+  searchAssistantTimeline,
+} from "@/lib/api/assistant-read";
+export {
+  confirmClinicalPatch,
+  createClinicalIntent,
+  decideClinicalIntentAction,
+  decideClinicalReviewItem,
+  draftSoapFromEvents,
+  proposeEventsFromEntry,
+  routeClinicalIntent,
+  streamClinicalCommandPreview,
+} from "@/lib/api/clinical-ai";
 
 export function listClinicalEntries(patientId: string) {
   return apiFetch<ClinicalEntry[]>(`/api/v1/patients/${patientId}/clinical-entries?limit=50`);
@@ -96,171 +92,6 @@ export function updateClinicalEvent(
 
 export function getClinicalTimeline(patientId: string) {
   return apiFetch<ClinicalTimeline>(`/api/v1/patients/${patientId}/timeline?limit=50`);
-}
-
-export function getAssistantTimeline(patientId: string) {
-  return apiFetch<AssistantTimelineResponse>(
-    `/api/v1/patients/${patientId}/assistant/timeline?limit=20`,
-  );
-}
-
-export function searchAssistantTimeline(patientId: string, query: string) {
-  const params = new URLSearchParams({ q: query, limit: "20" });
-  return apiFetch<AssistantSearchResponse>(
-    `/api/v1/patients/${patientId}/assistant/search?${params.toString()}`,
-  );
-}
-
-export function getAssistantChart(patientId: string, payload: AssistantChartRequest = {}) {
-  return apiFetch<AssistantChartResponse>(`/api/v1/patients/${patientId}/assistant/chart`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function correlateAssistant(
-  patientId: string,
-  payload: AssistantCorrelationRequest = {},
-) {
-  return apiFetch<AssistantCorrelationResponse>(
-    `/api/v1/patients/${patientId}/assistant/correlate`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export function listLabPanels(patientId: string, limit = 3) {
-  const params = new URLSearchParams({ limit: String(limit) });
-  return apiFetch<LabPanel[]>(`/api/v1/patients/${patientId}/lab-panels?${params.toString()}`);
-}
-
-export function draftSoapFromEvents(patientId: string, payload: DraftSoapFromEventsRequest) {
-  return apiFetch<DraftSoapFromEventsResponse>(
-    `/api/v1/patients/${patientId}/ai/draft-soap-from-events`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export function proposeEventsFromEntry(patientId: string, payload: EventProposalFromEntryRequest) {
-  return apiFetch<EventProposalsFromEntryResponse>(
-    `/api/v1/patients/${patientId}/ai/event-proposals-from-entry`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export function confirmClinicalPatch(patientId: string, payload: ConfirmClinicalPatchRequest) {
-  return apiFetch<ConfirmClinicalPatchResponse>(
-    `/api/v1/patients/${patientId}/ai/confirm-clinical-patch`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export function createClinicalIntent(patientId: string, payload: ClinicalIntentRequest) {
-  return apiFetch<ClinicalIntentResponse>(`/api/v1/patients/${patientId}/ai/clinical-intent`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function routeClinicalIntent(patientId: string, payload: ClinicalIntentRouteRequest) {
-  return apiFetch<ClinicalIntentRouteResponse>(
-    `/api/v1/patients/${patientId}/ai/clinical-intent-route`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export async function streamClinicalCommandPreview({
-  patientId,
-  text,
-  onEvent,
-}: {
-  patientId: string;
-  text: string;
-  onEvent: (event: AIStreamEvent) => void;
-}): Promise<ClinicalIntentRouteResponse> {
-  const headers = new Headers({ "Content-Type": "application/json" });
-  const token = getStoredAuthToken();
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-  if (API_ACTOR) {
-    headers.set("X-OneEpis-Actor", API_ACTOR);
-  }
-  const response = await fetch("/api/ai/clinical-command", {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ patientId, text }),
-  });
-  if (!response.ok || !response.body) {
-    throw new Error("No se pudo abrir el stream clinico.");
-  }
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let routedIntent: ClinicalIntentRouteResponse | null = null;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.trim()) {
-        continue;
-      }
-      const event = JSON.parse(line) as AIStreamEvent;
-      onEvent(event);
-      if (event.type === "proposal") {
-        routedIntent = event.data;
-      }
-    }
-  }
-  if (!routedIntent) {
-    throw new Error("Stream clinico incompleto.");
-  }
-  return routedIntent;
-}
-
-export function decideClinicalReviewItem(
-  patientId: string,
-  payload: ClinicalReviewItemDecisionRequest,
-) {
-  return apiFetch<ClinicalReviewItemDecisionResponse>(
-    `/api/v1/patients/${patientId}/ai/review-item-decision`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export function decideClinicalIntentAction(
-  patientId: string,
-  payload: ClinicalIntentActionDecisionRequest,
-) {
-  return apiFetch<ClinicalIntentActionDecisionResponse>(
-    `/api/v1/patients/${patientId}/ai/action-decision`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
 }
 
 export function listAllergies(patientId: string) {
