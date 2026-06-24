@@ -41,16 +41,12 @@ Estado real al 2026-06-24:
   - PR #16: resumen ambulatorio real de solo lectura
   - PR #17: indice de documentos/papel existente desde rutas print
   - PR #25: preconsulta ambulatoria minima dentro de atencion
-- `PROG-CONSOLIDATE-01` queda en cierre con documentacion reconciliada,
-  poda preventiva, reporte near-limit y cola de ejecucion automatica
-- `PROG-POST-PRECONSULTA-01` es el bloque activo docs-only para dejar #25
-  consolidado y mover la cola a dieta quirurgica antes de nueva clinica
-- `PROG-DIET-01` inicia con extraccion quirurgica de la mesa de pacientes:
-  `patient-list-pages.tsx` deja de estar en el reporte near-limit sin cambiar
-  conducta visible
-- `PROG-PATIENT-CORE-POLISH-01` mejora lectura de ficha sin nueva entidad:
-  antecedentes muestran fuentes usadas, timeline/laboratorio declaran limites
-  visibles y faltantes siguen explicitos
+  - PR #32: linea de tiempo avanzada read-only dentro de ficha reutilizando
+    `assistant/timeline`
+- bloques de consolidacion, dieta y polish inicial de ficha quedan cerrados:
+  documentacion reconciliada, `patient-list-pages.tsx` fuera del reporte
+  near-limit, antecedentes con fuentes usadas y timeline/laboratorio con
+  limites y faltantes visibles
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
@@ -68,12 +64,16 @@ Estado real al 2026-06-24:
 - la preconsulta minima queda limitada a permisos existentes `medico/admin/dev`;
   `enfermeria` queda aprobada solo para PR backend/permisos/tests y `admision`
   sigue futura hasta existir rol administrativo
+- la razon tecnica es explicita: enfermeria ya puede escribir signos y eventos
+  clinicos, pero `ClinicalEncounter` sigue restringido a `admin/medico/dev` y
+  el panel de preconsulta exige permisos de encuentro, evento y signos
 - `PROG-CLINICAL-RISK-01` implementa riesgos clinicos minimos con entidad/API
   bajo paciente, permisos, auditoria, OpenAPI, UI compacta en ficha y E2E
   visible; no crea dashboard, scores automaticos ni IA nueva
 - `PROG-PATIENT-CORE-NEXT-00` queda decidido y `PROG-PATIENT-TIMELINE-01`
-  integra linea de tiempo paciente avanzada de solo lectura dentro de ficha,
-  reutilizando `assistant/timeline` sin crear API, entidad o ruta nueva
+  esta cerrado por PR #32: linea de tiempo paciente avanzada de solo lectura
+  dentro de ficha, reutilizando `assistant/timeline` sin crear API, entidad o
+  ruta nueva
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -93,8 +93,11 @@ Estado real al 2026-06-24:
 - el backend bloquea aceptar patches con `requires_human_confirmation=false`
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
 - la UI de propuestas desde evolucion exige permiso AI para confirmar patches
-- el siguiente bloque debe partir desde `main` verde y ser micro-PR logico,
-  evitando nueva escritura clinica hasta tener contrato, permisos y gates
+- el siguiente bloque recomendado es `PR-034 / PROG-PATIENT-RECORD-READ-POLISH-02`:
+  pulir la ficha existente sin crear nuevo modulo; antecedentes ya existen como
+  lectura minima y solo deben mejorar jerarquia, fuentes y faltantes
+- alternativa posterior: `PROG-AMB-PRECONSULTA-PERMISSIONS-01` para enfermeria
+  con backend/permisos/tests
 
 Lecciones post #15-#17:
 
@@ -153,7 +156,9 @@ Auth local:
 - `GET /api/v1/auth/me`
 - roles iniciales: `admin`, `medico`, `enfermeria`, `solo_lectura`, `dev`
 - rutas de paciente requieren autenticacion
-- escrituras clinicas requieren `admin`, `medico`, `enfermeria` o `dev`
+- escrituras clinicas se reparten por permiso fino; `admin` y `dev` pueden
+  operar todo el entorno local gobernado, `medico` escribe actos medicos y
+  `enfermeria` queda acotada a signos/eventos/laboratorio/riesgos
 - IA clinica requiere `admin`, `medico` o `dev`
 - fuera de `development`, la API rechaza secreto default, usuarios default, actor dev y auth desactivada
 
@@ -166,7 +171,9 @@ Higiene local:
 Permisos finos:
 
 - matriz viva en `docs/PERMISSIONS.md`
-- enfermeria puede registrar signos vitales, pero no SOAP, medicacion, alergias ni IA clinica
+- enfermeria puede registrar signos vitales, eventos clinicos, laboratorio
+  minimo y riesgos clinicos, pero no encuentros, SOAP, medicacion, alergias,
+  problemas ni IA clinica
 - encuentros clinicos requieren rol medico/admin/dev
 - problemas activos requieren rol medico/admin/dev
 - estado de ficha y contexto asistencial se editan desde UI con rol medico/admin/dev
@@ -269,7 +276,8 @@ Consulta:
   opcionales y deja evento clinico `clinical_note` con payload `preconsult`
 - la implementacion inicial usa permisos existentes de encuentro/evento/signos
   (`medico/admin/dev` desde UI); preconsulta avanzada por enfermeria requiere
-  PR backend/permisos propio y rol `admision` sigue futuro
+  PR backend/permisos propio porque debe resolver permiso de encuentro, y rol
+  `admision` sigue futuro
 - agenda avanzada por equipos/recursos y no-show operacional siguen futuras
 - `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden
 - seguimiento formal, interconsultas y cierre documental ambulatorio siguen futuros

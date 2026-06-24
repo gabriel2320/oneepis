@@ -6,7 +6,8 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 
 - `admin`: operacion completa de desarrollo.
 - `medico`: escritura clinica medica y uso de IA clinica.
-- `enfermeria`: lectura y registro de signos vitales.
+- `enfermeria`: lectura y registro acotado de signos vitales, eventos clinicos,
+  laboratorio minimo y riesgos clinicos.
 - `solo_lectura`: lectura clinica sin escrituras.
 - `dev`: bypass local gobernado para desarrollo.
 
@@ -20,10 +21,13 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 | Crear/editar encuentros clinicos | si | si | no | no | si |
 | Crear/editar/cerrar hoja diaria hospitalizada | si | si | no | no | si |
 | Crear/editar evolucion SOAP | si | si | no | no | si |
+| Crear/editar eventos clinicos de contexto | si | si | si | no | si |
 | Crear/editar problemas activos | si | si | no | no | si |
 | Crear/editar alergias | si | si | no | no | si |
 | Crear/editar medicacion | si | si | no | no | si |
 | Registrar signos vitales | si | si | si | no | si |
+| Registrar laboratorio minimo | si | si | si | no | si |
+| Registrar/corregir riesgos clinicos | si | si | si | no | si |
 | Usar IA clinica contextual | si | si | no | no | si |
 | Crear/editar/cerrar borrador de indicacion hospitalaria | si | si | no | no | si |
 | Firmar indicacion o receta | no | no | no | no | no |
@@ -35,6 +39,8 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 - Toda escritura permitida debe registrar `audit_event` con actor autenticado.
 - `X-OneEpis-Actor` solo puede usarse si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`.
 - Ningun permiso habilita diagnostico autonomo, firma automatica ni escritura IA directa.
+- La preconsulta avanzada de enfermeria sigue pendiente porque el encuentro
+  clinico aun requiere rol `medico`, `admin` o `dev`.
 - Cerrar una hoja diaria bloquea edicion posterior, pero no equivale a firma legal.
 - Las indicaciones hospitalarias actuales son borradores auditables con estado `draft` o `closed`; no son orden firmada.
 - La receta impresa queda bloqueada hasta tener firma, folio, actor, fecha clinica y politica de prescripcion.

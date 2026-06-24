@@ -98,7 +98,8 @@ OneEpis ya tiene una base clinica E2E real:
 
 - Las rutas print dejaron de hacer fallback silencioso a otro documento cuando el ID solicitado no existe.
 - El build web dejo de depender de Google Fonts y usa una pila tipografica local del sistema.
-- Los scripts API/contrato usan `.venv/bin/python` para no depender del Python global de la maquina.
+- Los scripts API/contrato resuelven Python de forma cross-platform mediante
+  `scripts/python-command.mjs`, sin depender del Python global de la maquina.
 - `npm run check` quedo validado completo con API, web, contrato y E2E.
 
 ### PR-065: mesa `/pacientes` v2
