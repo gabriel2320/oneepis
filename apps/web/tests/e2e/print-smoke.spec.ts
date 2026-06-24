@@ -18,6 +18,8 @@ test.describe("print routes", () => {
     await expect(page.getByText("Vista papel")).toBeVisible();
     await expect(page.getByText("Hoja carta con footer de desarrollo.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Imprimir" })).toBeVisible();
+    await expect(page.getByText("Desarrollo", { exact: true })).toBeVisible();
+    await expect(page.getByText("Estado ficha:")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 
     await page.goto(`/print/pacientes/${demoPatientId}/resumen`);

@@ -190,12 +190,20 @@ select {
 
   .print-sheet {
     break-inside: avoid;
+    background: white !important;
     box-shadow: none !important;
     border-color: #d7d7d7 !important;
+    color: black !important;
   }
 
   .print-section {
     break-inside: avoid;
     page-break-inside: avoid;
+    border-color: #d7d7d7 !important;
+  }
+
+  .print-section h2,
+  .print-section p {
+    color: black !important;
   }
 }
