@@ -785,6 +785,15 @@ actualizacion de paciente, alergias y eventos clinicos. `npm run
 check:permissions` revisa 35 rutas mutantes clinicas con 0 brechas criticas y 0
 advertencias.
 
+#### C4-02 Permission warnings as failures
+
+Objetivo: convertir las advertencias de cobertura 403 en bloqueo duro ahora que
+`C4-01` dejo el reporte en cero.
+
+Estado: implementado. `npm run check:permissions` falla por brechas criticas de
+actor/auditoria y tambien por cualquier ruta mutante clinica sin evidencia de
+test 403.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

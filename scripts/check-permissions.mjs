@@ -33,6 +33,7 @@ const forbiddenTestFilesByRoute = {
 const routeFiles = readTree(routeDir, [".py"]).filter((path) => !excludedFiles.has(path.split("/").at(-1)));
 const rows = routeFiles.flatMap(inspectRouteFile);
 const criticalRows = rows.filter((row) => row.critical_gaps.length > 0);
+const warningRows = rows.filter((row) => row.warnings.length > 0);
 const report = {
   generated_at: new Date().toISOString(),
   scope: "clinical_write_permissions",
@@ -55,8 +56,16 @@ if (criticalRows.length > 0) {
   process.exit(1);
 }
 
+if (warningRows.length > 0) {
+  console.error(`Permission guard failed: ${warningRows.length} route(s) without 403 test evidence.`);
+  for (const row of warningRows) {
+    console.error(`- ${row.route_file} ${row.method} ${row.path}: ${row.warnings.join(", ")}`);
+  }
+  process.exit(1);
+}
+
 console.log(
-  `Permission guard passed: ${rows.length} mutating clinical routes, ${report.summary.warnings} warning(s) reported.`,
+  `Permission guard passed: ${rows.length} mutating clinical routes, no critical gaps or warnings.`,
 );
 
 function inspectRouteFile(path) {
