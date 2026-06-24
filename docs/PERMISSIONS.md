@@ -7,7 +7,7 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 - `admin`: operacion completa de desarrollo.
 - `medico`: escritura clinica medica y uso de IA clinica.
 - `enfermeria`: lectura y registro acotado de signos vitales, eventos clinicos,
-  laboratorio minimo y riesgos clinicos.
+  laboratorio minimo, riesgos clinicos y preconsulta ambulatoria minima.
 - `solo_lectura`: lectura clinica sin escrituras.
 - `dev`: bypass local gobernado para desarrollo.
 
@@ -18,7 +18,8 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 | Ver pacientes/ficha/auditoria | si | si | si | si | si |
 | Crear/editar paciente | si | si | no | no | si |
 | Editar estado ficha/contexto | si | si | no | no | si |
-| Crear/editar encuentros clinicos | si | si | no | no | si |
+| Crear/editar encuentros clinicos generales | si | si | no | no | si |
+| Completar preconsulta ambulatoria minima | si | si | si | no | si |
 | Crear/editar/cerrar hoja diaria hospitalizada | si | si | no | no | si |
 | Crear/editar evolucion SOAP | si | si | no | no | si |
 | Crear/editar eventos clinicos de contexto | si | si | si | no | si |
@@ -39,8 +40,12 @@ OneEpis usa roles locales en desarrollo. Esta matriz es el contrato minimo de PR
 - Toda escritura permitida debe registrar `audit_event` con actor autenticado.
 - `X-OneEpis-Actor` solo puede usarse si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`.
 - Ningun permiso habilita diagnostico autonomo, firma automatica ni escritura IA directa.
-- La preconsulta avanzada de enfermeria sigue pendiente porque el encuentro
-  clinico aun requiere rol `medico`, `admin` o `dev`.
+- Enfermeria puede completar la preconsulta ambulatoria minima existente:
+  encuentro ambulatorio `in_progress` marcado como preconsulta, signos
+  opcionales y evento clinico de contexto.
+- Ese permiso no abre gestion general de encuentros: enfermeria no puede crear
+  hospitalizaciones, encuentros ambulatorios comunes ni actualizar/cancelar
+  encuentros.
 - Cerrar una hoja diaria bloquea edicion posterior, pero no equivale a firma legal.
 - Las indicaciones hospitalarias actuales son borradores auditables con estado `draft` o `closed`; no son orden firmada.
 - La receta impresa queda bloqueada hasta tener firma, folio, actor, fecha clinica y politica de prescripcion.

@@ -278,18 +278,23 @@ Reglas de ejecucion:
 | 2 | `PROG-DIET-01` | `codex/diet-near-limit-files` | `[codex] trim near-limit clinical files` | `npm run check:size`, `npm run check:web` | extraccion quirurgica sin cambio de conducta ni rutas/API |
 | 3 | `PROG-PATIENT-CORE-POLISH-01` | `codex/patient-core-read-polish` | `[codex] polish patient core read surfaces` | `npm run check:web`, E2E ficha | antecedentes, timeline y laboratorio mas claros sin entidad/ruta/escritura nueva |
 | 4 | `PROG-AMB-PRECONSULTA-PERMISSIONS-00` | `codex/preconsult-permissions-decision` | `[codex] decide preconsult permissions path` | `npm run check:size` | decision docs-only: enfermeria aprobada para PR backend; admision administrativa futura |
-| 5 | `PROG-AMB-PRECONSULTA-PERMISSIONS-01` | `codex/preconsult-nursing-permissions` | `[codex] allow nursing preconsult backend` | `npm run check:api`, `npm run check:web`, `npm run check:contract` | pendiente: enfermeria ya escribe signos/eventos, pero falta permiso gobernado de encuentro para completar preconsulta |
+| 5 | `PROG-AMB-PRECONSULTA-PERMISSIONS-01` | `codex/preconsult-nursing-permissions` | `[codex] allow nursing preconsult backend` | `npm run check:api`, `npm run check:web`, `npm run check:contract` | cerrado por PR #35: enfermeria completa solo preconsulta minima |
 | 6 | `PROG-CLINICAL-RISK-01` | `codex/clinical-risk-minimal` | `[codex] implement minimal clinical risks` | `npm run check:api`, `npm run check:web`, `npm run check:contract`, E2E visible | API/permisos/auditoria/OpenAPI/UI compacta listas, sin dashboard ni IA |
-| 7 | `PROG-PATIENT-CORE-NEXT-00` | `codex/patient-core-next-plan` | `[codex] plan next patient core block` | `npm run check:size` | decidir si sigue linea de tiempo avanzada, antecedentes estructurados o enfermeria en preconsulta |
+| 7 | `PROG-PATIENT-CORE-NEXT-00` | `codex/patient-core-next-plan` | `[codex] plan next patient core block` | `npm run check:size` | cerrado: eligio timeline avanzada read-only |
 | 8 | `PROG-PATIENT-TIMELINE-01` | `codex/patient-timeline-read` | `[codex] integrate patient timeline read` | `npm run check:web`, `npm run check:size`, smoke ficha | ficha reutiliza `assistant/timeline` con dominios, fuentes, limites y faltantes; sin API ni escritura nueva |
-| 9 | `PROG-PATIENT-CONTINUITY-01` | `codex/patient-core-continuity` | `[codex] reconcile patient core continuity` | `git diff --check`, `npm run check:size` | docs-only: cola reconciliada despues de PR #32 y preconsulta de enfermeria marcada como pendiente real |
-| 10 | `PROG-PATIENT-RECORD-READ-POLISH-02` | `codex/patient-record-read-polish` | `[codex] polish patient record read surfaces` | `npm run check:web`, smoke ficha | mejora la ficha existente: antecedentes, fuentes y faltantes mas claros; sin API ni escritura |
-| 11 | `PROG-DIET-NEXT-01` | `codex/diet-next-near-limit` | `[codex] trim next near-limit surface` | `npm run check:size`, `npm run check:web` si toca web | solo si el proximo cambio toca un archivo near-limit |
+| 9 | `PROG-PATIENT-CONTINUITY-01` | `codex/patient-core-continuity` | `[codex] reconcile patient core continuity` | `git diff --check`, `npm run check:size` | cerrado por PR #33 |
+| 10 | `PROG-PATIENT-RECORD-READ-POLISH-02` | `codex/patient-record-read-polish` | `[codex] polish patient record read surfaces` | `npm run check:web`, smoke ficha | cerrado por PR #34 |
+| 11 | `PROG-DIET-FRONTEND-CONTRACTS-01` | `codex/diet-near-limit-clinical-files` | `[codex] split clinical record frontend contracts` | `npm run check:size`, `npm run check:web`, `npm run check:contract` | cerrado por PR #36: clinical-record sale del near-limit |
+| 12 | `PROG-POST-PR36-CONTINUITY-01` | `codex/reconcile-post-pr36-state` | `[codex] reconcile post PR36 state` | `git diff --check`, `npm run check:size` | docs/registry alineados despues de PR #34-#36 |
+| 13 | `PROG-DIET-NEXT-02` | `codex/diet-next-near-limit` | `[codex] trim next near-limit surface` | `npm run check:size`, `npm run check:web` si toca web | solo si el proximo cambio toca un archivo near-limit |
 
 Bloques ya cerrados en esta cola: `PROG-CONSOLIDATE-01`,
 `PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00`,
 `PROG-AMB-PRECONSULTA-01`, `PROG-CLINICAL-RISK-01`,
-`PROG-PATIENT-CORE-NEXT-00` y `PROG-PATIENT-TIMELINE-01`.
+`PROG-PATIENT-CORE-NEXT-00`, `PROG-PATIENT-TIMELINE-01`,
+`PROG-PATIENT-CONTINUITY-01`, `PROG-PATIENT-RECORD-READ-POLISH-02`,
+`PROG-AMB-PRECONSULTA-PERMISSIONS-01` y
+`PROG-DIET-FRONTEND-CONTRACTS-01`.
 
 Interrupcion correctiva 2026-06-24: antes de `PROG-PATIENT-CORE-NEXT-00`,
 cerrar el fix de bootstrap PostgreSQL para que una base limpia migre hasta
@@ -339,19 +344,19 @@ Gates de cierre:
 
 ## PROG-PATIENT-CONTINUITY-01
 
-Estado: docs-only de continuidad.
+Estado: completado por PR #33.
 
 Objetivo: dejar una cola ejecutable y coherente despues de PR #32, sin tocar
 producto, API, OpenAPI, base de datos ni rutas.
 
-Resultado esperado:
+Resultado:
 
 - `PROG-PATIENT-TIMELINE-01` queda registrado como cerrado
-- `PROG-AMB-PRECONSULTA-PERMISSIONS-01` queda registrado como pendiente real
-- razon tecnica visible: el panel de preconsulta exige permisos de encuentro,
-  evento y signos; enfermeria ya escribe eventos/signos, pero no encuentros
+- `PROG-AMB-PRECONSULTA-PERMISSIONS-01` quedo registrado como pendiente real
+  en ese momento; luego fue cerrado por PR #35
 - siguiente bloque recomendado: `PR-034 / PROG-PATIENT-RECORD-READ-POLISH-02`,
-  pulir ficha y antecedentes existentes sin crear modulo nuevo
+  pulir ficha y antecedentes existentes sin crear modulo nuevo; luego fue
+  cerrado por PR #34
 
 Gates de cierre:
 
@@ -360,7 +365,7 @@ Gates de cierre:
 
 ## PROG-PATIENT-RECORD-READ-POLISH-02
 
-Estado: siguiente bloque recomendado.
+Estado: completado por PR #34.
 
 Contrato minimo:
 
@@ -371,7 +376,7 @@ Contrato minimo:
 - no crear tabla, endpoint, ruta visible, dependencia, IA nueva ni escritura
   clinica
 
-Gates esperados:
+Gates de cierre:
 
 - `npm run check:web`
 - smoke E2E de ficha
@@ -445,10 +450,12 @@ Decision de implementacion:
 
 Nota de permisos:
 
-- la UI inicial habilita escritura solo cuando el usuario cumple permisos de
-  encuentro, evento y signos; hoy eso equivale a `medico/admin/dev`
-- habilitar `enfermeria` o rol futuro `admision` exige PR backend de permisos,
-  tests API y actualizacion de `SCREEN_TREE`
+- la UI inicial habilitaba escritura con permisos de encuentro, evento y
+  signos, equivalente a `medico/admin/dev`
+- PR #35 habilito `enfermeria` solo para completar el flujo existente de
+  preconsulta minima
+- `admision` sigue futura y exige rol administrativo, limites de escritura y
+  contrato propio
 
 ## PROG-AMB-PRECONSULTA-PERMISSIONS-00
 
@@ -471,17 +478,28 @@ Fuera de alcance:
 
 Siguiente PR permitido:
 
-- `PROG-AMB-PRECONSULTA-PERMISSIONS-01`: permitir a `enfermeria` completar
-  solo el flujo existente de preconsulta, con tests API de permiso y rechazo
-  para `solo_lectura`
+- `PROG-AMB-PRECONSULTA-PERMISSIONS-01`: implementado por PR #35.
+
+## PROG-AMB-PRECONSULTA-PERMISSIONS-01
+
+Estado: completado por PR #35.
+
+Resultado:
+
+- `enfermeria` puede completar solo el flujo existente de preconsulta minima
+- el backend permite crear el encuentro ambulatorio tecnico marcado como
+  preconsulta
+- `enfermeria` sigue bloqueada para encuentros generales, hospitalizacion,
+  actualizacion/cancelacion de encuentros, SOAP, medicacion, alergias,
+  problemas e IA clinica
+- no se agrego tabla, endpoint compuesto, ruta nueva, IA ni rol `admision`
 
 Gates de cierre:
 
-- `npm run check:size`
 - `npm run check:web`
-- E2E visible de atencion con panel de preconsulta en modo demo
-- `CURRENT_STATE`, `SCREEN_TREE`, `GOVERNANCE`, `CODEX_PLAN` y registry
-  reconciliados
+- `npm run check:api`
+- `npm run check:contract`
+- `npm run check:e2e`
 
 ## PROG-POST-PRECONSULTA-01
 
@@ -492,9 +510,9 @@ Objetivo: cerrar memoria ejecutable posterior a PR #25, sin tocar UI ni API.
 Decision de implementacion:
 
 - marcar `PROG-AMB-PRECONSULTA-01` como completado en cola y roadmap
-- registrar que la preconsulta minima queda congelada con permisos
+- registrar que la preconsulta minima inicial quedaba con permisos
   `medico/admin/dev`
-- declarar que `enfermeria` o `admision` requieren PR backend/permisos/tests
+- declarar que `enfermeria` o `admision` requerian PR backend/permisos/tests
 - promover el siguiente bloque a dieta quirurgica antes de nueva clinica
 
 Gates de cierre:
@@ -526,6 +544,30 @@ Resultado inicial:
 - `patient-list-pages.tsx` dejo de aparecer en el reporte near-limit
 - la lista y metricas de pacientes quedaron extraidas a un componente dedicado
 - no cambiaron rutas, API, OpenAPI, permisos, textos clinicos ni diseno visible
+
+## PROG-DIET-FRONTEND-CONTRACTS-01
+
+Estado: completado por PR #36.
+
+Objetivo: bajar riesgo de los contratos/clientes frontend near-limit sin
+cambiar conducta visible ni API.
+
+Resultado:
+
+- `apps/web/src/lib/api/clinical-record.ts` quedo como fachada de compatibilidad
+  y dejo de estar near-limit
+- las llamadas de Assistant Read viven en `apps/web/src/lib/api/assistant-read.ts`
+- las llamadas de IA clinica viven en `apps/web/src/lib/api/clinical-ai.ts`
+- los tipos de Assistant Read viven en
+  `apps/web/src/lib/type-contracts/assistant-read.ts`
+- `scripts/check-assistant-read-contract.mjs` valida la nueva fuente de tipos
+- se retiraron excepciones de tamano ya innecesarias
+
+Gates de cierre:
+
+- `npm run check:web`
+- `npm run check:contract`
+- `npm run check:size`
 
 ## PROG-PATIENT-CORE-POLISH-01
 
@@ -639,11 +681,10 @@ P4 completado para `v0.4-assistant-read`: tag, changelog, checklist de demo y wa
 
 Prioridad actual:
 
-1. Cerrar `PROG-PATIENT-CONTINUITY-01` como PR docs-only.
-2. Ejecutar `PROG-PATIENT-RECORD-READ-POLISH-02` como siguiente bloque
-   paciente-core read-only, puliendo antecedentes existentes.
-3. Mantener `PROG-AMB-PRECONSULTA-PERMISSIONS-01` pendiente hasta tocar
-   backend/permisos/tests de encuentro para enfermeria.
+1. Cerrar `PROG-POST-PR36-CONTINUITY-01` como reconciliacion docs/registry.
+2. Elegir una sola proxima pieza: dieta near-limit restante, papel serio o
+   contrato minimo paciente/ficha.
+3. Mantener `admision` futura hasta tener rol administrativo y limites propios.
 4. Evitar nueva IA hasta cerrar otro tramo tradicional.
 
 Hecho en este foco:
@@ -659,10 +700,15 @@ Hecho en este foco:
 - `ClinicalPatch` rechaza targets no soportados sin escribir ficha, sin auditar aceptacion y con auditoria `unsupported`
 - `ClinicalPatch` bloquea aceptaciones inseguras sin escribir ficha: falta de confirmacion humana o evolucion no borrador
 - el smoke E2E cubre la presencia del flujo visual AI-Chart sin depender de Ollama
+- PR #34 pulio la ficha read-only sin nuevo modulo
+- PR #35 habilito preconsulta minima para enfermeria con permiso estrecho
+- PR #36 separo clientes/contratos frontend de Assistant Read e IA clinica
 
 Cola corta de mantenimiento:
 
 - no crear nuevas superficies IA; usar AI-Chart y componentes existentes
+- no abrir admision administrativa sin rol/contrato propio
+- no agregar comportamiento a archivos near-limit sin extraer primero
 - mantener `ClinicalPatch` limitado a `clinical_event` y `evolution` hasta que exista duplicacion o necesidad real
 - no ampliar laboratorio a pantalla dedicada ni crear nueva IA durante paciente-core
 

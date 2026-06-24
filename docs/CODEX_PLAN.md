@@ -82,11 +82,13 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. Mantener `main` verde despues del fix de bootstrap PostgreSQL.
+1. Mantener `main` verde despues de PR #36.
 2. `PROG-PATIENT-TIMELINE-01` queda cerrado por PR #32.
-3. Siguiente bloque recomendado: `PR-034 / PROG-PATIENT-RECORD-READ-POLISH-02`, pulir la ficha existente sin crear modulo nuevo; antecedentes ya existen como lectura minima.
-4. Alternativa posterior: `PROG-AMB-PRECONSULTA-PERMISSIONS-01`, habilitar enfermeria solo con backend/permisos/tests porque el encuentro aun bloquea ese rol.
-5. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
+3. `PROG-PATIENT-RECORD-READ-POLISH-02` queda cerrado por PR #34.
+4. `PROG-AMB-PRECONSULTA-PERMISSIONS-01` queda cerrado por PR #35: enfermeria completa solo la preconsulta minima, sin abrir encuentros generales.
+5. `PROG-DIET-FRONTEND-CONTRACTS-01` queda cerrado por PR #36: contratos y clientes frontend de Assistant Read/IA clinica separados.
+6. Antes de nueva clinica, elegir una sola pieza: dieta near-limit restante, papel serio o contrato minimo paciente/ficha.
+7. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
 
 Reglas para avanzar:
 
@@ -95,7 +97,8 @@ Reglas para avanzar:
 - no mezclar contrato docs-only con implementacion
 - no agregar UI amplia antes de contrato, permisos, auditoria y pruebas
 - preconsulta debe seguir reutilizando cita, encuentro, signos y eventos antes de crear tabla o endpoint compuesto
-- la implementacion minima usa permisos existentes `medico/admin/dev`; enfermeria requiere PR backend porque ya puede escribir signos/eventos, pero no encuentros; admision no se promete todavia
+- enfermeria puede completar solo la preconsulta minima existente; encuentros generales, SOAP, medicacion, alergias, problemas e IA siguen bloqueados para ese rol
+- admision no se promete todavia
 - riesgos clinicos muestran fuente, severidad, estado y accion humana; no scores automaticos ni `ClinicalPatch`
 - no ampliar IA durante esta cola
 - usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge
