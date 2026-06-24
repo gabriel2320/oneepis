@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from unicodedata import category, normalize
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -19,25 +18,18 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalReviewItem,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
-from oneepis_api.services.clinical_context import (
-    clinical_context_sections as _context_sections,
-)
-from oneepis_api.services.clinical_context import (
-    clinical_evidence_marks as _evidence_marks,
-)
-from oneepis_api.services.clinical_context import (
-    clinical_missing_data as _missing_data,
-)
-from oneepis_api.services.clinical_context import (
-    clinical_sources as _sources,
-)
 from oneepis_api.services.clinical_course import clinical_course_finding
+from oneepis_api.services.clinical_intent_context import (
+    clinical_intent_context_payload as _context_payload,
+)
+from oneepis_api.services.clinical_intent_text import compare_decimal as _compare_decimal
+from oneepis_api.services.clinical_intent_text import compare_int as _compare_int
+from oneepis_api.services.clinical_intent_text import join_titles as _join_titles
+from oneepis_api.services.clinical_intent_text import normalize_text as _normalize_text
+from oneepis_api.services.clinical_intent_text import payload_text as _payload_text
 from oneepis_api.services.clinical_lab_context import fetch_context_lab_results
 from oneepis_api.services.clinical_problem_context import (
     event_matches_any_problem,
-)
-from oneepis_api.services.clinical_problem_context_builder import (
-    build_problem_contexts as _problem_contexts,
 )
 
 ReviewDecisionMetadata = dict[str, object]
@@ -224,12 +216,8 @@ def _summarize_patient(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer="\n".join(lines),
-        sources=_sources(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results),
         certainty="moderate" if events or snapshot.recent_entries else "low",
-        missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events, lab_results),
-        context_sections=_context_sections(snapshot, events, lab_results),
-        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -263,12 +251,8 @@ def _daily_changes(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer=answer,
-        sources=_sources(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results),
         certainty="moderate" if event_lines else "low",
-        missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events, lab_results),
-        context_sections=_context_sections(snapshot, events, lab_results),
-        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -303,12 +287,8 @@ def _active_problems(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer=answer,
-        sources=_sources(snapshot, [], lab_results),
+        **_context_payload(snapshot, [], lab_results, missing_data=missing),
         certainty="high" if snapshot.active_problems else "low",
-        missing_data=missing,
-        evidence_marks=_evidence_marks(snapshot, [], lab_results),
-        context_sections=_context_sections(snapshot, [], lab_results),
-        problem_contexts=_problem_contexts(snapshot, [], lab_results),
         change_set=_change_set(snapshot, [], recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -338,12 +318,8 @@ def _timeline(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer="\n".join(items) if items else "No hay timeline suficiente.",
-        sources=_sources(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results),
         certainty="moderate" if items else "low",
-        missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events, lab_results),
-        context_sections=_context_sections(snapshot, events, lab_results),
-        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -386,12 +362,8 @@ def _draft_soap_intent(
         intent_type=payload.intent_type,
         mode="draft",
         clinical_answer=answer,
-        sources=_sources(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results),
         certainty="moderate" if events else "low",
-        missing_data=_missing_data(snapshot, events),
-        evidence_marks=_evidence_marks(snapshot, events, lab_results),
-        context_sections=_context_sections(snapshot, events, lab_results),
-        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[
@@ -415,17 +387,14 @@ def _show_sources(
     lab_results: list[object],
     review_items: list[ClinicalReviewItem],
 ) -> ClinicalIntentResponse:
-    sources = _sources(snapshot, events, lab_results)
+    context_payload = _context_payload(snapshot, events, lab_results, missing_data=[])
+    sources = context_payload["sources"]
     return ClinicalIntentResponse(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer="\n".join(f"- {source.label}" for source in sources) or "Sin fuentes.",
-        sources=sources,
+        **context_payload,
         certainty="high" if sources else "low",
-        missing_data=[],
-        evidence_marks=_evidence_marks(snapshot, events, lab_results),
-        context_sections=_context_sections(snapshot, events, lab_results),
-        problem_contexts=_problem_contexts(snapshot, events, lab_results),
         change_set=_change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[_action("none", "Sin accion", "Lectura solamente.")],
@@ -876,60 +845,6 @@ def _medication_detail(payload: dict[str, object]) -> str:
     frequency = _payload_text(payload.get("frequency"))
     details = [item for item in [dose, route, frequency] if item]
     return f" ({', '.join(details)})" if details else ""
-
-
-def _payload_text(value: object | None) -> str | None:
-    if isinstance(value, str):
-        trimmed = value.strip()
-        return trimmed or None
-    if isinstance(value, int | float):
-        return str(value)
-    return None
-
-
-def _compare_int(
-    *,
-    label: str,
-    current: int | None,
-    previous: int | None,
-    unit: str,
-    relevant_delta: int,
-) -> list[str]:
-    if current is None or previous is None:
-        return []
-    delta = current - previous
-    if abs(delta) < relevant_delta:
-        return []
-    direction = "subio" if delta > 0 else "bajo"
-    return [f"{label} {direction} de {previous} a {current} {unit}."]
-
-
-def _compare_decimal(
-    *,
-    label: str,
-    current: object | None,
-    previous: object | None,
-    unit: str,
-    relevant_delta: float,
-) -> list[str]:
-    if current is None or previous is None:
-        return []
-    current_value = float(current)
-    previous_value = float(previous)
-    delta = current_value - previous_value
-    if abs(delta) < relevant_delta:
-        return []
-    direction = "subio" if delta > 0 else "bajo"
-    return [f"{label} {direction} de {previous_value:g} a {current_value:g} {unit}."]
-
-
-def _join_titles(values: list[str]) -> str:
-    return ", ".join(values[:6]) if values else "sin registros"
-
-
-def _normalize_text(value: str) -> str:
-    decomposed = normalize("NFD", value.casefold())
-    return "".join(char for char in decomposed if category(char) != "Mn")
 
 
 def _intent_label(intent_type: ClinicalIntentType) -> str:
