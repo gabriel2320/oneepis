@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T21:55:28.612Z",
+  "generated_at": "2026-06-24T22:12:57.136Z",
   "scope": "clinical_traceability",
   "sources": {
     "models": "apps/api/src/oneepis_api/models",

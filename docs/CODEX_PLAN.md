@@ -752,6 +752,17 @@ Read criticos de OpenAPI contra `apps/web/src/lib/type-contracts/*` y genera
 `reports/contract-drift-map.*`. La primera pasada corrige `ClinicalEntry.extra_data`
 en el tipo frontend para alinearlo con `ClinicalEntryRead`.
 
+#### C3-05 Traceability guard
+
+Objetivo: convertir el mapa de trazabilidad en una politica ejecutable que
+falle ante dominios clinicos sin dueño, paciente, fuente obligatoria o auditoria.
+
+Estado: implementado. `npm run check:traceability` regenera
+`reports/traceability-map.*`, valida la politica y produce
+`reports/traceability-guard.*`. `LabResult` y `ClinicalRisk` quedan como
+dominios bloqueados permitidos: no se deben expandir a escritura productiva sin
+definir fuente primaria.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

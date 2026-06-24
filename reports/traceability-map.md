@@ -1,6 +1,6 @@
 # Traceability Map - OneEpis
 
-Generado: 2026-06-24T21:55:28.612Z
+Generado: 2026-06-24T22:12:57.136Z
 
 ## Resumen
 

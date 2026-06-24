@@ -1,0 +1,146 @@
+{
+  "generated_at": "2026-06-24T22:12:57.142Z",
+  "scope": "clinical_traceability_policy",
+  "summary": {
+    "domains_checked": 11,
+    "allowed_blocked_domains": [
+      "ClinicalRisk",
+      "LabResult"
+    ],
+    "failures": 0
+  },
+  "rows": [
+    {
+      "domain": "Patient",
+      "state": "READ_MODEL_OK",
+      "table": "patients",
+      "patient_id": "id propio",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "patient.created, patient.updated",
+      "recommendation": "Mantener como raiz de identidad; conservar auditoria before/after en cambios.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "ClinicalEncounter",
+      "state": "READ_MODEL_OK",
+      "table": "clinical_encounters",
+      "patient_id": "directo",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "encounter.cancelled, encounter.created, encounter.updated",
+      "recommendation": "Usar como eje de episodio cuando exista contexto activo.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "ClinicalEntry",
+      "state": "READ_MODEL_OK",
+      "table": "clinical_entries",
+      "patient_id": "directo",
+      "encounter_id": "directo",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "clinical_entry.created, clinical_entry.deleted, clinical_entry.updated",
+      "recommendation": "Tratar como documento narrativo primario; no exigir source_ref porque es fuente.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "ClinicalEvent",
+      "state": "READ_MODEL_OK",
+      "table": "clinical_events",
+      "patient_id": "directo",
+      "encounter_id": "directo",
+      "source_type_source_ref": "source_type + source_ref",
+      "audit": "clinical_event.created, clinical_event.updated",
+      "recommendation": "Mantener como puente longitudinal entre fuente, timeline, ficha, IA y papel.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "VitalSign",
+      "state": "READ_MODEL_OK",
+      "table": "vital_signs",
+      "patient_id": "directo",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "vital_sign.created, vital_sign.deleted, vital_sign.updated",
+      "recommendation": "Si el signo se usa como hecho longitudinal, crear ClinicalEvent con source_type=vital_sign.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "Allergy",
+      "state": "READ_MODEL_OK",
+      "table": "allergies",
+      "patient_id": "directo",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "allergy.created, allergy.entered_in_error, allergy.updated",
+      "recommendation": "Mantener como lista activa/historica del paciente; auditar altas, cambios y anulaciones.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "Medication",
+      "state": "READ_MODEL_OK",
+      "table": "medications",
+      "patient_id": "directo",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "medication.created, medication.entered_in_error, medication.updated",
+      "recommendation": "Mantener como fuente estructurada de medicacion; no convertir receta en fuente primaria.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "ActiveProblem",
+      "state": "READ_MODEL_OK",
+      "table": "active_problems",
+      "patient_id": "directo",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "problem.created, problem.entered_in_error, problem.updated",
+      "recommendation": "Mantener como fuente de problemas activos; enlazar eventos si nacen desde evolucion o IA.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    },
+    {
+      "domain": "LabResult",
+      "state": "DUPLICATED_TRUTH",
+      "table": "sin tabla duena dedicada",
+      "patient_id": "NO_PATIENT_ID",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "NO_SOURCE_REF",
+      "audit": "clinical_entry.created, clinical_entry.deleted, clinical_entry.updated, clinical_event.created, clinical_event.updated",
+      "recommendation": "Hoy debe trazarse como ClinicalEntry LAB_RESULT o ClinicalEvent EXAM_RESULT hasta definir tabla dueña.",
+      "allowed_blocked_domain": true,
+      "gaps": []
+    },
+    {
+      "domain": "ClinicalRisk",
+      "state": "DUPLICATED_TRUTH",
+      "table": "sin tabla duena dedicada",
+      "patient_id": "NO_PATIENT_ID",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "NO_SOURCE_REF",
+      "audit": "no detectada",
+      "recommendation": "Si el riesgo es calculado, documentar fuente; si es clinico editable, definir tabla dueña antes de escribir.",
+      "allowed_blocked_domain": true,
+      "gaps": []
+    },
+    {
+      "domain": "AuditEvent",
+      "state": "READ_MODEL_OK",
+      "table": "audit_events",
+      "patient_id": "indirecto por entity_id/metadata",
+      "encounter_id": "no detectado",
+      "source_type_source_ref": "no requerido en primera pasada",
+      "audit": "no detectada",
+      "recommendation": "Mantener como traza transversal; patient_id puede venir por entity_id o metadata, no como campo directo.",
+      "allowed_blocked_domain": false,
+      "gaps": []
+    }
+  ]
+}
