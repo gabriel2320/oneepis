@@ -146,6 +146,7 @@ export function PatientSummaryPrintSheet({
 }) {
   return (
     <ClinicalPaperSheet record={record} title={title}>
+      <PrintSourceSummary record={record} title={title} />
       <section className="print-section">
         <h2 className="text-sm font-semibold">Identificacion</h2>
         <p className="mt-2 text-sm">
@@ -179,6 +180,34 @@ export function PatientSummaryPrintSheet({
   );
 }
 
+function PrintSourceSummary({
+  record,
+  title,
+}: {
+  record: PatientRecordSnapshot;
+  title: string;
+}) {
+  return (
+    <section className="print-section rounded-md border border-info/30 bg-info/10 p-3">
+      <h2 className="text-sm font-semibold">Estado y fuentes</h2>
+      <div className="mt-2 grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+        <p>Documento: {title}</p>
+        <p>Estado ficha: {record.patient.clinical_status}</p>
+        <p>Paciente: {record.patient.id}</p>
+        <p>Contexto: {record.patient.current_care_context}</p>
+        <p>Evoluciones: {record.recent_entries.length}</p>
+        <p>Signos vitales recientes: {record.latest_vitals ? record.latest_vitals.id : "sin dato"}</p>
+        <p>Alergias activas: {record.active_allergies.length}</p>
+        <p>Medicacion activa: {record.active_medications.length}</p>
+        <p>Problemas activos: {record.active_problems.length}</p>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Este papel proyecta datos existentes de ficha; no crea ni corrige datos clinicos.
+      </p>
+    </section>
+  );
+}
+
 export function PrescriptionA5Sheet({ record }: { record: PatientRecordSnapshot }) {
   return (
     <article className="print-sheet mx-auto min-h-[210mm] max-w-[148mm] border-2 border-warning bg-card p-6 shadow-sm">
@@ -203,6 +232,17 @@ export function PrescriptionA5Sheet({ record }: { record: PatientRecordSnapshot 
             {record.patient.clinical_identifier ?? record.patient.id}
           </p>
         </section>
+        <section className="print-section rounded-md border border-warning/40 bg-warning/10 p-4">
+          <h2 className="text-sm font-semibold">Requisitos pendientes</h2>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+            <li>firma profesional gobernada</li>
+            <li>folio o identificador documental inmutable</li>
+            <li>actor profesional visible y validado</li>
+            <li>fecha clinica de emision</li>
+            <li>permisos de prescripcion definidos</li>
+            <li>modelo/API de receta con auditoria y OpenAPI</li>
+          </ul>
+        </section>
         <section className="print-section min-h-32 border-t pt-4">
           <p className="text-sm font-semibold uppercase">Sin medicamentos autorizados</p>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -222,8 +262,28 @@ export function SoapPrintSheet({
   record: PatientRecordSnapshot;
   entry: ClinicalEntry;
 }) {
+  const statusLabel = {
+    amended: "Enmendada",
+    draft: "Borrador no firmado",
+    signed: "Firmada en estado clinico; sin firma legal digital",
+  }[entry.status];
+
   return (
     <ClinicalPaperSheet record={record} title="Evolucion SOAP">
+      <section className="print-section rounded-md border border-info/30 bg-info/10 p-3">
+        <h2 className="text-sm font-semibold">Estado documental</h2>
+        <div className="mt-2 grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+          <p>Estado: {statusLabel}</p>
+          <p>Entrada: {entry.id}</p>
+          <p>Paciente: {entry.patient_id}</p>
+          <p>Encuentro: {entry.encounter_id ?? "Sin encuentro vinculado"}</p>
+          <p>Autor registrado: {entry.created_by}</p>
+          <p>Actualizada: {formatDateTime(entry.updated_at)}</p>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Este papel proyecta una evolucion existente; no crea una nueva verdad clinica.
+        </p>
+      </section>
       <section className="print-section space-y-3">
         <div>
           <h2 className="text-sm font-semibold">{entry.title}</h2>
@@ -247,6 +307,14 @@ export function HospitalDailyPrintSheet({
 }) {
   return (
     <ClinicalPaperSheet record={record} title="Hoja diaria hospitalizada">
+      <section className="print-section rounded-md border border-warning/40 bg-warning/10 p-3">
+        <h2 className="text-sm font-semibold">Estado documental</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {sheet.status === "closed"
+            ? "Cerrada bloquea edicion posterior para trazabilidad; no equivale a firma legal."
+            : "Borrador editable; no firmado ni ejecutable como documento legal."}
+        </p>
+      </section>
       <section className="print-section space-y-3">
         <div>
           <h2 className="text-sm font-semibold">Fecha {sheet.sheet_date}</h2>

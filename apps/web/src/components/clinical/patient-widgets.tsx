@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, AlertTriangle, Pill, Sparkles } from "lucide-react";
+import { Activity, AlertTriangle, CalendarClock, Pill, Printer, Sparkles } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { MetricCard, TimelineCard } from "@/components/clinical/cards";
@@ -66,8 +66,14 @@ export function AllergyList({ allergies }: { allergies: Allergy[] }) {
           <div>
             <p className="text-sm font-semibold">{allergy.substance}</p>
             <p className="text-sm text-muted-foreground">{allergy.reaction ?? "Reaccion no documentada"}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Registrada: {formatDateTime(allergy.recorded_at)} - ID {allergy.id}
+            </p>
           </div>
-          <Badge variant={allergy.severity === "severe" ? "warning" : "outline"}>{allergy.severity}</Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant={allergy.severity === "severe" ? "warning" : "outline"}>{allergy.severity}</Badge>
+            <Badge variant={statusBadgeVariant(allergy.status)}>{recordStatusLabel(allergy.status)}</Badge>
+          </div>
         </div>
       ))}
     </div>
@@ -93,8 +99,11 @@ export function MedicationList({ medications }: { medications: Medication[] }) {
                 {[medication.dose, medication.route, medication.frequency].filter(Boolean).join(" / ") ||
                   "Detalle pendiente"}
               </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Inicio: {medication.started_on ?? "sin fecha"} - ID {medication.id}
+              </p>
             </div>
-            <Badge variant="outline">{medication.status}</Badge>
+            <Badge variant={statusBadgeVariant(medication.status)}>{recordStatusLabel(medication.status)}</Badge>
           </div>
         </div>
       ))}
@@ -117,9 +126,12 @@ export function ProblemList({ problems }: { problems: ActiveProblem[] }) {
               <p className="mt-1 text-sm text-muted-foreground">
                 {[problem.code_system, problem.code].filter(Boolean).join(" ") || "Sin codigo"}
               </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Inicio: {problem.onset_date ?? "sin fecha"} - ID {problem.id}
+              </p>
               {problem.notes ? <p className="mt-1 text-xs text-muted-foreground">{problem.notes}</p> : null}
             </div>
-            <Badge variant={problem.status === "active" ? "safe" : "outline"}>{problem.status}</Badge>
+            <Badge variant={statusBadgeVariant(problem.status)}>{recordStatusLabel(problem.status)}</Badge>
           </div>
         </div>
       ))}
@@ -142,11 +154,21 @@ export function ClinicalTimeline({ entries }: { entries: ClinicalEntry[] }) {
               <p className="text-xs text-muted-foreground">
                 {formatDateTime(entry.occurred_at)} - {entry.created_by}
               </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Documento: {entryStatusLabel(entry.status)}
+                {entry.encounter_id ? ` - encuentro ${entry.encounter_id}` : " - sin encuentro vinculado"}
+              </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
               {entry.encounter_id ? <Badge variant="outline">Encuentro vinculado</Badge> : null}
               <Badge variant="outline">{entry.kind}</Badge>
               <Badge variant={entry.status === "signed" ? "safe" : "secondary"}>{entry.status}</Badge>
+              <Button asChild variant="outline" size="sm" data-print-hidden="true">
+                <Link href={`/print/pacientes/${entry.patient_id}/evolucion/${entry.id}`}>
+                  <Printer className="h-3.5 w-3.5" />
+                  Papel
+                </Link>
+              </Button>
             </div>
           </div>
           <Separator className="my-3" />
@@ -162,22 +184,79 @@ export function ClinicalTimeline({ entries }: { entries: ClinicalEntry[] }) {
   );
 }
 
+function entryStatusLabel(status: ClinicalEntry["status"]) {
+  if (status === "draft") {
+    return "borrador no firmado";
+  }
+  if (status === "amended") {
+    return "enmendada";
+  }
+  return "firmada en estado clinico, sin firma legal digital";
+}
+
+function recordStatusLabel(status: ActiveProblem["status"]) {
+  if (status === "active") {
+    return "Activo";
+  }
+  if (status === "resolved") {
+    return "Resuelto";
+  }
+  if (status === "entered_in_error") {
+    return "Ingresado por error";
+  }
+  return "Inactivo";
+}
+
+function statusBadgeVariant(status: ActiveProblem["status"]) {
+  if (status === "active") {
+    return "safe";
+  }
+  if (status === "entered_in_error") {
+    return "warning";
+  }
+  return "outline";
+}
+
 export function EncounterList({ encounters }: { encounters: ClinicalEncounter[] }) {
   if (encounters.length === 0) {
     return <EmptyState title="Sin encuentros" description="Crea una consulta, ingreso o atencion inicial." />;
   }
+  const sortedEncounters = [...encounters].sort((first, second) => {
+    if (first.status === "in_progress" && second.status !== "in_progress") {
+      return -1;
+    }
+    if (first.status !== "in_progress" && second.status === "in_progress") {
+      return 1;
+    }
+    return new Date(second.started_at).getTime() - new Date(first.started_at).getTime();
+  });
 
   return (
     <div className="space-y-2">
-      {encounters.map((encounter) => (
-        <div key={encounter.id} className="rounded-md border p-3">
+      {sortedEncounters.map((encounter) => (
+        <div
+          key={encounter.id}
+          className={
+            encounter.status === "in_progress"
+              ? "rounded-md border border-primary/40 bg-primary/5 p-3"
+              : "rounded-md border p-3"
+          }
+        >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold">{encounter.reason}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold">{encounter.reason}</p>
+                {encounter.status === "in_progress" ? <Badge variant="safe">Episodio activo</Badge> : null}
+              </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {formatDateTime(encounter.started_at)}
                 {encounter.location_label ? ` - ${encounter.location_label}` : ""}
               </p>
+              {encounter.status === "in_progress" ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Usa este encuentro al registrar SOAP o eventos del episodio actual.
+                </p>
+              ) : null}
               {encounter.notes ? <p className="mt-1 text-xs text-muted-foreground">{encounter.notes}</p> : null}
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -213,6 +292,40 @@ export function CriticalAlerts({ record }: { record: PatientRecordSnapshot }) {
   );
 }
 
+export function EncounterTraceSummary({
+  record,
+  patientId,
+}: {
+  record: PatientRecordSnapshot;
+  patientId: string;
+}) {
+  const linkedEntries = record.recent_entries.filter((entry) => Boolean(entry.encounter_id)).length;
+  const unlinkedEntries = record.recent_entries.length - linkedEntries;
+  const hasUnlinkedEntries = unlinkedEntries > 0;
+
+  return (
+    <div className="flex flex-col gap-3 rounded-md border bg-card p-3 md:flex-row md:items-center md:justify-between">
+      <div className="min-w-0">
+        <p className="flex items-center gap-2 text-sm font-semibold">
+          <CalendarClock className="h-4 w-4 text-primary" />
+          Episodio clinico
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {linkedEntries} evoluciones recientes vinculadas a encuentro; {unlinkedEntries} sin encuentro.
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={hasUnlinkedEntries ? "warning" : "safe"}>
+          {hasUnlinkedEntries ? "Vinculo incompleto" : "Vinculo consistente"}
+        </Badge>
+        <Button asChild variant="outline" size="sm" data-print-hidden="true">
+          <Link href={`/pacientes/${patientId}/encuentros`}>Ver encuentros</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function LatestVitalsTrend({ vitals }: { vitals: VitalSign[] }) {
   const data = vitals
     .slice()
@@ -243,6 +356,43 @@ export function LatestVitalsTrend({ vitals }: { vitals: VitalSign[] }) {
       </ResponsiveContainer>
     </div>
   );
+}
+
+export function VitalSignList({ vitals }: { vitals: VitalSign[] }) {
+  if (vitals.length === 0) {
+    return <EmptyState title="Sin controles" description="Registra signos vitales para ver trazabilidad." />;
+  }
+
+  return (
+    <div className="space-y-2">
+      {vitals.map((vital) => (
+        <div key={vital.id} className="rounded-md border p-3">
+          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-sm font-semibold">{formatDateTime(vital.measured_at)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                PA {formatBloodPressure(vital)} - FC {vital.heart_rate_bpm ?? "sin dato"} - Sat{" "}
+                {vital.oxygen_saturation_pct ?? "sin dato"} - Temp {vital.temperature_c ?? "sin dato"}
+              </p>
+              {vital.notes ? <p className="mt-1 text-xs text-muted-foreground">{vital.notes}</p> : null}
+              <p className="mt-1 text-xs text-muted-foreground">ID {vital.id}</p>
+            </div>
+            <Badge variant="outline">Fuente vital_sign</Badge>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Si este control explica un cambio clinico, proyectalo como evento longitudinal con source_type vital_sign.
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function formatBloodPressure(vital: VitalSign) {
+  if (vital.systolic_bp && vital.diastolic_bp) {
+    return `${vital.systolic_bp}/${vital.diastolic_bp}`;
+  }
+  return "sin dato";
 }
 
 export function PatientLongitudinalSummary({ record }: { record: PatientRecordSnapshot }) {

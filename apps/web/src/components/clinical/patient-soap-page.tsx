@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Save } from "lucide-react";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
@@ -22,6 +22,7 @@ import { canManageClinicalEntries, canUseClinicalAi } from "@/lib/permissions";
 
 import {
   BackLink,
+  EncounterLinkNotice,
   Field,
   PageTitle,
   SoapTextarea,
@@ -81,6 +82,7 @@ export function NewSoapEntryPage() {
   const encounters = DEMO_MODE
     ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
     : (encountersQuery.data ?? []);
+  const selectedEncounterId = useWatch({ control: form.control, name: "encounter_id" });
   const reviewMutation = useMutation({
     mutationFn: (values: SoapFormValues) =>
       createClinicalInsight({
@@ -165,6 +167,10 @@ export function NewSoapEntryPage() {
                 ))}
               </select>
             </Field>
+            <EncounterLinkNotice
+              hasEncounters={encounters.length > 0}
+              hasSelectedEncounter={Boolean(selectedEncounterId)}
+            />
             <SoapTextarea label="Subjetivo" registration={form.register("subjective")} />
             <SoapTextarea label="Objetivo" registration={form.register("objective")} />
             <SoapTextarea label="Analisis" registration={form.register("assessment")} />

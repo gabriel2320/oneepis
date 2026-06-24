@@ -14,6 +14,7 @@
     "dev:web": "npm --workspace apps/web run dev",
     "dev:api": "node scripts/python.js -m uvicorn oneepis_api.main:app --reload --app-dir apps/api/src",
     "audit:variables": "node scripts/audit-variable-map.mjs",
+    "audit:traceability": "node scripts/audit-traceability-map.mjs",
     "check:api": "node scripts/python.js -m ruff check apps/api && node scripts/python.js -m pytest apps/api/tests",
     "check:web": "npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
     "check:screens": "node scripts/check-screens.js",

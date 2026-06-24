@@ -168,6 +168,10 @@ function AmbulatoryVisitWorkspace({
         {!DEMO_MODE && !userLoading && !canWrite ? (
           <ErrorState description="Tu rol actual no permite crear atencion ambulatoria." />
         ) : null}
+        <div className="mb-4 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+          Al guardar se creara un encuentro ambulatorio en curso y una evolucion SOAP en borrador
+          vinculada a ese encuentro. Esta pantalla no agenda ni confirma asistencia futura.
+        </div>
         <AmbulatoryVisitForm
           formState={formState}
           setFormState={setFormState}
@@ -181,9 +185,11 @@ function AmbulatoryVisitWorkspace({
           </p>
         ) : null}
         {savedEntry ? (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Borrador SOAP vinculado: {savedEntry.title}
-          </p>
+          <div className="mt-3 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+            <p>Borrador SOAP vinculado: {savedEntry.title}</p>
+            <p className="mt-1">Entrada: {savedEntry.id}</p>
+            <p>Encuentro: {savedEntry.encounter_id ?? "sin encuentro"}</p>
+          </div>
         ) : null}
       </ClinicalSectionCard>
     </div>

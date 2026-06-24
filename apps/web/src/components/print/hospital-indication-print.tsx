@@ -57,9 +57,11 @@ function HospitalIndicationPrintSheet({
   return (
     <ClinicalPaperSheet record={record} title="Indicacion hospitalaria">
       <section className="print-section rounded-md border border-warning/40 bg-warning/10 p-3">
-        <h2 className="text-sm font-semibold">Borrador no firmado</h2>
+        <h2 className="text-sm font-semibold">
+          {indication.status === "closed" ? "Cerrada sin firma legal" : "Borrador no firmado"}
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Este documento no equivale a orden ejecutable ni receta clinica valida.
+          Este documento no equivale a orden ejecutable, firma legal ni receta clinica valida.
         </p>
       </section>
       <section className="print-section space-y-3">

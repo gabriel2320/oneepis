@@ -209,6 +209,24 @@ export function PatientAiChartPage() {
           title="AI-Chart Core"
           description="Eventos clinicos -> contexto -> borrador SOAP editable -> confirmacion humana."
         />
+        <ClinicalSectionCard title="Lectura gobernada" description="Fuentes, limites y escritura controlada.">
+          <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
+            <div className="rounded-md border p-3">
+              <p className="font-medium text-foreground">Fuentes disponibles</p>
+              <p className="mt-1">
+                {events.length} eventos, {recentEntries.length} evoluciones recientes y ficha activa.
+              </p>
+            </div>
+            <div className="rounded-md border p-3">
+              <p className="font-medium text-foreground">Limites</p>
+              <p className="mt-1">Sin chat libre, sin RAG documental y sin diagnostico autonomo.</p>
+            </div>
+            <div className="rounded-md border p-3">
+              <p className="font-medium text-foreground">Escritura</p>
+              <p className="mt-1">Solo por ClinicalPatch confirmado; nunca firma ni guarda solo.</p>
+            </div>
+          </div>
+        </ClinicalSectionCard>
         {DEMO_MODE ? <ErrorState description="El modo demo no permite generar borradores reales." /> : null}
         {!DEMO_MODE && !userLoading && !canUseAi ? (
           <ErrorState description="Tu rol actual no permite usar IA clinica." />

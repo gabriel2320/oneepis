@@ -40,7 +40,11 @@ export type Patient = {
   sex_at_birth: SexAtBirth;
   clinical_status: PatientClinicalStatus;
   current_care_context: CareContext;
+  document_id_hash?: string | null;
   clinical_identifier?: string | null;
+  contact_phone?: string | null;
+  email?: string | null;
+  emergency_contact: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 };

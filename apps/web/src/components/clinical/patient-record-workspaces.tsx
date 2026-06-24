@@ -12,6 +12,7 @@ import {
   LatestVitalsTrend,
   MedicationList,
   ProblemList,
+  VitalSignList,
   VitalsStrip,
 } from "@/components/clinical/patient-widgets";
 import { Badge } from "@/components/ui/badge";
@@ -188,6 +189,9 @@ export function VitalsWorkspace({
           <EmptyState title="Accion separada" description="Usa registrar para abrir el formulario de signos." />
         </ClinicalSectionCard>
       </div>
+      <ClinicalSectionCard title="Controles registrados">
+        <VitalSignList vitals={vitals} />
+      </ClinicalSectionCard>
     </div>
   );
 }

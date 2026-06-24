@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T20:08:31.746Z",
+  "generated_at": "2026-06-24T21:05:30.874Z",
   "scope": "patient",
   "sources": {
     "model": "apps/api/src/oneepis_api/models/patient.py",
@@ -123,7 +123,7 @@
       "ts_type": "PatientCreate, PatientUpdate, Patient",
       "api_client": "listPatients, createPatient, updatePatient, getPatient, getPatientRecord",
       "pantalla": "apps/web/src/components/clinical/patient-list-pages.tsx, apps/web/src/components/clinical/patient-clinical-shell.tsx, apps/web/src/components/clinical/patient-status-page.tsx",
-      "papel": "no visible",
+      "papel": "apps/web/src/components/print/clinical-print.tsx",
       "permiso": "PatientActorDep on POST/PATCH",
       "auditoria": "patient.created / patient.updated",
       "screen_capability": "patient routes declared",
@@ -142,7 +142,7 @@
       "ts_type": "PatientCreate, PatientUpdate, Patient",
       "api_client": "listPatients, createPatient, updatePatient, getPatient, getPatientRecord",
       "pantalla": "apps/web/src/components/clinical/patient-list-pages.tsx, apps/web/src/components/clinical/patient-clinical-shell.tsx, apps/web/src/components/clinical/patient-status-page.tsx",
-      "papel": "no visible",
+      "papel": "apps/web/src/components/print/clinical-print.tsx",
       "permiso": "PatientActorDep on POST/PATCH",
       "auditoria": "patient.created / patient.updated",
       "screen_capability": "patient routes declared",
@@ -158,14 +158,14 @@
       "schema_pydantic": "PatientBase, PatientCreate, PatientRead",
       "endpoint": "GET/POST /api/v1/patients",
       "openapi": "PatientCreate, PatientRead",
-      "ts_type": "PatientCreate",
+      "ts_type": "PatientCreate, Patient",
       "api_client": "listPatients, createPatient, updatePatient, getPatient, getPatientRecord",
       "pantalla": "no visible",
       "papel": "no visible",
       "permiso": "PatientActorDep on POST/PATCH",
       "auditoria": "patient.created / patient.updated",
       "screen_capability": "patient routes declared",
-      "estado": "BACKEND_ONLY",
+      "estado": "UNUSED_FIELD",
       "recomendacion": "Decidir si Patient TS debe tiparlo como campo expuesto o si backend debe ocultarlo del read model."
     },
     {
@@ -196,14 +196,14 @@
       "schema_pydantic": "PatientBase, PatientCreate, PatientRead, PatientUpdate",
       "endpoint": "GET/POST/PATCH /api/v1/patients",
       "openapi": "PatientCreate, PatientRead, PatientUpdate",
-      "ts_type": "PatientCreate, PatientUpdate",
+      "ts_type": "PatientCreate, PatientUpdate, Patient",
       "api_client": "listPatients, createPatient, updatePatient, getPatient, getPatientRecord",
       "pantalla": "apps/web/src/components/clinical/patient-list-pages.tsx",
       "papel": "no visible",
       "permiso": "PatientActorDep on POST/PATCH",
       "auditoria": "patient.created / patient.updated",
       "screen_capability": "patient routes declared",
-      "estado": "BACKEND_ONLY",
+      "estado": "OK",
       "recomendacion": "Agregar al tipo Patient TS o retirar del read model; hoy create/update lo usan pero read TS no."
     },
     {
@@ -215,14 +215,14 @@
       "schema_pydantic": "PatientBase, PatientCreate, PatientRead, PatientUpdate",
       "endpoint": "GET/POST/PATCH /api/v1/patients",
       "openapi": "PatientCreate, PatientRead, PatientUpdate",
-      "ts_type": "PatientCreate, PatientUpdate",
+      "ts_type": "PatientCreate, PatientUpdate, Patient",
       "api_client": "listPatients, createPatient, updatePatient, getPatient, getPatientRecord",
       "pantalla": "apps/web/src/components/clinical/patient-list-pages.tsx",
       "papel": "no visible",
       "permiso": "PatientActorDep on POST/PATCH",
       "auditoria": "patient.created / patient.updated",
       "screen_capability": "patient routes declared",
-      "estado": "BACKEND_ONLY",
+      "estado": "OK",
       "recomendacion": "Agregar al tipo Patient TS o retirar del read model; hoy create/update lo usan pero read TS no."
     },
     {
@@ -234,28 +234,25 @@
       "schema_pydantic": "PatientBase, PatientCreate, PatientRead, PatientUpdate",
       "endpoint": "GET/POST/PATCH /api/v1/patients",
       "openapi": "PatientCreate, PatientRead, PatientUpdate",
-      "ts_type": "PatientCreate, PatientUpdate",
+      "ts_type": "PatientCreate, PatientUpdate, Patient",
       "api_client": "listPatients, createPatient, updatePatient, getPatient, getPatientRecord",
       "pantalla": "apps/web/src/components/clinical/patient-list-pages.tsx",
       "papel": "no visible",
       "permiso": "PatientActorDep on POST/PATCH",
       "auditoria": "patient.created / patient.updated",
       "screen_capability": "patient routes declared",
-      "estado": "BACKEND_ONLY",
+      "estado": "OK",
       "recomendacion": "Agregar al tipo Patient TS o retirar del read model; definir estructura antes de mostrar en UI."
     }
   ],
   "summary": {
     "total": 12,
     "states": {
-      "OK": 8,
-      "BACKEND_ONLY": 4
+      "OK": 11,
+      "UNUSED_FIELD": 1
     },
     "critical_findings": [
-      "document_id_hash: BACKEND_ONLY",
-      "contact_phone: BACKEND_ONLY",
-      "email: BACKEND_ONLY",
-      "emergency_contact: BACKEND_ONLY"
+      "document_id_hash: UNUSED_FIELD"
     ]
   }
 }

@@ -22,9 +22,18 @@ import {
 import { DEMO_MODE } from "@/lib/api/client";
 import { demoEncounters } from "@/lib/demo-record";
 import { canManageClinicalEvents } from "@/lib/permissions";
-import type { ClinicalEvent, ClinicalEventType } from "@/lib/types";
+import type { ClinicalEvent, ClinicalEventSourceType, ClinicalEventType } from "@/lib/types";
 
-import { BackLink, Field, PageTitle, emptyToNull, toDatetimeLocal, usePatientId, usePatientRecordQuery } from "./patient-page-shared";
+import {
+  BackLink,
+  EncounterLinkNotice,
+  Field,
+  PageTitle,
+  emptyToNull,
+  toDatetimeLocal,
+  usePatientId,
+  usePatientRecordQuery,
+} from "./patient-page-shared";
 
 const eventTypeOptions: { value: ClinicalEventType; label: string }[] = [
   { value: "symptom", label: "Sintoma" },
@@ -36,6 +45,14 @@ const eventTypeOptions: { value: ClinicalEventType; label: string }[] = [
   { value: "clinical_note", label: "Nota clinica" },
   { value: "care_plan", label: "Plan de cuidado" },
   { value: "administrative", label: "Administrativo" },
+];
+
+const sourceTypeOptions: { value: ClinicalEventSourceType; label: string }[] = [
+  { value: "manual", label: "Manual" },
+  { value: "clinical_entry", label: "Evolucion" },
+  { value: "vital_sign", label: "Signo vital" },
+  { value: "imported_document", label: "Documento importado" },
+  { value: "ai_draft", label: "Borrador IA" },
 ];
 
 export function PatientEventsPage() {
@@ -51,6 +68,7 @@ export function PatientEventsPage() {
     summary: searchParams.get("summary")?.slice(0, 280) ?? "",
     encounter_id: "",
     details: searchParams.get("details")?.slice(0, 1200) ?? "",
+    source_type: searchParams.get("aiActionId") ? "ai_draft" : "manual",
     source_ref: searchParams.get("aiActionId")?.slice(0, 160) ?? "",
   });
   const eventsQuery = useQuery({
@@ -66,6 +84,7 @@ export function PatientEventsPage() {
   const encounters = DEMO_MODE
     ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
     : (encountersQuery.data ?? []);
+  const hasSourceRef = form.source_ref.trim().length > 0;
   const createMutation = useMutation({
     mutationFn: () =>
       createClinicalEvent(patientId, {
@@ -73,7 +92,7 @@ export function PatientEventsPage() {
         occurred_at: new Date(form.occurred_at).toISOString(),
         summary: form.summary,
         encounter_id: emptyToNull(form.encounter_id),
-        source_type: form.source_ref ? "ai_draft" : "manual",
+        source_type: form.source_type as ClinicalEventSourceType,
         source_ref: emptyToNull(form.source_ref),
         payload: emptyToNull(form.details)
           ? {
@@ -184,6 +203,45 @@ export function PatientEventsPage() {
                   ))}
                 </select>
               </Field>
+              <EncounterLinkNotice
+                hasEncounters={encounters.length > 0}
+                hasSelectedEncounter={Boolean(form.encounter_id)}
+              />
+              <Field label="Fuente">
+                <select
+                  className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                  value={form.source_type}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      source_type: event.target.value as ClinicalEventSourceType,
+                      source_ref: event.target.value === "manual" ? "" : current.source_ref,
+                    }))
+                  }
+                >
+                  {sourceTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {form.source_type !== "manual" ? (
+                <Field label="Referencia fuente">
+                  <Input
+                    value={form.source_ref}
+                    maxLength={160}
+                    placeholder="ID de evolucion, signo vital, documento o accion IA"
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, source_ref: event.target.value }))
+                    }
+                  />
+                </Field>
+              ) : null}
+              <SourceTraceNotice
+                sourceType={form.source_type as ClinicalEventSourceType}
+                hasSourceRef={hasSourceRef}
+              />
               <Field label="Resumen">
                 <Input
                   value={form.summary}
@@ -253,7 +311,11 @@ function EventList({ events }: { events: ClinicalEvent[] }) {
                 {event.event_type} - {formatDate(event.occurred_at)}
               </p>
             </div>
-            <p className="text-xs text-muted-foreground">Fuente: {event.source_type}</p>
+            <div className="text-xs text-muted-foreground md:text-right">
+              <p>Fuente: {sourceTypeLabel(event.source_type)}</p>
+              {event.source_ref ? <p>Ref: {event.source_ref}</p> : null}
+              {event.encounter_id ? <p>Encuentro: {event.encounter_id}</p> : null}
+            </div>
           </div>
           {typeof event.payload.details === "string" ? (
             <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
@@ -266,8 +328,42 @@ function EventList({ events }: { events: ClinicalEvent[] }) {
   );
 }
 
+function SourceTraceNotice({
+  sourceType,
+  hasSourceRef,
+}: {
+  sourceType: ClinicalEventSourceType;
+  hasSourceRef: boolean;
+}) {
+  if (sourceType === "manual") {
+    return (
+      <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+        Fuente manual: este evento nace del registro humano actual.
+      </div>
+    );
+  }
+
+  if (hasSourceRef) {
+    return (
+      <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+        Fuente derivada con referencia: el evento conserva su origen para auditoria y timeline.
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border border-warning/40 bg-warning/10 p-3 text-sm text-muted-foreground">
+      Fuente derivada sin referencia: agrega el ID de la evolucion, signo, documento o accion IA que origina este evento.
+    </div>
+  );
+}
+
 function formatDate(value: string) {
   return new Date(value).toLocaleString("es-CL", { dateStyle: "short", timeStyle: "short" });
+}
+
+function sourceTypeLabel(value: ClinicalEventSourceType) {
+  return sourceTypeOptions.find((option) => option.value === value)?.label ?? value;
 }
 
 function eventTypeFromQuery(value: string | null): ClinicalEventType {

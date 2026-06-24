@@ -20,6 +20,7 @@ import {
   AllergyList,
   ClinicalTimeline,
   CriticalAlerts,
+  EncounterTraceSummary,
   MedicationList,
   PatientLongitudinalSummary,
   QuickSoapEditor,
@@ -90,6 +91,7 @@ function PatientSectionContent({
       <div className="space-y-4">
         <CriticalAlerts record={record} />
         <VitalsStrip vital={record.latest_vitals} />
+        <EncounterTraceSummary record={record} patientId={patientId} />
         <div className="flex justify-end" data-print-hidden="true">
           {canEditPatient ? (
             <Button asChild variant="outline" size="sm">

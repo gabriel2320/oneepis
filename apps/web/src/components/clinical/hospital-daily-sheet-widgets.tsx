@@ -162,6 +162,11 @@ export function DailySheetList({
               <Badge className="mt-2" variant={sheet.status === "closed" ? "safe" : "outline"}>
                 {dailySheetStatusLabel[sheet.status]}
               </Badge>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {sheet.status === "closed"
+                  ? "Cerrada bloquea edicion posterior; no equivale a firma legal."
+                  : "Editable y no firmado."}
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button asChild variant="outline" size="sm">

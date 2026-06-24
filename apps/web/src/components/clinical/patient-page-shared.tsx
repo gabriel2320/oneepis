@@ -11,6 +11,7 @@ import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { ErrorState } from "@/components/clinical/states";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DEMO_MODE } from "@/lib/api/client";
@@ -154,6 +155,32 @@ export function SoapTextarea({
     <div className="grid gap-2">
       <Label>{label}</Label>
       <Textarea className="min-h-28" {...registration} />
+    </div>
+  );
+}
+
+export function EncounterLinkNotice({
+  hasEncounters,
+  hasSelectedEncounter,
+}: {
+  hasEncounters: boolean;
+  hasSelectedEncounter: boolean;
+}) {
+  if (hasSelectedEncounter) {
+    return (
+      <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+        <Badge variant="safe">Encuentro vinculado</Badge>
+        Este acto quedara asociado al episodio seleccionado.
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 p-3 text-sm text-muted-foreground">
+      <Badge variant="warning">Sin encuentro</Badge>
+      {hasEncounters
+        ? "Selecciona un encuentro si este acto pertenece a una consulta, ingreso o urgencia."
+        : "No hay encuentros cargados para este paciente; puedes guardar, pero quedara fuera de episodio."}
     </div>
   );
 }
