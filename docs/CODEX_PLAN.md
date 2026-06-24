@@ -702,6 +702,28 @@ contrato OpenAPI y E2E 33 passed / 1 skipped. Riesgos residuales: `document_id_h
 tipado y no visible por privacidad; `LabResult` y `ClinicalRisk` siguen sin tabla
 duena dedicada y no deben crecer como pantallas/producto hasta definir fuente primaria.
 
+### Ciclo 3: guards arquitectonicos seriales
+
+El siguiente ciclo convierte la auditoria arquitectonica en gates pequenos. No
+cambia stack, no agrega dependencias, no mueve carpetas y no crea features
+clinicas.
+
+#### C3-01 Domain map
+
+Objetivo: crear mapa vertical por dominio sin duplicar el sistema de
+trazabilidad.
+
+Estado: implementado. `npm run audit:domain-map` regenera
+`audit:traceability` y produce `reports/domain-map.*` desde esa fuente. El mapa
+incluye modelo, schema, endpoints, repo/service, OpenAPI path, tipo TS, cliente,
+pantalla, papel, permisos, auditoria, tests y gaps. Resultado esperado inicial:
+9 dominios OK y `LabResult`/`ClinicalRisk` como `BLOCKED_DOMAIN`.
+
+#### C3-02 Permission guard
+
+Siguiente objetivo: crear `check:permissions` para rutas `POST/PATCH/DELETE`
+clinicas, separando este gate del inventario `domain-map`.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.
