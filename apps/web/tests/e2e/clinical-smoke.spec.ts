@@ -149,6 +149,24 @@ test("AI settings and print routes render", async ({ page }) => {
   await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 });
 
+test("prepared and blocked routes expose visible governance state", async ({ page }) => {
+  await page.goto("/consulta/agenda");
+  await expect(page.getByRole("heading", { name: "Agenda" })).toBeVisible();
+  await expect(page.getByText("Agenda ambulatoria lista para integracion.")).toBeVisible();
+
+  await page.goto(`/consulta/pacientes/${demoPatientId}/resumen`);
+  await expect(page.getByRole("heading", { name: "Resumen ambulatorio" })).toBeVisible();
+  await expect(page.getByText("Resumen pendiente")).toBeVisible();
+
+  await page.goto(`/pacientes/${demoPatientId}/documentos`);
+  await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
+  await expect(page.getByText("Documentos sin uploads reales")).toBeVisible();
+
+  await page.goto(`/print/pacientes/${demoPatientId}/receta`);
+  await expect(page.getByRole("heading", { name: "Receta bloqueada" })).toBeVisible();
+  await expect(page.getByText("Documento bloqueado: no valido para prescribir")).toBeVisible();
+});
+
 test("login route renders local auth form", async ({ page }) => {
   await page.goto("/login");
 
