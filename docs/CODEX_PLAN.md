@@ -83,9 +83,10 @@ Foco actual:
 Cola de ejecucion automatica:
 
 1. Mantener `main` verde despues del fix de bootstrap PostgreSQL.
-2. `PROG-PATIENT-TIMELINE-01`: integrar `assistant/timeline` dentro de ficha con filtros por dominio, fuente visible, limites y faltantes.
-3. Opciones secundarias posteriores: antecedentes estructurados minimos o permisos de enfermeria para preconsulta.
-4. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
+2. `PROG-PATIENT-TIMELINE-01` queda cerrado por PR #32.
+3. Siguiente bloque recomendado: `PROG-PATIENT-ANTECEDENTS-READ-01`, antecedentes read-only dentro de ficha usando fuentes existentes.
+4. Alternativa posterior: `PROG-AMB-PRECONSULTA-PERMISSIONS-01`, habilitar enfermeria solo con backend/permisos/tests porque el encuentro aun bloquea ese rol.
+5. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
 
 Reglas para avanzar:
 
@@ -94,7 +95,7 @@ Reglas para avanzar:
 - no mezclar contrato docs-only con implementacion
 - no agregar UI amplia antes de contrato, permisos, auditoria y pruebas
 - preconsulta debe seguir reutilizando cita, encuentro, signos y eventos antes de crear tabla o endpoint compuesto
-- la implementacion minima usa permisos existentes `medico/admin/dev`; enfermeria requiere PR backend y admision no se promete todavia
+- la implementacion minima usa permisos existentes `medico/admin/dev`; enfermeria requiere PR backend porque ya puede escribir signos/eventos, pero no encuentros; admision no se promete todavia
 - riesgos clinicos muestran fuente, severidad, estado y accion humana; no scores automaticos ni `ClinicalPatch`
 - no ampliar IA durante esta cola
 - usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge
