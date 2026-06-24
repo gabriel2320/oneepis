@@ -41,5 +41,6 @@ npm ci
 npm run check:api
 npm run check:web
 npm run check:contract
+npm run check:architecture
 
 echo "OK: OneEpis listo."

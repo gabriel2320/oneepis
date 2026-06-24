@@ -118,6 +118,7 @@ instala dependencias Python y npm, ejecuta migraciones y corre:
 npm run check:api
 npm run check:web
 npm run check:contract
+npm run check:architecture
 ```
 
 Para desarrollo diario despues del bootstrap:
@@ -166,6 +167,7 @@ El archivo estable queda en `packages/contracts/openapi.json`.
 npm run check:api
 npm run check:web
 npm run check:contract
+npm run check:architecture
 npm run check:e2e
 ```
 

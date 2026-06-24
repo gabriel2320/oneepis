@@ -823,6 +823,16 @@ arquitectura y E2E. El gate de arquitectura queda antes de E2E para fallar
 rapido ante drift de pantallas, permisos, papel, contratos frontend o
 trazabilidad.
 
+#### C4-06 Bootstrap architecture gate
+
+Objetivo: alinear bootstrap Ubuntu/Windows y documentacion operativa con el
+gate arquitectonico obligatorio.
+
+Estado: implementado. `bootstrap:ubuntu`, `bootstrap:windows`, README y
+`CURRENT_STATE.md` incluyen `npm run check:architecture` junto a API, web y
+contrato. No se agrega E2E al bootstrap para mantenerlo como preparacion local
+rapida y no forzar Playwright en cada instalacion inicial.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

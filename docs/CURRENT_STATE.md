@@ -207,6 +207,7 @@ Comandos esperados antes de entregar cambios:
 npm run check:api
 npm run check:web
 npm run check:contract
+npm run check:architecture
 npm run check:e2e
 npm run check
 ```
