@@ -286,6 +286,33 @@ Bloques ya cerrados en esta cola: `PROG-CONSOLIDATE-01`,
 `PROG-AMB-PRECONSULTA-00`, `PROG-CLINICAL-RISK-00`,
 `PROG-AMB-PRECONSULTA-01` y `PROG-CLINICAL-RISK-01`.
 
+Interrupcion correctiva 2026-06-24: antes de `PROG-PATIENT-CORE-NEXT-00`,
+cerrar el fix de bootstrap PostgreSQL para que una base limpia migre hasta
+`202606200015`. Gates minimos: `npm run check:api`, migracion Alembic contra
+DB temporal limpia y `npm run check:contract`.
+
+Decision recomendada para `PROG-PATIENT-CORE-NEXT-00`: elegir linea de tiempo
+paciente avanzada de solo lectura como proximo bloque, porque reutiliza fuentes
+existentes, no crea escritura nueva y mantiene el foco paciente/ficha/papel.
+
+## PROG-PATIENT-CORE-NEXT-00
+
+Estado: decidido docs-only.
+
+Decision: el siguiente bloque de producto sera `PROG-PATIENT-TIMELINE-01`.
+
+Contrato minimo:
+
+- reutilizar `GET /api/v1/patients/{patient_id}/assistant/timeline`
+- no crear tabla, endpoint, ruta visible ni escritura nueva
+- integrar lectura longitudinal dentro de `/pacientes/[patientId]/ficha`
+- mostrar dominios, fuente inspeccionable, limites y faltantes
+- mantener IA como lectura contextual declarada; no chat libre, RAG ni patch
+- si un componente supera presupuesto, extraer antes de sumar conducta
+
+Gates esperados para `PROG-PATIENT-TIMELINE-01`: `npm run check:web` y smoke
+E2E de ficha. `npm run check:contract` solo aplica si cambia API.
+
 ## PROG-AMB-PRECONSULTA-00
 
 Estado: contrato docs-only definido.

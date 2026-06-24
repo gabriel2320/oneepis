@@ -217,12 +217,12 @@ def _seed_demo_catalog() -> None:
         sa.column("form", sa.String()),
         sa.column("strength", sa.String()),
         sa.column("route", sa.String()),
-        sa.column("status", sa.String()),
+        sa.column("status", catalog_status),
         sa.column("tags", postgresql.JSONB(astext_type=sa.Text())),
-        sa.column("source_system", sa.String()),
+        sa.column("source_system", source_system),
         sa.column("source_label", sa.String()),
         sa.column("curated_by", sa.String()),
-        sa.column("review_status", sa.String()),
+        sa.column("review_status", review_status),
     )
     rules = sa.table(
         "medication_dose_rules",
@@ -236,10 +236,10 @@ def _seed_demo_catalog() -> None:
         sa.column("frequency_text", sa.String()),
         sa.column("usual_dose_text", sa.String()),
         sa.column("avoid_dose_text", sa.String()),
-        sa.column("severity", sa.String()),
-        sa.column("source_system", sa.String()),
+        sa.column("severity", dose_severity),
+        sa.column("source_system", source_system),
         sa.column("source_label", sa.String()),
-        sa.column("review_status", sa.String()),
+        sa.column("review_status", review_status),
     )
     op.bulk_insert(
         catalog,

@@ -26,6 +26,7 @@ clinical_risk_type = postgresql.ENUM(
     "adverse_event",
     "other",
     name="clinical_risk_type",
+    create_type=False,
 )
 
 clinical_risk_severity = postgresql.ENUM(
@@ -35,6 +36,7 @@ clinical_risk_severity = postgresql.ENUM(
     "critical",
     "unknown",
     name="clinical_risk_severity",
+    create_type=False,
 )
 
 clinical_risk_source_kind = postgresql.ENUM(
@@ -44,6 +46,7 @@ clinical_risk_source_kind = postgresql.ENUM(
     "clinical_entry",
     "lab_result",
     name="clinical_risk_source_kind",
+    create_type=False,
 )
 
 record_status = postgresql.ENUM(

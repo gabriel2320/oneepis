@@ -28,11 +28,15 @@ sobria, laboratorio minimo y preparacion contractual de ambulatorio/
 hospitalizacion. No autoriza IA nueva, dashboard, chat libre ni escritura
 automatica.
 
-Estado real al 2026-06-23:
+Estado real al 2026-06-24:
 
 - prototipo visual aprobado como base de ficha clinica tradicional gobernada
 - release `v0.4-assistant-read` cerrado y tagueado en `main`
 - el siguiente objetivo de producto es `v0.5-patient-core`
+- correccion de bootstrap PostgreSQL pendiente de cerrar: las migraciones
+  `202606200012_medication_catalog` y `202606200015_clinical_risks` ya migran
+  desde una base temporal limpia hasta `202606200015`; validar con
+  `npm run check:api`, migracion Alembic limpia y `npm run check:contract`
 - avances iniciales de `v0.5-patient-core` ya mergeados:
   - PR #15: agenda ambulatoria minima persistida con `ClinicalAppointment`
   - PR #16: resumen ambulatorio real de solo lectura
@@ -68,6 +72,10 @@ Estado real al 2026-06-23:
 - `PROG-CLINICAL-RISK-01` implementa riesgos clinicos minimos con entidad/API
   bajo paciente, permisos, auditoria, OpenAPI, UI compacta en ficha y E2E
   visible; no crea dashboard, scores automaticos ni IA nueva
+- `PROG-PATIENT-CORE-NEXT-00` queda decidido: el siguiente bloque clinico
+  tradicional sera linea de tiempo paciente avanzada de solo lectura,
+  reutilizando `assistant/timeline` dentro de ficha antes de crear API, entidad
+  o ruta nueva
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
@@ -86,7 +94,8 @@ Estado real al 2026-06-23:
 - el backend bloquea aceptar patches con `requires_human_confirmation=false`
 - el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
 - la UI de propuestas desde evolucion exige permiso AI para confirmar patches
-- el siguiente bloque debe partir desde `main` verde y ser micro-PR logico
+- el siguiente bloque debe partir desde `main` verde y ser micro-PR logico; si
+  hay correcciones de migracion pendientes, cerrarlas antes de nueva clinica
 
 Lecciones post #15-#17:
 
@@ -95,6 +104,8 @@ Lecciones post #15-#17:
 - evitar selectores E2E ambiguos: usar texto exacto o scope por card cuando el texto aparece en badges y descripciones
 - vigilar archivos entre 300 y 350 lineas antes de agregarles comportamiento; extraer componentes pequenos primero
 - mantener los documentos canonicos sincronizados para no volver a declarar como `preparada` una superficie ya completa
+- validar migraciones nuevas contra una DB PostgreSQL temporal limpia; los tests
+  API no sustituyen el bootstrap Alembic completo
 
 ## Backend
 
