@@ -804,6 +804,15 @@ Estado: implementado. `npm run check:architecture` ejecuta
 `check:traceability`. No reemplaza `check:api`, `check:web`, `check:contract`
 ni `check:e2e`; los complementa como gate de gobernanza del repo.
 
+#### C4-04 Architecture gate in CI
+
+Objetivo: evitar que el gate arquitectonico quede como comando local opcional.
+
+Estado: implementado. CI agrega un job `architecture` que corre
+`npm run check:architecture` separado de API, web y contracts-e2e. La plantilla
+de PR tambien lo lista para cambios en pantallas, permisos, papel, contratos
+frontend o trazabilidad.
+
 ## AI-Chart despues de R-01
 
 AI-Chart esta separado en `apps/web/src/components/clinical/ai-chart/`.

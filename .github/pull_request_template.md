@@ -41,6 +41,7 @@
 
 - [ ] `npm run check:api`
 - [ ] `npm run check:web`
+- [ ] `npm run check:architecture` si toca pantallas, permisos, papel, contratos frontend o trazabilidad
 - [ ] `npm run check:contract` si cambia API/OpenAPI
 - [ ] `npm run check:e2e` si toca UI/rutas/print
 - [ ] `npm run check` para cambios transversales
