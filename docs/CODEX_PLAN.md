@@ -82,10 +82,11 @@ Foco actual:
 
 Cola de ejecucion automatica:
 
-1. Cerrar `PROG-CLINICAL-RISK-01`: riesgos clinicos minimos bajo paciente, sin dashboard ni IA.
-2. `PROG-PATIENT-CORE-NEXT-00`: decidir siguiente bloque tradicional antes de implementar.
-3. Opciones candidatas: linea de tiempo avanzada, antecedentes estructurados minimos o permisos de enfermeria para preconsulta.
-4. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
+1. Cerrar el fix de bootstrap PostgreSQL si existen migraciones locales pendientes; no abrir clinica nueva con Alembic roto.
+2. `PROG-PATIENT-CORE-NEXT-00` queda decidido: seguir con linea de tiempo paciente avanzada de solo lectura.
+3. `PROG-PATIENT-TIMELINE-01`: reutilizar `assistant/timeline` dentro de ficha con filtros por dominio, fuente visible, limites y faltantes.
+4. Opciones secundarias posteriores: antecedentes estructurados minimos o permisos de enfermeria para preconsulta.
+5. No abrir otro dominio clinico con escritura hasta que el bloque elegido tenga contrato, permisos, auditoria y gates.
 
 Reglas para avanzar:
 
@@ -98,6 +99,7 @@ Reglas para avanzar:
 - riesgos clinicos muestran fuente, severidad, estado y accion humana; no scores automaticos ni `ClinicalPatch`
 - no ampliar IA durante esta cola
 - usar la tabla operativa de `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` para branch, titulo, gates y criterio de merge
+- si se toca Alembic, probar tambien migracion desde PostgreSQL limpio temporal, no solo tests API
 
 Semaforo de cambio:
 
