@@ -41,6 +41,14 @@ Current status:
 
 AI modules must remain assistive and review-only until explicit safety, audit, and governance controls are implemented.
 
+## CI Security Boundary
+
+The CI `security-report` job is intentionally incremental during the pilot.
+
+- Secret scanning with gitleaks is blocking: a real credential, token, private key, PHI sample, or clinical identifier must stop the PR and be treated as an incident.
+- Dependency review, CodeQL, `npm audit`, and `pip-audit` remain report-only until each signal has a documented blocking policy and false-positive process.
+- Report-only does not mean ignored: high-risk findings should be triaged before any healthcare-production milestone.
+
 ## Maintainer Checklist Before Production
 
 - role-based access control
