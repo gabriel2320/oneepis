@@ -52,6 +52,15 @@ Estado real al 2026-06-24:
     salen de `patient-event-pages.tsx`
   - PR #41: dieta de labs assistant; parsing, matching y resumen de valores de
     laboratorio salen de `patient_assistant_labs.py`
+  - PR #42: reconciliacion documental post dieta
+  - PR #43: `gitleaks` bloqueante en `security-report`; dependencias y analisis
+    estatico siguen report-only
+  - PR #44-#45: dieta faseada de `clinical_intent.py` con contexto/texto y
+    review items extraidos
+  - PR #46: marco de papel clinico mas serio y `clinical-print.tsx` fuera de
+    near-limit
+  - PR #47: polish read-only de ficha paciente con fuentes, limites y faltantes
+    mas visibles en antecedentes, timeline y laboratorio
 - bloques de consolidacion, dieta y polish inicial de ficha quedan cerrados:
   documentacion reconciliada, `patient-list-pages.tsx`, utilidades AI-Chart,
   eventos paciente y labs assistant fuera del reporte near-limit, antecedentes
@@ -402,9 +411,9 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - adjuntos externos, consentimientos y receta siguen como bordes bloqueados/futuros; no expandir todos a la vez.
-- watchlist de tamano actual tras PR #41: `clinical_intent.py`, `clinical_record.py`,
+- watchlist de tamano actual tras PR #47: `clinical_intent.py`, `clinical_record.py`,
   `clinical-intent-result-panel.tsx`, `patient-ai-chart-pages.tsx`,
-  `clinical_patch.py`, `clinical-print.tsx`, `ambulatory-appointment-pages.tsx`,
+  `clinical_patch.py`, `ambulatory-appointment-pages.tsx`,
   `demo-record.ts`, `assistant-read-sections.tsx`,
   `patient-record-workspaces.tsx`, `ambulatory-visit-pages.tsx` y
   `patient_assistant_correlation.py`.
@@ -441,7 +450,7 @@ Accesibilidad, performance y observabilidad pendientes:
 - Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
 - Rediseño grafico-web inicial: navegacion paciente agrupada, ficha como hoja clinica viva, AI-Chart con pasos guiados, paridad papel basica y tokens clinicos V2 documentados.
 - Validacion reciente rediseño visual: `npm run check:size`, `npm run check:web`, `npm run check:e2e`, `npm run check:contract` y `npm run check:api`.
-- Seguridad CI: job `security-report` report-only con gitleaks, dependency review, CodeQL, `npm audit` y `pip-audit`; no bloquea merge durante piloto salvo decision explicita posterior.
+- Seguridad CI: `security-report` bloquea secretos/PHI con `gitleaks`; dependency review, CodeQL, `npm audit` y `pip-audit` siguen report-only hasta politica explicita.
 - Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y superficies futuras por modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
 - Release `v0.4-assistant-read`: changelog creado, tag publicado y walkthrough humano aprobado el 2026-06-23.
