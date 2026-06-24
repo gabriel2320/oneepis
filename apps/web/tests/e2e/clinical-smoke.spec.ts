@@ -24,7 +24,10 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Linea clinica longitudinal")).toBeVisible();
   await expect(page.getByText("Antecedentes clinicos")).toBeVisible();
   await expect(page.getByText("Problema demo activo")).toBeVisible();
+  await expect(page.getByText("Fuentes actuales", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sin escritura", { exact: true })).toBeVisible();
   await expect(page.getByText("Fuentes usadas")).toBeVisible();
+  await expect(page.getByText("Eventos curados: 0")).toBeVisible();
   await expect(page.getByText("Faltantes declarados")).toBeVisible();
   await expect(page.getByText("Linea de tiempo avanzada")).toBeVisible();
   await expect(page.getByText("Fuentes visibles")).toBeVisible();

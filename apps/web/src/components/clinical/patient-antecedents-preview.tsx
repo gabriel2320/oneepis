@@ -15,12 +15,20 @@ type AntecedentItem = {
   id: string;
   label: string;
   detail: string;
-  source: string;
+  source: AntecedentSource;
   href: string;
   occurredAt?: string;
 };
 
+type AntecedentSource = "problemas" | "alergias" | "medicacion" | "eventos";
+
 const antecedentEventTypes = new Set(["diagnosis", "procedure", "clinical_note", "care_plan"]);
+const sourceLabels: Record<AntecedentSource, string> = {
+  problemas: "Problemas",
+  alergias: "Alergias",
+  medicacion: "Medicacion",
+  eventos: "Eventos curados",
+};
 
 export function PatientAntecedentsPreview({
   patientId,
@@ -58,6 +66,11 @@ export function PatientAntecedentsPreview({
         </Link>
       }
     >
+      <div className="mb-3 flex flex-wrap gap-2">
+        <Badge variant="safe">Solo lectura</Badge>
+        <Badge variant="outline">Fuentes actuales</Badge>
+        <Badge variant="outline">Sin escritura</Badge>
+      </div>
       {timelineQuery.isLoading ? <LoadingRows rows={2} /> : null}
       {timelineQuery.isError ? (
         <ErrorState
@@ -65,14 +78,14 @@ export function PatientAntecedentsPreview({
           onRetry={() => timelineQuery.refetch()}
         />
       ) : null}
+      <AntecedentSourceSummary counts={sourceCounts} />
       {items.length === 0 ? (
         <EmptyState
           title="Sin antecedentes visibles"
           description="Registra problemas, alergias, medicacion o eventos clinicos para alimentar esta lectura."
         />
       ) : (
-        <div className="space-y-2">
-          <AntecedentSourceSummary counts={sourceCounts} />
+        <div className="mt-3 space-y-2">
           {items.slice(0, 6).map((item) => (
             <article key={item.id} className="rounded-md border bg-background p-3">
               <div className="flex flex-wrap items-start justify-between gap-2">
@@ -80,7 +93,7 @@ export function PatientAntecedentsPreview({
                   <p className="text-sm font-medium">{item.label}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{item.detail}</p>
                 </div>
-                <Badge variant="outline">{item.source}</Badge>
+                <Badge variant="outline">{sourceLabels[item.source]}</Badge>
               </div>
               {item.occurredAt ? (
                 <p className="mt-2 text-[11px] text-muted-foreground">
@@ -97,11 +110,7 @@ export function PatientAntecedentsPreview({
           ))}
         </div>
       )}
-      <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
-        Faltantes declarados: antecedentes familiares/sociales, vacunas, dispositivos y diagnosticos
-        historicos codificados siguen pendientes de contrato propio. Esta lectura no crea ni corrige
-        antecedentes estructurados.
-      </div>
+      <AntecedentMissingDataNotice />
     </ClinicalSectionCard>
   );
 }
@@ -112,12 +121,15 @@ function AntecedentSourceSummary({
   counts: Record<"problemas" | "alergias" | "medicacion" | "eventos", number>;
 }) {
   return (
-    <div className="flex flex-wrap gap-2 rounded-md border bg-muted/20 p-2 text-xs text-muted-foreground">
-      <span className="font-medium text-foreground">Fuentes usadas</span>
-      <span>Problemas: {counts.problemas}</span>
-      <span>Alergias: {counts.alergias}</span>
-      <span>Medicacion: {counts.medicacion}</span>
-      <span>Eventos curados: {counts.eventos}</span>
+    <div className="rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+      <p className="font-medium text-foreground">Fuentes usadas</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {Object.entries(sourceLabels).map(([source, label]) => (
+          <span key={source} className="rounded-md border bg-background px-2 py-1">
+            {label}: {counts[source as AntecedentSource]}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -132,7 +144,7 @@ function buildAntecedentItems(
       id: `problem-${problem.id}`,
       label: problem.title,
       detail: problem.notes ?? `Estado: ${problem.status}`,
-      source: "problemas",
+      source: "problemas" as const,
       href: `/pacientes/${patientId}/problemas`,
       occurredAt: problem.onset_date ?? undefined,
     })),
@@ -140,7 +152,7 @@ function buildAntecedentItems(
       id: `allergy-${allergy.id}`,
       label: allergy.substance,
       detail: allergy.reaction ?? `Severidad: ${allergy.severity}`,
-      source: "alergias",
+      source: "alergias" as const,
       href: `/pacientes/${patientId}/alergias`,
       occurredAt: allergy.recorded_at,
     })),
@@ -150,7 +162,7 @@ function buildAntecedentItems(
       detail:
         [medication.dose, medication.route, medication.frequency].filter(Boolean).join(" / ") ||
         `Estado: ${medication.status}`,
-      source: "medicacion",
+      source: "medicacion" as const,
       href: `/pacientes/${patientId}/medicacion`,
       occurredAt: medication.started_on ?? undefined,
     })),
@@ -158,9 +170,31 @@ function buildAntecedentItems(
       id: `event-${event.id}`,
       label: event.summary,
       detail: `Evento curado como ${event.event_type}`,
-      source: "clinical_events",
+      source: "eventos" as const,
       href: `/pacientes/${patientId}/eventos`,
       occurredAt: event.occurred_at,
     })),
-  ].filter((item) => item.detail.trim().length > 0);
+  ]
+    .filter((item) => item.detail.trim().length > 0)
+    .sort((left, right) => compareAntecedentDates(left.occurredAt, right.occurredAt));
+}
+
+function AntecedentMissingDataNotice() {
+  return (
+    <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+      <p className="font-medium text-foreground">Faltantes declarados</p>
+      <p className="mt-1">
+        Familiares/sociales, vacunas, dispositivos y diagnosticos historicos codificados
+        siguen pendientes de contrato propio. Esta lectura no crea ni corrige antecedentes
+        estructurados.
+      </p>
+    </div>
+  );
+}
+
+function compareAntecedentDates(left?: string, right?: string) {
+  if (!left && !right) return 0;
+  if (!left) return 1;
+  if (!right) return -1;
+  return new Date(right).getTime() - new Date(left).getTime();
 }
