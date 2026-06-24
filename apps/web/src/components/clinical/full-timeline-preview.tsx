@@ -57,6 +57,7 @@ export function FullTimelinePreview({ patientId }: { patientId: string }) {
         <Badge variant="safe">Solo lectura</Badge>
         <Badge variant="outline">Fuentes visibles</Badge>
         <Badge variant="outline">Sin IA protagonista</Badge>
+        <Badge variant="outline">No escribe ficha</Badge>
       </div>
       {DEMO_MODE ? (
         <EmptyState
@@ -100,6 +101,7 @@ function TimelineWorkspace({ timeline }: { timeline: AssistantTimelineResponse }
 
   return (
     <div className="space-y-3">
+      <TimelineScopeSummary timeline={timeline} filteredCount={filteredItems.length} />
       <TimelineFilters
         activeFilter={activeFilter}
         counts={counts}
@@ -108,6 +110,32 @@ function TimelineWorkspace({ timeline }: { timeline: AssistantTimelineResponse }
       />
       <TimelineItemList activeFilter={activeFilter} items={filteredItems} />
       <TimelineFootnotes timeline={timeline} />
+    </div>
+  );
+}
+
+function TimelineScopeSummary({
+  timeline,
+  filteredCount,
+}: {
+  timeline: AssistantTimelineResponse;
+  filteredCount: number;
+}) {
+  const sourceCount = new Set(timeline.items.map((item) => item.source_label)).size;
+  return (
+    <div className="grid gap-2 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground sm:grid-cols-3">
+      <div>
+        <p className="font-medium text-foreground">{timeline.items.length} registros</p>
+        <p>Lectura longitudinal combinada.</p>
+      </div>
+      <div>
+        <p className="font-medium text-foreground">{sourceCount} fuentes</p>
+        <p>API existente, sin tabla nueva.</p>
+      </div>
+      <div>
+        <p className="font-medium text-foreground">{filteredCount} visibles</p>
+        <p>Segun filtro activo.</p>
+      </div>
     </div>
   );
 }
@@ -134,6 +162,7 @@ function TimelineFilters({
             type="button"
             variant={isActive ? "default" : "outline"}
             size="sm"
+            className="gap-2"
             onClick={() => onChange(filter.value)}
             aria-pressed={isActive}
           >
@@ -182,6 +211,7 @@ function TimelineItemList({
           <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
             <p>Fuente: {item.source_label}</p>
             <p className="break-all">Ruta: {item.source_path}</p>
+            <p>Tipo clinico: {TYPE_LABELS[item.item_type]}</p>
           </div>
         </article>
       ))}
@@ -202,11 +232,14 @@ function TimelineFootnotes({ timeline }: { timeline: AssistantTimelineResponse }
   }
 
   return (
-    <ul className="space-y-1 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
-      {notes.slice(0, 6).map((note) => (
-        <li key={note}>{note}</li>
-      ))}
-    </ul>
+    <div className="rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+      <p className="font-medium text-foreground">Limites y faltantes</p>
+      <ul className="mt-2 space-y-1">
+        {notes.slice(0, 6).map((note) => (
+          <li key={note}>{note}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

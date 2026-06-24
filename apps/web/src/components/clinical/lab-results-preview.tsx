@@ -10,6 +10,8 @@ import { listLabPanels } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
 import type { LabPanel } from "@/lib/types";
 
+type LabBadgeVariant = "safe" | "warning" | "outline";
+
 export function LabResultsPreview({ patientId }: { patientId: string }) {
   const labPanelsQuery = useQuery({
     queryKey: ["lab-panels", patientId, "ficha-preview"],
@@ -22,6 +24,11 @@ export function LabResultsPreview({ patientId }: { patientId: string }) {
       title="Resultados estructurados"
       description="Lectura reciente de laboratorio; no permite carga masiva ni ordenes."
     >
+      <div className="mb-3 flex flex-wrap gap-2">
+        <Badge variant="safe">Solo lectura</Badge>
+        <Badge variant="outline">Fuente API</Badge>
+        <Badge variant="outline">Sin ordenes</Badge>
+      </div>
       {DEMO_MODE ? (
         <EmptyState
           title="Laboratorio disponible con API real"
@@ -36,9 +43,7 @@ export function LabResultsPreview({ patientId }: { patientId: string }) {
         />
       ) : null}
       {labPanelsQuery.data ? <LabPanelPreviewList panels={labPanelsQuery.data} /> : null}
-      <p className="mt-3 text-xs text-muted-foreground">
-        Limite visible: 3 paneles recientes y hasta 4 resultados por panel; la vista amplia de laboratorio sigue futura.
-      </p>
+      <LabPreviewLimits />
     </ClinicalSectionCard>
   );
 }
@@ -52,8 +57,23 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
       />
     );
   }
+  const totalResults = panels.reduce((total, panel) => total + panel.results.length, 0);
   return (
     <div className="space-y-3">
+      <div className="grid gap-2 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground sm:grid-cols-3">
+        <div>
+          <p className="font-medium text-foreground">{panels.length} paneles</p>
+          <p>Ordenados por fecha reciente.</p>
+        </div>
+        <div>
+          <p className="font-medium text-foreground">{totalResults} resultados</p>
+          <p>Hasta 4 visibles por panel.</p>
+        </div>
+        <div>
+          <p className="font-medium text-foreground">Fuente estructurada</p>
+          <p>Sin reemplazar informe firmado.</p>
+        </div>
+      </div>
       {panels.map((panel) => (
         <div key={panel.id} className="rounded-md border bg-background p-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -61,6 +81,10 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
               <p className="text-sm font-medium">{panel.panel_name}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {formatDateTime(panel.occurred_at)}
+              </p>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Origen: {panel.source_type}
+                {panel.source_ref ? ` / ${panel.source_ref}` : ""}
               </p>
             </div>
             <Badge variant={panel.status === "active" ? "safe" : "warning"}>{panel.status}</Badge>
@@ -71,7 +95,7 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
               <div key={result.id} className="rounded-md bg-muted/30 p-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs font-medium">{result.name}</p>
-                  <Badge variant={result.status === "active" ? "outline" : "warning"}>
+                  <Badge variant={labFlagVariant(result.flag, result.status)}>
                     {result.flag}
                   </Badge>
                 </div>
@@ -104,6 +128,40 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
       ))}
     </div>
   );
+}
+
+function LabPreviewLimits() {
+  return (
+    <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+      <p className="font-medium text-foreground">Limites visibles y faltantes</p>
+      <p className="mt-1">
+        Limite visible: 3 paneles recientes y hasta 4 resultados por panel; la vista amplia
+        de laboratorio sigue futura.
+      </p>
+      <p className="mt-1">
+        No hay carga masiva, validacion de rangos por edad/sexo ni documento firmado en esta vista.
+      </p>
+    </div>
+  );
+}
+
+function labFlagVariant(
+  flag: LabPanel["results"][number]["flag"],
+  status: LabPanel["status"],
+): LabBadgeVariant {
+  if (
+    status !== "active" ||
+    flag === "critical" ||
+    flag === "high" ||
+    flag === "low" ||
+    flag === "abnormal"
+  ) {
+    return "warning";
+  }
+  if (flag === "normal") {
+    return "safe";
+  }
+  return "outline";
 }
 
 function labPanelSourcePath(panel: LabPanel) {

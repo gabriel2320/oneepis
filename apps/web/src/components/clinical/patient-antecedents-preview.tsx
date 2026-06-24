@@ -15,6 +15,7 @@ type AntecedentItem = {
   id: string;
   label: string;
   detail: string;
+  context: string;
   source: AntecedentSource;
   href: string;
   occurredAt?: string;
@@ -28,6 +29,12 @@ const sourceLabels: Record<AntecedentSource, string> = {
   alergias: "Alergias",
   medicacion: "Medicacion",
   eventos: "Eventos curados",
+};
+const sourceDetails: Record<AntecedentSource, string> = {
+  problemas: "Diagnosticos/problemas activos registrados.",
+  alergias: "Sustancias, reaccion y severidad visibles.",
+  medicacion: "Tratamiento activo; no equivale a receta.",
+  eventos: "Hechos curados desde timeline clinica.",
 };
 
 export function PatientAntecedentsPreview({
@@ -78,7 +85,7 @@ export function PatientAntecedentsPreview({
           onRetry={() => timelineQuery.refetch()}
         />
       ) : null}
-      <AntecedentSourceSummary counts={sourceCounts} />
+      <AntecedentSourceSummary counts={sourceCounts} total={items.length} />
       {items.length === 0 ? (
         <EmptyState
           title="Sin antecedentes visibles"
@@ -92,6 +99,7 @@ export function PatientAntecedentsPreview({
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{item.label}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{item.detail}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{item.context}</p>
                 </div>
                 <Badge variant="outline">{sourceLabels[item.source]}</Badge>
               </div>
@@ -110,6 +118,11 @@ export function PatientAntecedentsPreview({
           ))}
         </div>
       )}
+      {items.length > 6 ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Vista resumida: se muestran 6 de {items.length} fuentes disponibles.
+        </p>
+      ) : null}
       <AntecedentMissingDataNotice />
     </ClinicalSectionCard>
   );
@@ -117,17 +130,25 @@ export function PatientAntecedentsPreview({
 
 function AntecedentSourceSummary({
   counts,
+  total,
 }: {
   counts: Record<"problemas" | "alergias" | "medicacion" | "eventos", number>;
+  total: number;
 }) {
   return (
     <div className="rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
-      <p className="font-medium text-foreground">Fuentes usadas</p>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-medium text-foreground">Fuentes usadas</p>
+        <Badge variant={total > 0 ? "safe" : "warning"}>{total} visibles</Badge>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2">
         {Object.entries(sourceLabels).map(([source, label]) => (
-          <span key={source} className="rounded-md border bg-background px-2 py-1">
-            {label}: {counts[source as AntecedentSource]}
-          </span>
+          <div key={source} className="rounded-md border bg-background p-2">
+            <p className="font-medium text-foreground">
+              {label}: {counts[source as AntecedentSource]}
+            </p>
+            <p className="mt-1">{sourceDetails[source as AntecedentSource]}</p>
+          </div>
         ))}
       </div>
     </div>
@@ -144,6 +165,9 @@ function buildAntecedentItems(
       id: `problem-${problem.id}`,
       label: problem.title,
       detail: problem.notes ?? `Estado: ${problem.status}`,
+      context: problem.code
+        ? `${problem.code_system ?? "Codigo"}: ${problem.code}`
+        : "Sin codigo clinico estructurado.",
       source: "problemas" as const,
       href: `/pacientes/${patientId}/problemas`,
       occurredAt: problem.onset_date ?? undefined,
@@ -152,6 +176,7 @@ function buildAntecedentItems(
       id: `allergy-${allergy.id}`,
       label: allergy.substance,
       detail: allergy.reaction ?? `Severidad: ${allergy.severity}`,
+      context: `Severidad: ${allergy.severity}. Estado: ${allergy.status}.`,
       source: "alergias" as const,
       href: `/pacientes/${patientId}/alergias`,
       occurredAt: allergy.recorded_at,
@@ -162,6 +187,7 @@ function buildAntecedentItems(
       detail:
         [medication.dose, medication.route, medication.frequency].filter(Boolean).join(" / ") ||
         `Estado: ${medication.status}`,
+      context: medication.started_on ? "Con fecha de inicio." : "Sin fecha de inicio.",
       source: "medicacion" as const,
       href: `/pacientes/${patientId}/medicacion`,
       occurredAt: medication.started_on ?? undefined,
@@ -170,6 +196,7 @@ function buildAntecedentItems(
       id: `event-${event.id}`,
       label: event.summary,
       detail: `Evento curado como ${event.event_type}`,
+      context: `Fuente: ${event.source_type}${event.source_ref ? ` / ${event.source_ref}` : ""}.`,
       source: "eventos" as const,
       href: `/pacientes/${patientId}/eventos`,
       occurredAt: event.occurred_at,
