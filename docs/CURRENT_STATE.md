@@ -61,10 +61,14 @@ Estado real al 2026-06-24:
     near-limit
   - PR #47: polish read-only de ficha paciente con fuentes, limites y faltantes
     mas visibles en antecedentes, timeline y laboratorio
+  - dieta final de `clinical_intent.py`: las respuestas de intencion clinica
+    salen a `clinical_intent_responses.py` y el orquestador queda fuera de
+    near-limit sin cambio de conducta
 - bloques de consolidacion, dieta y polish inicial de ficha quedan cerrados:
   documentacion reconciliada, `patient-list-pages.tsx`, utilidades AI-Chart,
-  eventos paciente y labs assistant fuera del reporte near-limit, antecedentes
-  con fuentes usadas y timeline/laboratorio con limites y faltantes visibles
+  eventos paciente, labs assistant y `clinical_intent.py` fuera del reporte
+  near-limit, antecedentes con fuentes usadas y timeline/laboratorio con
+  limites y faltantes visibles
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
@@ -118,8 +122,9 @@ Estado real al 2026-06-24:
 - `PROG-DIET-AI-CHART-UTILS-01` quedo cerrado por PR #39
 - `PROG-DIET-PATIENT-EVENTS-01` quedo cerrado por PR #40
 - `PROG-DIET-ASSISTANT-LABS-01` quedo cerrado por PR #41
-- el siguiente bloque debe elegirse pequeno: dieta near-limit restante, papel
-  serio o contrato minimo paciente/ficha; no abrir IA nueva ni dominio amplio
+- la deuda near-limit vigente queda cerrada; el siguiente bloque debe elegirse
+  pequeno: papel serio o contrato minimo paciente/ficha; no abrir IA nueva ni
+  dominio amplio
 
 Lecciones post #15-#17:
 

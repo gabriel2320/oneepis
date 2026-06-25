@@ -218,6 +218,16 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Resultado: lista y metricas de pacientes extraidas a componente dedicado.
 - Fuera de alcance: cambios de conducta, textos, rutas, API, OpenAPI y diseno.
 
+### PROG-DIET-BACKEND-INTENT-01: cierre near-limit IA backend
+
+- Estado: extraccion completada sin cambio de conducta.
+- Decision: dejar `clinical_intent.py` como orquestador y mover builders de
+  respuesta/cambio a `clinical_intent_responses.py`.
+- Resultado: `clinical_intent.py` queda fuera de near-limit y `check:size`
+  no reporta archivos en watchlist.
+- Fuera de alcance: IA nueva, reglas nuevas, endpoints, OpenAPI y cambios de
+  respuesta clinica.
+
 ### PROG-PATIENT-CORE-POLISH-01: ficha de lectura mas clara
 
 - Estado: polish implementado sin entidad ni endpoint nuevo.
