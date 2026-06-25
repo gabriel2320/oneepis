@@ -287,6 +287,16 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: carga de archivos, almacenamiento documental, antivirus
   real, previsualizacion, OCR/RAG, firma y custodia legal.
 
+### PROG-EXTERNAL-AI-BLOCK-01: IA externa bloqueada explicita
+
+- Estado: guardrail visible implementado sin proveedor ni endpoint nuevo.
+- Decision: mantener proveedores externos bloqueados mientras OneEpis opera con
+  Nivel 0 local y Ollama como mejora opcional.
+- Resultado: `/configuracion/ia` declara requisitos faltantes de payload
+  anonimizado, preview humano, autorizacion explicita, auditoria y politica PHI.
+- Fuera de alcance: proveedor externo activo, RAG, embeddings externos,
+  persistencia de prompts, envio de PHI y decision clinica automatica.
+
 ### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
 - Estado: decision docs-only cerrada y permiso estrecho implementado.

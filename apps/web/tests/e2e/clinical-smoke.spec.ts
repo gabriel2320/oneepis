@@ -290,6 +290,10 @@ test("AI settings and print routes render", async ({ page }) => {
   await page.goto("/configuracion/ia");
   await expect(page.getByRole("heading", { name: "IA local" })).toBeVisible();
   await expect(page.getByText("Estado Ollama")).toBeVisible();
+  await expect(page.getByText("IA externa")).toBeVisible();
+  await expect(
+    page.getByText("Requiere anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI."),
+  ).toBeVisible();
 
   await page.goto(`/print/pacientes/${demoPatientId}/ficha`);
   await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
