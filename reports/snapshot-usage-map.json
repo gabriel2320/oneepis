@@ -1,0 +1,166 @@
+{
+  "generated_at": "2026-06-25T02:08:12.695Z",
+  "scope": "frontend_snapshot_usage",
+  "summary": {
+    "read_models": 15,
+    "snapshot_or_projection_models": 5,
+    "unused_read_models": 5
+  },
+  "rows": [
+    {
+      "function_name": "getPatient",
+      "return_type": "Patient",
+      "api_file": "apps/web/src/lib/api/patients.ts",
+      "endpoint": "/api/v1/patients/{patientId}",
+      "consumers": [],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "getPatientRecord",
+      "return_type": "PatientRecordSnapshot",
+      "api_file": "apps/web/src/lib/api/patients.ts",
+      "endpoint": "/api/v1/patients/{patientId}/record",
+      "consumers": [
+        "apps/web/src/components/clinical/patient-page-shared.tsx",
+        "apps/web/src/components/print/clinical-print.tsx",
+        "apps/web/src/components/print/hospital-admission-print.tsx",
+        "apps/web/src/components/print/hospital-discharge-summary-print.tsx",
+        "apps/web/src/components/print/hospital-indication-print.tsx"
+      ],
+      "role": "patient-record-snapshot"
+    },
+    {
+      "function_name": "listClinicalEntries",
+      "return_type": "ClinicalEntry[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/clinical-entries?limit=50",
+      "consumers": [],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listClinicalEvents",
+      "return_type": "ClinicalEvent[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/clinical-events?limit=50",
+      "consumers": [
+        "apps/web/src/components/clinical/patient-ai-chart-pages.tsx",
+        "apps/web/src/components/clinical/patient-event-pages.tsx"
+      ],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "getClinicalTimeline",
+      "return_type": "ClinicalTimeline",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/timeline?limit=50",
+      "consumers": [
+        "apps/web/src/components/clinical/patient-antecedents-preview.tsx"
+      ],
+      "role": "timeline-projection"
+    },
+    {
+      "function_name": "listAllergies",
+      "return_type": "Allergy[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/allergies?limit=50",
+      "consumers": [],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listMedications",
+      "return_type": "Medication[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/medications?limit=50",
+      "consumers": [],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listActiveProblems",
+      "return_type": "ActiveProblem[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/problems?limit=50",
+      "consumers": [],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listClinicalEncounters",
+      "return_type": "ClinicalEncounter[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/encounters?limit=50",
+      "consumers": [
+        "apps/web/src/components/clinical/ambulatory-summary-pages.tsx",
+        "apps/web/src/components/clinical/ambulatory-visit-pages.tsx",
+        "apps/web/src/components/clinical/hospital-admission-pages.tsx",
+        "apps/web/src/components/clinical/hospital-discharge-summary-pages.tsx",
+        "apps/web/src/components/clinical/patient-event-pages.tsx",
+        "apps/web/src/components/clinical/patient-record-workspaces.tsx",
+        "apps/web/src/components/clinical/patient-soap-page.tsx"
+      ],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listVitalSigns",
+      "return_type": "VitalSign[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/vital-signs?limit=50",
+      "consumers": [
+        "apps/web/src/components/clinical/patient-record-workspaces.tsx"
+      ],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listAuditEvents",
+      "return_type": "AuditEvent[]",
+      "api_file": "apps/web/src/lib/api/clinical-record.ts",
+      "endpoint": "/api/v1/patients/{patientId}/audit-events?limit=80",
+      "consumers": [
+        "apps/web/src/components/clinical/patient-record-workspaces.tsx"
+      ],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listActiveHospitalizations",
+      "return_type": "HospitalizationBoardItem[]",
+      "api_file": "apps/web/src/lib/api/hospitalization.ts",
+      "endpoint": "/api/v1/hospitalization/active?limit=50",
+      "consumers": [
+        "apps/web/src/components/clinical/hospitalization-data.ts",
+        "apps/web/src/components/print/hospital-round-print.tsx"
+      ],
+      "role": "hospitalization-board-projection"
+    },
+    {
+      "function_name": "listHospitalBeds",
+      "return_type": "HospitalBed[]",
+      "api_file": "apps/web/src/lib/api/hospitalization.ts",
+      "endpoint": "/api/v1/hospitalization/beds?limit=100",
+      "consumers": [
+        "apps/web/src/components/clinical/hospitalization-data.ts"
+      ],
+      "role": "entity-list"
+    },
+    {
+      "function_name": "listHospitalDailySheets",
+      "return_type": "HospitalDailySheet[]",
+      "api_file": "apps/web/src/lib/api/hospitalization.ts",
+      "endpoint": "/api/v1/hospitalization/patients/{patientId}/daily-sheets?limit=30",
+      "consumers": [
+        "apps/web/src/components/clinical/hospitalization-data.ts",
+        "apps/web/src/components/print/clinical-print.tsx",
+        "apps/web/src/components/print/hospital-round-print.tsx"
+      ],
+      "role": "hospital-document-list"
+    },
+    {
+      "function_name": "listHospitalIndications",
+      "return_type": "HospitalIndication[]",
+      "api_file": "apps/web/src/lib/api/hospitalization.ts",
+      "endpoint": "/api/v1/hospitalization/patients/{patientId}/indications?limit=50",
+      "consumers": [
+        "apps/web/src/components/clinical/hospitalization-data.ts",
+        "apps/web/src/components/print/hospital-indication-print.tsx"
+      ],
+      "role": "hospital-document-list"
+    }
+  ]
+}

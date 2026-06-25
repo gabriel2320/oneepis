@@ -1,0 +1,201 @@
+{
+  "generated_at": "2026-06-25T02:11:14.448Z",
+  "scope": "paper_source_policy",
+  "summary": {
+    "print_routes_checked": 8,
+    "app_routes_with_paper_policy": 11,
+    "gaps": 0
+  },
+  "rows": [
+    {
+      "route": "/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/hospitalizacion/rondas",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/pacientes/[patientId]/evolucion/[entryId]",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/pacientes/[patientId]/ficha",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/print/pacientes/[patientId]/resumen",
+      "linked_app_route": "sin ruta app vinculada",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "development-only",
+      "gaps": []
+    },
+    {
+      "route": "/hospitalizacion/pacientes/[patientId]/epicrisis",
+      "linked_app_route": "/hospitalizacion/pacientes/[patientId]/epicrisis",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/hospitalizacion/pacientes/[patientId]/ingreso",
+      "linked_app_route": "/hospitalizacion/pacientes/[patientId]/ingreso",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/hospitalizacion/pacientes/[patientId]/hoja-diaria",
+      "linked_app_route": "/hospitalizacion/pacientes/[patientId]/hoja-diaria",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar",
+      "linked_app_route": "/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/hospitalizacion/pacientes/[patientId]/indicaciones",
+      "linked_app_route": "/hospitalizacion/pacientes/[patientId]/indicaciones",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/hospitalizacion/rondas",
+      "linked_app_route": "/hospitalizacion/rondas",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/pacientes/[patientId]/documentos",
+      "linked_app_route": "/pacientes/[patientId]/documentos",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/pacientes/[patientId]/evoluciones",
+      "linked_app_route": "/pacientes/[patientId]/evoluciones",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/pacientes/[patientId]/evoluciones/desde-eventos",
+      "linked_app_route": "/pacientes/[patientId]/evoluciones/desde-eventos",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/pacientes/[patientId]/evoluciones/nueva",
+      "linked_app_route": "/pacientes/[patientId]/evoluciones/nueva",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    },
+    {
+      "route": "/pacientes/[patientId]/ficha",
+      "linked_app_route": "/pacientes/[patientId]/ficha",
+      "owner_entity": "no declarado",
+      "read_model": "no declarado",
+      "api_client": "no declarado",
+      "document_state": "no declarado",
+      "clinical_use": "no declarado",
+      "gaps": []
+    }
+  ]
+}

@@ -11,13 +11,25 @@
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
     "dev:api": "node scripts/dev-api.mjs",
+    "audit:variables": "node scripts/audit-variable-map.mjs",
+    "audit:traceability": "node scripts/audit-traceability-map.mjs",
+    "audit:domain-map": "npm run audit:traceability && node scripts/audit-domain-map.mjs",
+    "audit:snapshots": "node scripts/audit-snapshot-usage.mjs",
+    "audit:read-access": "node scripts/audit-read-access.mjs",
+    "audit:read-access-policy": "node scripts/check-read-access-policy.mjs",
+    "audit:encounter-axis": "node scripts/audit-encounter-axis.mjs",
     "check:api": "node scripts/check-api.mjs",
     "check:screens": "node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
+    "check:permissions": "node scripts/check-permissions.mjs",
+    "check:paper": "node scripts/check-paper-source.mjs",
+    "check:contracts:drift": "node scripts/check-contract-drift.mjs",
+    "check:traceability": "node scripts/check-traceability-policy.mjs",
+    "check:architecture": "npm run check:screens && npm run check:permissions && npm run check:paper && npm run check:contracts:drift && npm run check:traceability && npm run audit:read-access-policy",
     "check:size": "node scripts/check-file-size.mjs && npm run check:screens",
     "check:web": "npm run check:size && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
     "check:contract": "node scripts/export-openapi.mjs && node scripts/check-assistant-read-contract.mjs && git diff --exit-code packages/contracts/openapi.json",
     "check:e2e": "npm --workspace apps/web run test:e2e && npm --workspace apps/web run test:e2e:assistant-read",
-    "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
+    "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:architecture && npm run check:e2e"
   },
   "engines": {
     "node": ">=20.0.0",
