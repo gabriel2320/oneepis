@@ -203,7 +203,10 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; mantener `patient-ai-chart-pages.tsx` como orquestador y no volver a inflarlo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
 - `apps/api/src/oneepis_api/services/clinical_intent.py` queda como orquestador de intenciones; las reglas de cambios deterministicas viven en `clinical_intent_rules.py`.
-- `apps/api/src/oneepis_api/services/assistant_timeline.py` ya concentra timeline/search/chart/correlate; no agregar nuevas capacidades ahi sin extraer por dominio.
+- Los servicios assistant de lectura quedan separados por capacidad:
+  `assistant_timeline.py`, `assistant_search.py`, `assistant_chart.py` y
+  `assistant_correlations.py`; no agregar nuevas capacidades ahi sin extraer por
+  dominio.
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - `/consulta/agenda`, `/consulta/pacientes/[patientId]/resumen`, documentos y receta siguen como bordes preparados; no expandir todos a la vez.

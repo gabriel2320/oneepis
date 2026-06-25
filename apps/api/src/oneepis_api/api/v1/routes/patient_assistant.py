@@ -13,12 +13,10 @@ from oneepis_api.schemas.assistant import (
     AssistantSearchResponse,
     AssistantTimelineResponse,
 )
-from oneepis_api.services.assistant_timeline import (
-    build_assistant_chart,
-    build_assistant_correlations,
-    build_assistant_timeline,
-    search_assistant_timeline,
-)
+from oneepis_api.services.assistant_chart import build_assistant_chart
+from oneepis_api.services.assistant_correlations import build_assistant_correlations
+from oneepis_api.services.assistant_search import search_assistant_timeline
+from oneepis_api.services.assistant_timeline import build_assistant_timeline
 
 from .patient_shared import PATIENT_ROUTER_OPTIONS, LimitQuery, SessionDep, require_patient
 
