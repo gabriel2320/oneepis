@@ -310,3 +310,131 @@ def test_assistant_search_requires_authentication(client: TestClient) -> None:
     )
 
     assert response.status_code == 401
+
+
+def test_assistant_chart_returns_sources_without_writing_audit(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Grafico",
+            "last_name": "Lectura",
+            "birth_date": "1984-05-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    patient_id = patient["id"]
+    client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-21T08:00:00Z",
+            "heart_rate_bpm": 104,
+            "oxygen_saturation_pct": "92",
+        },
+    )
+    client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-21T09:00:00Z",
+            "summary": "PCR elevada",
+            "payload": {"marker": "PCR", "value": "58", "unit": "mg/L"},
+        },
+    )
+    client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={
+            "name": "Ceftriaxona",
+            "dose": "1 g",
+            "route": "EV",
+            "frequency": "cada 24 horas",
+            "started_on": "2026-06-21",
+        },
+    )
+
+    audit_before = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth).json()
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=auth,
+        json={},
+    )
+    audit_after = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth).json()
+
+    assert response.status_code == 200
+    body = response.json()
+    series = {item["key"]: item for item in body["series"]}
+    assert {"heart_rate_bpm", "oxygen_saturation_pct", "exam_result", "medication"}.issubset(
+        series
+    )
+    assert series["heart_rate_bpm"]["points"][0]["value"] == 104.0
+    assert series["oxygen_saturation_pct"]["points"][0]["unit"] == "%"
+    assert series["exam_result"]["points"][0]["label"] == "PCR"
+    assert series["exam_result"]["points"][0]["value"] == 58.0
+    assert series["exam_result"]["points"][0]["unit"] == "mg/L"
+    assert series["exam_result"]["points"][0]["source_type"] == "clinical_event"
+    assert series["medication"]["points"][0]["label"] == "Ceftriaxona"
+    assert series["medication"]["points"][0]["source_type"] == "medication"
+    assert "solo lectura" in body["limits"][0]
+    assert len(audit_after) == len(audit_before)
+
+
+def test_assistant_chart_filters_metrics_and_declares_missing(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Grafico",
+            "last_name": "Vacio",
+            "birth_date": "1992-09-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+
+    response = client.post(
+        f"/api/v1/patients/{patient['id']}/assistant/chart",
+        headers=auth,
+        json={"metrics": ["temperature_c"]},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["series"] == []
+    assert "No hay signos vitales con valores graficables." in body["missing"]
+
+
+def test_readonly_user_can_get_assistant_chart(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=readonly_auth,
+        json={},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["patient_id"] == patient_id
+
+
+def test_assistant_chart_requires_authentication(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/patients/11111111-1111-4111-8111-111111111111/assistant/chart",
+        json={},
+    )
+
+    assert response.status_code == 401

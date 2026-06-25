@@ -19,6 +19,17 @@ AssistantTimelineSourceType = Literal[
     "hospital_indication",
 ]
 
+AssistantChartMetric = Literal[
+    "temperature_c",
+    "systolic_bp",
+    "diastolic_bp",
+    "heart_rate_bpm",
+    "respiratory_rate_bpm",
+    "oxygen_saturation_pct",
+    "exam_result",
+    "medication",
+]
+
 
 class AssistantTimelineItem(APIModel):
     source_type: AssistantTimelineSourceType
@@ -59,4 +70,35 @@ class AssistantSearchResponse(APIModel):
     query: str
     matches: list[AssistantSearchMatch]
     searched_source_types: list[AssistantTimelineSourceType]
+    limits: list[str] = Field(default_factory=list)
+
+
+class AssistantChartRequest(APIModel):
+    metrics: list[AssistantChartMetric] = Field(default_factory=list)
+    limit: int = Field(default=100, ge=1, le=200)
+
+
+class AssistantChartPoint(APIModel):
+    source_type: AssistantTimelineSourceType
+    source_id: uuid.UUID
+    encounter_id: uuid.UUID | None = None
+    occurred_at: datetime | None = None
+    occurred_on: date | None = None
+    label: str = Field(min_length=1, max_length=160)
+    value: float | str | None = None
+    unit: str | None = Field(default=None, max_length=40)
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class AssistantChartSeries(APIModel):
+    key: AssistantChartMetric
+    label: str = Field(min_length=1, max_length=160)
+    unit: str | None = Field(default=None, max_length=40)
+    points: list[AssistantChartPoint]
+
+
+class AssistantChartResponse(APIModel):
+    patient_id: uuid.UUID
+    series: list[AssistantChartSeries]
+    missing: list[str] = Field(default_factory=list)
     limits: list[str] = Field(default_factory=list)

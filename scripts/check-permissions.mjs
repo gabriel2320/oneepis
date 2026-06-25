@@ -12,6 +12,7 @@ const excludedFiles = new Set(["auth.py", "health.py", "ai.py", "patient_shared.
 const readLikePosts = new Set([
   "patient_core.py POST /{patient_id}/ai/suggestions",
   "patient_assistant.py POST /{patient_id}/assistant/search",
+  "patient_assistant.py POST /{patient_id}/assistant/chart",
 ]);
 const delegatedAuditMarkers = [
   "confirm_patch_service(",

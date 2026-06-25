@@ -5,11 +5,14 @@ import uuid
 from fastapi import APIRouter
 
 from oneepis_api.schemas.assistant import (
+    AssistantChartRequest,
+    AssistantChartResponse,
     AssistantSearchRequest,
     AssistantSearchResponse,
     AssistantTimelineResponse,
 )
 from oneepis_api.services.assistant_timeline import (
+    build_assistant_chart,
     build_assistant_timeline,
     search_assistant_timeline,
 )
@@ -37,3 +40,13 @@ def search_assistant_sources(
 ) -> AssistantSearchResponse:
     require_patient(session, patient_id)
     return search_assistant_timeline(session, patient_id, payload)
+
+
+@router.post("/{patient_id}/assistant/chart", response_model=AssistantChartResponse)
+def get_assistant_chart(
+    patient_id: uuid.UUID,
+    payload: AssistantChartRequest,
+    session: SessionDep,
+) -> AssistantChartResponse:
+    require_patient(session, patient_id)
+    return build_assistant_chart(session, patient_id, payload)

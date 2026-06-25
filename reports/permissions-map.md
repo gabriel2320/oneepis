@@ -1,6 +1,6 @@
 # Permissions Map - OneEpis
 
-Generado: 2026-06-25T00:30:50.389Z
+Generado: 2026-06-25T00:38:32.275Z
 
 ## Resumen
 

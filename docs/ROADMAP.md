@@ -144,14 +144,16 @@ OneEpis ya tiene una base clinica E2E real:
   `GET /api/v1/patients/{patient_id}/assistant/timeline`.
 - Se agrego `POST /api/v1/patients/{patient_id}/assistant/search` como
   busqueda deterministica sobre las fuentes normalizadas del timeline.
+- Se agrego `POST /api/v1/patients/{patient_id}/assistant/chart` para devolver
+  series graficables de signos vitales, eventos `exam_result` y marcas de
+  medicacion activa.
 - El timeline une fuentes existentes: encuentros, evoluciones, eventos,
   signos vitales, problemas activos, medicacion activa, alergias activas e
   indicaciones hospitalarias.
 - Las respuestas declaran `source_type`, `source_id`, fecha disponible, resumen,
   snippets, faltantes o limites; no escriben ficha ni registran auditoria de
   modificacion.
-- Quedan pendientes datos graficables y correlacion por presets antes de abrir
-  UI dedicada.
+- Queda pendiente correlacion por presets antes de abrir UI dedicada.
 
 ## Principios aprendidos
 

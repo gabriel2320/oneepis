@@ -2097,6 +2097,93 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/assistant/chart": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Get Assistant Chart",
+        "operationId": "get_assistant_chart_api_v1_patients__patient_id__assistant_chart_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantChartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantChartResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/ai/draft-soap-from-events": {
       "post": {
         "tags": [
@@ -6165,6 +6252,225 @@
         },
         "type": "object",
         "title": "AllergyUpdate"
+      },
+      "AssistantChartPoint": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "encounter",
+              "clinical_entry",
+              "clinical_event",
+              "vital_sign",
+              "active_problem",
+              "medication",
+              "allergy",
+              "hospital_indication"
+            ],
+            "title": "Source Type"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Id"
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "occurred_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred On"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_type",
+          "source_id",
+          "label"
+        ],
+        "title": "AssistantChartPoint"
+      },
+      "AssistantChartRequest": {
+        "properties": {
+          "metrics": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "temperature_c",
+                "systolic_bp",
+                "diastolic_bp",
+                "heart_rate_bpm",
+                "respiratory_rate_bpm",
+                "oxygen_saturation_pct",
+                "exam_result",
+                "medication"
+              ]
+            },
+            "type": "array",
+            "title": "Metrics"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 100
+          }
+        },
+        "type": "object",
+        "title": "AssistantChartRequest"
+      },
+      "AssistantChartResponse": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantChartSeries"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing"
+          },
+          "limits": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limits"
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "series"
+        ],
+        "title": "AssistantChartResponse"
+      },
+      "AssistantChartSeries": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "temperature_c",
+              "systolic_bp",
+              "diastolic_bp",
+              "heart_rate_bpm",
+              "respiratory_rate_bpm",
+              "oxygen_saturation_pct",
+              "exam_result",
+              "medication"
+            ],
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantChartPoint"
+            },
+            "type": "array",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "points"
+        ],
+        "title": "AssistantChartSeries"
       },
       "AssistantSearchMatch": {
         "properties": {
