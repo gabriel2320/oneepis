@@ -25,7 +25,8 @@ from oneepis_api.schemas.clinical_record import (
 from oneepis_api.services.ai.provider import get_ai_provider
 from oneepis_api.services.audit import record_audit_event
 from oneepis_api.services.clinical_context import build_event_context
-from oneepis_api.services.clinical_intent import resolve_clinical_intent, route_clinical_intent
+from oneepis_api.services.clinical_intent import resolve_clinical_intent
+from oneepis_api.services.clinical_intent_router import route_clinical_intent
 from oneepis_api.services.clinical_patch import confirm_clinical_patch as confirm_patch_service
 from oneepis_api.services.document_drafter import draft_soap_from_events
 from oneepis_api.services.event_proposals import propose_events_from_entry

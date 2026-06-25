@@ -5,21 +5,17 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
-import { AiChartGovernancePanel } from "@/components/clinical/ai-chart/ai-chart-governance-panel";
 import { AiChartStep } from "@/components/clinical/ai-chart/ai-chart-step";
-import { AssistantReadPanel } from "@/components/clinical/ai-chart/assistant-read-panel";
 import type {
   HumanReviewConfirmation,
   SoapDraftState,
 } from "@/components/clinical/ai-chart/ai-chart-types";
 import { clinicalEventSourceIds } from "@/components/clinical/ai-chart/ai-chart-utils";
 import { buildSoapDraftPatch } from "@/components/clinical/ai-chart/clinical-patch";
-import { ClinicalIntentCommandBar } from "@/components/clinical/ai-chart/clinical-intent-command-bar";
-import { ClinicalIntentResultPanel } from "@/components/clinical/ai-chart/clinical-intent-result-panel";
-import { DraftSoapPaper } from "@/components/clinical/ai-chart/draft-soap-paper";
 import { EntryEventProposalsSection } from "@/components/clinical/ai-chart/entry-event-proposals-section";
-import { EventSelectionPanel } from "@/components/clinical/ai-chart/event-selection-panel";
-import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { PatientAiChartDraftSection } from "@/components/clinical/ai-chart/patient-ai-chart-draft-section";
+import { PatientAiChartEvidenceSection } from "@/components/clinical/ai-chart/patient-ai-chart-evidence-section";
+import { PatientAiChartIntentSection } from "@/components/clinical/ai-chart/patient-ai-chart-intent-section";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import { ErrorState } from "@/components/clinical/states";
 import { AppShell } from "@/components/layout/app-shell";
@@ -220,71 +216,52 @@ export function PatientAiChartPage() {
           title="Leer contexto"
           description="Primero revisa fuentes, faltantes y limites antes de preparar cualquier borrador."
         />
-        <ClinicalSectionCard
-          title="Intenciones clinicas"
-          description="Barra dirigida: interpreta frases clinicas y propone acciones seguras."
-        >
-          <ClinicalIntentCommandBar
-            routerText={routerText}
-            routedIntent={routedIntent}
-            aiStatus={aiStatus.data}
-            aiStatusIsError={aiStatus.isError}
-            canUseAi={canUseAi}
-            isRouting={routeMutation.isPending}
-            isExecuting={intentMutation.isPending}
-            hasRouteError={routeMutation.isError}
-            routeEvents={routeEvents}
-            isStreamingRoutePreview={isStreamingRoutePreview}
-            hasRoutePreviewError={routePreviewError}
-            hasIntentError={intentMutation.isError}
-            patientId={patientId}
-            onRouterTextChange={setRouterText}
-            onRoute={() => routeMutation.mutate()}
-            onExecuteIntent={(intentType) => intentMutation.mutate(intentType)}
-          />
-          {intent ? (
-            <ClinicalIntentResultPanel
-              intent={intent}
-              patientId={patientId}
-              onDecideReviewItem={(item, decision) =>
-                reviewDecisionMutation.mutate({ item, decision })
-              }
-              isDecidingReviewItem={reviewDecisionMutation.isPending}
-              reviewDecisionMessage={reviewDecisionMessage}
-              onDecideAction={(action) => actionDecisionMutation.mutate(action)}
-              isDecidingAction={actionDecisionMutation.isPending}
-              actionDecisionMessage={actionDecisionMessage}
-            />
-          ) : null}
-        </ClinicalSectionCard>
+        <PatientAiChartIntentSection
+          routerText={routerText}
+          routedIntent={routedIntent}
+          aiStatus={aiStatus.data}
+          aiStatusIsError={aiStatus.isError}
+          canUseAi={canUseAi}
+          isRouting={routeMutation.isPending}
+          isExecuting={intentMutation.isPending}
+          hasRouteError={routeMutation.isError}
+          routeEvents={routeEvents}
+          isStreamingRoutePreview={isStreamingRoutePreview}
+          hasRoutePreviewError={routePreviewError}
+          hasIntentError={intentMutation.isError}
+          patientId={patientId}
+          intent={intent}
+          isDecidingReviewItem={reviewDecisionMutation.isPending}
+          reviewDecisionMessage={reviewDecisionMessage}
+          isDecidingAction={actionDecisionMutation.isPending}
+          actionDecisionMessage={actionDecisionMessage}
+          onRouterTextChange={setRouterText}
+          onRoute={() => routeMutation.mutate()}
+          onExecuteIntent={(intentType) => intentMutation.mutate(intentType)}
+          onDecideReviewItem={(item, decision) =>
+            reviewDecisionMutation.mutate({ item, decision })
+          }
+          onDecideAction={(action) => actionDecisionMutation.mutate(action)}
+        />
 
         <AiChartStep
           step="2"
           title="Seleccionar evidencia"
           description="Elige eventos clinicos y revisa lectura contextual; Assistant Read no escribe ficha."
         />
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <EventSelectionPanel
-            events={events}
-            selectedIds={selectedIds}
-            isGenerating={draftMutation.isPending}
-            canUseAi={canUseAi}
-            hasError={eventsQuery.isError}
-            onGenerate={() => draftMutation.mutate(undefined)}
-            onSelectedIdsChange={setSelectedIds}
-          />
-          <div className="space-y-4">
-            <AiChartGovernancePanel
-              eventCount={events.length}
-              entryCount={recentEntries.length}
-              selectedEventCount={selectedIds.length}
-              canUseAi={canUseAi}
-              canWriteSoap={canWriteSoap}
-              canCreateEvents={canCreateEvents}
-            />
-            <AssistantReadPanel patientId={patientId} />
-          </div>
-        </div>
+        <PatientAiChartEvidenceSection
+          patientId={patientId}
+          events={events}
+          selectedIds={selectedIds}
+          recentEntryCount={recentEntries.length}
+          canUseAi={canUseAi}
+          canWriteSoap={canWriteSoap}
+          canCreateEvents={canCreateEvents}
+          isGenerating={draftMutation.isPending}
+          hasError={eventsQuery.isError}
+          onGenerate={() => draftMutation.mutate(undefined)}
+          onSelectedIdsChange={setSelectedIds}
+        />
 
         <AiChartStep
           step="3"
@@ -298,30 +275,16 @@ export function PatientAiChartPage() {
           canCreateEvents={canCreateEvents}
         />
 
-        {draftMutation.isError ? <ErrorState description="No se pudo generar el borrador SOAP." /> : null}
-        {draft ? (
-          <>
-            <AiChartStep
-              step="4"
-              title="Generar borrador SOAP"
-              description="El borrador conserva fuentes y margen de revision; no equivale a firma clinica."
-            />
-            <AiChartStep
-              step="5"
-              title="Confirmar como borrador no firmado"
-              description="La escritura solo ocurre con confirmacion humana y auditoria backend."
-            />
-          <DraftSoapPaper
-            draft={draft}
-            soap={soap}
-            canWriteSoap={canWriteSoap}
-            isSaving={saveMutation.isPending}
-            saveError={saveMutation.isError}
-            onSave={(review) => saveMutation.mutate(review)}
-            onSoapChange={setSoap}
-          />
-          </>
-        ) : null}
+        <PatientAiChartDraftSection
+          draft={draft}
+          soap={soap}
+          canWriteSoap={canWriteSoap}
+          isSaving={saveMutation.isPending}
+          saveError={saveMutation.isError}
+          draftError={draftMutation.isError}
+          onSave={(review) => saveMutation.mutate(review)}
+          onSoapChange={setSoap}
+        />
       </div>
     </PatientClinicalShell>
   );

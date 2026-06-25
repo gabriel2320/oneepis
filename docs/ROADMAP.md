@@ -6,17 +6,8 @@ cronologica para humanos y agentes.
 
 ## Estado actual
 
-Fecha de corte: 2026-06-24.
-
-OneEpis ya tiene una base clinica E2E real:
-
-- Next.js + Tailwind + shadcn/ui como mesa clinica.
-- FastAPI + Pydantic como API validada.
-- PostgreSQL + SQLAlchemy + Alembic como fuente de verdad clinica.
-- OpenAPI como contrato frontend-backend.
-- Auth local, roles, permisos y auditoria por escritura.
-- Ollama local first-class, opcional y siempre como borrador.
-- Modo papel serio para ficha, evolucion, resumen, hoja diaria, ronda e indicacion.
+El estado operativo vigente vive en `docs/CURRENT_STATE.md`. Este documento es
+solo cronologico y no debe mantener una segunda lista de estado actual.
 
 ## Historial por bloques
 
@@ -182,9 +173,9 @@ OneEpis ya tiene una base clinica E2E real:
 - Fuera de alcance: endpoints nuevos, OpenAPI, IA nueva, adjuntos, firma,
   receta valida, agenda avanzada o pantallas grandes.
 - Cola posterior: consolidacion post-#25, dieta near-limit, polish de nucleo
-  paciente, decision de permisos de preconsulta y riesgos clinicos minimos,
-  con branch, titulo, gates y criterio de merge definidos en
-  `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`.
+  paciente, decision de permisos de preconsulta y riesgos clinicos minimos.
+  El estado vigente de la cola vive en `docs/CURRENT_STATE.md` y sus limites
+  en `docs/GOVERNANCE.md`.
 
 ### PROG-AMB-PRECONSULTA-00: contrato de admision/preconsulta
 

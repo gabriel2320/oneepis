@@ -10,6 +10,7 @@ import { ClinicalRiskPreview } from "@/components/clinical/clinical-risk-preview
 import { FullTimelinePreview } from "@/components/clinical/full-timeline-preview";
 import { LabResultsPreview } from "@/components/clinical/lab-results-preview";
 import { PatientAntecedentsPreview } from "@/components/clinical/patient-antecedents-preview";
+import { PatientAiSuggestionsPanel } from "@/components/clinical/patient-ai-suggestions-panel";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import { PatientPaperDocuments } from "@/components/clinical/patient-paper-documents";
 import {
@@ -17,7 +18,6 @@ import {
   AuditWorkspace,
   EncounterWorkspace,
   MedicationWorkspace,
-  PatientAiSuggestionsPanel,
   ProblemWorkspace,
   VitalsWorkspace,
 } from "@/components/clinical/patient-record-workspaces";

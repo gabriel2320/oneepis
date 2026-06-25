@@ -8,12 +8,7 @@ const nearLimitThreshold = 300;
 const scanRoots = ["apps/api/src/oneepis_api", "apps/web/src"];
 const extensions = new Set([".py", ".ts", ".tsx"]);
 const ignoredSegments = new Set([".next", "node_modules"]);
-const exceptions = new Map([
-  [
-    "apps/api/src/oneepis_api/services/clinical_intent.py",
-    { limit: 1090, reason: "Deuda heredada de reglas deterministicas; no crecer sin extraer dominios." },
-  ],
-]);
+const exceptions = new Map();
 
 const files = scanRoots.flatMap((root) => walk(path.join(repoRoot, root)));
 const offenders = [];

@@ -3,16 +3,18 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import date, datetime
-from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, Date, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import JSON, Date, DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from oneepis_api.db.base import Base
+from oneepis_api.models.appointment import AppointmentStatus as AppointmentStatus
+from oneepis_api.models.appointment import ClinicalAppointment as ClinicalAppointment
 from oneepis_api.models.base import IdMixin, TimestampMixin
 from oneepis_api.models.medication_catalog import MedicationCatalogItem
 from oneepis_api.models.patient import enum_values
+from oneepis_api.models.vital_sign import VitalSign as VitalSign
 
 if TYPE_CHECKING:
     from oneepis_api.models.patient import Patient
@@ -80,15 +82,6 @@ class EncounterStatus(enum.StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
-
-
-class AppointmentStatus(enum.StrEnum):
-    SCHEDULED = "scheduled"
-    CHECK_IN = "check_in"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-    NO_SHOW = "no_show"
 
 
 class ClinicalEntry(Base, IdMixin, TimestampMixin):
@@ -285,51 +278,3 @@ class ClinicalEncounter(Base, IdMixin, TimestampMixin):
         back_populates="encounter",
         passive_deletes=True,
     )
-
-
-class ClinicalAppointment(Base, IdMixin, TimestampMixin):
-    __tablename__ = "clinical_appointments"
-
-    patient_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("patients.id", ondelete="CASCADE"),
-        index=True,
-    )
-    status: Mapped[AppointmentStatus] = mapped_column(
-        Enum(AppointmentStatus, values_callable=enum_values, name="appointment_status"),
-        default=AppointmentStatus.SCHEDULED,
-        nullable=False,
-    )
-    starts_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        index=True,
-        nullable=False,
-    )
-    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    reason: Mapped[str] = mapped_column(String(200), nullable=False)
-    location_label: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    clinician_label: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    notes: Mapped[str | None] = mapped_column(String(320), nullable=True)
-    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
-
-    patient: Mapped[Patient] = relationship(back_populates="appointments")
-
-
-class VitalSign(Base, IdMixin, TimestampMixin):
-    __tablename__ = "vital_signs"
-
-    patient_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("patients.id", ondelete="CASCADE"),
-        index=True,
-    )
-    measured_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), index=True, nullable=False
-    )
-    temperature_c: Mapped[Decimal | None] = mapped_column(Numeric(4, 1), nullable=True)
-    systolic_bp: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    diastolic_bp: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    heart_rate_bpm: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    respiratory_rate_bpm: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    oxygen_saturation_pct: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
-    notes: Mapped[str | None] = mapped_column(String(240), nullable=True)
-
-    patient: Mapped[Patient] = relationship(back_populates="vital_signs")

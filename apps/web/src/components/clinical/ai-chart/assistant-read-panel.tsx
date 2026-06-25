@@ -7,13 +7,13 @@ import { Activity, Clock3, GitCompare, RefreshCw, Search } from "lucide-react";
 import {
   CorrelationList,
   DataFootnotes,
-  LabPanelList,
   PanelState,
   SearchList,
   SeriesChart,
   SeriesList,
   TimelineList,
 } from "@/components/clinical/ai-chart/assistant-read-sections";
+import { LabPanelList } from "@/components/clinical/ai-chart/assistant-read-lab-panels";
 import { EmptyState } from "@/components/clinical/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
