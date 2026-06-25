@@ -230,7 +230,8 @@ Fortalezas actuales:
 - politica futura de auditoria de lectura esta propuesta en
   `reports/read-access-policy.*`, con candidatos report-only de volumen y
   retencion
-- ficha paciente formal v0.5 tiene caratula compacta y antecedentes estructurados
+- ficha paciente formal v0.5 tiene caratula compacta con problemas, alergias y
+  medicacion, mas antecedentes estructurados
   basados en `PatientRecordSnapshot`, con paridad basica en papel de ficha y sin
   duplicar fuente primaria
 - eje de episodio esta auditado en `reports/encounter-axis-map.*` sin migraciones nuevas

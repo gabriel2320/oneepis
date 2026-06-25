@@ -64,7 +64,7 @@ export function PatientFormalCover({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         <CoverField label="Nacimiento" value={patient.birth_date} detail="Fuente: patients.birth_date" />
         <CoverField
           label="Contacto"
@@ -80,6 +80,11 @@ export function PatientFormalCover({
           label="Medicacion activa"
           value={`${record.active_medications.length}`}
           detail="Fuente: medications"
+        />
+        <CoverField
+          label="Alergias activas"
+          value={`${record.active_allergies.length}`}
+          detail="Fuente: allergies"
         />
       </div>
 
