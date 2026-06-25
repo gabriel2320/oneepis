@@ -101,13 +101,15 @@ Estado: programa iniciado como extension cerrada de Fase 2.
 Implementado:
 
 - `GET /api/v1/patients/{patient_id}/assistant/timeline`
+- `POST /api/v1/patients/{patient_id}/assistant/search`
 - schemas backend `AssistantTimelineItem` y `AssistantTimelineResponse`
 - timeline deterministico de solo lectura con fuentes, faltantes y limites
-- cobertura API de permisos, datos longitudinales y no escritura de auditoria
+- busqueda deterministica sobre fuentes normalizadas, con filtros por tipo,
+  snippets y limites
+- cobertura API de permisos, datos longitudinales, busqueda y no escritura de auditoria
 
 Pendiente:
 
-- busqueda deterministica
 - datos graficables
 - correlacion por presets cerrados
 - cliente web y UI minima cuando el backend este completo y verde
@@ -137,7 +139,7 @@ Condicion de entrada:
 Orden obligatorio de ejecucion:
 
 1. Backend schemas + timeline de lectura. **Hecho.**
-2. Busqueda deterministica.
+2. Busqueda deterministica. **Hecho.**
 3. Datos graficables.
 4. Correlacion deterministica por presets.
 5. OpenAPI y cliente web.

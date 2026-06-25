@@ -183,3 +183,130 @@ def test_assistant_timeline_requires_authentication(client: TestClient) -> None:
     )
 
     assert response.status_code == 401
+
+
+def test_assistant_search_finds_text_and_payload_without_writing_audit(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Busqueda",
+            "last_name": "Deterministica",
+            "birth_date": "1988-03-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    patient_id = patient["id"]
+    client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-21T08:00:00Z",
+            "summary": "PCR elevada en control",
+            "payload": {"marker": "proteina C reactiva", "value": "58"},
+        },
+    )
+    client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json={
+            "kind": "progress",
+            "status": "signed",
+            "occurred_at": "2026-06-21T09:00:00Z",
+            "title": "Evolucion infecciosa",
+            "assessment": "Se interpreta como respuesta inflamatoria.",
+        },
+    )
+
+    audit_before = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth).json()
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/search",
+        headers=auth,
+        json={"query": "reactiva"},
+    )
+    audit_after = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth).json()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["query"] == "reactiva"
+    assert body["matches"]
+    assert body["matches"][0]["item"]["source_type"] == "clinical_event"
+    assert "payload" in body["matches"][0]["matched_fields"]
+    assert any("reactiva" in snippet for snippet in body["matches"][0]["snippets"])
+    assert "solo lectura" in body["limits"][0]
+    assert len(audit_after) == len(audit_before)
+
+
+def test_assistant_search_filters_source_types(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Filtro",
+            "last_name": "Fuentes",
+            "birth_date": "1988-03-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    patient_id = patient["id"]
+    client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-21T08:00:00Z",
+            "summary": "Dolor controlado",
+        },
+    )
+    client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=auth,
+        json={"title": "Dolor lumbar", "notes": "Problema activo."},
+    )
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/search",
+        headers=auth,
+        json={"query": "dolor", "source_types": ["active_problem"]},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["searched_source_types"] == ["active_problem"]
+    assert {match["item"]["source_type"] for match in body["matches"]} == {"active_problem"}
+
+
+def test_readonly_user_can_search_assistant_sources(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/search",
+        headers=readonly_auth,
+        json={"query": "permiso"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["patient_id"] == patient_id
+
+
+def test_assistant_search_requires_authentication(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/patients/11111111-1111-4111-8111-111111111111/assistant/search",
+        json={"query": "dolor"},
+    )
+
+    assert response.status_code == 401

@@ -40,3 +40,23 @@ class AssistantTimelineResponse(APIModel):
     items: list[AssistantTimelineItem]
     missing: list[str] = Field(default_factory=list)
     limits: list[str] = Field(default_factory=list)
+
+
+class AssistantSearchRequest(APIModel):
+    query: str = Field(min_length=2, max_length=120)
+    source_types: list[AssistantTimelineSourceType] = Field(default_factory=list)
+    limit: int = Field(default=20, ge=1, le=50)
+
+
+class AssistantSearchMatch(APIModel):
+    item: AssistantTimelineItem
+    matched_fields: list[str] = Field(default_factory=list)
+    snippets: list[str] = Field(default_factory=list)
+
+
+class AssistantSearchResponse(APIModel):
+    patient_id: uuid.UUID
+    query: str
+    matches: list[AssistantSearchMatch]
+    searched_source_types: list[AssistantTimelineSourceType]
+    limits: list[str] = Field(default_factory=list)

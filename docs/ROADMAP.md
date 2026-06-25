@@ -142,13 +142,16 @@ OneEpis ya tiene una base clinica E2E real:
 
 - Se inicio el asistente clinico de solo lectura con
   `GET /api/v1/patients/{patient_id}/assistant/timeline`.
+- Se agrego `POST /api/v1/patients/{patient_id}/assistant/search` como
+  busqueda deterministica sobre las fuentes normalizadas del timeline.
 - El timeline une fuentes existentes: encuentros, evoluciones, eventos,
   signos vitales, problemas activos, medicacion activa, alergias activas e
   indicaciones hospitalarias.
-- La respuesta declara `source_type`, `source_id`, fecha disponible, resumen,
-  faltantes y limites; no escribe ficha ni registra auditoria de modificacion.
-- Quedan pendientes busqueda deterministica, datos graficables y correlacion
-  por presets antes de abrir UI dedicada.
+- Las respuestas declaran `source_type`, `source_id`, fecha disponible, resumen,
+  snippets, faltantes o limites; no escriben ficha ni registran auditoria de
+  modificacion.
+- Quedan pendientes datos graficables y correlacion por presets antes de abrir
+  UI dedicada.
 
 ## Principios aprendidos
 

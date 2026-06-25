@@ -2010,6 +2010,93 @@
         }
       }
     },
+    "/api/v1/patients/{patient_id}/assistant/search": {
+      "post": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Search Assistant Sources",
+        "operationId": "search_assistant_sources_api_v1_patients__patient_id__assistant_search_post",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantSearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/patients/{patient_id}/ai/draft-soap-from-events": {
       "post": {
         "tags": [
@@ -6078,6 +6165,123 @@
         },
         "type": "object",
         "title": "AllergyUpdate"
+      },
+      "AssistantSearchMatch": {
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/AssistantTimelineItem"
+          },
+          "matched_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched Fields"
+          },
+          "snippets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Snippets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item"
+        ],
+        "title": "AssistantSearchMatch"
+      },
+      "AssistantSearchRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Query"
+          },
+          "source_types": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "encounter",
+                "clinical_entry",
+                "clinical_event",
+                "vital_sign",
+                "active_problem",
+                "medication",
+                "allergy",
+                "hospital_indication"
+              ]
+            },
+            "type": "array",
+            "title": "Source Types"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "AssistantSearchRequest"
+      },
+      "AssistantSearchResponse": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantSearchMatch"
+            },
+            "type": "array",
+            "title": "Matches"
+          },
+          "searched_source_types": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "encounter",
+                "clinical_entry",
+                "clinical_event",
+                "vital_sign",
+                "active_problem",
+                "medication",
+                "allergy",
+                "hospital_indication"
+              ]
+            },
+            "type": "array",
+            "title": "Searched Source Types"
+          },
+          "limits": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limits"
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "query",
+          "matches",
+          "searched_source_types"
+        ],
+        "title": "AssistantSearchResponse"
       },
       "AssistantTimelineItem": {
         "properties": {

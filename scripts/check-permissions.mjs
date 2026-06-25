@@ -11,6 +11,7 @@ const testFiles = readTree("apps/api/tests", [".py"]).filter(
 const excludedFiles = new Set(["auth.py", "health.py", "ai.py", "patient_shared.py", "patient_audit.py"]);
 const readLikePosts = new Set([
   "patient_core.py POST /{patient_id}/ai/suggestions",
+  "patient_assistant.py POST /{patient_id}/assistant/search",
 ]);
 const delegatedAuditMarkers = [
   "confirm_patch_service(",

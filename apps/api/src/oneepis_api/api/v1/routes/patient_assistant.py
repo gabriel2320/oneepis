@@ -4,8 +4,15 @@ import uuid
 
 from fastapi import APIRouter
 
-from oneepis_api.schemas.assistant import AssistantTimelineResponse
-from oneepis_api.services.assistant_timeline import build_assistant_timeline
+from oneepis_api.schemas.assistant import (
+    AssistantSearchRequest,
+    AssistantSearchResponse,
+    AssistantTimelineResponse,
+)
+from oneepis_api.services.assistant_timeline import (
+    build_assistant_timeline,
+    search_assistant_timeline,
+)
 
 from .patient_shared import PATIENT_ROUTER_OPTIONS, LimitQuery, SessionDep, require_patient
 
@@ -20,3 +27,13 @@ def get_assistant_timeline(
 ) -> AssistantTimelineResponse:
     require_patient(session, patient_id)
     return build_assistant_timeline(session, patient_id, limit=limit)
+
+
+@router.post("/{patient_id}/assistant/search", response_model=AssistantSearchResponse)
+def search_assistant_sources(
+    patient_id: uuid.UUID,
+    payload: AssistantSearchRequest,
+    session: SessionDep,
+) -> AssistantSearchResponse:
+    require_patient(session, patient_id)
+    return search_assistant_timeline(session, patient_id, payload)
