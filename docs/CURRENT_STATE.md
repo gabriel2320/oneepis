@@ -430,7 +430,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; `patient-ai-chart-pages.tsx` queda bajo presupuesto tras extraer intencion, evidencia y borrador, y no debe volver a inflarse.
 - `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon; Assistant Read backend ya no usa excepcion propia.
 - `npm run check:screens` bloquea rutas visibles sin fila en `SCREEN_TREE` o sin `ScreenCapability`.
-- `npm run check:contract` verifica OpenAPI y drift minimo Assistant Read contra los tipos TS manuales.
+- `npm run check:toolchain` bloquea divergencia de matriz local/CI: Node 22, npm 11.13.0 y Python 3.12.x.
+- `npm run check:contract` verifica OpenAPI sin reescribir el contrato y valida drift minimo Assistant Read contra los tipos TS manuales.
 - Playwright E2E corre con `workers: 1` para evitar 404 transitorios del dev server al compilar rutas dinamicas en paralelo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
 - `apps/api/src/oneepis_api/services/clinical_intent.py` salio de watchlist tras
@@ -497,6 +498,7 @@ Comandos esperados antes de entregar cambios:
 
 ```bash
 npm run check:screens
+npm run check:toolchain
 npm run check:api
 npm run check:web
 npm run check:contract

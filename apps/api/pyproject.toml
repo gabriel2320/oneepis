@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "oneepis-api"
 version = "0.1.0"
 description = "Clinical API for OneEpis."
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
   "alembic>=1.13,<2.0",
   "fastapi>=0.115,<1.0",

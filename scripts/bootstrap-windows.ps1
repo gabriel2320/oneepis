@@ -12,16 +12,14 @@ function Require-Command {
 Require-Command node
 Require-Command npm
 Require-Command docker
+Require-Command py
 
-$pythonCommand = Get-Command py -ErrorAction SilentlyContinue
-if ($pythonCommand) {
-  $python = "py"
-  $pythonArgs = @("-3.12")
-} elseif (Get-Command python -ErrorAction SilentlyContinue) {
-  $python = "python"
-  $pythonArgs = @()
-} else {
-  throw "Missing required command: py or python"
+$python = "py"
+$pythonArgs = @("-3.12")
+
+& $python @pythonArgs --version
+if ($LASTEXITCODE -ne 0) {
+  throw "Missing Python 3.12. Install it with: py install 3.12"
 }
 
 docker compose version | Out-Null
@@ -31,6 +29,8 @@ npm --version
 & $python @pythonArgs --version
 docker --version
 docker compose version
+
+npm run check:toolchain
 
 if (-not (Test-Path ".env")) {
   Copy-Item ".env.example" ".env"

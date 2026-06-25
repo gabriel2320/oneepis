@@ -12,7 +12,7 @@ require_command() {
 
 require_command node
 require_command npm
-require_command python3
+require_command python3.12
 require_command docker
 
 if ! docker compose version >/dev/null 2>&1; then
@@ -22,15 +22,17 @@ fi
 
 node --version
 npm --version
-python3 --version
+python3.12 --version
 docker --version
 docker compose version
+
+npm run check:toolchain
 
 cp -n .env.example .env || true
 
 docker compose -f infra/docker-compose.dev.yml up -d
 
-python3 -m venv .venv
+python3.12 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install -e "apps/api[dev]"
 
