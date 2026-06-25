@@ -11,6 +11,11 @@ export type PatientEventCurationPreset = {
   event_type: ClinicalEventType;
   summary: string;
   details: string;
+  antecedent: {
+    category: "diagnostico_historico" | "procedimiento" | "familiar_social" | "plan_longitudinal";
+    source_label: string;
+    limit: string;
+  };
 };
 
 const eventCurationPresets: PatientEventCurationPreset[] = [
@@ -19,24 +24,44 @@ const eventCurationPresets: PatientEventCurationPreset[] = [
     event_type: "diagnosis",
     summary: "Diagnostico historico por precisar",
     details: "Antecedente leido desde historia clinica. Completar fecha, estado y fuente.",
+    antecedent: {
+      category: "diagnostico_historico",
+      source_label: "Historia clinica",
+      limit: "Fecha, estado y codificacion pendientes de confirmacion humana.",
+    },
   },
   {
     label: "Procedimiento previo",
     event_type: "procedure",
     summary: "Procedimiento o cirugia previa por precisar",
     details: "Registrar procedimiento, fecha aproximada, complicaciones y fuente.",
+    antecedent: {
+      category: "procedimiento",
+      source_label: "Relato clinico/documento previo",
+      limit: "Fecha exacta y documento fuente pueden estar incompletos.",
+    },
   },
   {
     label: "Antecedente familiar/social",
     event_type: "clinical_note",
     summary: "Antecedente familiar/social por precisar",
     details: "Registrar tipo de antecedente, dato relevante, limite y fuente.",
+    antecedent: {
+      category: "familiar_social",
+      source_label: "Entrevista clinica",
+      limit: "No equivale a modulo social/familiar estructurado.",
+    },
   },
   {
     label: "Plan o seguimiento",
     event_type: "care_plan",
     summary: "Plan de cuidado longitudinal por precisar",
     details: "Registrar accion humana pendiente, responsable, fecha y fuente.",
+    antecedent: {
+      category: "plan_longitudinal",
+      source_label: "Plan humano",
+      limit: "Pendiente de seguimiento; no genera orden ni tarea ejecutable.",
+    },
   },
 ];
 
@@ -51,7 +76,7 @@ export function PatientEventCurationPanel({
     <div className="mb-4 rounded-md border bg-muted/20 p-3">
       <p className="text-xs font-semibold">Curaduria minima para ficha tradicional</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Usa eventos existentes para antecedentes hasta definir contrato propio.
+        Usa eventos existentes con fuente y limite visible hasta definir contrato propio.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {eventCurationPresets.map((preset) => (
@@ -100,6 +125,15 @@ export function PatientEventList({ events }: { events: ClinicalEvent[] }) {
               {event.payload.details}
             </p>
           ) : null}
+          {isAntecedentPayload(event.payload.antecedent) ? (
+            <div className="mt-2 rounded-md bg-muted/30 p-2 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground">
+                Antecedente curado: {antecedentCategoryLabel(event.payload.antecedent.category)}
+              </p>
+              <p className="mt-1">Fuente: {event.payload.antecedent.source_label}</p>
+              <p className="mt-1">Limite: {event.payload.antecedent.limit}</p>
+            </div>
+          ) : null}
         </article>
       ))}
     </div>
@@ -108,4 +142,28 @@ export function PatientEventList({ events }: { events: ClinicalEvent[] }) {
 
 function formatDate(value: string) {
   return new Date(value).toLocaleString("es-CL", { dateStyle: "short", timeStyle: "short" });
+}
+
+function isAntecedentPayload(
+  value: unknown,
+): value is PatientEventCurationPreset["antecedent"] {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.category === "string" &&
+    typeof item.source_label === "string" &&
+    typeof item.limit === "string"
+  );
+}
+
+function antecedentCategoryLabel(category: string) {
+  const labels: Record<string, string> = {
+    diagnostico_historico: "Diagnostico historico",
+    procedimiento: "Procedimiento previo",
+    familiar_social: "Familiar/social",
+    plan_longitudinal: "Plan longitudinal",
+  };
+  return labels[category] ?? category;
 }

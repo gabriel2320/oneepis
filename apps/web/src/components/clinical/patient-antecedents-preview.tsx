@@ -9,33 +9,16 @@ import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/state
 import { Badge } from "@/components/ui/badge";
 import { getClinicalTimeline } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
-import type { ClinicalEvent, PatientRecordSnapshot } from "@/lib/types";
+import type { PatientRecordSnapshot } from "@/lib/types";
 
-type AntecedentItem = {
-  id: string;
-  label: string;
-  detail: string;
-  context: string;
-  source: AntecedentSource;
-  href: string;
-  occurredAt?: string;
-};
-
-type AntecedentSource = "problemas" | "alergias" | "medicacion" | "eventos";
-
-const antecedentEventTypes = new Set(["diagnosis", "procedure", "clinical_note", "care_plan"]);
-const sourceLabels: Record<AntecedentSource, string> = {
-  problemas: "Problemas",
-  alergias: "Alergias",
-  medicacion: "Medicacion",
-  eventos: "Eventos curados",
-};
-const sourceDetails: Record<AntecedentSource, string> = {
-  problemas: "Diagnosticos/problemas activos registrados.",
-  alergias: "Sustancias, reaccion y severidad visibles.",
-  medicacion: "Tratamiento activo; no equivale a receta.",
-  eventos: "Hechos curados desde timeline clinica.",
-};
+import {
+  antecedentEventTypes,
+  buildAntecedentItems,
+  categoryLabel,
+  sourceDetails,
+  sourceLabels,
+  type AntecedentSource,
+} from "./patient-antecedents-data";
 
 export function PatientAntecedentsPreview({
   patientId,
@@ -86,6 +69,7 @@ export function PatientAntecedentsPreview({
         />
       ) : null}
       <AntecedentSourceSummary counts={sourceCounts} total={items.length} />
+      <AntecedentCategorySummary items={items} />
       {items.length === 0 ? (
         <EmptyState
           title="Sin antecedentes visibles"
@@ -101,7 +85,10 @@ export function PatientAntecedentsPreview({
                   <p className="mt-1 text-sm text-muted-foreground">{item.detail}</p>
                   <p className="mt-1 text-xs text-muted-foreground">{item.context}</p>
                 </div>
-                <Badge variant="outline">{sourceLabels[item.source]}</Badge>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">{categoryLabel(item.category)}</Badge>
+                  <Badge variant="outline">{sourceLabels[item.source]}</Badge>
+                </div>
               </div>
               {item.occurredAt ? (
                 <p className="mt-2 text-[11px] text-muted-foreground">
@@ -125,6 +112,30 @@ export function PatientAntecedentsPreview({
       ) : null}
       <AntecedentMissingDataNotice />
     </ClinicalSectionCard>
+  );
+}
+
+function AntecedentCategorySummary({
+  items,
+}: {
+  items: ReturnType<typeof buildAntecedentItems>;
+}) {
+  const counts = items.reduce<Record<string, number>>((accumulator, item) => {
+    accumulator[item.category] = (accumulator[item.category] ?? 0) + 1;
+    return accumulator;
+  }, {});
+  const entries = Object.entries(counts);
+  if (entries.length === 0) {
+    return null;
+  }
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {entries.map(([category, count]) => (
+        <Badge key={category} variant="outline">
+          {categoryLabel(category)}: {count}
+        </Badge>
+      ))}
+    </div>
   );
 }
 
@@ -155,57 +166,6 @@ function AntecedentSourceSummary({
   );
 }
 
-function buildAntecedentItems(
-  record: PatientRecordSnapshot,
-  patientId: string,
-  events: ClinicalEvent[],
-): AntecedentItem[] {
-  return [
-    ...record.active_problems.map((problem) => ({
-      id: `problem-${problem.id}`,
-      label: problem.title,
-      detail: problem.notes ?? `Estado: ${problem.status}`,
-      context: problem.code
-        ? `${problem.code_system ?? "Codigo"}: ${problem.code}`
-        : "Sin codigo clinico estructurado.",
-      source: "problemas" as const,
-      href: `/pacientes/${patientId}/problemas`,
-      occurredAt: problem.onset_date ?? undefined,
-    })),
-    ...record.active_allergies.map((allergy) => ({
-      id: `allergy-${allergy.id}`,
-      label: allergy.substance,
-      detail: allergy.reaction ?? `Severidad: ${allergy.severity}`,
-      context: `Severidad: ${allergy.severity}. Estado: ${allergy.status}.`,
-      source: "alergias" as const,
-      href: `/pacientes/${patientId}/alergias`,
-      occurredAt: allergy.recorded_at,
-    })),
-    ...record.active_medications.map((medication) => ({
-      id: `medication-${medication.id}`,
-      label: medication.name,
-      detail:
-        [medication.dose, medication.route, medication.frequency].filter(Boolean).join(" / ") ||
-        `Estado: ${medication.status}`,
-      context: medication.started_on ? "Con fecha de inicio." : "Sin fecha de inicio.",
-      source: "medicacion" as const,
-      href: `/pacientes/${patientId}/medicacion`,
-      occurredAt: medication.started_on ?? undefined,
-    })),
-    ...events.map((event) => ({
-      id: `event-${event.id}`,
-      label: event.summary,
-      detail: `Evento curado como ${event.event_type}`,
-      context: `Fuente: ${event.source_type}${event.source_ref ? ` / ${event.source_ref}` : ""}.`,
-      source: "eventos" as const,
-      href: `/pacientes/${patientId}/eventos`,
-      occurredAt: event.occurred_at,
-    })),
-  ]
-    .filter((item) => item.detail.trim().length > 0)
-    .sort((left, right) => compareAntecedentDates(left.occurredAt, right.occurredAt));
-}
-
 function AntecedentMissingDataNotice() {
   return (
     <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
@@ -217,11 +177,4 @@ function AntecedentMissingDataNotice() {
       </p>
     </div>
   );
-}
-
-function compareAntecedentDates(left?: string, right?: string) {
-  if (!left && !right) return 0;
-  if (!left) return 1;
-  if (!right) return -1;
-  return new Date(right).getTime() - new Date(left).getTime();
 }

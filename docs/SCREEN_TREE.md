@@ -61,7 +61,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes/[patientId]` | Nucleo paciente | paciente | completa | redirect App Router | no | lectura paciente | no | no | no | mantener como entrada a ficha |
 | `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente + assistant timeline | no | lectura paciente | no | carta | lectura/pendientes | antecedentes, resultados y timeline avanzada existen en ficha; documentos longitudinales siguen futuros |
 | `/pacientes/[patientId]/estado` | Nucleo paciente | seguimiento | completa | API paciente | si | medico/admin/dev | si | no | no | estados clinicos mas finos |
-| `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | si | escritura clinica | si | no | lectura contextual | curaduria minima de antecedentes; clasificacion estructurada futura |
+| `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | si | escritura clinica | si | no | lectura contextual | curaduria minima de antecedentes con categoria/fuente/limite; clasificacion estructurada futura |
 | `/pacientes/[patientId]/problemas` | Nucleo paciente | paciente | completa | problemas activos | no | lectura paciente | no | no | lectura contextual | diagnosticos historicos/CIE-10 futuros |
 | `/pacientes/[patientId]/problemas/nuevo` | Nucleo paciente | acto clinico | completa | problemas activos | si | medico/admin/dev | si | no | no | clasificacion diagnostica futura |
 | `/pacientes/[patientId]/alergias` | Seguridad/auditoria | paciente | completa | alergias activas | no | lectura paciente | no | no | lectura contextual | alertas criticas mas amplias |
