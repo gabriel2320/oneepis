@@ -13,20 +13,20 @@ OneEpis ya tiene una base E2E real:
 
 El modo demo solo debe usarse con `NEXT_PUBLIC_DEMO_MODE=true`.
 
-Programa de lectura aprobado, no implementado: `PROG-ASSISTANT-READ-01`.
+Programa de lectura iniciado: `PROG-ASSISTANT-READ-01`.
 
-Este programa define una capa futura de asistente clinico de solo lectura para
+Este programa define una capa de asistente clinico de solo lectura para
 leer, buscar, mostrar, graficar y correlacionar la historia longitudinal del
 paciente. Queda integrado en `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md` como
 extension cerrada de Fase 2 y gobernado por `docs/GOVERNANCE.md`.
 
-Estado real al 2026-06-24:
+Estado real al 2026-06-25:
 
-- no existen todavia endpoints `/assistant/*`
+- existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - no existe todavia ruta `/pacientes/[patientId]/contexto`
 - no hay busqueda, chart ni correlacion assistant dedicados
 - no se autoriza escritura clinica desde el programa
-- no debe implementarse encima de PR #1 mientras siga en draft o con CI remoto rojo
+- el timeline assistant es deterministico, declara fuentes/faltantes/limites y no registra auditoria de modificacion
 
 ## Backend
 
@@ -42,6 +42,16 @@ Dominios CRUD:
 - alergias
 - medicacion
 - signos vitales
+
+Asistente de lectura:
+
+- `GET /api/v1/patients/{patient_id}/assistant/timeline`
+- une encuentros, evoluciones, eventos, signos vitales, problemas activos,
+  medicacion activa, alergias activas e indicaciones hospitalarias existentes
+- responde con `source_type`, `source_id`, fecha disponible, resumen, estado,
+  detalles, faltantes y limites
+- es solo lectura: no crea, actualiza ni elimina datos clinicos, y no registra
+  eventos de auditoria de modificacion
 
 Auditoria:
 

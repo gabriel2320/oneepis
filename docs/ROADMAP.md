@@ -138,6 +138,18 @@ OneEpis ya tiene una base clinica E2E real:
 - CI, bootstrap Ubuntu/Windows, README, PR template y `npm run check` quedaron
   alineados con el gate arquitectonico.
 
+### Inicio PROG-ASSISTANT-READ-01
+
+- Se inicio el asistente clinico de solo lectura con
+  `GET /api/v1/patients/{patient_id}/assistant/timeline`.
+- El timeline une fuentes existentes: encuentros, evoluciones, eventos,
+  signos vitales, problemas activos, medicacion activa, alergias activas e
+  indicaciones hospitalarias.
+- La respuesta declara `source_type`, `source_id`, fecha disponible, resumen,
+  faltantes y limites; no escribe ficha ni registra auditoria de modificacion.
+- Quedan pendientes busqueda deterministica, datos graficables y correlacion
+  por presets antes de abrir UI dedicada.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
