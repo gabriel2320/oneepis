@@ -183,6 +183,9 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 - las rutas print no hacen fallback silencioso a otro documento cuando el ID solicitado no existe
+- `screen-capabilities.ts` separa `lifecycle` tecnico de `clinicalUse`;
+  `complete` no implica uso clinico real, firma legal, receta valida ni orden
+  ejecutable
 
 Tests API:
 
@@ -225,6 +228,8 @@ Fortalezas actuales:
 - eje de episodio esta auditado en `reports/encounter-axis-map.*` sin migraciones nuevas
 - `npm run check:architecture` agrupa `check:screens`, `check:permissions`, `check:paper`, `check:contracts:drift` y `check:traceability`
 - `npm run check` incluye API, web, contrato, arquitectura y E2E
+- `check:screens` falla si una ruta bloqueada no declara `clinicalUse=blocked`
+  o si un papel limitado se marca como `clinically-valid`
 
 Validacion registrada:
 

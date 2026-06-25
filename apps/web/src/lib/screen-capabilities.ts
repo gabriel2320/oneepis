@@ -3,7 +3,7 @@ export type ScreenLifecycle = "complete" | "prepared" | "blocked";
 export type ScreenKind = "app" | "print";
 export type ScreenWritePolicy = "none" | "existing-api" | "blocked";
 export type ScreenPaperPolicy = "none" | "carta";
-export type ScreenPrintClinicalUse = "development-only" | "blocked";
+export type ScreenClinicalUse = "development-only" | "draft-workflow" | "clinically-valid" | "blocked";
 
 export type ScreenCapability = {
   route: string;
@@ -12,17 +12,21 @@ export type ScreenCapability = {
   screenKind: ScreenKind;
   writePolicy: ScreenWritePolicy;
   paperPolicy: ScreenPaperPolicy;
+  clinicalUse: ScreenClinicalUse;
   printRoute?: string;
   printOwnerEntity?: string;
   printReadModel?: string;
   printApiClient?: string;
   printDocumentState?: string;
-  printClinicalUse?: ScreenPrintClinicalUse;
   apiTestEvidence?: string[];
   blockExpectation?: string[];
 };
 
-export const screenCapabilities: ScreenCapability[] = [
+type RawScreenCapability = Omit<ScreenCapability, "clinicalUse"> & {
+  clinicalUse?: ScreenClinicalUse;
+};
+
+const rawScreenCapabilities = [
   {
     route: "/",
     domain: "pacientes",
@@ -135,6 +139,7 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "app",
     writePolicy: "existing-api",
     paperPolicy: "carta",
+    clinicalUse: "draft-workflow",
     printRoute: "/print/pacientes/[patientId]/evolucion/[entryId]",
     apiTestEvidence: ["apps/api/tests/test_patient_record.py"],
   },
@@ -145,6 +150,7 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "app",
     writePolicy: "existing-api",
     paperPolicy: "carta",
+    clinicalUse: "draft-workflow",
     printRoute: "/print/pacientes/[patientId]/evolucion/[entryId]",
     apiTestEvidence: ["apps/api/tests/test_patient_ai_patch.py"],
   },
@@ -282,6 +288,7 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "app",
     writePolicy: "existing-api",
     paperPolicy: "carta",
+    clinicalUse: "draft-workflow",
     printRoute: "/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]",
     apiTestEvidence: ["apps/api/tests/test_hospital_daily_sheets.py"],
   },
@@ -292,6 +299,7 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "app",
     writePolicy: "existing-api",
     paperPolicy: "carta",
+    clinicalUse: "draft-workflow",
     printRoute: "/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]",
     apiTestEvidence: ["apps/api/tests/test_hospital_daily_sheets.py"],
   },
@@ -302,6 +310,7 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "app",
     writePolicy: "existing-api",
     paperPolicy: "carta",
+    clinicalUse: "draft-workflow",
     printRoute: "/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]",
     apiTestEvidence: ["apps/api/tests/test_hospital_indications.py"],
   },
@@ -328,6 +337,7 @@ export const screenCapabilities: ScreenCapability[] = [
     screenKind: "app",
     writePolicy: "existing-api",
     paperPolicy: "carta",
+    clinicalUse: "draft-workflow",
     printRoute: "/print/pacientes/[patientId]/evolucion/[entryId]",
     apiTestEvidence: ["apps/api/tests/test_encounters.py", "apps/api/tests/test_patient_record.py"],
   },
@@ -383,7 +393,6 @@ export const screenCapabilities: ScreenCapability[] = [
     printReadModel: "GET /api/v1/patients/{patient_id}/record",
     printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
     printDocumentState: "Documento de desarrollo / no uso clinico real",
-    printClinicalUse: "development-only",
   },
   {
     route: "/print/pacientes/[patientId]/evolucion/[entryId]",
@@ -396,7 +405,7 @@ export const screenCapabilities: ScreenCapability[] = [
     printReadModel: "GET /api/v1/patients/{patient_id}/record",
     printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
     printDocumentState: "Borrador/firmada/enmendada visible; sin firma legal digital",
-    printClinicalUse: "development-only",
+    clinicalUse: "draft-workflow",
   },
   {
     route: "/print/pacientes/[patientId]/resumen",
@@ -409,7 +418,6 @@ export const screenCapabilities: ScreenCapability[] = [
     printReadModel: "GET /api/v1/patients/{patient_id}/record",
     printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
     printDocumentState: "Documento de desarrollo / no uso clinico real",
-    printClinicalUse: "development-only",
   },
   {
     route: "/print/pacientes/[patientId]/receta",
@@ -422,7 +430,7 @@ export const screenCapabilities: ScreenCapability[] = [
     printReadModel: "GET /api/v1/patients/{patient_id}/record",
     printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord",
     printDocumentState: "Documento bloqueado: no valido para prescribir",
-    printClinicalUse: "blocked",
+    clinicalUse: "blocked",
     blockExpectation: ["Receta bloqueada", "Documento bloqueado: no valido para prescribir"],
   },
   {
@@ -436,7 +444,6 @@ export const screenCapabilities: ScreenCapability[] = [
     printReadModel: "GET /api/v1/hospitalization/active + GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets",
     printApiClient: "apps/web/src/lib/api/hospitalization.ts:listActiveHospitalizations,listHospitalDailySheets",
     printDocumentState: "Documento operacional de desarrollo / no uso clinico real",
-    printClinicalUse: "development-only",
   },
   {
     route: "/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]",
@@ -449,7 +456,7 @@ export const screenCapabilities: ScreenCapability[] = [
     printReadModel: "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets",
     printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalDailySheets",
     printDocumentState: "Borrador/cerrada visible; sin firma legal digital",
-    printClinicalUse: "development-only",
+    clinicalUse: "draft-workflow",
   },
   {
     route: "/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]",
@@ -462,6 +469,11 @@ export const screenCapabilities: ScreenCapability[] = [
     printReadModel: "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/indications",
     printApiClient: "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalIndications",
     printDocumentState: "Borrador/cerrada visible; no equivale a orden ejecutable ni firma legal",
-    printClinicalUse: "development-only",
+    clinicalUse: "draft-workflow",
   },
-];
+] satisfies RawScreenCapability[];
+
+export const screenCapabilities: ScreenCapability[] = rawScreenCapabilities.map((capability) => ({
+  clinicalUse: "development-only",
+  ...capability,
+}));

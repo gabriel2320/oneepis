@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-25T00:50:36.743Z",
+  "generated_at": "2026-06-25T01:00:36.440Z",
   "scope": "paper_source_policy",
   "summary": {
     "print_routes_checked": 7,
@@ -24,7 +24,7 @@
       "read_model": "GET /api/v1/patients/{patient_id}/record",
       "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord",
       "document_state": "Borrador/firmada/enmendada visible; sin firma legal digital",
-      "clinical_use": "development-only",
+      "clinical_use": "draft-workflow",
       "gaps": []
     },
     {
@@ -64,7 +64,7 @@
       "read_model": "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets",
       "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalDailySheets",
       "document_state": "Borrador/cerrada visible; sin firma legal digital",
-      "clinical_use": "development-only",
+      "clinical_use": "draft-workflow",
       "gaps": []
     },
     {
@@ -74,7 +74,7 @@
       "read_model": "GET /api/v1/patients/{patient_id}/record + GET /api/v1/hospitalization/patients/{patient_id}/indications",
       "api_client": "apps/web/src/lib/api/patients.ts:getPatientRecord; apps/web/src/lib/api/hospitalization.ts:listHospitalIndications",
       "document_state": "Borrador/cerrada visible; no equivale a orden ejecutable ni firma legal",
-      "clinical_use": "development-only",
+      "clinical_use": "draft-workflow",
       "gaps": []
     }
   ]

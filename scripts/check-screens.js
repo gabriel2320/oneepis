@@ -84,7 +84,9 @@ function parseCapabilities() {
         lifecycle: parseStringField(body, "lifecycle"),
         writePolicy: parseStringField(body, "writePolicy"),
         paperPolicy: parseStringField(body, "paperPolicy"),
+        clinicalUse: parseStringField(body, "clinicalUse") || "development-only",
         printRoute: parseStringField(body, "printRoute"),
+        printDocumentState: parseStringField(body, "printDocumentState"),
         apiTestEvidence: parseArrayField(body, "apiTestEvidence"),
         blockExpectation: parseArrayField(body, "blockExpectation"),
       };
@@ -151,6 +153,21 @@ for (const capability of capabilities) {
   if (capability.lifecycle === "blocked" && capability.blockExpectation.length === 0) {
     errors.push(`blocked lifecycle needs blockExpectation: ${capability.route}`);
   }
+  if (capability.lifecycle === "blocked" && capability.clinicalUse !== "blocked") {
+    errors.push(`blocked lifecycle needs clinicalUse=blocked: ${capability.route}`);
+  }
+  if (capability.writePolicy === "blocked" && capability.clinicalUse !== "blocked") {
+    errors.push(`writePolicy=blocked needs clinicalUse=blocked: ${capability.route}`);
+  }
+  if (
+    capability.printDocumentState &&
+    isLimitedClinicalState(capability.printDocumentState) &&
+    capability.clinicalUse === "clinically-valid"
+  ) {
+    errors.push(
+      `printDocumentState is limited but clinicalUse=clinically-valid for ${capability.route}: ${capability.printDocumentState}`,
+    );
+  }
 }
 
 fail(errors);
@@ -158,3 +175,20 @@ fail(errors);
 console.log(
   `Screen check passed: ${declared.length} declared, ${implemented.length} implemented, ${capabilities.length} capabilities.`,
 );
+
+function isLimitedClinicalState(value) {
+  const normalized = value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+  return [
+    "desarrollo",
+    "no uso clinico real",
+    "sin firma",
+    "firma legal",
+    "no equivale",
+    "orden ejecutable",
+    "bloqueado",
+    "no valido",
+  ].some((needle) => normalized.includes(needle));
+}

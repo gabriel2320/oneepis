@@ -1,5 +1,15 @@
 # Screen Tree
 
+`lifecycle=complete` significa que la ruta existe y esta conectada a su flujo
+tecnico esperado. No significa uso clinico real, firma legal, receta valida ni
+orden ejecutable. La validez clinica se declara por separado en
+`screen-capabilities.ts` mediante `clinicalUse`:
+
+- `development-only`: visible para laboratorio/desarrollo; no uso clinico real.
+- `draft-workflow`: flujo auditable de borrador o cerrado tecnico, sin firma legal.
+- `clinically-valid`: reservado para flujos con politica legal/productiva completa.
+- `blocked`: ruta presente pero no habilitada funcionalmente.
+
 ## Pacientes
 
 ```text

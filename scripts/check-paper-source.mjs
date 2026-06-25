@@ -83,19 +83,19 @@ function inspectPrintRoute(capability) {
     "printReadModel",
     "printApiClient",
     "printDocumentState",
-    "printClinicalUse",
+    "clinicalUse",
   ]) {
     if (!capability[field]) {
       gaps.push(`MISSING_${field.replace("print", "").toUpperCase()}`);
     }
   }
   if (
-    capability.printClinicalUse &&
-    !["development-only", "blocked"].includes(capability.printClinicalUse)
+    capability.clinicalUse &&
+    !["development-only", "draft-workflow", "blocked"].includes(capability.clinicalUse)
   ) {
     gaps.push("INVALID_CLINICAL_USE");
   }
-  if (capability.lifecycle === "blocked" && capability.printClinicalUse !== "blocked") {
+  if (capability.lifecycle === "blocked" && capability.clinicalUse !== "blocked") {
     gaps.push("BLOCKED_PRINT_NEEDS_BLOCKED_CLINICAL_USE");
   }
 
@@ -106,7 +106,7 @@ function inspectPrintRoute(capability) {
     read_model: capability.printReadModel || "no declarado",
     api_client: capability.printApiClient || "no declarado",
     document_state: capability.printDocumentState || "no declarado",
-    clinical_use: capability.printClinicalUse || "no declarado",
+    clinical_use: capability.clinicalUse || "no declarado",
     gaps,
   };
 }
@@ -142,7 +142,7 @@ function parseCapabilities() {
         printReadModel: parseStringField(body, "printReadModel"),
         printApiClient: parseStringField(body, "printApiClient"),
         printDocumentState: parseStringField(body, "printDocumentState"),
-        printClinicalUse: parseStringField(body, "printClinicalUse"),
+        clinicalUse: parseStringField(body, "clinicalUse") || "development-only",
       };
     })
     .filter(Boolean);
