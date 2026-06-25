@@ -27,6 +27,9 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Fuentes actuales", { exact: true })).toBeVisible();
   await expect(page.getByText("Sin escritura", { exact: true })).toBeVisible();
   await expect(page.getByText("Fuentes usadas")).toBeVisible();
+  await expect(page.getByText("Problema activo: 1")).toBeVisible();
+  await expect(page.getByText("Alergia: 1")).toBeVisible();
+  await expect(page.getByText("Medicacion activa: 1")).toBeVisible();
   await expect(page.getByText("Eventos curados: 0")).toBeVisible();
   await expect(page.getByText("Faltantes declarados")).toBeVisible();
   await expect(page.getByText("Linea de tiempo avanzada")).toBeVisible();
@@ -106,6 +109,7 @@ test("patient events expose curation presets for patient core", async ({ page })
   await expect(page.getByRole("button", { name: "Diagnostico historico" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Procedimiento previo" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Antecedente familiar/social" })).toBeDisabled();
+  await expect(page.getByText("fuente y limite visible")).toBeVisible();
 });
 
 test("patient encounters render list and creation screen", async ({ page }) => {

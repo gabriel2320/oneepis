@@ -135,6 +135,9 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
   medicacion y eventos curados, sin ruta nueva ni backend nuevo.
 - La pantalla de eventos agrega curaduria minima para antecedentes, diagnosticos,
   procedimientos y planes usando `clinical_events`.
+- Los eventos curados de antecedentes registran categoria, fuente y limite en
+  `payload.antecedent` para que la ficha pueda explicar la lectura sin crear
+  una entidad nueva.
 - Laboratorio queda como lectura sobria en ficha/AI-Chart, con fuente especifica
   por panel/resultado y sin dashboard dedicado.
 - Atencion ambulatoria agrega cierre administrativo minimo del encuentro usando

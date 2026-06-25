@@ -25,7 +25,11 @@ import { canManageClinicalEvents } from "@/lib/permissions";
 import type { ClinicalEventType } from "@/lib/types";
 
 import { BackLink, Field, PageTitle, emptyToNull, toDatetimeLocal, usePatientId, usePatientRecordQuery } from "./patient-page-shared";
-import { PatientEventCurationPanel, PatientEventList } from "./patient-event-sections";
+import {
+  PatientEventCurationPanel,
+  PatientEventList,
+  type PatientEventCurationPreset,
+} from "./patient-event-sections";
 
 const eventTypeOptions: { value: ClinicalEventType; label: string }[] = [
   { value: "symptom", label: "Sintoma" },
@@ -53,6 +57,7 @@ export function PatientEventsPage() {
     encounter_id: "",
     details: searchParams.get("details")?.slice(0, 1200) ?? "",
     source_ref: searchParams.get("aiActionId")?.slice(0, 160) ?? "",
+    antecedent: null as PatientEventCurationPreset["antecedent"] | null,
   });
   const eventsQuery = useQuery({
     queryKey: ["clinical-events", patientId],
@@ -76,18 +81,18 @@ export function PatientEventsPage() {
         encounter_id: emptyToNull(form.encounter_id),
         source_type: form.source_ref ? "ai_draft" : "manual",
         source_ref: emptyToNull(form.source_ref),
-        payload: emptyToNull(form.details)
-          ? {
-              details: form.details,
-              prefilled_from_ai_action: Boolean(form.source_ref),
-            }
-          : { prefilled_from_ai_action: Boolean(form.source_ref) },
+        payload: buildEventPayload({
+          details: form.details,
+          sourceRef: form.source_ref,
+          antecedent: form.antecedent,
+        }),
       }),
     onSuccess: async () => {
       setForm((current) => ({
         ...current,
         summary: "",
         details: "",
+        antecedent: null,
         occurred_at: toDatetimeLocal(new Date()),
       }));
       await queryClient.invalidateQueries({ queryKey: ["clinical-events", patientId] });
@@ -143,6 +148,7 @@ export function PatientEventsPage() {
                   event_type: preset.event_type,
                   summary: current.summary.trim() ? current.summary : preset.summary,
                   details: current.details.trim() ? current.details : preset.details,
+                  antecedent: preset.antecedent,
                 }))
               }
             />
@@ -247,4 +253,20 @@ export function PatientEventsPage() {
 function eventTypeFromQuery(value: string | null): ClinicalEventType {
   const allowed = new Set(eventTypeOptions.map((option) => option.value));
   return allowed.has(value as ClinicalEventType) ? (value as ClinicalEventType) : "clinical_note";
+}
+
+function buildEventPayload({
+  details,
+  sourceRef,
+  antecedent,
+}: {
+  details: string;
+  sourceRef: string;
+  antecedent: PatientEventCurationPreset["antecedent"] | null;
+}) {
+  return {
+    ...(emptyToNull(details) ? { details } : {}),
+    ...(antecedent ? { antecedent } : {}),
+    prefilled_from_ai_action: Boolean(sourceRef),
+  };
 }

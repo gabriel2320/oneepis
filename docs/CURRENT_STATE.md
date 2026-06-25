@@ -253,7 +253,7 @@ Laboratorio estructurado:
 - no existe UI amplia ni navegacion propia de laboratorio todavia
 - existe lectura minima de paneles/resultados recientes dentro de Assistant Read, sin escritura ni carga masiva
 - existe lectura minima de paneles/resultados recientes dentro de la ficha, sin escritura, carga masiva ni navegacion nueva
-- la ficha inicia antecedentes clinicos de solo lectura desde problemas, alergias, medicacion y eventos curados; antecedentes familiares/sociales, vacunas, dispositivos y diagnosticos codificados siguen pendientes de contrato
+- la ficha inicia antecedentes clinicos de solo lectura desde problemas, alergias, medicacion y eventos curados; los presets de eventos guardan categoria, fuente y limite en `payload.antecedent`; vacunas, dispositivos y diagnosticos codificados siguen pendientes de contrato propio
 - `docs/SCREEN_TREE.md` registra contratos minimos bloqueantes para agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional; no se debe crear UI amplia de esas superficies antes de cumplirlos
 - `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
 - `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
@@ -348,7 +348,7 @@ Capas:
 - navegacion paciente agrupada visualmente en Ficha, Datos, IA y Control; mobile usa selector compacto de seccion clinica
 - las pantallas visibles pueden mostrar badges comunes de estado, papel, escritura e IA permitida desde el Screen Capability Registry
 - `/pacientes/[patientId]/ficha` se organiza como hoja clinica viva: cabecera critica, linea longitudinal y riel contextual de faltantes/IA/acciones
-- `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales
+- `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales y ofrece curaduria minima de antecedentes con categoria, fuente y limite visible
 - `/pacientes/[patientId]/medicacion` integra vademecum local, favoritos, sugeridos deterministicas, historial y copia de indicaciones previas como borrador humano
 - `/pacientes/[patientId]/medicacion/nueva` valida dosis contra reglas curadas y exige justificacion si hay bloqueo antes de guardar
 - `/pacientes/[patientId]/ficha` muestra riesgos clinicos minimos en el riel contextual; permite registro manual y marcar resuelto solo con permisos
