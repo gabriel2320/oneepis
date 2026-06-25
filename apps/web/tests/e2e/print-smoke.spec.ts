@@ -46,6 +46,8 @@ test.describe("print routes", () => {
       `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria/${demoDailySheetId}`,
     );
     await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
+    const dailyStatusSection = page.locator("section").filter({ hasText: "Estado documental" });
+    await expect(dailyStatusSection.getByText("Fuente: hospital_daily_sheets")).toBeVisible();
     await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 
@@ -53,6 +55,8 @@ test.describe("print routes", () => {
       `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicacion/${demoHospitalIndicationId}`,
     );
     await expect(page.getByRole("heading", { name: "Indicacion hospitalaria" })).toBeVisible();
+    const indicationStatusSection = page.locator("section").filter({ hasText: "Borrador no firmado" });
+    await expect(indicationStatusSection.getByText("Fuente: hospital_indications")).toBeVisible();
     await expect(page.getByText("Borrador no firmado")).toBeVisible();
     await expect(page.getByText("Borrador de indicacion demo")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();

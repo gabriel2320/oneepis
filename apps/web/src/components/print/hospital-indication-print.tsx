@@ -63,6 +63,13 @@ function HospitalIndicationPrintSheet({
         <p className="mt-2 text-sm text-muted-foreground">
           Este documento no equivale a orden ejecutable, firma legal ni receta clinica valida.
         </p>
+        <div className="mt-2 grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+          <p>Indicacion: {indication.id}</p>
+          <p>Paciente: {indication.patient_id}</p>
+          <p>Encuentro: {indication.encounter_id}</p>
+          <p>Contexto: {record.patient.current_care_context}</p>
+          <p>Fuente: hospital_indications</p>
+        </div>
       </section>
       <section className="print-section space-y-3">
         <div>

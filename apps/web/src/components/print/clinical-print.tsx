@@ -389,6 +389,13 @@ export function HospitalDailyPrintSheet({
             ? "Cerrada bloquea edicion posterior para trazabilidad; no equivale a firma legal."
             : "Borrador editable; no firmado ni ejecutable como documento legal."}
         </p>
+        <div className="mt-2 grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+          <p>Hoja diaria: {sheet.id}</p>
+          <p>Paciente: {sheet.patient_id}</p>
+          <p>Encuentro: {sheet.encounter_id}</p>
+          <p>Contexto: {record.patient.current_care_context}</p>
+          <p>Fuente: hospital_daily_sheets</p>
+        </div>
       </section>
       <section className="print-section space-y-3">
         <div>

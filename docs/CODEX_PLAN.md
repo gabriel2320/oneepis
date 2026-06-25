@@ -939,6 +939,9 @@ Reglas:
 Estado: evolucion SOAP impresa declara estado documental, entrada, paciente,
 identificador clinico, contexto, encuentro, autor, fecha de actualizacion y
 fuente `clinical_entries`. Sigue sin firma legal digital ni folio inmutable.
+Hoja diaria e indicacion hospitalaria impresas declaran estado documental,
+paciente, encuentro, contexto y fuente (`hospital_daily_sheets` o
+`hospital_indications`) sin convertir borradores en orden ejecutable.
 
 #### C9 Seguridad preproduccion
 

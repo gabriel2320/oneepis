@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-25T01:47:03.376Z",
+  "generated_at": "2026-06-25T01:50:20.488Z",
   "scope": "clinical_traceability",
   "sources": {
     "models": "apps/api/src/oneepis_api/models",
@@ -52,7 +52,7 @@
       "endpoints_lectura": "GET /{patient_id}/encounters (apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py), GET /{patient_id}/encounters/{encounter_id} (apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py)",
       "endpoints_actualizacion": "DELETE /{patient_id}/encounters/{encounter_id} (apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py), PATCH /{patient_id}/encounters/{encounter_id} (apps/api/src/oneepis_api/api/v1/routes/patient_encounters.py)",
       "pantalla": "apps/web/src/app/pacientes/[patientId]/encuentros/nuevo/page.tsx, apps/web/src/app/pacientes/[patientId]/encuentros/page.tsx, apps/web/src/components/clinical/ambulatory-visit-pages.tsx, apps/web/src/components/clinical/hospital-bed-admin.tsx, apps/web/src/components/clinical/hospital-bed-pages.tsx, apps/web/src/components/clinical/hospitalization-data.ts, apps/web/src/components/clinical/hospitalization-widgets.tsx, apps/web/src/components/clinical/patient-clinical-shell.tsx, apps/web/src/components/clinical/patient-encounter-page.tsx, apps/web/src/components/clinical/patient-event-pages.tsx, apps/web/src/components/clinical/patient-formal-cover.tsx, apps/web/src/components/clinical/patient-page-shared.tsx, apps/web/src/components/clinical/patient-record-pages.tsx, apps/web/src/components/clinical/patient-record-workspaces.tsx, apps/web/src/components/clinical/patient-soap-page.tsx, apps/web/src/components/clinical/patient-widgets.tsx",
-      "papel": "apps/web/src/components/print/clinical-print.tsx, apps/web/src/components/print/hospital-round-print.tsx",
+      "papel": "apps/web/src/components/print/clinical-print.tsx, apps/web/src/components/print/hospital-indication-print.tsx, apps/web/src/components/print/hospital-round-print.tsx",
       "cliente_frontend": "apps/web/src/lib/api/clinical-record.ts",
       "tipo_frontend": "apps/web/src/lib/type-contracts/clinical-record.ts, apps/web/src/lib/type-contracts/hospitalization.ts",
       "schema_pydantic": "apps/api/src/oneepis_api/schemas/clinical_record.py, apps/api/src/oneepis_api/schemas/clinical_record_contracts/longitudinal.py, apps/api/src/oneepis_api/schemas/hospitalization.py, apps/api/src/oneepis_api/schemas/patient.py",

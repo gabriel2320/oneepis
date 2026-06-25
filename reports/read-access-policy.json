@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-25T01:47:03.528Z",
+  "generated_at": "2026-06-25T01:50:20.647Z",
   "scope": "clinical_read_access_policy_report_only",
   "source_report": "reports/read-access-map.json",
   "report_only": true,
