@@ -323,6 +323,8 @@ Documentos/papel:
 - `/pacientes/[patientId]/documentos` es indice real de papel existente: ficha, resumen, evoluciones, ingreso y epicrisis cuando hay entradas disponibles
 - las hojas carta muestran metadata documental comun: fuente, estado, actor y
   fecha clinica cuando la fuente los expone
+- consentimientos siguen bloqueados y declaran requisitos faltantes: plantilla
+  versionada, firmante, fecha, custodia y revocacion
 - adjuntos externos, consentimientos, custodia documental, firma real y receta valida siguen bloqueados/futuros
 
 Seguridad clinica:

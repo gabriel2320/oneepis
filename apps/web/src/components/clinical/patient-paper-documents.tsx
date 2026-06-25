@@ -52,7 +52,10 @@ export function PatientPaperDocuments({
         <div className="grid gap-3 md:grid-cols-3">
           <BlockedDocument label="Receta valida" detail="Requiere firma, folio, actor, fecha clinica y permisos." />
           <BlockedDocument label="Adjuntos externos" detail="Requiere almacenamiento, PHI policy y trazabilidad." />
-          <BlockedDocument label="Consentimientos" detail="Requiere firma, custodia y reglas legales." />
+          <BlockedDocument
+            label="Consentimientos"
+            detail="Requiere plantilla versionada, firmante, fecha, custodia y revocacion."
+          />
         </div>
       </ClinicalSectionCard>
     </div>
