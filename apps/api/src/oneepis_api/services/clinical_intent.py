@@ -7,18 +7,33 @@ from sqlalchemy.orm import Session
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.clinical_record import (
     ClinicalChangeSet,
-    ClinicalIntentAction,
     ClinicalIntentRequest,
     ClinicalIntentResponse,
     ClinicalIntentRouteRequest,
     ClinicalIntentRouteResponse,
-    ClinicalIntentType,
     ClinicalReviewItem,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
-from oneepis_api.services.clinical_course import clinical_course_finding
+from oneepis_api.services.clinical_intent_actions import (
+    clinical_intent_action as _action,
+)
+from oneepis_api.services.clinical_intent_change_rules import (
+    event_rule_findings as _event_rule_findings,
+)
+from oneepis_api.services.clinical_intent_change_rules import (
+    vital_rule_findings as _vital_rule_findings,
+)
 from oneepis_api.services.clinical_intent_context import (
     clinical_intent_context_payload as _context_payload,
+)
+from oneepis_api.services.clinical_intent_exam_rules import (
+    exam_payload_rule_findings as _exam_payload_rule_findings,
+)
+from oneepis_api.services.clinical_intent_medication_rules import (
+    medication_payload_rule_findings as _medication_payload_rule_findings,
+)
+from oneepis_api.services.clinical_intent_medication_rules import (
+    medication_review_findings as _medication_review_findings,
 )
 from oneepis_api.services.clinical_intent_review import (
     apply_review_decisions as _apply_review_decisions,
@@ -26,28 +41,15 @@ from oneepis_api.services.clinical_intent_review import (
 from oneepis_api.services.clinical_intent_review import (
     build_review_items as _review_items,
 )
-from oneepis_api.services.clinical_intent_review import (
-    medication_payload_has_minimum as _medication_payload_has_minimum,
+from oneepis_api.services.clinical_intent_router import (
+    route_clinical_intent as _route_clinical_intent,
 )
-from oneepis_api.services.clinical_intent_text import (
-    compare_decimal as _compare_decimal,
-)
-from oneepis_api.services.clinical_intent_text import (
-    compare_int as _compare_int,
-)
-from oneepis_api.services.clinical_intent_text import (
-    join_titles as _join_titles,
-)
-from oneepis_api.services.clinical_intent_text import (
-    normalize_text as _normalize_text,
-)
-from oneepis_api.services.clinical_intent_text import (
-    payload_text as _payload_text,
-)
+from oneepis_api.services.clinical_intent_text import join_titles as _join_titles
 from oneepis_api.services.clinical_lab_context import fetch_context_lab_results
-from oneepis_api.services.clinical_problem_context import (
-    event_matches_any_problem,
-)
+
+
+def route_clinical_intent(payload: ClinicalIntentRouteRequest) -> ClinicalIntentRouteResponse:
+    return _route_clinical_intent(payload)
 
 
 def resolve_clinical_intent(
@@ -89,125 +91,6 @@ def resolve_clinical_intent(
             payload, snapshot, events, recent_vitals, lab_results, review_items
         )
     return _show_sources(payload, snapshot, events, recent_vitals, lab_results, review_items)
-
-
-def route_clinical_intent(payload: ClinicalIntentRouteRequest) -> ClinicalIntentRouteResponse:
-    text = _normalize_text(payload.text)
-    direct_action = _direct_form_action(text, payload.text)
-    if direct_action:
-        return ClinicalIntentRouteResponse(
-            recognized=True,
-            original_text=payload.text,
-            intent_type=None,
-            mode="structured_proposal",
-            confidence="moderate",
-            explanation=(
-                "Se reconocio una accion de registro. AI-Chart abrira un formulario existente; "
-                "no se guardaran datos sin revision humana."
-            ),
-            suggested_actions=[direct_action],
-            fallback_options=_fallback_actions(),
-        )
-
-    matches: list[tuple[ClinicalIntentType, str, tuple[str, ...]]] = [
-        (
-            "draft_soap",
-            "draft",
-            (
-                "evolucion",
-                "evoluciona",
-                "soap",
-                "nota de hoy",
-                "prepara evolucion",
-            ),
-        ),
-        (
-            "daily_changes",
-            "read",
-            (
-                "cambio",
-                "cambios",
-                "desde ayer",
-                "ultimas 24",
-                "24h",
-                "24 horas",
-            ),
-        ),
-        (
-            "active_problems",
-            "read",
-            (
-                "problemas",
-                "diagnosticos activos",
-                "problemas activos",
-                "ordena problemas",
-            ),
-        ),
-        (
-            "timeline",
-            "read",
-            (
-                "timeline",
-                "linea de tiempo",
-                "hospitalizacion",
-                "cronologia",
-            ),
-        ),
-        (
-            "show_sources",
-            "read",
-            (
-                "fuentes",
-                "de donde",
-                "auditoria",
-                "trazabilidad",
-            ),
-        ),
-        (
-            "summarize_patient",
-            "read",
-            (
-                "resume",
-                "resumen",
-                "ordename",
-                "ordename",
-                "caso",
-                "paciente",
-            ),
-        ),
-    ]
-    for intent_type, mode, keywords in matches:
-        if any(keyword in text for keyword in keywords):
-            return ClinicalIntentRouteResponse(
-                recognized=True,
-                original_text=payload.text,
-                intent_type=intent_type,
-                mode=mode,
-                confidence="high",
-                explanation="Intencion reconocida por router clinico deterministico.",
-                suggested_actions=[
-                    _action(
-                        "create_soap_draft"
-                        if intent_type == "draft_soap"
-                        else "review_sources",
-                        _intent_label(intent_type),
-                        "Ejecutar la intencion reconocida como accion revisable.",
-                        requires_confirmation=intent_type == "draft_soap",
-                    )
-                ],
-                fallback_options=_fallback_actions(),
-            )
-
-    return ClinicalIntentRouteResponse(
-        recognized=False,
-        original_text=payload.text,
-        intent_type=None,
-        mode="read",
-        confidence="low",
-        explanation="No se reconocio una intencion clinica segura. Elige una opcion dirigida.",
-        suggested_actions=[],
-        fallback_options=_fallback_actions(),
-    )
 
 
 def _summarize_patient(
@@ -441,345 +324,4 @@ def _change_set(
         new_items=[event.summary for event in events[:8]],
         rule_findings=rule_findings,
         missing_for_comparison=missing,
-    )
-
-
-def _vital_rule_findings(recent_vitals: list[object]) -> list[str]:
-    if len(recent_vitals) < 2:
-        return []
-    current = recent_vitals[0]
-    previous = recent_vitals[1]
-    findings: list[str] = []
-    findings.extend(
-        _compare_decimal(
-            label="Temperatura",
-            current=current.temperature_c,
-            previous=previous.temperature_c,
-            unit="C",
-            relevant_delta=0.5,
-        )
-    )
-    findings.extend(
-        _compare_int(
-            label="Frecuencia cardiaca",
-            current=current.heart_rate_bpm,
-            previous=previous.heart_rate_bpm,
-            unit="lpm",
-            relevant_delta=15,
-        )
-    )
-    findings.extend(
-        _compare_int(
-            label="Presion sistolica",
-            current=current.systolic_bp,
-            previous=previous.systolic_bp,
-            unit="mmHg",
-            relevant_delta=20,
-        )
-    )
-    findings.extend(
-        _compare_decimal(
-            label="Saturacion O2",
-            current=current.oxygen_saturation_pct,
-            previous=previous.oxygen_saturation_pct,
-            unit="%",
-            relevant_delta=2,
-        )
-    )
-    return findings
-
-
-def _event_rule_findings(
-    snapshot: PatientRecordSnapshot,
-    events: list[object],
-    baseline_entry: object | None,
-    recent_vitals: list[object],
-) -> list[str]:
-    compared_events = [
-        event
-        for event in events[:12]
-        if baseline_entry is None or event.occurred_at > baseline_entry.occurred_at
-    ]
-    if not compared_events:
-        return []
-
-    findings: list[str] = []
-    labels = {
-        "exam_result": "Nuevo examen registrado",
-        "medication": "Nuevo evento de medicacion registrado",
-        "care_plan": "Nuevo plan de cuidado registrado",
-        "diagnosis": "Nuevo diagnostico registrado",
-        "procedure": "Nuevo procedimiento registrado",
-    }
-    for event in compared_events:
-        event_type = getattr(event.event_type, "value", event.event_type)
-        label = labels.get(event_type)
-        if label:
-            findings.append(f"{label}: {event.summary}.")
-        course_finding = clinical_course_finding(event.summary, recent_vitals)
-        if course_finding:
-            findings.append(course_finding)
-
-    unlinked_count = sum(
-        1 for event in compared_events if not event_matches_any_problem(snapshot, event)
-    )
-    if unlinked_count:
-        findings.append(
-            f"{unlinked_count} evento(s) recientes sin problema activo asociado."
-        )
-    return findings
-
-
-def _exam_payload_rule_findings(
-    events: list[object],
-    baseline_entry: object | None,
-) -> list[str]:
-    findings: list[str] = []
-    grouped: dict[str, list[tuple[object, dict[str, object]]]] = {}
-    for event in events:
-        event_type = getattr(event.event_type, "value", event.event_type)
-        if event_type != "exam_result":
-            continue
-        for result in _exam_results(event.payload):
-            marker = _exam_marker(result)
-            value = _exam_value(result)
-            if marker is None or value is None:
-                continue
-            grouped.setdefault(marker, []).append((event, result))
-
-    for marker, marker_results in grouped.items():
-        ordered = sorted(marker_results, key=lambda item: item[0].occurred_at, reverse=True)
-        if len(ordered) < 2:
-            continue
-        current, current_result = ordered[0]
-        previous, previous_result = ordered[1]
-        if baseline_entry is not None and current.occurred_at <= baseline_entry.occurred_at:
-            continue
-        current_value = _exam_value(current_result)
-        previous_value = _exam_value(previous_result)
-        if current_value is None or previous_value is None:
-            continue
-        finding = _exam_delta_finding(
-            marker=marker,
-            current=current_value,
-            previous=previous_value,
-            unit=str(current_result.get("unit") or previous_result.get("unit") or ""),
-        )
-        if finding:
-            findings.append(finding)
-    return findings
-
-
-def _exam_results(payload: dict[str, object]) -> list[dict[str, object]]:
-    raw_results = payload.get("results")
-    if isinstance(raw_results, list):
-        return [item for item in raw_results if isinstance(item, dict)]
-    return [payload]
-
-
-def _exam_marker(payload: dict[str, object]) -> str | None:
-    raw = payload.get("code") or payload.get("name") or payload.get("marker")
-    if not isinstance(raw, str):
-        return None
-    normalized = _normalize_text(raw).replace("_", " ").strip()
-    aliases = {
-        "pcr": "pcr",
-        "proteina c reactiva": "pcr",
-        "crp": "pcr",
-        "creatinina": "creatinine",
-        "creatinine": "creatinine",
-        "hemoglobina": "hemoglobin",
-        "hemoglobin": "hemoglobin",
-        "hb": "hemoglobin",
-    }
-    return aliases.get(normalized)
-
-
-def _exam_value(payload: dict[str, object]) -> float | None:
-    raw = payload.get("value")
-    if isinstance(raw, int | float):
-        return float(raw)
-    if isinstance(raw, str):
-        try:
-            return float(raw.replace(",", "."))
-        except ValueError:
-            return None
-    return None
-
-
-def _exam_delta_finding(
-    *,
-    marker: str,
-    current: float,
-    previous: float,
-    unit: str,
-) -> str | None:
-    labels = {
-        "pcr": "PCR",
-        "creatinine": "Creatinina",
-        "hemoglobin": "Hemoglobina",
-    }
-    thresholds = {
-        "pcr": max(abs(previous) * 0.3, 10),
-        "creatinine": 0.3,
-        "hemoglobin": 1.0,
-    }
-    delta = current - previous
-    if abs(delta) < thresholds[marker]:
-        return None
-    direction = "subio" if delta > 0 else "bajo"
-    suffix = f" {unit}" if unit else ""
-    return f"{labels[marker]} {direction} de {previous:g} a {current:g}{suffix}."
-
-
-def _medication_payload_rule_findings(
-    events: list[object],
-    baseline_entry: object | None,
-) -> list[str]:
-    findings: list[str] = []
-    for event in events:
-        event_type = getattr(event.event_type, "value", event.event_type)
-        if event_type != "medication":
-            continue
-        if baseline_entry is not None and event.occurred_at <= baseline_entry.occurred_at:
-            continue
-        finding = _medication_payload_finding(event.payload)
-        if finding:
-            findings.append(finding)
-    return findings
-
-
-def _medication_review_findings(
-    snapshot: PatientRecordSnapshot,
-    events: list[object],
-    baseline_entry: object | None,
-) -> list[str]:
-    findings: list[str] = []
-    for medication in snapshot.active_medications[:12]:
-        if not medication.dose:
-            findings.append(f"Revisar medicamento activo sin dosis: {medication.name}.")
-        if not medication.frequency:
-            findings.append(f"Revisar medicamento activo sin frecuencia: {medication.name}.")
-
-    compared_med_events = [
-        event
-        for event in events[:12]
-        if getattr(event.event_type, "value", event.event_type) == "medication"
-        and (baseline_entry is None or event.occurred_at > baseline_entry.occurred_at)
-    ]
-    for event in compared_med_events:
-        if not _medication_payload_has_minimum(event.payload):
-            findings.append(
-                f"Revisar evento de medicacion sin payload estructurado suficiente: "
-                f"{event.summary}."
-            )
-        if not event_matches_any_problem(snapshot, event):
-            findings.append(
-                f"Revisar evento de medicacion sin problema activo asociado: {event.summary}."
-            )
-    return findings
-
-
-def _medication_payload_finding(payload: dict[str, object]) -> str | None:
-    action_raw = payload.get("action")
-    name_raw = payload.get("name") or payload.get("medication")
-    if not isinstance(action_raw, str) or not isinstance(name_raw, str):
-        return None
-    action = _normalize_text(action_raw).replace("_", "-").strip()
-    name = name_raw.strip()
-    if not name:
-        return None
-
-    if action in {"started", "iniciado", "inicio"}:
-        detail = _medication_detail(payload)
-        return f"Medicamento iniciado: {name}{detail}."
-    if action in {"stopped", "suspended", "suspendido", "suspension"}:
-        return f"Medicamento suspendido: {name}."
-    if action in {"dose-changed", "dose changed", "cambio dosis", "ajuste dosis"}:
-        previous_dose = _payload_text(payload.get("previous_dose"))
-        dose = _payload_text(payload.get("dose"))
-        if previous_dose and dose:
-            return f"Dosis modificada: {name} de {previous_dose} a {dose}."
-        if dose:
-            return f"Dosis modificada: {name} a {dose}."
-    return None
-
-
-def _medication_detail(payload: dict[str, object]) -> str:
-    dose = _payload_text(payload.get("dose"))
-    route = _payload_text(payload.get("route"))
-    frequency = _payload_text(payload.get("frequency"))
-    details = [item for item in [dose, route, frequency] if item]
-    return f" ({', '.join(details)})" if details else ""
-
-
-def _intent_label(intent_type: ClinicalIntentType) -> str:
-    labels = {
-        "summarize_patient": "Resumir paciente",
-        "daily_changes": "Comparar ultimas 24 h",
-        "active_problems": "Mostrar problemas activos",
-        "timeline": "Crear timeline",
-        "draft_soap": "Preparar evolucion S/O/A/P",
-        "show_sources": "Mostrar fuentes",
-    }
-    return labels[intent_type]
-
-
-def _fallback_actions() -> list[ClinicalIntentAction]:
-    return [
-        _action("review_sources", "Resumir paciente", "Ver contexto clinico resumido."),
-        _action("review_sources", "Que cambio desde ayer", "Comparar cambios recientes."),
-        _action(
-            "create_soap_draft",
-            "Preparar evolucion SOAP",
-            "Crear borrador editable con confirmacion humana.",
-            requires_confirmation=True,
-        ),
-        _action("review_sources", "Mostrar fuentes", "Ver fuentes usadas por AI-Chart."),
-    ]
-
-
-def _direct_form_action(text: str, original_text: str) -> ClinicalIntentAction | None:
-    form_actions: list[tuple[tuple[str, ...], str, str]] = [
-        (
-            ("medicacion", "medicamento", "farmaco", "receta"),
-            "Registrar medicacion",
-            "Abrir formulario de medicacion con origen AI-Chart revisable.",
-        ),
-        (
-            ("alergia", "alergias", "alergico"),
-            "Registrar alergia",
-            "Abrir formulario de alergias con origen AI-Chart revisable.",
-        ),
-        (
-            ("signos vitales", "control de signos", "presion", "saturacion", "temperatura"),
-            "Registrar signos vitales",
-            "Abrir formulario de signos vitales con origen AI-Chart revisable.",
-        ),
-    ]
-    for keywords, label, description in form_actions:
-        if any(keyword in text for keyword in keywords):
-            return _action(
-                "create_event",
-                label,
-                f"{description} Texto original: {original_text}",
-                requires_confirmation=True,
-            )
-    return None
-
-
-def _action(
-    action_type: str,
-    label: str,
-    description: str,
-    *,
-    requires_confirmation: bool = False,
-) -> ClinicalIntentAction:
-    return ClinicalIntentAction(
-        action_type=action_type,
-        action_id=f"{action_type}:{_normalize_text(label).replace(' ', '_')}",
-        label=label,
-        description=description,
-        confirmation_label="Revisar y confirmar" if requires_confirmation else "Revisar",
-        requires_confirmation=requires_confirmation,
     )

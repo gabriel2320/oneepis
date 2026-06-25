@@ -88,8 +88,8 @@ jobs:
       - name: CodeQL analyze report
         uses: github/codeql-action/analyze@v3
         continue-on-error: true
-      - name: npm audit report
-        run: npm audit --audit-level=high
+      - name: OSV npm advisory report
+        run: npm run check:npm-advisories
         continue-on-error: true
       - name: pip-audit report
         run: |

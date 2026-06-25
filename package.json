@@ -17,6 +17,7 @@
     "check:web": "npm run check:size && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
     "check:contract": "node scripts/export-openapi.mjs && node scripts/check-assistant-read-contract.mjs && git diff --exit-code packages/contracts/openapi.json",
     "check:e2e": "npm --workspace apps/web run test:e2e && npm --workspace apps/web run test:e2e:assistant-read",
+    "check:npm-advisories": "node scripts/check-npm-advisories.mjs",
     "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
   },
   "engines": {

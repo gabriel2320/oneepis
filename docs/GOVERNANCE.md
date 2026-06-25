@@ -37,13 +37,17 @@ No crear documentos nuevos si una fuente existente puede absorber la decision.
 Responsabilidades canonicas:
 
 - `README.md`: entrada operativa, stack, comandos y enlaces.
+- `AGENTS.md`: reglas raiz para agentes.
 - `docs/CURRENT_STATE.md`: verdad operativa actual.
 - `docs/ROADMAP.md`: historial y rumbo, no backlog detallado.
 - `docs/GOVERNANCE.md`: criterios anti-inflacion y limites activos.
-- `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart.
+- `docs/CODEX_PLAN.md`: quickstart corto para agentes, no backlog.
+- `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart, no historial.
 - `docs/AI_CHART_CORE.md`: contrato conceptual de AI-Chart.
 - `docs/VISUAL_INTELLIGENCE_COUPLING.md`: regla inteligencia -> UI visible.
 - `docs/SCREEN_TREE.md`: rutas y estado por superficie.
+- reportes fechados como `docs/ONEEPIS_REPORT_*.md`: snapshots de auditoria,
+  no fuente canonica viva.
 
 Los documentos largos de vision son cantera conceptual. No son backlog directo
 si no pasan antes por el plan progresivo y la escalera OneEpis.
@@ -187,7 +191,7 @@ evitables que no deben repetirse:
 
 - El job `security-report` entrega senales de secretos, dependencias y analisis estatico sin mezclar politica clinica con producto.
 - Gitleaks es bloqueo duro: un secreto real, token, llave privada, muestra PHI o identificador clinico debe detener el PR y tratarse como incidente.
-- Dependency review, CodeQL, `npm audit` y `pip-audit` quedan en modo reporte hasta que cada senal tenga politica de bloqueo y manejo de falsos positivos.
+- Dependency review, CodeQL, OSV npm advisory check y `pip-audit` quedan en modo reporte hasta que cada senal tenga politica de bloqueo y manejo de falsos positivos.
 - Report-only no significa ignorado: hallazgos de alto riesgo deben triagearse antes de cualquier hito productivo sanitario.
 
 ## Escalera OneEpis

@@ -15,7 +15,12 @@ from oneepis_api.schemas.clinical_record import (
     ConfirmClinicalPatchRequest,
     ConfirmClinicalPatchResponse,
 )
-from oneepis_api.services.audit import audit_snapshot, record_audit_event
+from oneepis_api.services.clinical_patch_audit import (
+    record_patch_acceptance,
+    record_patch_blocked,
+    record_patch_rejection,
+    record_patch_unsupported,
+)
 
 
 def confirm_clinical_patch(
@@ -27,20 +32,11 @@ def confirm_clinical_patch(
     validate_encounter: Callable[[uuid.UUID | None], None],
 ) -> ConfirmClinicalPatchResponse:
     if payload.decision == "rejected":
-        record_audit_event(
-            session,
-            action="ai.clinical_patch.rejected",
-            entity_type="patient",
-            entity_id=patient_id,
-            actor_id=actor,
-            metadata={
-                "patient_id": str(patient_id),
-                "patch_id": payload.patch.patch_id,
-                "target": payload.patch.target,
-                "note": payload.note,
-                "applies_changes": False,
-                "requires_human_confirmation": payload.patch.requires_human_confirmation,
-            },
+        record_patch_rejection(
+            session=session,
+            patient_id=patient_id,
+            payload=payload,
+            actor=actor,
         )
         session.commit()
         return ConfirmClinicalPatchResponse(
@@ -73,22 +69,11 @@ def confirm_clinical_patch(
             validate_encounter=validate_encounter,
         )
 
-    record_audit_event(
-        session,
-        action="ai.clinical_patch.unsupported",
-        entity_type="patient",
-        entity_id=patient_id,
-        actor_id=actor,
-        metadata={
-            "patient_id": str(patient_id),
-            "patch_id": payload.patch.patch_id,
-            "target": payload.patch.target,
-            "operation_count": len(payload.patch.operations),
-            "source_count": len(payload.patch.sources),
-            "note": payload.note,
-            "applies_changes": False,
-            "requires_human_confirmation": payload.patch.requires_human_confirmation,
-        },
+    record_patch_unsupported(
+        session=session,
+        patient_id=patient_id,
+        payload=payload,
+        actor=actor,
     )
     session.commit()
     raise HTTPException(
@@ -199,23 +184,14 @@ def _audit_patch_acceptance(
     entity_id: uuid.UUID,
     after_model: ClinicalEntry | ClinicalEvent,
 ) -> None:
-    record_audit_event(
-        session,
-        action="ai.clinical_patch.accepted",
+    record_patch_acceptance(
+        session=session,
+        patient_id=patient_id,
+        payload=payload,
+        actor=actor,
         entity_type=entity_type,
         entity_id=entity_id,
-        actor_id=actor,
-        metadata={
-            "patient_id": str(patient_id),
-            "patch_id": payload.patch.patch_id,
-            "target": payload.patch.target,
-            "operation_count": len(payload.patch.operations),
-            "source_count": len(payload.patch.sources),
-            "note": payload.note,
-            "applies_changes": True,
-            "requires_human_confirmation": payload.patch.requires_human_confirmation,
-        },
-        after=audit_snapshot(after_model),
+        after_model=after_model,
     )
 
 
@@ -300,23 +276,12 @@ def _block_patch_acceptance(
     actor: str,
     reason: str,
 ) -> None:
-    record_audit_event(
-        session,
-        action="ai.clinical_patch.blocked",
-        entity_type="patient",
-        entity_id=patient_id,
-        actor_id=actor,
-        metadata={
-            "patient_id": str(patient_id),
-            "patch_id": payload.patch.patch_id,
-            "target": payload.patch.target,
-            "operation_count": len(payload.patch.operations),
-            "source_count": len(payload.patch.sources),
-            "note": payload.note,
-            "applies_changes": False,
-            "requires_human_confirmation": payload.patch.requires_human_confirmation,
-            "reason": reason,
-        },
+    record_patch_blocked(
+        session=session,
+        patient_id=patient_id,
+        payload=payload,
+        actor=actor,
+        reason=reason,
     )
     session.commit()
     raise HTTPException(

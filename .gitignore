@@ -41,3 +41,6 @@ postgres-data/
 
 # Generated contracts can be refreshed from the API.
 packages/contracts/openapi.generated.json
+
+# Tool-specific agent pointer; apps/web/AGENTS.md is the canonical instruction file.
+apps/web/CLAUDE.md

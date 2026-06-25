@@ -15,9 +15,7 @@ import {
   ProblemList,
   VitalsStrip,
 } from "@/components/clinical/patient-widgets";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { createPatientAiSuggestions } from "@/lib/api/ai";
 import { listAuditEvents, listClinicalEncounters, listVitalSigns } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
 import { demoEncounters } from "@/lib/demo-record";
@@ -28,7 +26,7 @@ import {
   canManageProblems,
   canRecordVitals,
 } from "@/lib/permissions";
-import type { AuthUser, PatientAiSuggestionsResponse, PatientRecordSnapshot } from "@/lib/types";
+import type { AuthUser, PatientRecordSnapshot } from "@/lib/types";
 
 import { NoPermissionButton } from "./patient-page-shared";
 
@@ -193,92 +191,6 @@ export function VitalsWorkspace({
           <EmptyState title="Accion separada" description="Usa registrar para abrir el formulario de signos." />
         </ClinicalSectionCard>
       </div>
-    </div>
-  );
-}
-
-export function PatientAiSuggestionsPanel({ patientId, canUseAi }: { patientId: string; canUseAi: boolean }) {
-  const suggestionsQuery = useQuery({
-    queryKey: ["patient-ai-suggestions", patientId],
-    queryFn: () => createPatientAiSuggestions(patientId, { focus: "summary" }),
-    enabled: !DEMO_MODE && canUseAi,
-    staleTime: 60_000,
-  });
-
-  if (DEMO_MODE) {
-    return (
-      <ClinicalSectionCard title="Sugerencias Ollama" description="Borrador IA - requiere revision humana.">
-        <EmptyState title="IA no disponible en demo" description="Usa API real para sugerencias locales." />
-      </ClinicalSectionCard>
-    );
-  }
-
-  if (!canUseAi) {
-    return (
-      <ClinicalSectionCard title="Sugerencias Ollama" description="Borrador IA - requiere revision humana.">
-        <EmptyState
-          title="IA no permitida para este rol"
-          description="Disponible para medico, admin o dev."
-        />
-      </ClinicalSectionCard>
-    );
-  }
-
-  return (
-    <ClinicalSectionCard
-      title="Sugerencias Ollama"
-      description="Borrador IA - requiere revision humana."
-      action={
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={suggestionsQuery.isFetching}
-          onClick={() => suggestionsQuery.refetch()}
-        >
-          {suggestionsQuery.isFetching ? "Revisando..." : "Actualizar"}
-        </Button>
-      }
-    >
-      {suggestionsQuery.isLoading ? <LoadingRows rows={2} /> : null}
-      {suggestionsQuery.isError ? (
-        <ErrorState description="No se pudo obtener sugerencias. La ficha sigue operativa." />
-      ) : null}
-      {suggestionsQuery.data ? <PatientAiSuggestionList response={suggestionsQuery.data} /> : null}
-    </ClinicalSectionCard>
-  );
-}
-
-function PatientAiSuggestionList({ response }: { response: PatientAiSuggestionsResponse }) {
-  return (
-    <div className="space-y-3">
-      <div className="rounded-md border bg-muted/30 p-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={response.status === "draft" ? "safe" : "warning"}>{response.status}</Badge>
-          <Badge variant="outline">{response.provider}</Badge>
-          {response.model ? <Badge variant="outline">{response.model}</Badge> : null}
-        </div>
-        <p className="mt-2 text-sm text-muted-foreground">{response.summary}</p>
-      </div>
-      <div className="space-y-2">
-        {response.suggestions.map((suggestion) => (
-          <div key={`${suggestion.title}-${suggestion.detail}`} className="rounded-md border p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold">{suggestion.title}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{suggestion.detail}</p>
-              </div>
-              <Badge variant={suggestion.severity === "critical" ? "warning" : "outline"}>
-                {suggestion.severity}
-              </Badge>
-            </div>
-            {suggestion.action_label ? (
-              <p className="mt-2 text-xs text-muted-foreground">{suggestion.action_label}</p>
-            ) : null}
-          </div>
-        ))}
-      </div>
-      <p className="text-xs text-muted-foreground">Borrador IA - requiere revision humana.</p>
     </div>
   );
 }
