@@ -14790,6 +14790,23 @@
           "patient": {
             "$ref": "#/components/schemas/PatientRead"
           },
+          "active_encounter": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClinicalEncounterRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recent_encounters": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalEncounterRead"
+            },
+            "type": "array",
+            "title": "Recent Encounters"
+          },
           "latest_vitals": {
             "anyOf": [
               {

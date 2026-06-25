@@ -10,6 +10,7 @@ from oneepis_api.models.patient import CareContext, PatientClinicalStatus, SexAt
 from oneepis_api.schemas.clinical_record import (
     ActiveProblemRead,
     AllergyRead,
+    ClinicalEncounterRead,
     ClinicalEntryRead,
     MedicationRead,
     VitalSignRead,
@@ -55,6 +56,8 @@ class PatientRead(PatientBase):
 
 class PatientRecordSnapshot(APIModel):
     patient: PatientRead
+    active_encounter: ClinicalEncounterRead | None = None
+    recent_encounters: list[ClinicalEncounterRead] = Field(default_factory=list)
     latest_vitals: VitalSignRead | None = None
     active_allergies: list[AllergyRead] = Field(default_factory=list)
     active_medications: list[MedicationRead] = Field(default_factory=list)

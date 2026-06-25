@@ -110,6 +110,9 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     assert snapshot["patient"]["clinical_identifier"] == "ONE-001"
     assert snapshot["patient"]["clinical_status"] == "active"
     assert snapshot["patient"]["current_care_context"] == "unknown"
+    assert snapshot["active_encounter"]["id"] == encounter_id
+    assert snapshot["active_encounter"]["reason"] == "Control clinico"
+    assert snapshot["recent_encounters"][0]["id"] == encounter_id
     assert snapshot["active_problems"][0]["title"] == "Hipertension arterial"
     assert snapshot["active_problems"][0]["code"] == "I10"
     assert snapshot["latest_vitals"]["heart_rate_bpm"] == 78

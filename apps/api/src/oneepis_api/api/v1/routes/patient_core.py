@@ -112,6 +112,8 @@ def get_patient_record(
     patient = require_patient(session, patient_id)
     return PatientRecordSnapshot(
         patient=patient,
+        active_encounter=patient_repo.get_active_encounter(session, patient_id),
+        recent_encounters=patient_repo.get_recent_encounters(session, patient_id),
         latest_vitals=patient_repo.get_latest_vitals(session, patient_id),
         active_allergies=patient_repo.get_active_allergies(session, patient_id),
         active_medications=patient_repo.get_active_medications(session, patient_id),
