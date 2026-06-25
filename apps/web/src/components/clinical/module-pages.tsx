@@ -86,36 +86,46 @@ export function AiSettingsPage() {
 
   return (
     <ModulePage title="IA local" description="Proveedor Ollama desacoplado y seguro.">
-      <ClinicalSectionCard title="Estado Ollama">
-        {aiQuery.isLoading ? <LoadingRows rows={2} /> : null}
-        {aiQuery.isError ? <ErrorState description="No se pudo consultar /ai/status." /> : null}
-        {aiQuery.data ? (
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={aiQuery.data.available ? "safe" : "warning"}>
-                {aiQuery.data.available ? "Disponible" : "Pendiente"}
-              </Badge>
-              {aiQuery.data.model ? <Badge variant="outline">{aiQuery.data.model}</Badge> : null}
-            </div>
-            <p className="text-sm text-muted-foreground">{aiQuery.data.message}</p>
-            {aiQuery.data.tasks.length > 0 ? (
-              <div className="grid gap-2 md:grid-cols-2">
-                {aiQuery.data.tasks.map((task) => (
-                  <div key={task.task} className="rounded-md border p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold">{task.task}</p>
-                      <Badge variant={task.available ? "safe" : "outline"}>
-                        {task.available ? "instalado" : "pendiente"}
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">{task.model}</p>
-                  </div>
-                ))}
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ClinicalSectionCard title="Estado Ollama">
+          {aiQuery.isLoading ? <LoadingRows rows={2} /> : null}
+          {aiQuery.isError ? <ErrorState description="No se pudo consultar /ai/status." /> : null}
+          {aiQuery.data ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={aiQuery.data.available ? "safe" : "warning"}>
+                  {aiQuery.data.available ? "Disponible" : "Pendiente"}
+                </Badge>
+                {aiQuery.data.model ? <Badge variant="outline">{aiQuery.data.model}</Badge> : null}
               </div>
-            ) : null}
+              <p className="text-sm text-muted-foreground">{aiQuery.data.message}</p>
+              {aiQuery.data.tasks.length > 0 ? (
+                <div className="grid gap-2 md:grid-cols-2">
+                  {aiQuery.data.tasks.map((task) => (
+                    <div key={task.task} className="rounded-md border p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold">{task.task}</p>
+                        <Badge variant={task.available ? "safe" : "outline"}>
+                          {task.available ? "instalado" : "pendiente"}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{task.model}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </ClinicalSectionCard>
+        <ClinicalSectionCard title="IA externa">
+          <div className="space-y-3">
+            <Badge variant="warning">Bloqueada</Badge>
+            <p className="text-sm text-muted-foreground">
+              Requiere anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI.
+            </p>
           </div>
-        ) : null}
-      </ClinicalSectionCard>
+        </ClinicalSectionCard>
+      </div>
     </ModulePage>
   );
 }

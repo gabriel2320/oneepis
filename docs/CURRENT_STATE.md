@@ -226,6 +226,8 @@ IA:
 - factory compatible en `services/ai/provider.py`
 - contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
 - Ollama es first-class en desarrollo, con fallback no bloqueante
+- `/configuracion/ia` declara IA externa bloqueada hasta existir payload
+  anonimizado, preview humano, autorizacion explicita, auditoria y politica PHI
 - AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados, hoja SOAP con margen inteligente, propuestas de eventos desde evoluciones escritas y guardado por `ClinicalPatch` confirmado aunque Ollama este apagado
 - las aceptaciones `ClinicalPatch` quedan limitadas por contrato: confirmacion humana obligatoria, evolucion siempre borrador no firmado y auditoria de bloqueo cuando no aplica
 

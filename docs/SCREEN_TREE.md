@@ -54,7 +54,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/login` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | no | no | no | seleccion institucion/rol futura |
 | `/configuracion` | Acceso/configuracion | seguimiento | completa | App Router | no | sesion local | no | no | estado/config | administracion clinica futura |
 | `/configuracion/apariencia` | Acceso/configuracion | seguimiento | completa | preferencias UI | no | sesion local | no | no | no | tokens visuales futuros |
-| `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | no | sesion local | no | no | estado Ollama | preferencias Ollama/local futuras |
+| `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | no | sesion local | no | no | estado Ollama | IA externa bloqueada: anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI |
 | `/configuracion/api` | Acceso/configuracion | seguimiento | completa | config API/OpenAPI | no | sesion local | no | no | no | health y versionado |
 | `/pacientes` | Nucleo paciente | paciente | completa | API pacientes / demo | no | lectura paciente | no | no | no | buscador universal avanzado y ultimos abiertos |
 | `/pacientes/nuevo` | Nucleo paciente | paciente | completa | API pacientes | si | escritura paciente | si | no | no | identidad administrativa mas completa |
@@ -140,7 +140,7 @@ tener contrato minimo y flujo humano verificable.
 | Farmacovigilancia | Seguridad/auditoria | seguimiento | futura | eventos adversos + fuentes | si | medico/admin/dev | si | no | no automatica | no usar FAERS como contraindicacion automatica |
 | Auditoria de accesos | Seguridad/auditoria | seguimiento | futura | access logs | no | admin/dev | no | no | no | separar acceso de modificacion clinica |
 | Administracion clinica | Administracion clinica | seguimiento | futura | usuarios/catalogos/plantillas | si | admin/dev | si | no | no | no bloquear piloto clinico actual |
-| IA externa | IA clinica | seguimiento | bloqueada | proveedor externo futuro | no | admin/dev futuro | si si se habilita | no | solo con autorizacion | anonimizar, preview payload y autorizacion explicita |
+| IA externa | IA clinica | seguimiento | bloqueada | proveedor externo futuro | no | admin/dev futuro | si si se habilita | no | solo con autorizacion | anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI |
 
 ## Secuencia de construccion
 
