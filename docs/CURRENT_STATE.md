@@ -413,7 +413,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - mover una ruta visible bajo `apps/web/src/app` exige actualizar el mapa maestro o falla `npm run check:screens`
 - mantener la regla de producto: paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
-- `apps/web/src/components/print/clinical-print.tsx` esta cerca del presupuesto de complejidad; no inflarlo con mas papel sin separar.
+- `apps/web/src/components/print/clinical-print.tsx` salio de near-limit tras
+  separar receta bloqueada; no volver a inflarlo con mas papel sin extraer.
 - los contratos frontend de Assistant Read e IA clinica ya se separaron de
   `clinical-record.ts`; vigilar los nuevos near-limit antes de sumar dominios.
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; `patient-ai-chart-pages.tsx` queda bajo presupuesto tras extraer intencion, evidencia y borrador, y no debe volver a inflarse.
@@ -422,11 +423,13 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `npm run check:contract` verifica OpenAPI y drift minimo Assistant Read contra los tipos TS manuales.
 - Playwright E2E corre con `workers: 1` para evitar 404 transitorios del dev server al compilar rutas dinamicas en paralelo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
-- `apps/api/src/oneepis_api/services/clinical_intent.py` sigue en watchlist no bloqueante, pero ya no requiere excepcion de tamano; router, acciones, reglas de cambios, examenes y medicacion ya viven en modulos de dominio.
+- `apps/api/src/oneepis_api/services/clinical_intent.py` salio de watchlist tras
+  separar respuestas de intencion; router, acciones, reglas de cambios,
+  examenes y medicacion viven en modulos de dominio.
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - adjuntos externos, consentimientos y receta siguen como bordes bloqueados/futuros; no expandir todos a la vez.
-- watchlist de tamano actual: `clinical_intent.py`.
+- watchlist de tamano actual: vacia segun `node scripts/check-file-size.mjs`.
 - `patient-list-pages.tsx`, `ai-chart-utils.ts`, `patient-event-pages.tsx`,
   `patient_assistant_labs.py`, `clinical_record.py`, `clinical_patch.py`,
   `patient_assistant_correlation.py`, `clinical-intent-result-panel.tsx`,
