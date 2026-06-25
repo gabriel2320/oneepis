@@ -100,6 +100,13 @@ export function categoryLabel(category: string) {
   return antecedentCategoryLabels[category] ?? category;
 }
 
+export function isCuratedAntecedentEvent(event: ClinicalEvent) {
+  return (
+    antecedentEventTypes.has(event.event_type) &&
+    parseCuratedAntecedent(event.payload.antecedent) !== null
+  );
+}
+
 function eventAntecedentItem(event: ClinicalEvent, patientId: string): AntecedentItem {
   const antecedent = parseCuratedAntecedent(event.payload.antecedent);
   return {

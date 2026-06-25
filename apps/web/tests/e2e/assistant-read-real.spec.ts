@@ -2,6 +2,8 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 
 const patientId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const eventId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const curatedAntecedentEventId = "b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const uncuratedAntecedentEventId = "b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const entryId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const vitalId = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const medicationId = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
@@ -20,6 +22,16 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await mockClinicalApi(page, calls);
 
   await page.goto(`/pacientes/${patientId}/ficha`);
+  await expect(page.getByText("Antecedentes clinicos")).toBeVisible();
+  await expect(page.getByText("Eventos curados: 1")).toBeVisible();
+  await expect(page.getByText("Familiar/social: 1")).toBeVisible();
+  await expect(page.getByText("Antecedente familiar validado")).toBeVisible();
+  await expect(
+    page.getByText(
+      "Fuente: Entrevista clinica. Limite: Dato familiar sin modulo estructurado propio.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByText("Nota sin curaduria para ficha")).not.toBeVisible();
   await expect(page.getByText("Resultados estructurados")).toBeVisible();
   await expect(page.getByText("Perfil renal")).toBeVisible();
   await expect(page.getByText("Creatinina")).toBeVisible();
@@ -192,6 +204,40 @@ const clinicalEvents = [
     event_type: "clinical_note",
     occurred_at: "2026-06-20T10:20:00Z",
     summary: "Disnea y saturacion baja",
+    source_type: "manual",
+    source_ref: null,
+    payload: {},
+    created_by: "playwright.dev",
+    created_at: createdAt,
+    updated_at: createdAt,
+  },
+  {
+    id: curatedAntecedentEventId,
+    patient_id: patientId,
+    encounter_id: null,
+    event_type: "clinical_note",
+    occurred_at: "2026-06-19T10:20:00Z",
+    summary: "Antecedente familiar validado",
+    source_type: "manual",
+    source_ref: null,
+    payload: {
+      antecedent: {
+        category: "familiar_social",
+        source_label: "Entrevista clinica",
+        limit: "Dato familiar sin modulo estructurado propio.",
+      },
+    },
+    created_by: "playwright.dev",
+    created_at: createdAt,
+    updated_at: createdAt,
+  },
+  {
+    id: uncuratedAntecedentEventId,
+    patient_id: patientId,
+    encounter_id: null,
+    event_type: "clinical_note",
+    occurred_at: "2026-06-18T10:20:00Z",
+    summary: "Nota sin curaduria para ficha",
     source_type: "manual",
     source_ref: null,
     payload: {},
