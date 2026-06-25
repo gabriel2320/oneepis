@@ -235,6 +235,11 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByRole("button", { name: "Registrar preconsulta" })).toBeDisabled();
   await expect(page.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(page.getByText("Cierre de consulta")).toBeVisible();
+  await expect(page.getByText("Encuentros en curso")).toBeVisible();
+  await expect(page.getByText("Destino")).toBeVisible();
+  await expect(page.getByText("completed + ended_at")).toBeVisible();
+  await expect(page.getByText("no firmado")).toBeVisible();
+  await expect(page.getByText("Al cerrar se guardara fecha de termino y auditoria backend.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Cerrar encuentro" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
 });

@@ -299,6 +299,9 @@ Consulta:
 
 - `/consulta/pacientes/{patient_id}/atencion` usa endpoints existentes para crear encuentro ambulatorio y evolucion SOAP vinculada
 - la misma pantalla permite cerrar un encuentro ambulatorio en curso como `completed` usando el PATCH existente de encuentros; es cierre administrativo auditado, no firma ni receta valida
+- el panel de cierre ambulatorio declara encuentros en curso/cerrados, destino
+  `completed + ended_at`, estado no firmado y auditoria esperada antes de
+  ejecutar el cierre
 - agenda ambulatoria minima existe como `ClinicalAppointment`, con persistencia, estados, permisos y auditoria
 - `/consulta/agenda` lista citas por dia, permite crear cita programada y enlaza a la atencion del paciente
 - preconsulta ambulatoria minima esta integrada dentro de la atencion: toma cita

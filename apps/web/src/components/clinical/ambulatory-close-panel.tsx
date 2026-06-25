@@ -22,6 +22,7 @@ export function AmbulatoryClosePanel({
 }) {
   const queryClient = useQueryClient();
   const openEncounters = encounters.filter((encounter) => encounter.status === "in_progress");
+  const completedEncounters = encounters.filter((encounter) => encounter.status === "completed");
   const closeMutation = useMutation({
     mutationFn: (encounterId: string) =>
       updateClinicalEncounter(patientId, encounterId, {
@@ -41,6 +42,11 @@ export function AmbulatoryClosePanel({
       title="Cierre de consulta"
       description="Cierra el encuentro ambulatorio como estado administrativo; no firma receta ni evolucion."
     >
+      <div className="mb-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
+        <CloseFact label="Encuentros en curso" value={String(openEncounters.length)} />
+        <CloseFact label="Cerrados" value={String(completedEncounters.length)} />
+        <CloseFact label="Destino" value="completed + ended_at" />
+      </div>
       {openEncounters.length === 0 ? (
         <EmptyState
           title="Sin encuentros abiertos"
@@ -56,8 +62,14 @@ export function AmbulatoryClosePanel({
                   <p className="mt-1 text-xs text-muted-foreground">
                     Inicio: {formatDateTime(encounter.started_at)}
                   </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Al cerrar se guardara fecha de termino y auditoria backend.
+                  </p>
                 </div>
-                <Badge variant="safe">{encounter.status}</Badge>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="safe">en curso</Badge>
+                  <Badge variant="outline">no firmado</Badge>
+                </div>
               </div>
               <Button
                 className="mt-3"
@@ -83,5 +95,14 @@ export function AmbulatoryClosePanel({
         orden ejecutable.
       </p>
     </ClinicalSectionCard>
+  );
+}
+
+function CloseFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border bg-muted/20 px-3 py-2">
+      <p className="font-semibold text-foreground">{label}</p>
+      <p className="mt-1">{value}</p>
+    </div>
   );
 }
