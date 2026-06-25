@@ -293,6 +293,9 @@ Hospitalizacion:
 - indicacion hospitalaria minima tiene PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel
 - estado de indicacion hospitalaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
 - receta ya tiene politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tiene modelo, endpoint ni firma real
+- la ruta print de receta permanece bloqueada y muestra requisitos faltantes:
+  firma profesional, folio institucional, actor/permisos, fecha clinica y
+  politica de prescripcion activa
 - aun no existen indicaciones firmadas, recetas validas ni rondas con escritura clinica propia
 
 Consulta:

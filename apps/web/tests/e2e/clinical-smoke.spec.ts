@@ -264,6 +264,7 @@ test("patient documents render paper index and blocked future documents", async 
   await expect(page.getByText("Control clinico demo")).toBeVisible();
   await expect(page.getByText("Ingreso administrativo demo")).toBeVisible();
   await expect(page.getByText("Receta valida")).toBeVisible();
+  await expect(page.getByText("Requiere firma, folio, actor, fecha clinica y permisos.")).toBeVisible();
   await expect(page.getByText("Adjuntos externos", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Ver papel" }).first()).toBeVisible();
 });

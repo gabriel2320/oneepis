@@ -256,6 +256,16 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: firma clinica, receta valida, orden ejecutable y resumen
   carta de cierre.
 
+### PROG-PRESCRIPTION-BLOCK-01: receta bloqueada explicita
+
+- Estado: guardrail visible implementado sin modelo ni endpoint.
+- Decision: mantener la receta como documento bloqueado hasta existir contrato
+  legal/clinico completo.
+- Resultado: el print de receta declara requisitos faltantes de firma, folio,
+  actor/permisos, fecha clinica y politica activa.
+- Fuera de alcance: prescripcion valida, firma, folio real, orden, despacho y
+  administracion de medicamentos.
+
 ### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
 - Estado: decision docs-only cerrada y permiso estrecho implementado.

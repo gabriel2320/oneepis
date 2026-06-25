@@ -95,7 +95,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/print/pacientes/[patientId]/ficha` | Documentos/papel | documento | completa | record paciente | no | lectura paciente | no | carta | no | paridad con ficha expandida |
 | `/print/pacientes/[patientId]/evolucion/[entryId]` | Documentos/papel | documento | completa | clinical entry | no | lectura paciente | no | carta | no | firma real futura |
 | `/print/pacientes/[patientId]/resumen` | Documentos/papel | documento | completa | record paciente | no | lectura paciente | no | carta | resumen no persistido | resumen IA no persistido |
-| `/print/pacientes/[patientId]/receta` | Documentos/papel | documento | bloqueada | politica receta | no | lectura paciente | no | bloqueado | no | receta valida requiere firma/folio |
+| `/print/pacientes/[patientId]/receta` | Documentos/papel | documento | bloqueada | politica receta | no | lectura paciente | no | bloqueado | no | receta valida requiere firma, folio, actor, fecha clinica y permisos |
 | `/print/hospitalizacion/rondas` | Documentos/papel | documento | completa | rondas lectura | no | lectura paciente | no | carta | no | read-model si escala |
 | `/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]` | Documentos/papel | documento | completa | `clinical_entries(kind=discharge_summary)` | no | lectura paciente | no | carta | no | firma real futura |
 | `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` | Documentos/papel | documento | completa | `clinical_entries(kind=intake)` | no | lectura paciente | no | carta | no | firma real futura |
@@ -119,7 +119,7 @@ tener contrato minimo y flujo humano verificable.
 | Preconsulta/admision ambulatoria avanzada | Ambulatorio | episodio | futura | cita + encuentro + signos + evento clinico | si | enfermeria/medico/admin/dev; admision futuro | si | no | faltantes | preconsulta minima de enfermeria ya existe; faltan admision administrativa, equipos y cierre operacional |
 | Motivo de consulta estructurado | Ambulatorio | acto clinico | futura | encuentro + entrada clinica | si | medico/admin/dev | si | si si aplica | apoyo SOAP | contrato antes de UI amplia |
 | Cierre de consulta | Ambulatorio | firma/estado | futura | encuentro + estado | si | medico/admin/dev | si | si si aplica | no firma | diagnostico/plan/cierre borrador |
-| Receta valida | Ambulatorio/documentos | documento | bloqueada | receta firmada | si | medico/admin/dev futuro | si | carta/A5 | no | firma, folio, actor, fecha clinica y permisos |
+| Receta valida | Ambulatorio/documentos | documento | bloqueada | receta firmada | si | medico/admin/dev futuro | si | carta/A5 | no | firma, folio, actor, fecha clinica, permisos y politica activa |
 | Ordenes ambulatorias | Ordenes/resultados | acto clinico | futura | ordenes clinicas | si | medico/admin/dev | si | carta | apoyo no ejecutable | tipos de orden y estados |
 | Interconsultas/derivaciones | Ambulatorio/hospitalizacion | acto clinico | futura | solicitudes/respuestas | si | medico/admin/dev | si | carta | resumen/fuentes | pregunta clinica, prioridad, cierre |
 | Ingreso medico hospitalario firmado | Hospitalizacion | documento | futura | documento ingreso firmado | si | medico/admin/dev futuro | si | carta | borrador revisable | ingreso borrador ya existe; falta firma/cierre legal |
