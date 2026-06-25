@@ -131,7 +131,10 @@ Hospitalizacion:
 - estado de hoja diaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
 - fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado usando fecha clinica local `America/Santiago`, no el dia UTC crudo
 - `/hospitalizacion/rondas` es vista de lectura: ingresos activos, cama, ultima hoja diaria y accesos a ficha/papel
-- `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos activos, cama y ultima hoja diaria
+- `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos
+  activos, cama y ultima hoja diaria; declara fuentes
+  `hospitalization/active` y `hospital_daily_sheets` y no equivale a orden ni
+  firma legal
 - indicacion hospitalaria minima tiene PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel
 - estado de indicacion hospitalaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
 - receta ya tiene politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tiene modelo, endpoint ni firma real

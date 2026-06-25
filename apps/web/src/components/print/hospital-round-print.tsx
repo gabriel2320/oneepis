@@ -65,6 +65,21 @@ function HospitalRoundPrintSheet({ rows }: { rows: RoundPrintRow[] }) {
         </p>
       </header>
       <div className="space-y-4 py-6">
+        <section className="print-section rounded-md border border-info/30 bg-info/10 p-3">
+          <h2 className="text-sm font-semibold">Estado y fuentes</h2>
+          <div className="mt-2 grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+            <p>Documento: ronda hospitalaria</p>
+            <p>Estado: operacional de desarrollo</p>
+            <p>Ingresos activos: {rows.length}</p>
+            <p>Fuente board: hospitalization/active</p>
+            <p>Fuente hojas: hospital_daily_sheets</p>
+            <p>Uso clinico: no reemplaza indicaciones ni firma legal</p>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Este papel proyecta ingresos, camas y ultima hoja diaria existente; no crea ordenes ni
+            cierra actos clinicos.
+          </p>
+        </section>
         {rows.length === 0 ? (
           <section className="print-section rounded-md border border-dashed p-4">
             <h2 className="text-sm font-semibold">Sin pacientes en ronda</h2>
@@ -98,12 +113,17 @@ function HospitalRoundPrintRow({ row }: { row: RoundPrintRow }) {
           </p>
           <p className="mt-2 text-sm">{bedLabel ?? "Ubicacion pendiente"}</p>
           <p className="mt-1 text-sm text-muted-foreground">{item.encounter.reason}</p>
+          <p className="mt-2 text-xs text-muted-foreground">Fuente paciente: hospitalization-board</p>
         </div>
         <div className="text-sm">
           <p className="text-xs font-semibold uppercase text-muted-foreground">Ingreso</p>
           <p className="mt-1">{formatDateTime(item.encounter.started_at)}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Encuentro: {item.encounter.id}</p>
           <p className="mt-3 text-xs font-semibold uppercase text-muted-foreground">Cama</p>
           <p className="mt-1">{item.bed ? "Asignada" : "Pendiente"}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Fuente cama: {item.bed ? "hospital_beds" : "clinical_encounters"}
+          </p>
         </div>
       </div>
       {latestDailySheet ? (
@@ -113,6 +133,9 @@ function HospitalRoundPrintRow({ row }: { row: RoundPrintRow }) {
             {latestDailySheet.status === "closed" ? "Cerrada" : "Borrador"}
           </p>
           <p className="mt-2 whitespace-pre-wrap text-sm">{latestDailySheet.clinical_summary}</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Fuente hoja diaria: hospital_daily_sheets / {latestDailySheet.id}
+          </p>
           {latestDailySheet.pending_tasks ? (
             <p className="mt-2 text-sm text-muted-foreground">
               Pendientes: {latestDailySheet.pending_tasks}

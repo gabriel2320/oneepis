@@ -942,6 +942,9 @@ fuente `clinical_entries`. Sigue sin firma legal digital ni folio inmutable.
 Hoja diaria e indicacion hospitalaria impresas declaran estado documental,
 paciente, encuentro, contexto y fuente (`hospital_daily_sheets` o
 `hospital_indications`) sin convertir borradores en orden ejecutable.
+Ronda hospitalaria impresa declara fuente de board (`hospitalization/active`),
+fuente de hojas (`hospital_daily_sheets`) y limite operacional: no crea ordenes
+ni cierra actos clinicos.
 
 #### C9 Seguridad preproduccion
 

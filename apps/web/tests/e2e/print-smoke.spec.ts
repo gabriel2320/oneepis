@@ -63,9 +63,13 @@ test.describe("print routes", () => {
 
     await page.goto("/print/hospitalizacion/rondas");
     await expect(page.getByRole("heading", { name: "Ronda hospitalaria" })).toBeVisible();
+    const roundSourceSection = page.locator("section").filter({ hasText: "Estado y fuentes" });
+    await expect(roundSourceSection.getByText("Fuente board: hospitalization/active")).toBeVisible();
+    await expect(roundSourceSection.getByText("Fuente hojas: hospital_daily_sheets")).toBeVisible();
     await expect(page.getByText("Paciente Demo Beta")).toBeVisible();
     await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
     await expect(page.getByText("Ultima hoja diaria 2026-06-20 - Borrador")).toBeVisible();
+    await expect(page.getByText("Fuente hoja diaria: hospital_daily_sheets")).toBeVisible();
     await expect(page.getByText("Sin hoja diaria para este ingreso")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
   });
