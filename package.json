@@ -13,17 +13,19 @@
     "dev:api": "node scripts/dev-api.mjs",
     "bootstrap:ubuntu": "bash scripts/bootstrap-ubuntu.sh",
     "bootstrap:windows": "powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
+    "check:toolchain": "node scripts/check-toolchain.mjs",
     "check:api": "node scripts/check-api.mjs",
     "check:screens": "node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
     "check:size": "node scripts/check-file-size.mjs && npm run check:screens",
     "check:web": "npm run check:size && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
-    "check:contract": "node scripts/export-openapi.mjs && node scripts/check-assistant-read-contract.mjs && git diff --exit-code packages/contracts/openapi.json",
+    "check:contract": "node scripts/export-openapi.mjs --check && node scripts/check-assistant-read-contract.mjs",
     "check:e2e": "npm --workspace apps/web run test:e2e && npm --workspace apps/web run test:e2e:assistant-read",
     "check:npm-advisories": "node scripts/check-npm-advisories.mjs",
-    "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
+    "export:openapi": "node scripts/export-openapi.mjs",
+    "check": "npm run check:toolchain && npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
   },
   "engines": {
-    "node": ">=22.0.0",
-    "npm": ">=11.13.0"
+    "node": ">=22 <23",
+    "npm": "11.13.0"
   }
 }

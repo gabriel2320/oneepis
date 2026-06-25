@@ -5,15 +5,17 @@ FastAPI service for the clinical record domain.
 ## Local Commands
 
 ```bash
+python3.12 -m venv .venv
 .venv/bin/python -m pip install -e "apps/api[dev]"
 .venv/bin/python -m alembic -c apps/api/alembic.ini upgrade head
 npm run dev:api
 npm run check:api
-.venv/bin/python apps/api/scripts/export_openapi.py
+npm run export:openapi
 ```
 
-En Windows/PowerShell usa `.venv\Scripts\python` para comandos Python
-directos. Los scripts npm resuelven Python mediante `scripts/python-command.mjs`.
+En Windows/PowerShell crea `.venv` con `py -3.12 -m venv .venv` y usa
+`.venv\Scripts\python` para comandos Python directos. Los scripts npm resuelven
+Python mediante `scripts/python-command.mjs` y exigen Python 3.12.x.
 
 ## Boundaries
 

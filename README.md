@@ -42,7 +42,7 @@ El arbol completo de rutas y estado por superficie vive en `docs/SCREEN_TREE.md`
 
 - Node.js 22 (`.nvmrc`)
 - npm 11.13.0 (`packageManager`)
-- Python 3.12+
+- Python 3.12.x
 - PostgreSQL 15+ o Docker
 - Ollama opcional para IA local
 
@@ -66,13 +66,14 @@ Docker expone PostgreSQL en `localhost:5433` para no chocar con instalaciones lo
 
 ```bash
 npm install
-python -m venv .venv
+python3.12 -m venv .venv
 .venv/bin/python -m pip install -e "apps/api[dev]"
 ```
 
-En Windows/PowerShell usa `.venv\Scripts\python` para comandos Python
-directos. Los scripts npm resuelven Python de forma cross-platform mediante
-`scripts/python-command.mjs`.
+En Windows/PowerShell crea el entorno con `py -3.12 -m venv .venv` y usa
+`.venv\Scripts\python` para comandos Python directos. Los scripts npm resuelven
+Python de forma cross-platform mediante `scripts/python-command.mjs` y fallan si
+`.venv` no usa Python 3.12.x.
 
 4. Ejecuta migraciones:
 
@@ -110,11 +111,12 @@ npm i -g npm@11.13.0
 npm run bootstrap:ubuntu
 ```
 
-El bootstrap verifica `node`, `npm`, `python3`, `docker` y `docker compose`,
+El bootstrap verifica `node`, `npm`, `python3.12`, `docker` y `docker compose`,
 copia `.env.example` a `.env` si falta, levanta PostgreSQL, crea `.venv`,
 instala dependencias Python y npm, ejecuta migraciones y corre:
 
 ```bash
+npm run check:toolchain
 npm run check:api
 npm run check:web
 npm run check:contract
@@ -137,6 +139,8 @@ npm i -g npm@11.13.0
 npm run bootstrap:windows
 ```
 
+Si falta Python 3.12, instala con `py install 3.12` antes del bootstrap.
+
 Para desarrollo diario:
 
 ```powershell
@@ -152,17 +156,22 @@ auditoria aunque Ollama este apagado. Configuracion y modelos sugeridos viven en
 
 ## Contrato OpenAPI
 
-Genera el contrato desde FastAPI:
+Verifica que el contrato versionado coincida con FastAPI:
 
 ```bash
 npm run check:contract
 ```
 
-El archivo estable queda en `packages/contracts/openapi.json`.
+Para regenerar explicitamente el archivo estable en `packages/contracts/openapi.json`:
+
+```bash
+npm run export:openapi
+```
 
 ## Gates
 
 ```bash
+npm run check:toolchain
 npm run check:api
 npm run check:web
 npm run check:contract
