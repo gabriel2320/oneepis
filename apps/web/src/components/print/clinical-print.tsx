@@ -348,9 +348,12 @@ export function SoapPrintSheet({
           <p>Estado: {statusLabel}</p>
           <p>Entrada: {entry.id}</p>
           <p>Paciente: {entry.patient_id}</p>
+          <p>Identificador clinico: {record.patient.clinical_identifier ?? "sin identificador"}</p>
+          <p>Contexto: {record.patient.current_care_context}</p>
           <p>Encuentro: {entry.encounter_id ?? "Sin encuentro vinculado"}</p>
           <p>Autor registrado: {entry.created_by}</p>
           <p>Actualizada: {formatDateTime(entry.updated_at)}</p>
+          <p>Fuente: clinical_entries</p>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
           Este papel proyecta una evolucion existente; no crea una nueva verdad clinica.

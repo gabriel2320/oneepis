@@ -31,6 +31,9 @@ test.describe("print routes", () => {
 
     await page.goto(`/print/pacientes/${demoPatientId}/evolucion/${demoEntryId}`);
     await expect(page.getByRole("heading", { name: "Evolucion SOAP" })).toBeVisible();
+    const soapStatusSection = page.locator("section").filter({ hasText: "Estado documental" });
+    await expect(soapStatusSection.getByText("Fuente: clinical_entries")).toBeVisible();
+    await expect(soapStatusSection.getByText("Identificador clinico: DEMO-001")).toBeVisible();
     await expect(page.getByText("Control clinico demo")).toBeVisible();
     await expect(page.getByText("Mantener seguimiento y registrar cambios relevantes.")).toBeVisible();
 

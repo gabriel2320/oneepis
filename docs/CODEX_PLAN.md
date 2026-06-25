@@ -936,6 +936,10 @@ Reglas:
 - no crear receta valida, folio, firma ni orden ejecutable
 - cualquier documento nuevo requiere fuente, permiso, auditoria, OpenAPI y test
 
+Estado: evolucion SOAP impresa declara estado documental, entrada, paciente,
+identificador clinico, contexto, encuentro, autor, fecha de actualizacion y
+fuente `clinical_entries`. Sigue sin firma legal digital ni folio inmutable.
+
 #### C9 Seguridad preproduccion
 
 Objetivo: transformar la auditoria de seguridad desde report-only a plan
