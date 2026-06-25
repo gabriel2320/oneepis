@@ -42,6 +42,11 @@ test.describe("print routes", () => {
     await expect(page.getByRole("heading", { name: "Receta bloqueada" })).toBeVisible();
     await expect(page.getByText("No emitir como receta clinica")).toBeVisible();
     await expect(page.getByText("Documento bloqueado: no valido para prescribir")).toBeVisible();
+    await expect(page.getByText("Requisitos no cumplidos")).toBeVisible();
+    await expect(page.getByText("Firma profesional habilitada.")).toBeVisible();
+    await expect(page.getByText("Folio institucional verificable.")).toBeVisible();
+    await expect(page.getByText("Actor prescriptor y permisos de receta.")).toBeVisible();
+    await expect(page.getByText("Fecha clinica de emision.")).toBeVisible();
 
     await page.goto(
       `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria/${demoDailySheetId}`,
