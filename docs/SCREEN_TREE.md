@@ -91,7 +91,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/hospitalizacion/pacientes/[patientId]/ingreso` | Hospitalizacion | documento | completa | `clinical_entries(kind=intake)` | si | medico/admin/dev | si | carta | borrador revisable | firma real y cierre legal futuros |
 | `/hospitalizacion/pacientes/[patientId]/hoja-diaria` | Hospitalizacion | acto clinico | completa | hojas diarias | si | medico/admin/dev | si | carta | lectura contextual | evolucion hospitalaria por problema |
 | `/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar` | Hospitalizacion | acto clinico | completa | hojas diarias | si | medico/admin/dev | si | carta | no | firma/bloqueo legal futuro |
-| `/hospitalizacion/pacientes/[patientId]/indicaciones` | Hospitalizacion | acto clinico | completa | indicaciones draft | si | medico/admin/dev | si | carta | apoyo no ejecutable | orden ejecutable y firma futura |
+| `/hospitalizacion/pacientes/[patientId]/indicaciones` | Hospitalizacion | acto clinico | completa | indicaciones draft | si | medico/admin/dev | si | carta | apoyo no ejecutable | ejecucion bloqueada: orden firmada, doble chequeo, MAR activo, administracion y auditoria futuras |
 | `/print/pacientes/[patientId]/ficha` | Documentos/papel | documento | completa | record paciente | no | lectura paciente | no | carta | no | paridad con ficha expandida |
 | `/print/pacientes/[patientId]/evolucion/[entryId]` | Documentos/papel | documento | completa | clinical entry | no | lectura paciente | no | carta | no | firma real futura |
 | `/print/pacientes/[patientId]/resumen` | Documentos/papel | documento | completa | record paciente | no | lectura paciente | no | carta | resumen no persistido | resumen IA no persistido |
@@ -125,8 +125,8 @@ tener contrato minimo y flujo humano verificable.
 | Ingreso medico hospitalario firmado | Hospitalizacion | documento | futura | documento ingreso firmado | si | medico/admin/dev futuro | si | carta | borrador revisable | ingreso borrador ya existe; falta firma/cierre legal |
 | Evolucion hospitalaria por problema | Hospitalizacion | acto clinico | futura | clinical entries + encuentro | si | medico/admin/dev | si | carta | lectura contextual | no duplicar hoja diaria |
 | Evoluciones de enfermeria | Hospitalizacion | acto clinico | futura | notas enfermeria | si | enfermeria/admin/dev | si | carta si aplica | no generativa | permisos enfermeria y turno |
-| Kardex | Hospitalizacion | seguimiento | bloqueada | indicaciones ejecutables | si | enfermeria/medico/admin/dev futuro | si | no | no | requiere indicacion ejecutable y doble chequeo |
-| Administracion de medicamentos | Hospitalizacion | acto clinico | bloqueada | indicaciones ejecutables + MAR | si | enfermeria/admin/dev futuro | si | no | alertas/fuentes | seguridad medicamentosa y firma/ejecucion |
+| Kardex | Hospitalizacion | seguimiento | bloqueada | indicaciones ejecutables | si | enfermeria/medico/admin/dev futuro | si | no | no | requiere orden firmada, doble chequeo, MAR activo, administracion y auditoria |
+| Administracion de medicamentos | Hospitalizacion | acto clinico | bloqueada | indicaciones ejecutables + MAR | si | enfermeria/admin/dev futuro | si | no | alertas/fuentes | requiere orden firmada, doble chequeo, MAR activo, administracion y auditoria |
 | Balance hidrico | Hospitalizacion | seguimiento | futura | observaciones balance | si | enfermeria/admin/dev | si | no | no | periodos, totales y auditoria |
 | Resultados laboratorio UI amplia | Ordenes/resultados | seguimiento | futura | `lab_panels`/`lab_results` | no inicialmente | lectura paciente | no | carta si aplica | series/fuentes | la ficha/AI-Chart ya tienen lectura minima; falta vista amplia sin dashboard |
 | Imagenes e informes radiologicos | Ordenes/resultados | seguimiento | futura | informes/documentos | no inicialmente | lectura paciente | no | carta si aplica | resumen/fuentes | sin PACS real por ahora |

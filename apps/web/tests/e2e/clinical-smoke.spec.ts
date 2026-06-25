@@ -202,6 +202,10 @@ test("hospital indications render governed draft workspace", async ({ page }) =>
   await expect(page.getByText("Borradores registrados")).toBeVisible();
   await expect(page.getByText("Borrador de indicacion demo")).toBeVisible();
   await expect(page.getByText("Borrador hospitalario; no sustituye firma")).toBeVisible();
+  await expect(page.getByText("Ejecucion bloqueada")).toBeVisible();
+  await expect(
+    page.getByText("Requiere orden firmada, doble chequeo, MAR activo, registro de administracion y auditoria de ejecucion."),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "Imprimir", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Cerrar borrador" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeDisabled();

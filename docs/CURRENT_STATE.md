@@ -294,6 +294,9 @@ Hospitalizacion:
 - `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos activos, cama y ultima hoja diaria
 - indicacion hospitalaria minima tiene PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel
 - estado de indicacion hospitalaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
+- la pantalla de indicaciones declara ejecucion bloqueada hasta existir orden
+  firmada, doble chequeo, MAR activo, registro de administracion y auditoria de
+  ejecucion
 - receta ya tiene politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tiene modelo, endpoint ni firma real
 - la ruta print de receta permanece bloqueada y muestra requisitos faltantes:
   firma profesional, folio institucional, actor/permisos, fecha clinica y
