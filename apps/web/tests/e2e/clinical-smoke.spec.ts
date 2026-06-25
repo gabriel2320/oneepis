@@ -17,7 +17,7 @@ test("patients index renders clinical work queue", async ({ page }) => {
 test("patient ficha renders clinical shell and AI draft area", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
 
-  await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Paciente Demo Alfa/ })).toBeVisible();
   await expect(page.getByText("Episodio clinico")).toBeVisible();
   await expect(page.getByText(/Encuentro demo - ambulatory iniciado/)).toBeVisible();
   await expect(page.getByText("1 encuentros recientes; 1 evoluciones recientes vinculadas; 1 sin encuentro.")).toBeVisible();
