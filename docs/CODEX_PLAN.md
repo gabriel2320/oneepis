@@ -901,7 +901,9 @@ Estado: primer corte implementado. `/pacientes/[patientId]/ficha` incorpora
 `PatientFormalCover`, una caratula compacta construida solo desde
 `PatientRecordSnapshot`: identidad, estado/contexto, contacto, problemas,
 medicacion, alergias, episodio activo, ultimo acto clinico y estado documental
-de desarrollo. No crea backend, tabla, ruta, contrato ni dependencia nueva.
+de desarrollo. El papel de ficha imprime identificacion/contexto formal y
+antecedentes desde las mismas fuentes. No crea backend, tabla, ruta, contrato ni
+dependencia nueva.
 
 #### C7 Encounter como eje clinico
 

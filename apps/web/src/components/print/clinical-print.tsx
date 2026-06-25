@@ -132,9 +132,29 @@ export function PatientSummaryPrintSheet({
       <PrintSourceSummary record={record} title={title} />
       <section className="print-section">
         <h2 className="text-sm font-semibold">Identificacion</h2>
-        <p className="mt-2 text-sm">
-          {record.patient.first_name} {record.patient.last_name} - {record.patient.birth_date}
-        </p>
+        <div className="mt-2 grid gap-2 text-sm md:grid-cols-2">
+          <p>
+            <span className="font-medium">Nombre:</span> {record.patient.first_name}{" "}
+            {record.patient.last_name}
+          </p>
+          <p>
+            <span className="font-medium">Nacimiento:</span> {record.patient.birth_date}
+          </p>
+          <p>
+            <span className="font-medium">Sexo registrado:</span> {record.patient.sex_at_birth}
+          </p>
+          <p>
+            <span className="font-medium">Identificador clinico:</span>{" "}
+            {record.patient.clinical_identifier ?? "sin identificador"}
+          </p>
+          <p>
+            <span className="font-medium">Estado ficha:</span> {record.patient.clinical_status}
+          </p>
+          <p>
+            <span className="font-medium">Contexto:</span> {record.patient.current_care_context}
+          </p>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">Fuente: patients</p>
       </section>
       <PrintStructuredAntecedents record={record} />
       <section className="print-section">

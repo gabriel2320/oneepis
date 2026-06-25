@@ -232,8 +232,8 @@ Fortalezas actuales:
   retencion
 - ficha paciente formal v0.5 tiene caratula compacta con problemas, alergias y
   medicacion, mas antecedentes estructurados
-  basados en `PatientRecordSnapshot`, con paridad basica en papel de ficha y sin
-  duplicar fuente primaria
+  basados en `PatientRecordSnapshot`, con identificacion/contexto y paridad
+  basica en papel de ficha sin duplicar fuente primaria
 - eje de episodio esta auditado en `reports/encounter-axis-map.*` sin migraciones nuevas
 - `npm run check:architecture` agrupa `check:screens`, `check:permissions`,
   `check:paper`, `check:contracts:drift`, `check:traceability` y la politica

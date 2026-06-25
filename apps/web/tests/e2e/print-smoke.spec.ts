@@ -15,6 +15,9 @@ test.describe("print routes", () => {
     await page.goto(`/print/pacientes/${demoPatientId}/ficha`);
     await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
     await expect(page.getByText("Paciente Demo Alfa - DEMO-001")).toBeVisible();
+    const identificationSection = page.locator("section").filter({ hasText: "Identificacion" });
+    await expect(identificationSection.getByText("Identificador clinico: DEMO-001")).toBeVisible();
+    await expect(identificationSection.getByText("Contexto: ambulatory")).toBeVisible();
     await expect(page.getByText("Antecedentes estructurados")).toBeVisible();
     await expect(page.getByText("Fuente: active_problem", { exact: true })).toBeVisible();
     await expect(page.getByText("Problema demo activo")).toBeVisible();
