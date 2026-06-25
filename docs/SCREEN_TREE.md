@@ -135,7 +135,7 @@ tener contrato minimo y flujo humano verificable.
 | Procedimientos | Hospitalizacion/ambulatorio | acto clinico | futura | procedimientos | si | medico/admin/dev | si | carta | apoyo no ejecutable | solicitud, consentimiento y protocolo |
 | Alta/epicrisis firmada | Hospitalizacion/documentos | documento | futura | documento egreso firmado | si | medico/admin/dev futuro | si | carta | borrador revisable | epicrisis borrador ya existe; falta firma/cierre legal y alta formal |
 | Consentimientos | Documentos/papel | documento | futura | documentos firmados | si | medico/admin/dev futuro | si | carta | no | plantilla versionada, firmante, fecha, custodia y revocacion |
-| Adjuntos/documentos externos | Documentos/papel | documento | futura | almacenamiento documental | si | admin/dev futuro | si | segun tipo | resumen futuro | privacidad, virus scan y trazabilidad |
+| Adjuntos/documentos externos | Documentos/papel | documento | futura | almacenamiento documental | si | admin/dev futuro | si | segun tipo | resumen futuro | almacenamiento documental, tipo, virus scan, PHI policy, retencion y trazabilidad |
 | Seguridad clinica ampliada | Seguridad/auditoria | seguimiento | completa/en expansion gobernada | `ClinicalRisk` bajo paciente | si | enfermeria/medico/admin/dev | si | no | fuentes/resumen | riesgo minimo en ficha; historico avanzado, scores y dashboard siguen fuera |
 | Farmacovigilancia | Seguridad/auditoria | seguimiento | futura | eventos adversos + fuentes | si | medico/admin/dev | si | no | no automatica | no usar FAERS como contraindicacion automatica |
 | Auditoria de accesos | Seguridad/auditoria | seguimiento | futura | access logs | no | admin/dev | no | no | no | separar acceso de modificacion clinica |
