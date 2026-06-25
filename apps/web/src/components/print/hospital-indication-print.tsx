@@ -57,7 +57,16 @@ function HospitalIndicationPrintSheet({
   indication: HospitalIndication;
 }) {
   return (
-    <ClinicalPaperSheet record={record} title="Indicacion hospitalaria">
+    <ClinicalPaperSheet
+      record={record}
+      title="Indicacion hospitalaria"
+      metadata={{
+        source: `indicacion hospitalaria ${indication.id}`,
+        status: `${hospitalIndicationStatusLabel[indication.status]} no firmada`,
+        actor: indication.created_by,
+        clinicalDate: formatDateTime(indication.indicated_at),
+      }}
+    >
       <section className="print-section rounded-md border border-warning/40 bg-warning/10 p-3">
         <h2 className="text-sm font-semibold">Borrador no firmado</h2>
         <p className="mt-2 text-sm text-muted-foreground">

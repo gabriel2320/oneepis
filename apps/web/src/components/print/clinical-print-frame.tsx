@@ -5,6 +5,13 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
+type ClinicalPaperMetadata = {
+  source: string;
+  status: string;
+  actor?: string | null;
+  clinicalDate?: string | null;
+};
+
 export function PrintPage({ children }: { children: ReactNode }) {
   return <main className="min-h-screen bg-muted/40 p-4 print:bg-white print:p-0">{children}</main>;
 }
@@ -26,15 +33,18 @@ export function PrintToolbar() {
 export function ClinicalPaperSheet({
   record,
   title,
+  metadata,
   children,
 }: {
   record: PatientRecordSnapshot;
   title: string;
+  metadata?: ClinicalPaperMetadata;
   children: ReactNode;
 }) {
   return (
     <article className="print-sheet mx-auto min-h-[279mm] max-w-3xl border bg-card p-8 shadow-sm print:min-h-[250mm]">
       <PrintHeader record={record} title={title} />
+      {metadata ? <PrintDocumentMetadata metadata={metadata} /> : null}
       <div className="space-y-5 py-6">{children}</div>
       <PrintFooter />
     </article>
@@ -70,6 +80,20 @@ export function PrintHeader({
         <p>Contexto: {record.patient.current_care_context}</p>
       </div>
     </header>
+  );
+}
+
+function PrintDocumentMetadata({ metadata }: { metadata: ClinicalPaperMetadata }) {
+  return (
+    <section className="mt-4 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+      <p className="font-semibold text-foreground">Metadata documental</p>
+      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+        <p>Fuente: {metadata.source}</p>
+        <p>Estado: {metadata.status}</p>
+        <p>Actor: {metadata.actor || "No registrado"}</p>
+        <p>Fecha clinica: {metadata.clinicalDate || "No registrada"}</p>
+      </div>
+    </section>
   );
 }
 

@@ -159,7 +159,7 @@ tener contrato minimo y flujo humano verificable.
 | Laboratorio sobrio | resultados en ficha o AI-Chart | reutilizar `lab_panels`/`lab_results` existentes | lectura minima con fuente especifica por resultado; UI amplia queda futura y sin dashboard |
 | Imagenes/informes | informes como documentos clinicos | contrato documental o resultado estructurado minimo | no crear PACS ni visor complejo |
 | Seguridad clinica | alertas/riesgos | `ClinicalRisk` minimo con fuente, severidad, estado y accion humana | implementado en ficha; sin scores automaticos ni dashboard |
-| Papel tradicional | ingreso, evolucion, indicacion, epicrisis | estado documental, actor/fecha si existen y ruta print | hoja carta, sin fallback silencioso y footer de desarrollo si no firmado |
+| Papel tradicional | ingreso, evolucion, indicacion, epicrisis | estado documental, actor/fecha si existen y ruta print | hoja carta, metadata documental visible, sin fallback silencioso y footer de desarrollo si no firmado |
 | Indice de documentos | `/pacientes/[patientId]/documentos` | rutas print existentes y entradas del record | implementado como indice; adjuntos externos y consentimientos quedan futuros |
 
 ## Contratos minimos antes de UI amplia

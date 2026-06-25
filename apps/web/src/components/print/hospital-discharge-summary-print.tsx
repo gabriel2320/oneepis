@@ -59,7 +59,16 @@ function HospitalDischargeSummaryPrintSheet({
   entry: ClinicalEntry;
 }) {
   return (
-    <ClinicalPaperSheet record={record} title="Alta y epicrisis">
+    <ClinicalPaperSheet
+      record={record}
+      title="Alta y epicrisis"
+      metadata={{
+        source: `clinical entry ${entry.id}`,
+        status: entry.status === "draft" ? "Borrador no firmado" : entry.status,
+        actor: entry.created_by,
+        clinicalDate: formatDateTime(entry.occurred_at),
+      }}
+    >
       <section className="print-section space-y-3">
         <div>
           <h2 className="text-sm font-semibold">{entry.title}</h2>
