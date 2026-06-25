@@ -30,6 +30,14 @@ AssistantChartMetric = Literal[
     "medication",
 ]
 
+AssistantCorrelationPreset = Literal[
+    "fever_infection",
+    "renal_medications",
+    "respiratory_oxygen",
+    "hemoglobin_bleeding",
+    "medication_changes",
+]
+
 
 class AssistantTimelineItem(APIModel):
     source_type: AssistantTimelineSourceType
@@ -100,5 +108,25 @@ class AssistantChartSeries(APIModel):
 class AssistantChartResponse(APIModel):
     patient_id: uuid.UUID
     series: list[AssistantChartSeries]
+    missing: list[str] = Field(default_factory=list)
+    limits: list[str] = Field(default_factory=list)
+
+
+class AssistantCorrelationRequest(APIModel):
+    presets: list[AssistantCorrelationPreset] = Field(default_factory=list)
+    limit: int = Field(default=20, ge=1, le=50)
+
+
+class AssistantCorrelationFinding(APIModel):
+    preset: AssistantCorrelationPreset
+    title: str = Field(min_length=1, max_length=160)
+    summary: str = Field(min_length=1, max_length=500)
+    sources: list[AssistantTimelineItem]
+    missing: list[str] = Field(default_factory=list)
+
+
+class AssistantCorrelationResponse(APIModel):
+    patient_id: uuid.UUID
+    findings: list[AssistantCorrelationFinding]
     missing: list[str] = Field(default_factory=list)
     limits: list[str] = Field(default_factory=list)

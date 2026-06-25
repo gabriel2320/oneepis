@@ -438,3 +438,117 @@ def test_assistant_chart_requires_authentication(client: TestClient) -> None:
     )
 
     assert response.status_code == 401
+
+
+def test_assistant_correlate_returns_preset_sources_without_writing_audit(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Correlacion",
+            "last_name": "Lectura",
+            "birth_date": "1978-02-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    patient_id = patient["id"]
+    client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-22T08:00:00Z",
+            "temperature_c": "38.5",
+            "heart_rate_bpm": 110,
+        },
+    )
+    client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "exam_result",
+            "occurred_at": "2026-06-22T09:00:00Z",
+            "summary": "PCR elevada en control infeccioso",
+            "payload": {"marker": "PCR", "value": "72", "unit": "mg/L"},
+        },
+    )
+
+    audit_before = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth).json()
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/correlate",
+        headers=auth,
+        json={"presets": ["fever_infection"]},
+    )
+    audit_after = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth).json()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["findings"][0]["preset"] == "fever_infection"
+    assert body["findings"][0]["title"] == "Fiebre e infeccion"
+    assert {source["source_type"] for source in body["findings"][0]["sources"]} == {
+        "clinical_event",
+        "vital_sign",
+    }
+    assert body["missing"] == []
+    assert "solo lectura" in body["limits"][0]
+    assert len(audit_after) == len(audit_before)
+
+
+def test_assistant_correlate_filters_presets_and_declares_missing(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Correlacion",
+            "last_name": "Vacia",
+            "birth_date": "1995-04-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+
+    response = client.post(
+        f"/api/v1/patients/{patient['id']}/assistant/correlate",
+        headers=auth,
+        json={"presets": ["renal_medications"]},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["findings"] == []
+    assert body["missing"] == [
+        "No hay suficientes fuentes para correlacionar funcion renal y medicamentos."
+    ]
+
+
+def test_readonly_user_can_correlate_assistant_sources(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/correlate",
+        headers=readonly_auth,
+        json={},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["patient_id"] == patient_id
+
+
+def test_assistant_correlate_requires_authentication(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/patients/11111111-1111-4111-8111-111111111111/assistant/correlate",
+        json={},
+    )
+
+    assert response.status_code == 401

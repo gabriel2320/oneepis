@@ -25,8 +25,8 @@ Estado real al 2026-06-25:
 - existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - existe `POST /api/v1/patients/{patient_id}/assistant/search`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
+- existe `POST /api/v1/patients/{patient_id}/assistant/correlate`
 - no existe todavia ruta `/pacientes/[patientId]/contexto`
-- no hay correlacion assistant dedicada
 - no se autoriza escritura clinica desde el programa
 - el asistente de lectura es deterministico, declara fuentes/faltantes/limites y no registra auditoria de modificacion
 
@@ -50,6 +50,7 @@ Asistente de lectura:
 - `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - `POST /api/v1/patients/{patient_id}/assistant/search`
 - `POST /api/v1/patients/{patient_id}/assistant/chart`
+- `POST /api/v1/patients/{patient_id}/assistant/correlate`
 - une encuentros, evoluciones, eventos, signos vitales, problemas activos,
   medicacion activa, alergias activas e indicaciones hospitalarias existentes
 - responde con `source_type`, `source_id`, fecha disponible, resumen, estado,
@@ -58,6 +59,9 @@ Asistente de lectura:
   IA generativa
 - devuelve series graficables de signos vitales, eventos `exam_result` y marcas
   temporales de medicacion activa, sin acoplar imagenes ni componentes UI al backend
+- correlaciona fuentes con presets cerrados `fever_infection`,
+  `renal_medications`, `respiratory_oxygen`, `hemoglobin_bleeding` y
+  `medication_changes`, sin diagnosticar ni prescribir
 - es solo lectura: no crea, actualiza ni elimina datos clinicos, y no registra
   eventos de auditoria de modificacion
 

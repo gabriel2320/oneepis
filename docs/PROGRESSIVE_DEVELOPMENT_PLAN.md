@@ -103,17 +103,20 @@ Implementado:
 - `GET /api/v1/patients/{patient_id}/assistant/timeline`
 - `POST /api/v1/patients/{patient_id}/assistant/search`
 - `POST /api/v1/patients/{patient_id}/assistant/chart`
-- schemas backend `AssistantTimeline*`, `AssistantSearch*` y `AssistantChart*`
+- `POST /api/v1/patients/{patient_id}/assistant/correlate`
+- schemas backend `AssistantTimeline*`, `AssistantSearch*`, `AssistantChart*` y
+  `AssistantCorrelation*`
 - timeline deterministico de solo lectura con fuentes, faltantes y limites
 - busqueda deterministica sobre fuentes normalizadas, con filtros por tipo,
   snippets y limites
 - datos graficables de signos vitales, eventos `exam_result` y marcas de
   medicacion activa
-- cobertura API de permisos, datos longitudinales, busqueda, chart y no escritura de auditoria
+- correlacion por presets cerrados con fuentes, faltantes y limites
+- cobertura API de permisos, datos longitudinales, busqueda, chart,
+  correlacion y no escritura de auditoria
 
 Pendiente:
 
-- correlacion por presets cerrados
 - cliente web y UI minima cuando el backend este completo y verde
 
 Objetivo: convertir OneEpis en una ficha medica tradicional aumentada que puede
@@ -143,7 +146,7 @@ Orden obligatorio de ejecucion:
 1. Backend schemas + timeline de lectura. **Hecho.**
 2. Busqueda deterministica. **Hecho.**
 3. Datos graficables. **Hecho.**
-4. Correlacion deterministica por presets.
+4. Correlacion deterministica por presets. **Hecho.**
 5. OpenAPI y cliente web.
 6. UI minima solo si el backend esta verde.
 7. Tests y documentacion canonica.

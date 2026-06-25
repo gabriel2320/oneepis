@@ -147,13 +147,16 @@ OneEpis ya tiene una base clinica E2E real:
 - Se agrego `POST /api/v1/patients/{patient_id}/assistant/chart` para devolver
   series graficables de signos vitales, eventos `exam_result` y marcas de
   medicacion activa.
+- Se agrego `POST /api/v1/patients/{patient_id}/assistant/correlate` para
+  relacionar fuentes por presets cerrados: fiebre/infeccion, renal/medicacion,
+  respiratorio/oxigeno, hemoglobina/sangrado y cambios de medicacion.
 - El timeline une fuentes existentes: encuentros, evoluciones, eventos,
   signos vitales, problemas activos, medicacion activa, alergias activas e
   indicaciones hospitalarias.
 - Las respuestas declaran `source_type`, `source_id`, fecha disponible, resumen,
   snippets, faltantes o limites; no escriben ficha ni registran auditoria de
   modificacion.
-- Queda pendiente correlacion por presets antes de abrir UI dedicada.
+- Queda pendiente cliente web y UI minima antes de abrir una vista dedicada.
 
 ## Principios aprendidos
 

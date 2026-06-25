@@ -26,6 +26,10 @@ from oneepis_api.schemas.assistant import (
     AssistantChartRequest,
     AssistantChartResponse,
     AssistantChartSeries,
+    AssistantCorrelationFinding,
+    AssistantCorrelationPreset,
+    AssistantCorrelationRequest,
+    AssistantCorrelationResponse,
     AssistantSearchMatch,
     AssistantSearchRequest,
     AssistantSearchResponse,
@@ -50,6 +54,13 @@ DEFAULT_CHART_METRICS: tuple[AssistantChartMetric, ...] = (
     "oxygen_saturation_pct",
     "exam_result",
     "medication",
+)
+DEFAULT_CORRELATION_PRESETS: tuple[AssistantCorrelationPreset, ...] = (
+    "fever_infection",
+    "renal_medications",
+    "respiratory_oxygen",
+    "hemoglobin_bleeding",
+    "medication_changes",
 )
 
 
@@ -135,6 +146,35 @@ def build_assistant_chart(
     )
 
 
+def build_assistant_correlations(
+    session: Session,
+    patient_id: uuid.UUID,
+    payload: AssistantCorrelationRequest,
+) -> AssistantCorrelationResponse:
+    presets = _unique_presets(payload.presets or list(DEFAULT_CORRELATION_PRESETS))
+    timeline = build_assistant_timeline(session, patient_id, limit=100)
+    findings: list[AssistantCorrelationFinding] = []
+    missing: list[str] = []
+
+    for preset in presets:
+        finding = _correlate_preset(preset, timeline.items, payload.limit)
+        if finding is None:
+            missing.append(_correlation_missing_message(preset))
+            continue
+        findings.append(finding)
+
+    return AssistantCorrelationResponse(
+        patient_id=patient_id,
+        findings=findings[: payload.limit],
+        missing=missing,
+        limits=[
+            "Correlacion deterministica de solo lectura; no diagnostica ni prescribe.",
+            "Solo relaciona fuentes existentes por presets cerrados y texto estructurado.",
+            f"Respuesta limitada a {payload.limit} hallazgo(s).",
+        ],
+    )
+
+
 def search_assistant_timeline(
     session: Session,
     patient_id: uuid.UUID,
@@ -184,6 +224,16 @@ def _unique_metrics(metrics: list[AssistantChartMetric]) -> list[AssistantChartM
     for metric in metrics:
         if metric not in unique:
             unique.append(metric)
+    return unique
+
+
+def _unique_presets(
+    presets: list[AssistantCorrelationPreset],
+) -> list[AssistantCorrelationPreset]:
+    unique: list[AssistantCorrelationPreset] = []
+    for preset in presets:
+        if preset not in unique:
+            unique.append(preset)
     return unique
 
 
@@ -485,6 +535,243 @@ def _medication_chart_series(medications: list[Medication]) -> AssistantChartSer
         unit=None,
         points=points,
     )
+
+
+def _correlate_preset(
+    preset: AssistantCorrelationPreset,
+    items: list[AssistantTimelineItem],
+    limit: int,
+) -> AssistantCorrelationFinding | None:
+    if preset == "fever_infection":
+        fever = _filter_items(items, keywords=("fiebre", "febril", "temperatura"))
+        fever.extend(
+            item
+            for item in items
+            if item.source_type == "vital_sign"
+            and _payload_or_summary_has_temperature(item, minimum=38.0)
+            and item not in fever
+        )
+        infection = _filter_items(
+            items,
+            keywords=(
+                "infecc",
+                "pcr",
+                "proteina c reactiva",
+                "leucoc",
+                "cultivo",
+                "antibiot",
+            ),
+        )
+        return _finding_if_sources(
+            preset=preset,
+            title="Fiebre e infeccion",
+            summary=(
+                "Fuentes con fiebre o temperatura elevada aparecen junto a fuentes "
+                "infecciosas o inflamatorias."
+            ),
+            groups=[fever, infection],
+            missing=["Faltan fiebre documentada.", "Faltan fuentes infecciosas o inflamatorias."],
+            limit=limit,
+        )
+
+    if preset == "renal_medications":
+        renal = _filter_items(
+            items,
+            keywords=("renal", "creatinina", "clearance", "egfr", "filtrado glomerular"),
+        )
+        medications = [item for item in items if item.source_type == "medication"]
+        return _finding_if_sources(
+            preset=preset,
+            title="Funcion renal y medicamentos",
+            summary="Fuentes renales aparecen junto a medicacion activa registrada.",
+            groups=[renal, medications],
+            missing=["Faltan fuentes renales.", "Falta medicacion activa."],
+            limit=limit,
+        )
+
+    if preset == "respiratory_oxygen":
+        respiratory = _filter_items(
+            items,
+            keywords=("disnea", "respiratorio", "sato2", "saturacion", "hipox", "fr "),
+        )
+        respiratory.extend(
+            item
+            for item in items
+            if item.source_type == "vital_sign"
+            and (_payload_or_summary_has_saturation(item, maximum=92.0) or "FR " in item.summary)
+            and item not in respiratory
+        )
+        oxygen = _filter_items(items, keywords=("oxigen", "naricera", "fio2", "ventil"))
+        return _finding_if_sources(
+            preset=preset,
+            title="Respiratorio y oxigeno",
+            summary=(
+                "Fuentes respiratorias o de saturacion baja aparecen junto a registros "
+                "de oxigeno o soporte ventilatorio."
+            ),
+            groups=[respiratory, oxygen],
+            missing=[
+                "Faltan fuentes respiratorias.",
+                "Faltan fuentes de oxigeno o soporte ventilatorio.",
+            ],
+            limit=limit,
+        )
+
+    if preset == "hemoglobin_bleeding":
+        hemoglobin = _filter_items(
+            items,
+            keywords=("hemoglobina", "hematocrito", " hb ", "anemia"),
+        )
+        bleeding = _filter_items(
+            items,
+            keywords=("sangrado", "hemorrag", "melena", "hematemesis", "rectorragia"),
+        )
+        return _finding_if_sources(
+            preset=preset,
+            title="Hemoglobina y sangrado",
+            summary=(
+                "Fuentes hematologicas aparecen junto a registros compatibles con "
+                "sangrado documentado."
+            ),
+            groups=[hemoglobin, bleeding],
+            missing=["Faltan fuentes de hemoglobina o hematocrito.", "Faltan fuentes de sangrado."],
+            limit=limit,
+        )
+
+    medication_items = [item for item in items if item.source_type == "medication"]
+    medication_events = [
+        item
+        for item in _filter_items(items, keywords=("inicia", "suspende", "ajusta", "cambia"))
+        if item.source_type in {"clinical_event", "clinical_entry", "medication"}
+    ]
+    sources = _dedupe_items([*medication_events, *medication_items])[:limit]
+    if len(sources) < 2:
+        return None
+    return AssistantCorrelationFinding(
+        preset="medication_changes",
+        title="Cambios de medicacion",
+        summary=(
+            "Hay multiples fuentes de medicacion o cambios narrativos que conviene "
+            "revisar en orden temporal."
+        ),
+        sources=sources,
+        missing=[],
+    )
+
+
+def _finding_if_sources(
+    *,
+    preset: AssistantCorrelationPreset,
+    title: str,
+    summary: str,
+    groups: list[list[AssistantTimelineItem]],
+    missing: list[str],
+    limit: int,
+) -> AssistantCorrelationFinding | None:
+    present_groups = [group for group in groups if group]
+    if len(present_groups) != len(groups):
+        return None
+    sources = _dedupe_items([item for group in groups for item in group])[:limit]
+    return AssistantCorrelationFinding(
+        preset=preset,
+        title=title,
+        summary=summary,
+        sources=sources,
+        missing=[] if sources else missing,
+    )
+
+
+def _filter_items(
+    items: list[AssistantTimelineItem],
+    *,
+    keywords: tuple[str, ...],
+) -> list[AssistantTimelineItem]:
+    normalized_keywords = tuple(_normalize_text(keyword) for keyword in keywords)
+    matches = []
+    for item in items:
+        haystack = _normalize_text(
+            " ".join(
+                _compact(
+                    [
+                        item.label,
+                        item.summary,
+                        item.status,
+                        " ".join(item.details),
+                        _payload_text(item.payload),
+                    ]
+                )
+            )
+        )
+        if any(keyword in haystack for keyword in normalized_keywords):
+            matches.append(item)
+    return matches
+
+
+def _dedupe_items(items: list[AssistantTimelineItem]) -> list[AssistantTimelineItem]:
+    seen: set[tuple[str, uuid.UUID]] = set()
+    unique = []
+    for item in items:
+        key = (item.source_type, item.source_id)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(item)
+    unique.sort(key=_sort_key, reverse=True)
+    return unique
+
+
+def _payload_or_summary_has_temperature(
+    item: AssistantTimelineItem,
+    *,
+    minimum: float,
+) -> bool:
+    value = _payload_number(item.payload)
+    if value is not None and value >= minimum:
+        return True
+    summary_value = _number_after_label(item.summary, "T")
+    return summary_value is not None and summary_value >= minimum
+
+
+def _payload_or_summary_has_saturation(
+    item: AssistantTimelineItem,
+    *,
+    maximum: float,
+) -> bool:
+    value = _payload_number(item.payload)
+    if value is not None and value <= maximum:
+        return True
+    summary_value = _number_after_label(item.summary, "SatO2")
+    return summary_value is not None and summary_value <= maximum
+
+
+def _number_after_label(value: str, label: str) -> float | None:
+    marker = f"{label} "
+    if marker not in value:
+        return None
+    tail = value.split(marker, 1)[1].split(" ", 1)[0].replace(",", ".")
+    try:
+        return float(tail)
+    except ValueError:
+        return None
+
+
+def _correlation_missing_message(preset: AssistantCorrelationPreset) -> str:
+    messages = {
+        "fever_infection": "No hay suficientes fuentes para correlacionar fiebre e infeccion.",
+        "renal_medications": (
+            "No hay suficientes fuentes para correlacionar funcion renal y medicamentos."
+        ),
+        "respiratory_oxygen": (
+            "No hay suficientes fuentes para correlacionar respiratorio y oxigeno."
+        ),
+        "hemoglobin_bleeding": (
+            "No hay suficientes fuentes para correlacionar hemoglobina y sangrado."
+        ),
+        "medication_changes": (
+            "No hay suficientes fuentes para correlacionar cambios de medicacion."
+        ),
+    }
+    return messages[preset]
 
 
 def _sort_key(item: AssistantTimelineItem) -> datetime:

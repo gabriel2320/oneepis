@@ -7,12 +7,15 @@ from fastapi import APIRouter
 from oneepis_api.schemas.assistant import (
     AssistantChartRequest,
     AssistantChartResponse,
+    AssistantCorrelationRequest,
+    AssistantCorrelationResponse,
     AssistantSearchRequest,
     AssistantSearchResponse,
     AssistantTimelineResponse,
 )
 from oneepis_api.services.assistant_timeline import (
     build_assistant_chart,
+    build_assistant_correlations,
     build_assistant_timeline,
     search_assistant_timeline,
 )
@@ -50,3 +53,13 @@ def get_assistant_chart(
 ) -> AssistantChartResponse:
     require_patient(session, patient_id)
     return build_assistant_chart(session, patient_id, payload)
+
+
+@router.post("/{patient_id}/assistant/correlate", response_model=AssistantCorrelationResponse)
+def correlate_assistant_sources(
+    patient_id: uuid.UUID,
+    payload: AssistantCorrelationRequest,
+    session: SessionDep,
+) -> AssistantCorrelationResponse:
+    require_patient(session, patient_id)
+    return build_assistant_correlations(session, patient_id, payload)
