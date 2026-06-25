@@ -11,6 +11,8 @@
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
     "dev:api": "node scripts/dev-api.mjs",
+    "bootstrap:ubuntu": "bash scripts/bootstrap-ubuntu.sh",
+    "bootstrap:windows": "powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
     "check:api": "node scripts/check-api.mjs",
     "check:screens": "node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
     "check:size": "node scripts/check-file-size.mjs && npm run check:screens",
@@ -21,7 +23,7 @@
     "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0"
+    "node": ">=22.0.0",
+    "npm": ">=11.13.0"
   }
 }
