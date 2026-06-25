@@ -18,6 +18,10 @@ const summary = {
   audit_required_p1: rows.filter((row) => row.proposed_policy === "AUDIT_REQUIRED_P1").length,
   review_volume_policy: rows.filter((row) => row.proposed_policy === "REVIEW_VOLUME_POLICY").length,
   exempt_technical: rows.filter((row) => row.proposed_policy === "EXEMPT_TECHNICAL").length,
+  volume_high_frequency: rows.filter((row) => row.volume_profile === "high_frequency").length,
+  retention_strict_access_trail: rows.filter(
+    (row) => row.retention_candidate === "strict_access_trail",
+  ).length,
   blocking_ready: false,
 };
 const report = {
@@ -59,6 +63,7 @@ console.log(
 
 function classifyPolicy(row) {
   const classification = proposedPolicy(row);
+  const operations = operationalPolicy(row, classification.policy);
   return {
     route: `${row.method} ${row.full_path}`,
     route_file: row.route_file,
@@ -67,6 +72,8 @@ function classifyPolicy(row) {
     current_policy: row.policy,
     proposed_policy: classification.policy,
     rollout_phase: classification.rollout,
+    volume_profile: operations.volume,
+    retention_candidate: operations.retention,
     rationale: classification.rationale,
     ci_behavior: "report-only",
   };
@@ -124,6 +131,26 @@ function proposedPolicy(row) {
   };
 }
 
+function operationalPolicy(row, policy) {
+  if (policy === "EXEMPT_TECHNICAL") {
+    return { volume: "technical", retention: "none" };
+  }
+
+  if (["patient_search_or_identity", "clinical_read", "hospital_board"].includes(row.sensitivity)) {
+    return { volume: "high_frequency", retention: "sample_or_short_access_trail" };
+  }
+
+  if (["audit_trail", "patient_record", "clinical_timeline", "hospital_document"].includes(row.sensitivity)) {
+    return { volume: "interactive_sensitive", retention: "strict_access_trail" };
+  }
+
+  if (row.sensitivity === "patient_child_entity") {
+    return { volume: "interactive_clinical", retention: "standard_access_trail" };
+  }
+
+  return { volume: "manual_review", retention: "manual_review" };
+}
+
 function renderMarkdown(data) {
   const lines = [
     "# Read Access Policy - OneEpis",
@@ -137,6 +164,8 @@ function renderMarkdown(data) {
     `- Auditoria requerida P1: ${data.summary.audit_required_p1}`,
     `- Requieren politica de volumen/retencion: ${data.summary.review_volume_policy}`,
     `- Exentas tecnicas: ${data.summary.exempt_technical}`,
+    `- Alto volumen probable: ${data.summary.volume_high_frequency}`,
+    `- Retencion estricta candidata: ${data.summary.retention_strict_access_trail}`,
     `- Listo para bloqueo CI: ${data.summary.blocking_ready ? "si" : "no"}`,
     "",
     "## Bloqueantes antes de activar CI",
@@ -149,14 +178,16 @@ function renderMarkdown(data) {
     "",
     "## Matriz",
     "",
-    "Ruta | Sensibilidad | Politica propuesta | Fase | CI | Razon",
-    "--- | --- | --- | --- | --- | ---",
+    "Ruta | Sensibilidad | Politica propuesta | Fase | Volumen | Retencion candidata | CI | Razon",
+    "--- | --- | --- | --- | --- | --- | --- | ---",
     ...data.rows.map((row) =>
       [
         `${row.route} (${row.route_file})`,
         row.sensitivity,
         row.proposed_policy,
         row.rollout_phase,
+        row.volume_profile,
+        row.retention_candidate,
         row.ci_behavior,
         row.rationale,
       ]

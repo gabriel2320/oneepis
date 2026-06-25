@@ -227,7 +227,9 @@ Fortalezas actuales:
 - permisos por rol y rechazos 403 estan cubiertos por gate ejecutable
 - pantallas, papel, contratos frontend y trazabilidad tienen reportes/gates propios
 - auditoria de lectura ya tiene inventario report-only en `reports/read-access-map.*`
-- politica futura de auditoria de lectura esta propuesta en `reports/read-access-policy.*`
+- politica futura de auditoria de lectura esta propuesta en
+  `reports/read-access-policy.*`, con candidatos report-only de volumen y
+  retencion
 - ficha paciente formal v0.5 tiene caratula compacta y antecedentes estructurados
   basados en `PatientRecordSnapshot`, con paridad basica en papel de ficha y sin
   duplicar fuente primaria

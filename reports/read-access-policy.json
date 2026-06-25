@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-25T01:29:27.566Z",
+  "generated_at": "2026-06-25T01:32:09.706Z",
   "scope": "clinical_read_access_policy_report_only",
   "source_report": "reports/read-access-map.json",
   "report_only": true,
@@ -9,6 +9,8 @@
     "audit_required_p1": 15,
     "review_volume_policy": 2,
     "exempt_technical": 3,
+    "volume_high_frequency": 3,
+    "retention_strict_access_trail": 6,
     "blocking_ready": false
   },
   "blockers_before_blocking": [
@@ -39,6 +41,8 @@
       "current_policy": "EXEMPT_TECHNICAL",
       "proposed_policy": "EXEMPT_TECHNICAL",
       "rollout_phase": "no_aplica",
+      "volume_profile": "technical",
+      "retention_candidate": "none",
       "rationale": "Ruta tecnica, health, sesion o estado operacional sin lectura clinica de paciente.",
       "ci_behavior": "report-only"
     },
@@ -50,6 +54,8 @@
       "current_policy": "EXEMPT_TECHNICAL",
       "proposed_policy": "EXEMPT_TECHNICAL",
       "rollout_phase": "no_aplica",
+      "volume_profile": "technical",
+      "retention_candidate": "none",
       "rationale": "Ruta tecnica, health, sesion o estado operacional sin lectura clinica de paciente.",
       "ci_behavior": "report-only"
     },
@@ -61,6 +67,8 @@
       "current_policy": "EXEMPT_TECHNICAL",
       "proposed_policy": "EXEMPT_TECHNICAL",
       "rollout_phase": "no_aplica",
+      "volume_profile": "technical",
+      "retention_candidate": "none",
       "rationale": "Ruta tecnica, health, sesion o estado operacional sin lectura clinica de paciente.",
       "ci_behavior": "report-only"
     },
@@ -72,6 +80,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "REVIEW_VOLUME_POLICY",
       "rollout_phase": "diseno_retencion",
+      "volume_profile": "high_frequency",
+      "retention_candidate": "sample_or_short_access_trail",
       "rationale": "Puede generar alto volumen o corresponder a catalogo/lista; requiere politica de muestreo o retencion.",
       "ci_behavior": "report-only"
     },
@@ -83,6 +93,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "high_frequency",
+      "retention_candidate": "sample_or_short_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -94,6 +106,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P0",
       "rollout_phase": "primera_implementacion",
+      "volume_profile": "interactive_sensitive",
+      "retention_candidate": "strict_access_trail",
       "rationale": "Lectura clinica sensible o documental; debe dejar trail antes de produccion.",
       "ci_behavior": "report-only"
     },
@@ -105,6 +119,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P0",
       "rollout_phase": "primera_implementacion",
+      "volume_profile": "interactive_sensitive",
+      "retention_candidate": "strict_access_trail",
       "rationale": "Lectura clinica sensible o documental; debe dejar trail antes de produccion.",
       "ci_behavior": "report-only"
     },
@@ -116,6 +132,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -127,6 +145,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -138,6 +158,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P0",
       "rollout_phase": "primera_implementacion",
+      "volume_profile": "interactive_sensitive",
+      "retention_candidate": "strict_access_trail",
       "rationale": "Lectura clinica sensible o documental; debe dejar trail antes de produccion.",
       "ci_behavior": "report-only"
     },
@@ -149,6 +171,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P0",
       "rollout_phase": "primera_implementacion",
+      "volume_profile": "interactive_sensitive",
+      "retention_candidate": "strict_access_trail",
       "rationale": "Lectura clinica sensible o documental; debe dejar trail antes de produccion.",
       "ci_behavior": "report-only"
     },
@@ -160,6 +184,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "REVIEW_VOLUME_POLICY",
       "rollout_phase": "diseno_retencion",
+      "volume_profile": "high_frequency",
+      "retention_candidate": "sample_or_short_access_trail",
       "rationale": "Puede generar alto volumen o corresponder a catalogo/lista; requiere politica de muestreo o retencion.",
       "ci_behavior": "report-only"
     },
@@ -171,6 +197,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -182,6 +210,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P0",
       "rollout_phase": "primera_implementacion",
+      "volume_profile": "interactive_sensitive",
+      "retention_candidate": "strict_access_trail",
       "rationale": "Lectura clinica sensible o documental; debe dejar trail antes de produccion.",
       "ci_behavior": "report-only"
     },
@@ -193,6 +223,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -204,6 +236,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -215,6 +249,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -226,6 +262,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -237,6 +275,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -248,6 +288,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P0",
       "rollout_phase": "primera_implementacion",
+      "volume_profile": "interactive_sensitive",
+      "retention_candidate": "strict_access_trail",
       "rationale": "Lectura clinica sensible o documental; debe dejar trail antes de produccion.",
       "ci_behavior": "report-only"
     },
@@ -259,6 +301,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -270,6 +314,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -281,6 +327,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -292,6 +340,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -303,6 +353,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     },
@@ -314,6 +366,8 @@
       "current_policy": "READ_AUDIT_CANDIDATE",
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
+      "volume_profile": "interactive_clinical",
+      "retention_candidate": "standard_access_trail",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
       "ci_behavior": "report-only"
     }

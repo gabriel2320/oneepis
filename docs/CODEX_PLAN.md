@@ -879,9 +879,10 @@ La primera politica propone `AUDIT_REQUIRED_P0` para ficha, timeline, auditoria
 clinica y documentos hospitalarios; `AUDIT_REQUIRED_P1` para entidades clinicas
 de paciente; `REVIEW_VOLUME_POLICY` para listas/busquedas de alto volumen; y
 `EXEMPT_TECHNICAL` para health, sesion y estado IA. El reporte declara
-`blocking_ready=false` hasta definir retencion, volumen, metadata minima y
-tests de no regresion; `check:architecture` lo incluye solo como reporte
-regenerado.
+`blocking_ready=false` y agrega candidatos de volumen/retencion para orientar
+el diseno, sin convertirlos todavia en politica productiva. Sigue pendiente
+cerrar retencion final, volumen esperado, metadata minima y tests de no
+regresion; `check:architecture` lo incluye solo como reporte regenerado.
 
 #### C6 Ficha paciente formal v0.5
 
