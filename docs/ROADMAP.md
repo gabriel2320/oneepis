@@ -246,6 +246,16 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: firma real, folio, receta valida, adjuntos y custodia
   documental.
 
+### PROG-AMB-CLOSE-POLISH-01: cierre ambulatorio explicito
+
+- Estado: polish implementado sin endpoint nuevo.
+- Decision: reforzar el cierre administrativo existente antes de avanzar a
+  cierre documental o firma.
+- Resultado: el panel de atencion muestra encuentros en curso/cerrados,
+  destino `completed + ended_at`, estado no firmado y auditoria esperada.
+- Fuera de alcance: firma clinica, receta valida, orden ejecutable y resumen
+  carta de cierre.
+
 ### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
 - Estado: decision docs-only cerrada y permiso estrecho implementado.
