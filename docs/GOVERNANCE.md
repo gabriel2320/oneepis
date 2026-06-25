@@ -68,11 +68,15 @@ Antes de implementar, clasificar cada pasada:
 
 Toda pantalla clinica debe tener un estado explicito en `docs/SCREEN_TREE.md`:
 
-- `completa`: tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
+- `completa`: minima operativa en entorno gobernado; tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
 - `completa/en expansion gobernada`: funciona, pero tiene un subdominio acotado en crecimiento con guardrails activos.
 - `preparada`: existe como borde visible, declara que esta pendiente y no simula produccion.
 - `bloqueada`: existe o se nombra para evitar uso clinico hasta completar requisitos legales/clinicos.
 - `futura`: pertenece al mapa maestro, pero no tiene ruta o contrato listo.
+
+`completa` no significa lista para produccion sanitaria, uso con PHI real,
+firma legal, receta valida, alta formal, adjuntos productivos ni auditoria de
+accesos.
 
 Reglas:
 
@@ -87,7 +91,10 @@ Reglas:
 - Si produce documento clinico, debe tener papel carta o declarar explicitamente que no tiene papel aun.
 - No se promueve una pantalla por apariencia: debe cerrar un acto clinico real.
 - El orden del producto es `paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento`.
-- Receta valida, firma clinica, folio, despacho, administracion de medicamentos, ordenes ejecutables, agenda productiva e IA externa siguen bloqueadas/futuras hasta cumplir su contrato clinico/legal.
+- Receta valida, firma clinica real, folio, despacho, alta legal, adjuntos
+  productivos, auditoria de accesos, administracion de medicamentos, ordenes
+  ejecutables, agenda productiva e IA externa siguen bloqueadas/futuras hasta
+  cumplir su contrato clinico/legal.
 
 Reglas IA por pantalla:
 
@@ -105,6 +112,8 @@ No construir ahora:
 - dashboard central nuevo
 - chat libre generico
 - receta valida o firma clinica real
+- alta legal o auditoria de accesos productiva
+- adjuntos reales/productivos
 - indicaciones ejecutables
 - agenda productiva
 - RAG documental amplio
@@ -193,6 +202,7 @@ evitables que no deben repetirse:
 - Gitleaks es bloqueo duro: un secreto real, token, llave privada, muestra PHI o identificador clinico debe detener el PR y tratarse como incidente.
 - Dependency review, CodeQL, OSV npm advisory check y `pip-audit` quedan en modo reporte hasta que cada senal tenga politica de bloqueo y manejo de falsos positivos.
 - Report-only no significa ignorado: hallazgos de alto riesgo deben triagearse antes de cualquier hito productivo sanitario.
+- `check:architecture` compone guards incrementales que no duplican reportes existentes; hoy ejecuta trazabilidad de papel contra baseline.
 
 ## Escalera OneEpis
 
@@ -250,6 +260,7 @@ Reglas base:
 - Una indicacion debe pertenecer a un paciente y, si aplica, a un encuentro clinico.
 - La fuente de verdad debe ser PostgreSQL via API; la UI y el papel son proyecciones.
 - Toda escritura debe tener permisos, actor autenticado, auditoria, `correlation_id` y OpenAPI.
+- Los registros clinicos `entered_in_error` son terminales para edicion normal; se conservan para trazabilidad y lectura directa, pero no se reactivan por `PATCH`.
 - IA puede ayudar a revisar texto como borrador, pero no crea, firma ni activa indicaciones o recetas.
 - Una receta no se genera automaticamente desde medicacion activa.
 

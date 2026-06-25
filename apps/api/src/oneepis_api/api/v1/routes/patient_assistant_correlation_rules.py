@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import uuid
 
-from oneepis_api.models.clinical_record import ClinicalEvent, Medication, VitalSign
+from oneepis_api.models.clinical_record import ClinicalEvent, Medication
+from oneepis_api.models.vital_sign import VitalSign
 from oneepis_api.schemas.clinical_record import (
     AssistantCorrelationEvidence,
     AssistantCorrelationResult,

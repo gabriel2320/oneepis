@@ -19,6 +19,7 @@ import type {
   VitalSign,
 } from "@/lib/types";
 
+import { formatClinicalEntryStatus } from "./clinical-entry-labels";
 import { formatDateTime } from "./date-format";
 
 export function VitalsStrip({ vital }: { vital?: VitalSign | null }) {
@@ -151,7 +152,7 @@ export function ClinicalTimeline({ entries }: { entries: ClinicalEntry[] }) {
             <div className="flex gap-2">
               {entry.encounter_id ? <Badge variant="outline">Encuentro vinculado</Badge> : null}
               <Badge variant="outline">{entry.kind}</Badge>
-              <Badge variant={entry.status === "signed" ? "safe" : "secondary"}>{entry.status}</Badge>
+              <Badge variant="secondary">{formatClinicalEntryStatus(entry.status)}</Badge>
             </div>
           </div>
           <Separator className="my-3" />

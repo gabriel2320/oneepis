@@ -7,6 +7,7 @@ import { Printer, Save } from "lucide-react";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { formatClinicalEntryStatus } from "@/components/clinical/clinical-entry-labels";
 import { formatDateTime } from "@/components/clinical/date-format";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import { EmptyState, ErrorState } from "@/components/clinical/states";
@@ -188,7 +189,7 @@ function AdmissionEntryList({
         <article key={entry.id} className="rounded-md border p-3">
           <p className="text-sm font-semibold">{entry.title}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {formatDateTime(entry.occurred_at)} - Estado: {entry.status}
+            {formatDateTime(entry.occurred_at)} - Estado: {formatClinicalEntryStatus(entry.status)}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             {entry.assessment || entry.subjective || "Ingreso sin resumen clinico."}

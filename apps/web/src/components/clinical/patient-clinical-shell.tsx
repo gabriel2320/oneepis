@@ -5,23 +5,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
-  AlertTriangle,
   BrainCircuit,
-  CalendarClock,
-  ClipboardList,
-  GitBranch,
   FileText,
-  HeartPulse,
-  History,
-  Pill,
   Printer,
   Settings,
-  ShieldAlert,
-  type LucideIcon,
   UserRound,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { useCurrentUser } from "@/components/auth/use-current-user";
+import { clinicalNav, clinicalNavGroups } from "@/components/clinical/patient-clinical-navigation";
 import { SessionButton } from "@/components/auth/session-button";
 import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -29,56 +22,11 @@ import { TemplateSelector } from "@/components/theme/template-selector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
+import { DEMO_MODE } from "@/lib/api/client";
+import { canUseClinicalAi } from "@/lib/permissions";
 import { findScreenCapability } from "@/lib/screen-capabilities";
 import type { PatientRecordSnapshot } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-type ClinicalNavItem = {
-  key: string;
-  label: string;
-  icon: LucideIcon;
-};
-
-type ClinicalNavGroup = {
-  title: string;
-  items: ClinicalNavItem[];
-};
-
-const clinicalNavGroups: ClinicalNavGroup[] = [
-  {
-    title: "Ficha",
-    items: [
-      { key: "ficha", label: "Resumen", icon: ClipboardList },
-      { key: "evoluciones", label: "Evoluciones", icon: FileText },
-      { key: "encuentros", label: "Encuentros", icon: CalendarClock },
-    ],
-  },
-  {
-    title: "Datos",
-    items: [
-      { key: "eventos", label: "Eventos", icon: GitBranch },
-      { key: "problemas", label: "Problemas", icon: ShieldAlert },
-      { key: "alergias", label: "Alergias", icon: AlertTriangle },
-      { key: "medicacion", label: "Medicamentos", icon: Pill },
-      { key: "signos-vitales", label: "Signos vitales", icon: HeartPulse },
-    ],
-  },
-  {
-    title: "IA",
-    items: [
-      { key: "ai-chart", label: "AI-Chart", icon: BrainCircuit },
-      { key: "ia", label: "IA clinica", icon: BrainCircuit },
-    ],
-  },
-  {
-    title: "Control",
-    items: [
-      { key: "documentos", label: "Documentos", icon: FileText },
-      { key: "auditoria", label: "Auditoria", icon: History },
-    ],
-  },
-];
-const clinicalNav = clinicalNavGroups.flatMap((group) => group.items);
 
 export function PatientClinicalShell({
   record,
@@ -91,7 +39,16 @@ export function PatientClinicalShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const aiStatus = useQuery({ queryKey: ["ai-status"], queryFn: getAiStatus, staleTime: 30_000 });
+  const { user } = useCurrentUser();
+  const canUseAi = canUseClinicalAi(user);
+  const showAiStatus = !DEMO_MODE && canUseAi;
+  const aiStatus = useQuery({
+    queryKey: ["ai-status"],
+    queryFn: getAiStatus,
+    enabled: showAiStatus,
+    staleTime: 30_000,
+    retry: false,
+  });
   const patient = record.patient;
   const relevantAllergy =
     record.active_allergies.find((item) => item.severity === "severe") ??
@@ -199,10 +156,12 @@ export function PatientClinicalShell({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <SessionButton compact />
-                <Badge variant={aiStatus.data?.available ? "safe" : "warning"}>
-                  <BrainCircuit className="mr-1 h-3 w-3" />
-                  {aiStatus.data?.available ? "Ollama activo" : "Ollama pendiente"}
-                </Badge>
+                {showAiStatus ? (
+                  <Badge variant={aiStatus.data?.available ? "safe" : "warning"}>
+                    <BrainCircuit className="mr-1 h-3 w-3" />
+                    {aiStatus.data?.available ? "Ollama activo" : "Ollama pendiente"}
+                  </Badge>
+                ) : null}
                 <Button asChild size="sm">
                   <Link href={`/pacientes/${patient.id}/evoluciones/nueva`}>
                     <FileText className="h-4 w-4" />

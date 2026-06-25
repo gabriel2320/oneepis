@@ -3,12 +3,14 @@
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import { formatClinicalEntryStatus } from "@/components/clinical/clinical-entry-labels";
 import { formatDateTime } from "@/components/clinical/date-format";
 import {
   ClinicalPaperSheet,
   PrintPage,
   PrintToolbar,
 } from "@/components/print/clinical-print";
+import { paperTraceability } from "@/components/print/clinical-print-traceability";
 import { getClinicalEntry } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
 import { getPatientRecord } from "@/lib/api/patients";
@@ -62,19 +64,19 @@ function HospitalAdmissionPrintSheet({
     <ClinicalPaperSheet
       record={record}
       title="Ingreso medico hospitalario"
-      metadata={{
-        source: `clinical entry ${entry.id}`,
-        status: entry.status === "draft" ? "Borrador no firmado" : entry.status,
+      traceability={paperTraceability({
+        source: `clinical_entries/${entry.id}`,
+        status: formatClinicalEntryStatus(entry.status),
         actor: entry.created_by,
         clinicalDate: formatDateTime(entry.occurred_at),
-      }}
+        limitation: "Borrador de ingreso; no equivale a firma ni cierre legal.",
+      })}
     >
       <section className="print-section space-y-3">
         <div>
           <h2 className="text-sm font-semibold">{entry.title}</h2>
           <p className="text-xs text-muted-foreground">
-            {formatDateTime(entry.occurred_at)} - Estado:{" "}
-            {entry.status === "draft" ? "Borrador" : entry.status}
+            {formatDateTime(entry.occurred_at)} - Estado: {formatClinicalEntryStatus(entry.status)}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             Registrado por {entry.created_by}

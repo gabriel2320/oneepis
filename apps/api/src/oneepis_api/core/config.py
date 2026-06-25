@@ -1,4 +1,5 @@
 from functools import lru_cache
+from urllib.parse import urlsplit
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -50,9 +51,30 @@ class Settings(BaseSettings):
             errors.append("auth_allow_dev_actor_header is development-only")
         if not self.auth_enabled:
             errors.append("auth_enabled cannot be false outside development")
+        errors.extend(self._validate_cors_origins())
         if errors:
             raise ValueError("; ".join(errors))
         return self
+
+    def _validate_cors_origins(self) -> list[str]:
+        if not self.cors_origins:
+            return ["cors_origins must include explicit HTTPS origins outside development"]
+
+        errors: list[str] = []
+        for origin in self.cors_origins:
+            value = origin.strip()
+            if not value:
+                errors.append("cors_origins cannot include empty origins outside development")
+                continue
+            if value == "*":
+                errors.append("cors_origins cannot include wildcard outside development")
+                continue
+            parsed = urlsplit(value)
+            if parsed.scheme != "https" or not parsed.netloc:
+                errors.append(
+                    "cors_origins must be explicit HTTPS origins outside development"
+                )
+        return errors
 
 
 @lru_cache

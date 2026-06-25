@@ -28,14 +28,14 @@ sobria, laboratorio minimo y preparacion contractual de ambulatorio/
 hospitalizacion. No autoriza IA nueva, dashboard, chat libre ni escritura
 automatica.
 
-Estado real al 2026-06-24:
+Estado real al 2026-06-25:
 
 - prototipo visual aprobado como base de ficha clinica tradicional gobernada
 - release `v0.4-assistant-read` cerrado y tagueado en `main`
 - el siguiente objetivo de producto es `v0.5-patient-core`
-- PR #31 corrige el bootstrap PostgreSQL: las migraciones
-  `202606200012_medication_catalog` y `202606200015_clinical_risks` migran
-  desde una base temporal limpia hasta `202606200015`
+- PR #31 corrigio el bootstrap PostgreSQL hasta `202606200015`; el gate
+  actual valida `alembic upgrade head` contra PostgreSQL limpio e incluye
+  `202606250001_soft_delete_vitals_entries`
 - avances iniciales de `v0.5-patient-core` ya mergeados:
   - PR #15: agenda ambulatoria minima persistida con `ClinicalAppointment`
   - PR #16: resumen ambulatorio real de solo lectura
@@ -64,6 +64,14 @@ Estado real al 2026-06-24:
   - dieta final de `clinical_intent.py`: las respuestas de intencion clinica
     salen a `clinical_intent_responses.py` y el orquestador queda fuera de
     near-limit sin cambio de conducta
+  - PR #50: toolchain Node/npm, bootstrap y CI alineados
+  - PR #53: cobertura test-only de denegaciones de permisos
+  - PR #54: `source_ref` obligatorio para eventos clinicos derivados
+- estabilizacion local 2026-06-25 en curso: `GET /api/v1/ai/status` exige
+  permiso IA, CORS fuera de development rechaza configuracion insegura,
+  `DELETE` clinico conserva trazabilidad con `entered_in_error` terminal,
+  seguridad CI bloquea solo severidad critica en dependencias y existen
+  `check:migrations:postgres` y `check:architecture`
 - bloques de consolidacion, dieta y polish inicial de ficha quedan cerrados:
   documentacion reconciliada, `patient-list-pages.tsx`, utilidades AI-Chart,
   eventos paciente, labs assistant y `clinical_intent.py` fuera del reporte
@@ -72,6 +80,9 @@ Estado real al 2026-06-24:
 - sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
 - el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
 - los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
+- `completa` significa minima operativa en entorno gobernado; no significa
+  produccion sanitaria, PHI real, firma legal, receta valida, alta formal,
+  adjuntos productivos ni auditoria de accesos
 - una pantalla preparada no cuenta como feature final y debe declarar su estado pendiente
 - una pantalla bloqueada existe para evitar uso clinico hasta cumplir contrato clinico/legal; no cuenta como feature final
 - `npm run check:screens` valida que toda ruta visible de `apps/web/src/app` este documentada en `docs/SCREEN_TREE.md`
@@ -125,6 +136,12 @@ Estado real al 2026-06-24:
 - la deuda near-limit vigente queda cerrada; el siguiente bloque debe elegirse
   pequeno: papel serio o contrato minimo paciente/ficha; no abrir IA nueva ni
   dominio amplio
+- PR #51 no se mergea como bloque grande; se reemplaza por cuatro PRs:
+  `audit:variables-domain-snapshots`, `audit:permissions-read-access`,
+  `audit:paper-traceability` y `check:architecture`
+- despues de esa auditoria, se inicio `diet:patient-core-watchlist` y se aplico
+  `patient-core:paper-source-status` sobre papel existente; no abrir otro
+  dominio clinico antes de publicar este bloque y mantener gates verdes
 
 Lecciones post #15-#17:
 
@@ -163,7 +180,7 @@ Medicacion con vademecum:
 - `POST /api/v1/patients/{patient_id}/medications` revalida dosis antes de guardar
 - una dosis fuera de rango curado bloquea sin `dose_override_reason`
 - el override guarda snapshot de regla, fuente, alerta y justificacion en auditoria
-- el fixture incluido es demo sintetico y declara `no uso clinico`
+- el fixture incluido es sintetico y declara `no uso clinico`
 - FDA/openFDA, Drugs@FDA, FAERS, enforcement e ISP/ANAMED quedan como fuentes de evidencia para curaduria local; no se consultan en vivo desde UI clinica
 - receta valida, orden ejecutable, firma, folio, despacho y administracion siguen bloqueados/futuros
 
@@ -187,8 +204,9 @@ Auth local:
   operar todo el entorno local gobernado, `medico` escribe actos medicos y
   `enfermeria` queda acotada a signos/eventos/laboratorio/riesgos y
   preconsulta ambulatoria minima
-- IA clinica requiere `admin`, `medico` o `dev`
-- fuera de `development`, la API rechaza secreto default, usuarios default, actor dev y auth desactivada
+- IA clinica requiere `admin`, `medico` o `dev`, incluido `GET /api/v1/ai/status`
+- fuera de `development`, la API rechaza secreto default, usuarios default,
+  actor dev, auth desactivada, CORS wildcard, origins vacios y origins no HTTPS
 
 Higiene local:
 
@@ -323,6 +341,8 @@ Documentos/papel:
 - `/pacientes/[patientId]/documentos` es indice real de papel existente: ficha, resumen, evoluciones, ingreso y epicrisis cuando hay entradas disponibles
 - las hojas carta muestran metadata documental comun: fuente, estado, actor y
   fecha clinica cuando la fuente los expone
+- las rutas print existentes declaran limite explicito y no agregan firma,
+  receta, adjuntos ni alta legal
 - consentimientos siguen bloqueados y declaran requisitos faltantes: plantilla
   versionada, firmante, fecha, custodia y revocacion
 - adjuntos externos, consentimientos, custodia documental, firma real y receta valida siguen bloqueados/futuros
@@ -339,7 +359,7 @@ Seguridad clinica:
   `admin`, `medico`, `enfermeria` o `dev`
 - cada escritura genera auditoria `clinical_risk.created` o
   `clinical_risk.updated` con `before/after` cuando aplica
-- la ficha muestra una tarjeta compacta de riesgos activos; demo declara que no
+- la ficha muestra una tarjeta compacta de riesgos activos; la UI declara que no
   simula seguridad clinica productiva
 - no hay scores automaticos, no hay bloqueo clinico inferido, no hay IA nueva y
   no existe `ClinicalPatch` para riesgos
@@ -423,6 +443,7 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon; Assistant Read backend ya no usa excepcion propia.
 - `npm run check:screens` bloquea rutas visibles sin fila en `SCREEN_TREE` o sin `ScreenCapability`.
 - `npm run check:contract` verifica OpenAPI y drift minimo Assistant Read contra los tipos TS manuales.
+- `npm run check:architecture` ejecuta guards incrementales de arquitectura/papel sin duplicar los reportes existentes.
 - Playwright E2E corre con `workers: 1` para evitar 404 transitorios del dev server al compilar rutas dinamicas en paralelo.
 - tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
 - `apps/api/src/oneepis_api/services/clinical_intent.py` salio de watchlist tras
@@ -440,14 +461,17 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
   `ambulatory-visit-pages.tsx` y `demo-record.ts` ya salieron
   del reporte near-limit; no volver a agregarles comportamiento sin revisar
   primero su presupuesto.
+- `patient-clinical-shell.tsx` tambien salio tras extraer navegacion estatica a
+  `patient-clinical-navigation.ts`; no volver a agregarle comportamiento sin
+  revisar primero su presupuesto.
 - agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
 - receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
 - rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
 
-Release gates demo:
+Release gates:
 
 - Releases previstos: `v0.1-base-ficha`, `v0.2-hospitalizacion`, `v0.3-ai-chart-core`, `v0.4-assistant-read`.
-- Cada release exige tag, changelog, CI verde, checklist de demo y plan de rollback.
+- Cada release exige tag, changelog, CI verde, checklist de walkthrough y plan de rollback.
 - Checklist `v0.4-assistant-read`: paciente, hospitalizacion, evolucion, signo vital, evento clinico, laboratorio estructurado reciente, AI-Chart/Assistant Read, impresion y auditoria.
 - Criterios `v0.4`: fuentes inspeccionables, limites/faltantes visibles, cero escritura automatica, cero chat libre, cero RAG, cero IA externa activa y compatibilidad `lab_results` + `clinical_events.exam_result`.
 - Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
@@ -471,6 +495,9 @@ Accesibilidad, performance y observabilidad pendientes:
 - Rediseño grafico-web inicial: navegacion paciente agrupada, ficha como hoja clinica viva, AI-Chart con pasos guiados, paridad papel basica y tokens clinicos V2 documentados.
 - Validacion reciente rediseño visual: `npm run check:size`, `npm run check:web`, `npm run check:e2e`, `npm run check:contract` y `npm run check:api`.
 - Seguridad CI: `security-report` bloquea secretos/PHI con `gitleaks`; dependency review, CodeQL, OSV npm advisory check y `pip-audit` siguen report-only hasta politica explicita.
+- Auditoria incremental: `docs/audit/` contiene reportes reproducibles de
+  variables/dominios/snapshots y permisos/lectura; `check:paper-traceability`
+  bloquea solo regresiones nuevas contra baseline.
 - Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y superficies futuras por modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente.
 - Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
 - Release `v0.4-assistant-read`: changelog creado, tag publicado y walkthrough humano aprobado el 2026-06-23.
@@ -490,7 +517,9 @@ Comandos esperados antes de entregar cambios:
 ```bash
 npm run check:screens
 npm run check:api
+npm run check:migrations:postgres
 npm run check:web
+npm run check:architecture
 npm run check:contract
 npm run check:e2e
 npm run check

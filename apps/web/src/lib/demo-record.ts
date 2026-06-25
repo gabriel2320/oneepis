@@ -35,6 +35,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
       heart_rate_bpm: 74,
       respiratory_rate_bpm: 16,
       oxygen_saturation_pct: "98.00",
+      status: "active",
       notes: "Control basal demo",
       created_at: "2026-06-20T12:10:00Z",
       updated_at: "2026-06-20T12:10:00Z",

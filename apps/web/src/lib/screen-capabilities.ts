@@ -63,7 +63,7 @@ export const screenCapabilities: ScreenCapability[] = [
   capability("/configuracion", "Acceso/configuracion", "seguimiento", "completa", "App Router", "none", "sesion local", "none", "none", AI.read, "administracion clinica futura"),
   capability("/configuracion/apariencia", "Acceso/configuracion", "seguimiento", "completa", "preferencias UI", "none", "sesion local", "none", "none", AI.none, "tokens visuales futuros"),
   capability("/configuracion/api", "Acceso/configuracion", "seguimiento", "completa", "config API/OpenAPI", "none", "sesion local", "none", "none", AI.none, "health y versionado"),
-  capability("/configuracion/ia", "Acceso/configuracion", "seguimiento", "completa", "AI status", "none", "sesion local", "none", "none", AI.read, "preferencias Ollama/local futuras"),
+  capability("/configuracion/ia", "Acceso/configuracion", "seguimiento", "completa", "AI status", "none", "sesion local + permiso IA", "none", "none", AI.read, "preferencias Ollama/local futuras"),
   capability("/consulta", "Ambulatorio", "seguimiento", "completa", "App Router", "none", "lectura paciente", "none", "none", AI.none, "indice simple"),
   capability("/consulta/agenda", "Ambulatorio", "episodio", "completa", "clinical appointments", "clinical_write", "medico/admin/dev", "writes", "none", AI.none, "preconsulta minima enlazada; agenda por equipos futura"),
   capability("/consulta/pacientes/[patientId]/atencion", "Ambulatorio", "acto clinico", "completa", "encuentros + SOAP + preconsulta", "clinical_write", "medico/admin/dev; preconsulta enfermeria/medico/admin/dev", "writes", "none", AI.draft, "preconsulta minima con enfermeria; diagnosticos finales futuros"),

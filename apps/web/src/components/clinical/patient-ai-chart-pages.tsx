@@ -55,8 +55,9 @@ export function PatientAiChartPage() {
   const aiStatus = useQuery({
     queryKey: ["ai-status"],
     queryFn: getAiStatus,
-    enabled: !DEMO_MODE,
+    enabled: !DEMO_MODE && canUseAi,
     staleTime: 30_000,
+    retry: false,
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [draft, setDraft] = useState<DraftSoapFromEventsResponse | null>(null);

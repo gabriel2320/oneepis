@@ -5,7 +5,8 @@ import uuid
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from oneepis_api.models.clinical_record import ClinicalEvent, Medication, RecordStatus, VitalSign
+from oneepis_api.models.clinical_record import ClinicalEvent, Medication, RecordStatus
+from oneepis_api.models.vital_sign import VitalSign
 from oneepis_api.schemas.clinical_record import (
     AssistantCorrelationRequest,
     AssistantCorrelationResponse,
@@ -34,7 +35,10 @@ def correlate_assistant_read_layer(
     vitals = list(
         session.scalars(
             select(VitalSign)
-            .where(VitalSign.patient_id == patient_id)
+            .where(
+                VitalSign.patient_id == patient_id,
+                VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+            )
             .order_by(VitalSign.measured_at.desc())
             .limit(query_limit)
         )

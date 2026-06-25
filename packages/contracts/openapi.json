@@ -1455,6 +1455,9 @@
               }
             }
           },
+          "409": {
+            "description": "Entered-in-error clinical entries cannot be edited"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1532,6 +1535,9 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "409": {
+            "description": "Only draft clinical entries can be deleted"
           },
           "422": {
             "description": "Validation Error",
@@ -4847,6 +4853,9 @@
               }
             }
           },
+          "409": {
+            "description": "Entered-in-error vital signs cannot be edited"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -7630,6 +7639,42 @@
         ],
         "summary": "Get Ai Status",
         "operationId": "get_ai_status_api_v1_ai_status_get",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7637,6 +7682,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AIProviderStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -9848,7 +9903,8 @@
         "enum": [
           "draft",
           "signed",
-          "amended"
+          "amended",
+          "entered_in_error"
         ],
         "title": "ClinicalEntryStatus"
       },
@@ -15097,6 +15153,10 @@
             ],
             "title": "Oxygen Saturation Pct"
           },
+          "status": {
+            "$ref": "#/components/schemas/RecordStatus",
+            "default": "active"
+          },
           "notes": {
             "anyOf": [
               {
@@ -15198,6 +15258,10 @@
               }
             ],
             "title": "Oxygen Saturation Pct"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RecordStatus",
+            "default": "active"
           },
           "notes": {
             "anyOf": [
@@ -15339,6 +15403,16 @@
               }
             ],
             "title": "Oxygen Saturation Pct"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "notes": {
             "anyOf": [

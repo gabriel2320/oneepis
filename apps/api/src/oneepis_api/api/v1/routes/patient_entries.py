@@ -48,7 +48,10 @@ def list_clinical_entries(
     require_patient(session, patient_id)
     statement = (
         select(ClinicalEntry)
-        .where(ClinicalEntry.patient_id == patient_id)
+        .where(
+            ClinicalEntry.patient_id == patient_id,
+            ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+        )
         .order_by(ClinicalEntry.occurred_at.desc())
         .offset(offset)
         .limit(limit)
@@ -84,6 +87,7 @@ def create_clinical_entry(
     actor: ClinicalEntryActorDep,
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
+    _validate_entry_status_input(payload.status)
     entry_data = payload.model_dump()
     validate_entry_encounter(session, patient_id, payload.kind, payload.encounter_id)
     entry_data["created_by"] = actor
@@ -104,7 +108,15 @@ def create_clinical_entry(
     return entry
 
 
-@router.patch("/{patient_id}/clinical-entries/{entry_id}", response_model=ClinicalEntryRead)
+@router.patch(
+    "/{patient_id}/clinical-entries/{entry_id}",
+    response_model=ClinicalEntryRead,
+    responses={
+        status.HTTP_409_CONFLICT: {
+            "description": "Entered-in-error clinical entries cannot be edited",
+        },
+    },
+)
 def update_clinical_entry(
     patient_id: uuid.UUID,
     entry_id: uuid.UUID,
@@ -120,6 +132,9 @@ def update_clinical_entry(
         patient_id,
         "Clinical entry not found",
     )
+    _validate_entry_editable(entry)
+    if "status" in payload.model_dump(exclude_unset=True):
+        _validate_entry_status_input(payload.status)
     if "encounter_id" in payload.model_dump(exclude_unset=True):
         validate_entry_encounter(session, patient_id, entry.kind, payload.encounter_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
@@ -145,7 +160,15 @@ def update_clinical_entry(
     return entry
 
 
-@router.delete("/{patient_id}/clinical-entries/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{patient_id}/clinical-entries/{entry_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_409_CONFLICT: {
+            "description": "Only draft clinical entries can be deleted",
+        },
+    },
+)
 def delete_draft_clinical_entry(
     patient_id: uuid.UUID,
     entry_id: uuid.UUID,
@@ -160,24 +183,44 @@ def delete_draft_clinical_entry(
         patient_id,
         "Clinical entry not found",
     )
+    if entry.status == ClinicalEntryStatus.ENTERED_IN_ERROR:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     if entry.status != ClinicalEntryStatus.DRAFT:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Only draft clinical entries can be deleted",
         )
-    before = audit_snapshot(entry)
+    before = audit_snapshot(entry, ["status"])
+    entry.status = ClinicalEntryStatus.ENTERED_IN_ERROR
+    after = audit_snapshot(entry, ["status"])
     record_audit_event(
         session,
         action="clinical_entry.deleted",
         entity_type="clinical_entry",
         entity_id=entry.id,
         actor_id=actor,
-        metadata={"patient_id": str(patient_id), "status": entry.status.value},
+        metadata={"patient_id": str(patient_id), "status": before["status"]},
         before=before,
+        after=after,
     )
-    session.delete(entry)
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _validate_entry_editable(entry: ClinicalEntry) -> None:
+    if entry.status == ClinicalEntryStatus.ENTERED_IN_ERROR:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Entered-in-error clinical entries cannot be edited",
+        )
+
+
+def _validate_entry_status_input(entry_status: ClinicalEntryStatus | None) -> None:
+    if entry_status == ClinicalEntryStatus.ENTERED_IN_ERROR:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Use DELETE to mark a clinical entry as entered_in_error",
+        )
 
 
 def validate_entry_encounter(

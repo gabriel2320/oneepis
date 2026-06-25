@@ -11,11 +11,12 @@ from oneepis_api.models.clinical_record import (
     Allergy,
     ClinicalEncounter,
     ClinicalEntry,
+    ClinicalEntryStatus,
     ClinicalEvent,
     Medication,
     RecordStatus,
-    VitalSign,
 )
+from oneepis_api.models.vital_sign import VitalSign
 from oneepis_api.schemas.clinical_record import AssistantSearchResponse, AssistantSearchResult
 
 from .patient_assistant_common import (
@@ -122,6 +123,7 @@ def _search_entries(session, patient_id: uuid.UUID, pattern: str, limit: int):
             select(ClinicalEntry)
             .where(
                 ClinicalEntry.patient_id == patient_id,
+                ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
                 match_columns(
                     pattern,
                     ClinicalEntry.title,
@@ -155,7 +157,11 @@ def _search_vitals(session, patient_id: uuid.UUID, pattern: str, limit: int):
     return list(
         session.scalars(
             select(VitalSign)
-            .where(VitalSign.patient_id == patient_id, match_columns(pattern, VitalSign.notes))
+            .where(
+                VitalSign.patient_id == patient_id,
+                VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+                match_columns(pattern, VitalSign.notes),
+            )
             .order_by(VitalSign.measured_at.desc())
             .limit(limit)
         )

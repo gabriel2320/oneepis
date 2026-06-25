@@ -2,12 +2,22 @@
 
 import type { PatientRecordSnapshot } from "@/lib/types";
 
-import { PrintFooter, PrintHeader } from "./clinical-print-frame";
+import { PaperTraceability, PrintFooter, PrintHeader } from "./clinical-print-frame";
+import { paperTraceability } from "./clinical-print-traceability";
 
 export function PrescriptionA5Sheet({ record }: { record: PatientRecordSnapshot }) {
   return (
     <article className="print-sheet mx-auto min-h-[210mm] max-w-[148mm] border-2 border-warning bg-card p-6 shadow-sm">
       <PrintHeader record={record} title="Receta bloqueada" />
+      <PaperTraceability
+        {...paperTraceability({
+          source: "Politica de receta bloqueada",
+          status: "Bloqueado",
+          actor: "No aplica",
+          clinicalDate: "No aplica",
+          limitation: "No valido para prescribir, dispensar ni respaldar compra de medicamentos.",
+        })}
+      />
       <div className="space-y-5 py-6">
         <section className="print-section rounded-md border-2 border-warning bg-warning/10 p-4">
           <h2 className="text-sm font-semibold uppercase text-warning-foreground">

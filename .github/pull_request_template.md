@@ -40,7 +40,9 @@
 ## Pruebas
 
 - [ ] `npm run check:api`
+- [ ] `npm run check:migrations:postgres` si cambia migracion/modelo SQL
 - [ ] `npm run check:web`
+- [ ] `npm run check:architecture` si toca pantallas, papel o auditoria
 - [ ] `npm run check:contract` si cambia API/OpenAPI
 - [ ] `npm run check:e2e` si toca UI/rutas/print
 - [ ] `npm run check` para cambios transversales

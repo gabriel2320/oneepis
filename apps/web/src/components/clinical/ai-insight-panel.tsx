@@ -3,15 +3,20 @@
 import { useEffect, useState } from "react";
 import { BrainCircuit, ShieldCheck, Sparkles } from "lucide-react";
 
+import { useCurrentUser } from "@/components/auth/use-current-user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { createClinicalInsight, getAiStatus } from "@/lib/api/ai";
+import { DEMO_MODE } from "@/lib/api/client";
+import { canUseClinicalAi } from "@/lib/permissions";
 import type { AIProviderStatus, ClinicalInsightResponse } from "@/lib/types";
 
 export function AiInsightPanel() {
+  const { user } = useCurrentUser();
+  const canRequestAi = !DEMO_MODE && canUseClinicalAi(user);
   const [sourceText, setSourceText] = useState(
     "Paciente refiere evolucion estable. Signos vitales sin alertas. Mantener seguimiento.",
   );
@@ -21,6 +26,9 @@ export function AiInsightPanel() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!canRequestAi) {
+      return;
+    }
     getAiStatus()
       .then(setStatus)
       .catch(() => {
@@ -33,9 +41,12 @@ export function AiInsightPanel() {
           message: "API no disponible.",
         });
       });
-  }, []);
+  }, [canRequestAi]);
 
   async function handleCreateInsight() {
+    if (!canRequestAi) {
+      return;
+    }
     setIsLoading(true);
     setError(null);
 
@@ -61,13 +72,15 @@ export function AiInsightPanel() {
             IA clinica local
           </CardTitle>
           <Badge variant={status?.available ? "safe" : "warning"}>
-            {status?.available ? "Ollama activo" : "Ollama pendiente"}
+            {canRequestAi ? (status?.available ? "Ollama activo" : "Ollama pendiente") : "IA restringida"}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          {status?.message ?? "Consultando proveedor local..."}
+          {canRequestAi
+            ? (status?.message ?? "Consultando proveedor local...")
+            : "El rol actual no permite consultar IA clinica."}
         </p>
-        {status?.tasks?.length ? (
+        {canRequestAi && status?.tasks?.length ? (
           <div className="flex flex-wrap gap-2">
             {status.tasks.map((task) => (
               <Badge key={task.task} variant={task.available ? "safe" : "outline"}>
@@ -101,7 +114,7 @@ export function AiInsightPanel() {
             variant="outline"
             size="sm"
             className="w-full justify-start"
-            disabled={isLoading || sourceText.trim().length === 0}
+            disabled={!canRequestAi || isLoading || sourceText.trim().length === 0}
             onClick={handleCreateInsight}
           >
             <Sparkles className="h-4 w-4" />

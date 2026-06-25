@@ -44,7 +44,7 @@ La implementacion Ollama usa:
 
 Superficies actuales de IA:
 
-- `GET /api/v1/ai/status`: estado Ollama y modelos por tarea.
+- `GET /api/v1/ai/status`: estado Ollama y modelos por tarea; requiere permiso IA (`admin`, `medico` o `dev`).
 - `POST /api/v1/ai/clinical-insights`: borrador desde texto clinico.
 - `POST /api/v1/patients/{patient_id}/ai/suggestions`: sugerencias temporales desde snapshot.
 

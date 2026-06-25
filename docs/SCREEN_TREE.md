@@ -12,13 +12,15 @@ paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
 
 Estados permitidos:
 
-- `completa`: tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
+- `completa`: minima operativa en entorno gobernado; tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
 - `completa/en expansion gobernada`: funciona, pero tiene un subdominio acotado en crecimiento con guardrails activos.
 - `preparada`: existe como borde visible, declara que esta pendiente y no simula produccion.
 - `bloqueada`: existe o se nombra para evitar uso clinico hasta completar requisitos legales/clinicos.
 - `futura`: pertenece al mapa maestro, pero no tiene ruta o contrato listo.
 
 Las pantallas preparadas o bloqueadas no cuentan como feature final.
+Una pantalla `completa` no implica produccion sanitaria, PHI real, firma legal,
+receta valida, alta formal, adjuntos productivos ni auditoria de accesos.
 
 Avances `v0.5-patient-core` ya consolidados:
 
@@ -54,9 +56,9 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/login` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | no | no | no | seleccion institucion/rol futura |
 | `/configuracion` | Acceso/configuracion | seguimiento | completa | App Router | no | sesion local | no | no | estado/config | administracion clinica futura |
 | `/configuracion/apariencia` | Acceso/configuracion | seguimiento | completa | preferencias UI | no | sesion local | no | no | no | tokens visuales futuros |
-| `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | no | sesion local | no | no | estado Ollama | preferencias Ollama/local futuras |
+| `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | no | sesion local + permiso IA | no | no | estado Ollama | preferencias Ollama/local futuras |
 | `/configuracion/api` | Acceso/configuracion | seguimiento | completa | config API/OpenAPI | no | sesion local | no | no | no | health y versionado |
-| `/pacientes` | Nucleo paciente | paciente | completa | API pacientes / demo | no | lectura paciente | no | no | no | buscador universal avanzado y ultimos abiertos |
+| `/pacientes` | Nucleo paciente | paciente | completa | API pacientes | no | lectura paciente | no | no | no | buscador universal avanzado y ultimos abiertos |
 | `/pacientes/nuevo` | Nucleo paciente | paciente | completa | API pacientes | si | escritura paciente | si | no | no | identidad administrativa mas completa |
 | `/pacientes/[patientId]` | Nucleo paciente | paciente | completa | redirect App Router | no | lectura paciente | no | no | no | mantener como entrada a ficha |
 | `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente + assistant timeline | no | lectura paciente | no | carta | lectura/pendientes | antecedentes, resultados y timeline avanzada existen en ficha; documentos longitudinales siguen futuros |
@@ -317,4 +319,4 @@ Criterio de promocion a `completa/en expansion gobernada`:
 - Una pantalla completa no puede depender de fallback silencioso al primer paciente, documento o registro si la ruta trae ID.
 - IA puede sugerir o resumir, pero no convierte una pantalla futura en completa ni firma documentos.
 - La IA permitida por pantalla se declara en el Screen Capability Registry; una accion no declarada debe quedar bloqueada antes de ejecutarse.
-- Receta valida, firma clinica, folio, despacho, administracion de medicamentos, ordenes ejecutables, agenda avanzada e IA externa siguen bloqueadas/futuras hasta cumplir sus contratos.
+- Receta valida, firma clinica real, folio, despacho, alta legal, adjuntos productivos, auditoria de accesos, administracion de medicamentos, ordenes ejecutables, agenda avanzada e IA externa siguen bloqueadas/futuras hasta cumplir sus contratos.

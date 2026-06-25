@@ -29,6 +29,38 @@ jobs:
       - run: .venv/bin/python -m pip install -e "apps/api[dev]"
       - run: npm run check:api
 
+  postgres-migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: oneepis_test
+          POSTGRES_USER: oneepis
+          POSTGRES_PASSWORD: oneepis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U oneepis -d oneepis_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm i -g npm@11.13.0
+      - run: python -m venv .venv
+      - run: .venv/bin/python -m pip install --upgrade pip
+      - run: .venv/bin/python -m pip install -e "apps/api[dev]"
+      - run: npm run check:migrations:postgres
+        env:
+          ONEEPIS_DATABASE_URL: postgresql+psycopg://oneepis:oneepis@localhost:5432/oneepis_test
+
   web:
     runs-on: ubuntu-latest
     steps:
@@ -40,6 +72,7 @@ jobs:
       - run: npm i -g npm@11.13.0
       - run: npm ci
       - run: npm run check:web
+      - run: npm run check:architecture
 
   contracts-e2e:
     runs-on: ubuntu-latest
@@ -74,6 +107,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: npm i -g npm@11.13.0
       - run: npm ci
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e "apps/api[dev]"
@@ -84,7 +118,8 @@ jobs:
       - name: Dependency review report
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
-        continue-on-error: true
+        with:
+          fail-on-severity: critical
       - name: CodeQL init report
         uses: github/codeql-action/init@v3
         with:

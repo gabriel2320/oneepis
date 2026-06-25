@@ -6,7 +6,12 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import ClinicalEventActorDep
-from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, ClinicalEventSourceType
+from oneepis_api.models.clinical_record import (
+    ClinicalEntry,
+    ClinicalEntryStatus,
+    ClinicalEvent,
+    ClinicalEventSourceType,
+)
 from oneepis_api.schemas.clinical_record import (
     ClinicalEventCreate,
     ClinicalEventRead,
@@ -173,7 +178,10 @@ def get_clinical_timeline(
         entries=list(
             session.scalars(
                 select(ClinicalEntry)
-                .where(ClinicalEntry.patient_id == patient_id)
+                .where(
+                    ClinicalEntry.patient_id == patient_id,
+                    ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+                )
                 .order_by(ClinicalEntry.occurred_at.desc())
                 .limit(limit)
             )

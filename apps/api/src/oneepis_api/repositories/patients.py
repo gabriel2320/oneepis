@@ -9,12 +9,13 @@ from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
     ClinicalEntry,
+    ClinicalEntryStatus,
     ClinicalEvent,
     Medication,
     RecordStatus,
-    VitalSign,
 )
 from oneepis_api.models.patient import Patient
+from oneepis_api.models.vital_sign import VitalSign
 
 
 def get_patient(session: Session, patient_id: uuid.UUID) -> Patient | None:
@@ -46,7 +47,10 @@ def get_recent_entries(
 ) -> list[ClinicalEntry]:
     statement = (
         select(ClinicalEntry)
-        .where(ClinicalEntry.patient_id == patient_id)
+        .where(
+            ClinicalEntry.patient_id == patient_id,
+            ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+        )
         .order_by(ClinicalEntry.occurred_at.desc())
         .limit(limit)
     )
@@ -68,7 +72,10 @@ def get_recent_events(
 def get_latest_vitals(session: Session, patient_id: uuid.UUID) -> VitalSign | None:
     statement = (
         select(VitalSign)
-        .where(VitalSign.patient_id == patient_id)
+        .where(
+            VitalSign.patient_id == patient_id,
+            VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+        )
         .order_by(VitalSign.measured_at.desc())
         .limit(1)
     )
@@ -80,7 +87,10 @@ def get_recent_vitals(
 ) -> list[VitalSign]:
     statement = (
         select(VitalSign)
-        .where(VitalSign.patient_id == patient_id)
+        .where(
+            VitalSign.patient_id == patient_id,
+            VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+        )
         .order_by(VitalSign.measured_at.desc())
         .limit(limit)
     )

@@ -8,12 +8,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from oneepis_api.api.deps import ClinicalRiskActorDep
-from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, RecordStatus, VitalSign
+from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, RecordStatus
 from oneepis_api.models.clinical_risk import (
     ClinicalRisk,
     ClinicalRiskSourceKind,
 )
 from oneepis_api.models.lab import LabResult
+from oneepis_api.models.vital_sign import VitalSign
 from oneepis_api.schemas.clinical_record import (
     ClinicalRiskCreate,
     ClinicalRiskRead,

@@ -166,9 +166,25 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
   atencion ambulatoria cerrable, ingreso medico hospitalario, epicrisis borrador
   implementada y papel tradicional.
 
+### Estabilizacion seguridad/trazabilidad 2026-06-25
+
+- PR #50 alinea toolchain Node/npm, bootstrap y CI.
+- PR #53 agrega cobertura test-only de denegaciones de permisos.
+- PR #54 exige `source_ref` en eventos clinicos derivados.
+- El bloque local actual protege `GET /api/v1/ai/status` con permiso IA.
+- CORS fuera de `development` rechaza wildcard, origins vacios y origins HTTP no locales.
+- Borrados clinicos restantes pasan a trazabilidad con `entered_in_error`.
+- Se agrega gate PostgreSQL real para validar `alembic upgrade head`.
+- PR #51 no debe mergearse como bloque grande; se divide en
+  `audit:variables-domain-snapshots`, `audit:permissions-read-access`,
+  `audit:paper-traceability` y `check:architecture`.
+- Despues de la auditoria, se inicio `diet:patient-core-watchlist` y se aplico
+  `patient-core:paper-source-status` sobre papel existente: fuente, estado,
+  actor/fecha y limite visibles sin crear firma, receta, adjuntos ni alta legal.
+
 ### PROG-CONSOLIDATE-01: consolidacion post #15-#17
 
-- Estado: en cierre antes de abrir otra feature clinica.
+- Estado: completado.
 - Objetivo: reconciliar documentacion canonica, podar componentes cerca del
   limite de tamano, reforzar guardrails y dejar cola de avance automatico.
 - Alcance permitido: docs canonicos, extraccion de componentes sin cambio de
@@ -204,7 +220,7 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 
 ### PROG-POST-PRECONSULTA-01: consolidacion post #25
 
-- Estado: siguiente micro-PR docs-only.
+- Estado: completado como micro-PR docs-only.
 - Decision: no abrir clinica nueva inmediatamente despues de preconsulta.
 - Alcance: registrar #25 como completado, mover la cola a dieta quirurgica y
   dejar congelada la decision de permisos.

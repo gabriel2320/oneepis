@@ -38,6 +38,27 @@ def test_non_development_accepts_explicit_secure_auth_settings() -> None:
         environment="production",
         auth_secret="prod-secret",
         auth_local_users="admin@example.local|secret|Admin|admin",
+        cors_origins=["https://oneepis.example"],
     )
 
     assert settings.environment == "production"
+
+
+@pytest.mark.parametrize(
+    "cors_origins",
+    [
+        [],
+        [""],
+        ["*"],
+        ["http://oneepis.example"],
+        ["http://localhost:3000"],
+    ],
+)
+def test_non_development_rejects_insecure_cors_origins(cors_origins: list[str]) -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            environment="production",
+            auth_secret="prod-secret",
+            auth_local_users="admin@example.local|secret|Admin|admin",
+            cors_origins=cors_origins,
+        )

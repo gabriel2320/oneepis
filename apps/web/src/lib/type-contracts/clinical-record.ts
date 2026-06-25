@@ -8,7 +8,7 @@ export type ClinicalEntryKind =
   | "prescription"
   | "procedure"
   | "note";
-export type ClinicalEntryStatus = "draft" | "signed" | "amended";
+export type ClinicalEntryStatus = "draft" | "signed" | "amended" | "entered_in_error";
 export type ClinicalEventType =
   | "symptom"
   | "vital_sign"
@@ -105,6 +105,7 @@ export type VitalSignCreate = {
   heart_rate_bpm?: number | null;
   respiratory_rate_bpm?: number | null;
   oxygen_saturation_pct?: string | null;
+  status?: RecordStatus;
   notes?: string | null;
 };
 
@@ -118,6 +119,7 @@ export type VitalSign = {
   heart_rate_bpm?: number | null;
   respiratory_rate_bpm?: number | null;
   oxygen_saturation_pct?: string | null;
+  status: RecordStatus;
   notes?: string | null;
   created_at: string;
   updated_at: string;

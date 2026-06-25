@@ -7,6 +7,7 @@ import { ArrowRight, Server } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
@@ -16,7 +17,8 @@ import { AppointmentList, VisitWorkspace } from "@/components/clinical/ambulator
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
-import { API_BASE_URL } from "@/lib/api/client";
+import { API_BASE_URL, DEMO_MODE } from "@/lib/api/client";
+import { canUseClinicalAi } from "@/lib/permissions";
 import { findScreenCapability } from "@/lib/screen-capabilities";
 
 export function AmbulatoryHomePage() {
@@ -82,12 +84,24 @@ export function AppearanceSettingsPage() {
 }
 
 export function AiSettingsPage() {
-  const aiQuery = useQuery({ queryKey: ["ai-status"], queryFn: getAiStatus });
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canUseAi = canUseClinicalAi(user);
+  const shouldQueryAi = !DEMO_MODE && canUseAi;
+  const aiQuery = useQuery({
+    queryKey: ["ai-status"],
+    queryFn: getAiStatus,
+    enabled: shouldQueryAi,
+    retry: false,
+  });
 
   return (
     <ModulePage title="IA local" description="Proveedor Ollama desacoplado y seguro.">
       <ClinicalSectionCard title="Estado Ollama">
-        {aiQuery.isLoading ? <LoadingRows rows={2} /> : null}
+        {userLoading || aiQuery.isLoading ? <LoadingRows rows={2} /> : null}
+        {DEMO_MODE ? <ErrorState description="Consulta de proveedor desactivada en este modo local." /> : null}
+        {!DEMO_MODE && !userLoading && !canUseAi ? (
+          <ErrorState description="IA restringida para el rol actual." />
+        ) : null}
         {aiQuery.isError ? <ErrorState description="No se pudo consultar /ai/status." /> : null}
         {aiQuery.data ? (
           <div className="space-y-3">

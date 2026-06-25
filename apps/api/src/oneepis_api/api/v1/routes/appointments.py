@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import EncounterActorDep, require_patient_read_access
-from oneepis_api.models.clinical_record import ClinicalAppointment
+from oneepis_api.models.appointment import ClinicalAppointment
 from oneepis_api.schemas.clinical_record import (
     ClinicalAppointmentCreate,
     ClinicalAppointmentRead,

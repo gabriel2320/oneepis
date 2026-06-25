@@ -25,7 +25,7 @@ sin datos reales
 
 ## No Negociable
 
-- No usar datos reales ni datos demo realistas.
+- No usar datos reales ni fixtures que parezcan pacientes reales.
 - No implementar diagnostico autonomo.
 - No firmar ni escribir ficha desde IA.
 - No imprimir receta clinica valida sin firma, folio, actor, fecha clinica y permisos claros.
@@ -34,7 +34,8 @@ sin datos reales
 - No dejar endpoints sin tests.
 - Toda escritura clinica debe tener actor, permisos, auditoria y `correlation_id`.
 - Todo cambio de API debe actualizar `packages/contracts/openapi.json`.
-- Frontend no debe usar datos demo salvo `NEXT_PUBLIC_DEMO_MODE=true`.
+- Los contratos Assistant Read deben pasar `scripts/check-assistant-read-contract.mjs` hasta reemplazar tipos manuales por generacion completa.
+- Frontend solo puede usar datos sinteticos cuando `NEXT_PUBLIC_DEMO_MODE=true`.
 - Ninguna ruta clinica o print con ID en URL puede mostrar un primer registro como fallback.
 - Ningun archivo clinico nuevo debe superar 350 lineas sin excepcion explicita en `scripts/check-file-size.mjs`.
 

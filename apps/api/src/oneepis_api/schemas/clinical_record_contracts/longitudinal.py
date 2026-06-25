@@ -148,6 +148,7 @@ class VitalSignBase(APIModel):
     heart_rate_bpm: int | None = Field(default=None, ge=20, le=260)
     respiratory_rate_bpm: int | None = Field(default=None, ge=4, le=80)
     oxygen_saturation_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    status: RecordStatus = RecordStatus.ACTIVE
     notes: str | None = Field(default=None, max_length=240)
 
 
@@ -163,6 +164,7 @@ class VitalSignUpdate(APIModel):
     heart_rate_bpm: int | None = Field(default=None, ge=20, le=260)
     respiratory_rate_bpm: int | None = Field(default=None, ge=4, le=80)
     oxygen_saturation_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    status: RecordStatus | None = None
     notes: str | None = Field(default=None, max_length=240)
 
 

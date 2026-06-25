@@ -5,11 +5,14 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
-type ClinicalPaperMetadata = {
-  source: string;
-  status: string;
-  actor?: string | null;
-  clinicalDate?: string | null;
+export type PaperTraceabilityItem = {
+  label: string;
+  value: ReactNode;
+};
+
+export type PaperTraceabilityProps = {
+  items: PaperTraceabilityItem[];
+  limitation: ReactNode;
 };
 
 export function PrintPage({ children }: { children: ReactNode }) {
@@ -33,18 +36,18 @@ export function PrintToolbar() {
 export function ClinicalPaperSheet({
   record,
   title,
-  metadata,
+  traceability,
   children,
 }: {
   record: PatientRecordSnapshot;
   title: string;
-  metadata?: ClinicalPaperMetadata;
+  traceability?: PaperTraceabilityProps;
   children: ReactNode;
 }) {
   return (
     <article className="print-sheet mx-auto min-h-[279mm] max-w-3xl border bg-card p-8 shadow-sm print:min-h-[250mm]">
       <PrintHeader record={record} title={title} />
-      {metadata ? <PrintDocumentMetadata metadata={metadata} /> : null}
+      {traceability ? <PaperTraceability {...traceability} /> : null}
       <div className="space-y-5 py-6">{children}</div>
       <PrintFooter />
     </article>
@@ -83,16 +86,20 @@ export function PrintHeader({
   );
 }
 
-function PrintDocumentMetadata({ metadata }: { metadata: ClinicalPaperMetadata }) {
+export function PaperTraceability({ items, limitation }: PaperTraceabilityProps) {
   return (
-    <section className="mt-4 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
-      <p className="font-semibold text-foreground">Metadata documental</p>
-      <div className="mt-2 grid gap-2 sm:grid-cols-2">
-        <p>Fuente: {metadata.source}</p>
-        <p>Estado: {metadata.status}</p>
-        <p>Actor: {metadata.actor || "No registrado"}</p>
-        <p>Fecha clinica: {metadata.clinicalDate || "No registrada"}</p>
+    <section className="mt-4 rounded-md border border-info/30 bg-info/10 p-3 text-xs">
+      <div className="grid gap-2 sm:grid-cols-2">
+        {items.map((item) => (
+          <p key={item.label}>
+            <span className="font-semibold text-foreground">{item.label}:</span>{" "}
+            <span className="text-muted-foreground">{item.value}</span>
+          </p>
+        ))}
       </div>
+      <p className="mt-2 border-t border-info/30 pt-2 font-semibold text-muted-foreground">
+        Limite: {limitation}
+      </p>
     </section>
   );
 }
@@ -104,7 +111,7 @@ export function PrintFooter() {
         <p>
           Fecha: <span suppressHydrationWarning>{new Date().toLocaleString("es-CL")}</span>
         </p>
-        <p>Folio demo: ONE-DEV - Pagina 1</p>
+        <p>Folio interno: ONE-DEV - Pagina 1</p>
       </div>
       <p className="mt-1 font-semibold">Documento de desarrollo / no uso clinico real.</p>
     </footer>

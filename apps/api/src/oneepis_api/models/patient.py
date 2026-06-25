@@ -11,18 +11,18 @@ from oneepis_api.db.base import Base
 from oneepis_api.models.base import IdMixin, TimestampMixin
 
 if TYPE_CHECKING:
+    from oneepis_api.models.appointment import ClinicalAppointment
     from oneepis_api.models.clinical_record import (
         ActiveProblem,
         Allergy,
-        ClinicalAppointment,
         ClinicalEncounter,
         ClinicalEntry,
         ClinicalEvent,
         Medication,
-        VitalSign,
     )
     from oneepis_api.models.clinical_risk import ClinicalRisk
     from oneepis_api.models.lab import LabPanel, LabResult
+    from oneepis_api.models.vital_sign import VitalSign
 
 
 def enum_values(enum_class: type[enum.Enum]) -> list[str]:

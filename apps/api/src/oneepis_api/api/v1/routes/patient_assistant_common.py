@@ -10,8 +10,8 @@ from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEvent,
     Medication,
-    VitalSign,
 )
+from oneepis_api.models.vital_sign import VitalSign
 
 VITAL_CHART_SERIES = {
     "temperature_c": ("Temperatura", "C", "temperature_c"),

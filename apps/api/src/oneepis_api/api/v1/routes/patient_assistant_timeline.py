@@ -10,11 +10,12 @@ from oneepis_api.models.clinical_record import (
     Allergy,
     ClinicalEncounter,
     ClinicalEntry,
+    ClinicalEntryStatus,
     ClinicalEvent,
     Medication,
     RecordStatus,
-    VitalSign,
 )
+from oneepis_api.models.vital_sign import VitalSign
 from oneepis_api.schemas.clinical_record import AssistantTimelineItem, AssistantTimelineResponse
 
 from .patient_assistant_common import (
@@ -46,9 +47,23 @@ def get_assistant_timeline(
         ClinicalEncounter.started_at,
         query_limit,
     )
-    entries = _recent(session, ClinicalEntry, patient_id, ClinicalEntry.occurred_at, query_limit)
+    entries = _recent(
+        session,
+        ClinicalEntry,
+        patient_id,
+        ClinicalEntry.occurred_at,
+        query_limit,
+        ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+    )
     events = _recent(session, ClinicalEvent, patient_id, ClinicalEvent.occurred_at, query_limit)
-    vitals = _recent(session, VitalSign, patient_id, VitalSign.measured_at, query_limit)
+    vitals = _recent(
+        session,
+        VitalSign,
+        patient_id,
+        VitalSign.measured_at,
+        query_limit,
+        VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+    )
     medications = list(
         session.scalars(
             select(Medication)
@@ -119,15 +134,14 @@ def get_assistant_timeline(
     )
 
 
-def _recent(session, model, patient_id: uuid.UUID, order_column, limit: int):
-    return list(
-        session.scalars(
-            select(model)
-            .where(model.patient_id == patient_id)
-            .order_by(order_column.desc())
-            .limit(limit)
-        )
+def _recent(session, model, patient_id: uuid.UUID, order_column, limit: int, *filters):
+    statement = (
+        select(model)
+        .where(model.patient_id == patient_id, *filters)
+        .order_by(order_column.desc())
+        .limit(limit)
     )
+    return list(session.scalars(statement))
 
 
 def _encounter_items(

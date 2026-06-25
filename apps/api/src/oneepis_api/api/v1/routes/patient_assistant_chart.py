@@ -5,7 +5,12 @@ import uuid
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from oneepis_api.models.clinical_record import ClinicalEvent, ClinicalEventType, VitalSign
+from oneepis_api.models.clinical_record import (
+    ClinicalEvent,
+    ClinicalEventType,
+    RecordStatus,
+)
+from oneepis_api.models.vital_sign import VitalSign
 from oneepis_api.schemas.clinical_record import (
     AssistantChartPoint,
     AssistantChartRequest,
@@ -32,7 +37,10 @@ def get_assistant_chart_data(
     vitals = list(
         session.scalars(
             select(VitalSign)
-            .where(VitalSign.patient_id == patient_id)
+            .where(
+                VitalSign.patient_id == patient_id,
+                VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+            )
             .order_by(VitalSign.measured_at.desc())
             .limit(query_limit)
         )

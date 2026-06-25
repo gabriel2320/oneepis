@@ -3,19 +3,21 @@
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import { formatClinicalEntryStatus } from "@/components/clinical/clinical-entry-labels";
 import { formatDateTime } from "@/components/clinical/date-format";
 import { ClinicalTimeline } from "@/components/clinical/patient-widgets";
 import { DEMO_MODE } from "@/lib/api/client";
-import { listHospitalDailySheets } from "@/lib/api/hospitalization";
 import { getPatientRecord } from "@/lib/api/patients";
-import { demoHospitalDailySheets, demoRecords } from "@/lib/demo-record";
-import type { ClinicalEntry, HospitalDailySheet, PatientRecordSnapshot } from "@/lib/types";
+import { demoRecords } from "@/lib/demo-record";
+import type { ClinicalEntry, PatientRecordSnapshot } from "@/lib/types";
 
 import { PrescriptionA5Sheet } from "./blocked-prescription-print";
 import { ClinicalPaperSheet, PrintPage, PrintToolbar } from "./clinical-print-frame";
+import { paperTraceability } from "./clinical-print-traceability";
 
 export {
   ClinicalPaperSheet,
+  PaperTraceability,
   PrintFooter,
   PrintHeader,
   PrintPage,
@@ -78,42 +80,6 @@ export function PrintEvolutionPage() {
   );
 }
 
-export function PrintHospitalDailySheetPage() {
-  const params = useParams<{ patientId: string; sheetId: string }>();
-  const patientId = params.patientId;
-  const sheetId = params.sheetId;
-  const recordQuery = useQuery({
-    queryKey: ["patient-record", patientId],
-    queryFn: () => getPatientRecord(patientId),
-    enabled: Boolean(patientId) && !DEMO_MODE,
-  });
-  const sheetsQuery = useQuery({
-    queryKey: ["hospital-daily-sheets", patientId],
-    queryFn: () => listHospitalDailySheets(patientId),
-    enabled: Boolean(patientId) && !DEMO_MODE,
-  });
-  const record =
-    (DEMO_MODE ? demoRecords.find((item) => item.patient.id === patientId) : null) ??
-    recordQuery.data;
-  const sheets = DEMO_MODE
-    ? demoHospitalDailySheets.filter((item) => item.patient_id === patientId)
-    : (sheetsQuery.data ?? []);
-  const sheet = sheets.find((item) => item.id === sheetId);
-
-  return (
-    <PrintPage>
-      <PrintToolbar />
-      {record && sheet ? (
-        <HospitalDailyPrintSheet record={record} sheet={sheet} />
-      ) : (
-        <p className="p-6 text-sm">
-          {record ? "Hoja diaria no encontrada." : "Cargando hoja diaria..."}
-        </p>
-      )}
-    </PrintPage>
-  );
-}
-
 export function PatientSummaryPrintSheet({
   record,
   title,
@@ -121,14 +87,21 @@ export function PatientSummaryPrintSheet({
   record: PatientRecordSnapshot;
   title: string;
 }) {
+  const isSummary = title === "Resumen";
+
   return (
     <ClinicalPaperSheet
       record={record}
       title={title}
-      metadata={{
-        source: "record paciente",
-        status: title === "Ficha clinica" ? "Ficha de lectura no firmada" : "Resumen no persistido",
-      }}
+      traceability={paperTraceability({
+        source: "Snapshot de ficha paciente",
+        status: isSummary ? "Resumen no persistido" : "Proyeccion longitudinal",
+        actor: "No aplica",
+        clinicalDate: "No aplica",
+        limitation: isSummary
+          ? "No reemplaza evolucion, epicrisis ni documento firmado."
+          : "Proyeccion de lectura; no equivale a documento clinico firmado.",
+      })}
     >
       <section className="print-section">
         <h2 className="text-sm font-semibold">Identificacion</h2>
@@ -174,17 +147,20 @@ export function SoapPrintSheet({
     <ClinicalPaperSheet
       record={record}
       title="Evolucion SOAP"
-      metadata={{
-        source: `clinical entry ${entry.id}`,
-        status: entry.status === "draft" ? "Borrador no firmado" : entry.status,
+      traceability={paperTraceability({
+        source: `clinical_entries/${entry.id}`,
+        status: formatClinicalEntryStatus(entry.status),
         actor: entry.created_by,
         clinicalDate: formatDateTime(entry.occurred_at),
-      }}
+        limitation: "Sin firma legal; el registro directo por ID se mantiene para trazabilidad.",
+      })}
     >
       <section className="print-section space-y-3">
         <div>
           <h2 className="text-sm font-semibold">{entry.title}</h2>
-          <p className="text-xs text-muted-foreground">{formatDateTime(entry.occurred_at)}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatDateTime(entry.occurred_at)} - Estado: {formatClinicalEntryStatus(entry.status)}
+          </p>
         </div>
         <SoapRow label="S" value={entry.subjective} />
         <SoapRow label="O" value={entry.objective} />
@@ -195,58 +171,11 @@ export function SoapPrintSheet({
   );
 }
 
-export function HospitalDailyPrintSheet({
-  record,
-  sheet,
-}: {
-  record: PatientRecordSnapshot;
-  sheet: HospitalDailySheet;
-}) {
-  return (
-    <ClinicalPaperSheet
-      record={record}
-      title="Hoja diaria hospitalizada"
-      metadata={{
-        source: `hoja diaria ${sheet.id}`,
-        status: sheet.status === "closed" ? "Cerrada no firmada" : "Borrador no firmado",
-        actor: sheet.created_by,
-        clinicalDate: sheet.sheet_date,
-      }}
-    >
-      <section className="print-section space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold">Fecha {sheet.sheet_date}</h2>
-          <p className="text-xs text-muted-foreground">
-            Registrada por {sheet.created_by} - {formatDateTime(sheet.created_at)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Estado: {sheet.status === "closed" ? "Cerrada" : "Borrador"}
-          </p>
-        </div>
-        <PrintTextBlock label="Resumen clinico" value={sheet.clinical_summary} />
-        <PrintTextBlock label="Eventos relevantes" value={sheet.overnight_events} />
-        <PrintTextBlock label="Plan activo" value={sheet.active_plan} />
-        <PrintTextBlock label="Pendientes" value={sheet.pending_tasks} />
-        <PrintTextBlock label="Notas de seguridad" value={sheet.safety_notes} />
-      </section>
-    </ClinicalPaperSheet>
-  );
-}
-
 function SoapRow({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <p className="text-xs font-semibold text-muted-foreground">{label}</p>
       <p className="mt-1 text-sm">{value || "Sin registro"}</p>
-    </div>
-  );
-}
-
-function PrintTextBlock({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold text-muted-foreground">{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm">{value || "Sin registro"}</p>
     </div>
   );
 }

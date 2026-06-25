@@ -9,7 +9,7 @@ import { listActiveHospitalizations, listHospitalDailySheets } from "@/lib/api/h
 import { demoHospitalDailySheets } from "@/lib/demo-record";
 import type { HospitalDailySheet, HospitalizationBoardItem } from "@/lib/types";
 
-import { PrintFooter, PrintPage, PrintToolbar } from "./clinical-print";
+import { PaperTraceability, PrintFooter, PrintPage, PrintToolbar } from "./clinical-print";
 
 type RoundPrintRow = {
   item: HospitalizationBoardItem;
@@ -64,6 +64,18 @@ function HospitalRoundPrintSheet({ rows }: { rows: RoundPrintRow[] }) {
           Fecha operacional: {new Date().toLocaleDateString("es-CL")}
         </p>
       </header>
+      <PaperTraceability
+        items={[
+          { label: "Fuente", value: "hospitalization-board + hojas diarias" },
+          { label: "Estado", value: "Lectura operacional" },
+          { label: "Actor", value: "No aplica" },
+          {
+            label: "Fecha clinica",
+            value: <span suppressHydrationWarning>{new Date().toLocaleDateString("es-CL")}</span>,
+          },
+        ]}
+        limitation="Ronda de lectura; no reemplaza evolucion, indicacion ni hoja diaria firmada."
+      />
       <div className="space-y-4 py-6">
         {rows.length === 0 ? (
           <section className="print-section rounded-md border border-dashed p-4">

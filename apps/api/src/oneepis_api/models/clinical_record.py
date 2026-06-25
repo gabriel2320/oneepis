@@ -14,7 +14,6 @@ from oneepis_api.models.appointment import ClinicalAppointment as ClinicalAppoin
 from oneepis_api.models.base import IdMixin, TimestampMixin
 from oneepis_api.models.medication_catalog import MedicationCatalogItem
 from oneepis_api.models.patient import enum_values
-from oneepis_api.models.vital_sign import VitalSign as VitalSign
 
 if TYPE_CHECKING:
     from oneepis_api.models.patient import Patient
@@ -34,6 +33,7 @@ class ClinicalEntryStatus(enum.StrEnum):
     DRAFT = "draft"
     SIGNED = "signed"
     AMENDED = "amended"
+    ENTERED_IN_ERROR = "entered_in_error"
 
 
 class ClinicalEventType(enum.StrEnum):

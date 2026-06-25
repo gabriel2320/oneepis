@@ -22,6 +22,6 @@ def create_clinical_insight(
 
 
 @router.get("/status", response_model=AIProviderStatus)
-def get_ai_status(settings: SettingsDep) -> AIProviderStatus:
+def get_ai_status(settings: SettingsDep, _user: AiAccessDep) -> AIProviderStatus:
     provider = get_ai_provider(settings)
     return provider.status()

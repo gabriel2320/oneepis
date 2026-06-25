@@ -14,13 +14,18 @@
     "dev:web": "npm --workspace apps/web run dev",
     "dev:api": "node scripts/dev-api.mjs",
     "check:api": "node scripts/check-api.mjs",
+    "check:migrations:postgres": "node scripts/check-postgres-migrations.mjs",
     "check:screens": "node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
     "check:size": "node scripts/check-file-size.mjs && npm run check:screens",
+    "check:paper-traceability": "node scripts/check-paper-traceability.mjs",
+    "check:architecture": "npm run check:paper-traceability",
     "check:web": "npm run check:size && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
-    "check:contract": "node scripts/export-openapi.mjs && node scripts/check-assistant-read-contract.mjs && git diff --exit-code packages/contracts/openapi.json",
+    "check:contract": "node scripts/check-openapi-contract.mjs && node scripts/check-assistant-read-contract.mjs",
     "check:e2e": "npm --workspace apps/web run test:e2e && npm --workspace apps/web run test:e2e:assistant-read",
     "check:npm-advisories": "node scripts/check-npm-advisories.mjs",
-    "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
+    "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e",
+    "audit:variables-domain-snapshots": "node scripts/audit-variable-domain-snapshots.mjs",
+    "audit:permissions-read-access": "node scripts/audit-permissions-read-access.mjs"
   },
   "engines": {
     "node": ">=22.0.0",

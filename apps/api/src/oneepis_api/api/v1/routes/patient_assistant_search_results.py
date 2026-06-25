@@ -9,8 +9,8 @@ from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEvent,
     Medication,
-    VitalSign,
 )
+from oneepis_api.models.vital_sign import VitalSign
 from oneepis_api.schemas.clinical_record import AssistantSearchResult
 
 from .patient_assistant_common import (

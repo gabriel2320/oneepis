@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { formatDateTime } from "@/components/clinical/date-format";
 import { ClinicalPaperSheet, PrintPage, PrintToolbar } from "@/components/print/clinical-print";
+import { paperTraceability } from "@/components/print/clinical-print-traceability";
 import { DEMO_MODE } from "@/lib/api/client";
 import { listHospitalIndications } from "@/lib/api/hospitalization";
 import { getPatientRecord } from "@/lib/api/patients";
@@ -60,12 +61,13 @@ function HospitalIndicationPrintSheet({
     <ClinicalPaperSheet
       record={record}
       title="Indicacion hospitalaria"
-      metadata={{
-        source: `indicacion hospitalaria ${indication.id}`,
-        status: `${hospitalIndicationStatusLabel[indication.status]} no firmada`,
+      traceability={paperTraceability({
+        source: `hospital_indications/${indication.id}`,
+        status: hospitalIndicationStatusLabel[indication.status],
         actor: indication.created_by,
         clinicalDate: formatDateTime(indication.indicated_at),
-      }}
+        limitation: "Borrador no firmado; no equivale a orden ejecutable ni receta valida.",
+      })}
     >
       <section className="print-section rounded-md border border-warning/40 bg-warning/10 p-3">
         <h2 className="text-sm font-semibold">Borrador no firmado</h2>

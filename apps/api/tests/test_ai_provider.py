@@ -1,8 +1,11 @@
 import json
 
+from fastapi.testclient import TestClient
+
 from oneepis_api.core.config import Settings
 from oneepis_api.schemas.ai import ClinicalInsightRequest
 from oneepis_api.services.ai.provider import OllamaProvider, get_ai_provider
+from oneepis_api.services.auth import AuthenticatedUser, UserRole, create_access_token
 
 
 class FakeOllamaProvider(OllamaProvider):
@@ -66,6 +69,33 @@ def test_get_ai_provider_selects_ollama() -> None:
     assert provider.name == "ollama"
 
 
+def test_ai_status_requires_ai_permission(client: TestClient, auth_headers) -> None:
+    unauthorized = client.get("/api/v1/ai/status")
+    readonly = client.get(
+        "/api/v1/ai/status",
+        headers=auth_headers(client, email="lector@oneepis.local", password="lector"),
+    )
+    nursing = client.get(
+        "/api/v1/ai/status",
+        headers=auth_headers(client, email="enfermeria@oneepis.local", password="enfermeria"),
+    )
+
+    assert unauthorized.status_code == 401
+    assert readonly.status_code == 403
+    assert nursing.status_code == 403
+
+    medico = client.get("/api/v1/ai/status", headers=auth_headers(client))
+    admin = client.get(
+        "/api/v1/ai/status",
+        headers=auth_headers(client, email="admin@oneepis.local", password="admin"),
+    )
+    dev = client.get("/api/v1/ai/status", headers=_dev_token_headers())
+
+    assert medico.status_code == 200
+    assert admin.status_code == 200
+    assert dev.status_code == 200
+
+
 def test_get_ai_provider_prefers_summary_model_for_clinical_insights() -> None:
     settings = Settings(
         ai_provider="ollama",
@@ -77,6 +107,17 @@ def test_get_ai_provider_prefers_summary_model_for_clinical_insights() -> None:
 
     assert provider.name == "ollama"
     assert provider.model == "qwen3:8b"
+
+
+def _dev_token_headers() -> dict[str, str]:
+    user = AuthenticatedUser(
+        email="dev@oneepis.local",
+        name="Dev",
+        roles=frozenset({UserRole.DEV}),
+        actor_id="dev@oneepis.local",
+    )
+    token, _expires_at = create_access_token(Settings(ai_provider="local_rules"), user)
+    return {"Authorization": f"Bearer {token}"}
 
 
 def test_get_ai_provider_prefers_suggestions_model() -> None:
