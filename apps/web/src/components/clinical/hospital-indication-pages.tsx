@@ -108,6 +108,17 @@ function HospitalIndicationWorkspace({ patientId }: { patientId: string }) {
         {closeMutation.isError ? (
           <p className="mt-3 text-sm text-destructive">No se pudo cerrar el borrador.</p>
         ) : null}
+        <div className="mt-4 rounded-md border border-dashed p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold">Ejecucion bloqueada</p>
+            <span className="rounded-md bg-warning/15 px-2 py-1 text-xs font-medium text-warning-foreground">
+              No ejecutable
+            </span>
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Requiere orden firmada, doble chequeo, MAR activo, registro de administracion y auditoria de ejecucion.
+          </p>
+        </div>
       </ClinicalSectionCard>
       <ClinicalSectionCard title="Nueva indicacion">
         {DEMO_MODE ? (

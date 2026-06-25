@@ -297,6 +297,17 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: proveedor externo activo, RAG, embeddings externos,
   persistencia de prompts, envio de PHI y decision clinica automatica.
 
+### PROG-HOSP-INDICATION-EXEC-BLOCK-01: ejecucion de indicaciones bloqueada
+
+- Estado: guardrail visible implementado sin modelo ni endpoint nuevo.
+- Decision: mantener indicaciones hospitalarias como borradores no ejecutables
+  hasta existir firma y circuito de administracion.
+- Resultado: la pantalla de indicaciones declara requisitos faltantes de orden
+  firmada, doble chequeo, MAR activo, registro de administracion y auditoria de
+  ejecucion.
+- Fuera de alcance: Kardex, MAR, administracion de medicamentos, firma real,
+  despacho y alertas automaticas.
+
 ### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
 - Estado: decision docs-only cerrada y permiso estrecho implementado.
