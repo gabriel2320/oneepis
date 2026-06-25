@@ -136,18 +136,7 @@ export function PatientSummaryPrintSheet({
           {record.patient.first_name} {record.patient.last_name} - {record.patient.birth_date}
         </p>
       </section>
-      <section className="print-section">
-        <h2 className="text-sm font-semibold">Alergias</h2>
-        <p className="mt-2 text-sm">
-          {record.active_allergies.map((item) => item.substance).join(", ") || "Sin alergias activas"}
-        </p>
-      </section>
-      <section className="print-section">
-        <h2 className="text-sm font-semibold">Medicacion activa</h2>
-        <p className="mt-2 text-sm">
-          {record.active_medications.map((item) => item.name).join(", ") || "Sin medicacion activa"}
-        </p>
-      </section>
+      <PrintStructuredAntecedents record={record} />
       <section className="print-section">
         <h2 className="mb-3 text-sm font-semibold">Evoluciones recientes</h2>
         <ClinicalTimeline entries={record.recent_entries} />
@@ -160,6 +149,86 @@ export function PatientSummaryPrintSheet({
         </p>
       </section>
     </ClinicalPaperSheet>
+  );
+}
+
+function PrintStructuredAntecedents({ record }: { record: PatientRecordSnapshot }) {
+  return (
+    <section className="print-section">
+      <h2 className="text-sm font-semibold">Antecedentes estructurados</h2>
+      <div className="mt-3 grid gap-3 md:grid-cols-3">
+        <PrintAntecedentColumn
+          title="Problemas activos"
+          source="active_problem"
+          emptyLabel="Sin problemas activos"
+          items={record.active_problems.map((problem) => ({
+            id: problem.id,
+            title: problem.title,
+            detail: [problem.code_system, problem.code].filter(Boolean).join(" ") || "Sin codigo",
+            meta: `Inicio: ${problem.onset_date ?? "sin fecha"}`,
+          }))}
+        />
+        <PrintAntecedentColumn
+          title="Alergias activas"
+          source="allergy"
+          emptyLabel="Sin alergias activas"
+          items={record.active_allergies.map((allergy) => ({
+            id: allergy.id,
+            title: allergy.substance,
+            detail: allergy.reaction ?? "Reaccion no documentada",
+            meta: `Severidad: ${allergy.severity}`,
+          }))}
+        />
+        <PrintAntecedentColumn
+          title="Medicacion activa"
+          source="medication"
+          emptyLabel="Sin medicacion activa"
+          items={record.active_medications.map((medication) => ({
+            id: medication.id,
+            title: medication.name,
+            detail:
+              [medication.dose, medication.route, medication.frequency].filter(Boolean).join(" / ") ||
+              "Detalle pendiente",
+            meta: `Inicio: ${medication.started_on ?? "sin fecha"}`,
+          }))}
+        />
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Este bloque imprime las fuentes estructuradas existentes; no crea antecedentes nuevos.
+      </p>
+    </section>
+  );
+}
+
+function PrintAntecedentColumn({
+  title,
+  source,
+  emptyLabel,
+  items,
+}: {
+  title: string;
+  source: string;
+  emptyLabel: string;
+  items: { id: string; title: string; detail: string; meta: string }[];
+}) {
+  return (
+    <div className="rounded-md border p-3">
+      <h3 className="text-xs font-semibold uppercase text-muted-foreground">{title}</h3>
+      <p className="mt-1 text-[11px] text-muted-foreground">Fuente: {source}</p>
+      {items.length > 0 ? (
+        <ul className="mt-2 space-y-2">
+          {items.slice(0, 4).map((item) => (
+            <li key={item.id} className="text-xs">
+              <p className="font-medium text-foreground">{item.title}</p>
+              <p className="text-muted-foreground">{item.detail}</p>
+              <p className="text-muted-foreground">{item.meta}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-xs text-muted-foreground">{emptyLabel}</p>
+      )}
+    </div>
   );
 }
 
