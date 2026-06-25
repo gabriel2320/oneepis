@@ -127,7 +127,14 @@ export function PatientSummaryPrintSheet({
   title: string;
 }) {
   return (
-    <ClinicalPaperSheet record={record} title={title}>
+    <ClinicalPaperSheet
+      record={record}
+      title={title}
+      metadata={{
+        source: "record paciente",
+        status: title === "Ficha clinica" ? "Ficha de lectura no firmada" : "Resumen no persistido",
+      }}
+    >
       <section className="print-section">
         <h2 className="text-sm font-semibold">Identificacion</h2>
         <p className="mt-2 text-sm">
@@ -205,7 +212,16 @@ export function SoapPrintSheet({
   entry: ClinicalEntry;
 }) {
   return (
-    <ClinicalPaperSheet record={record} title="Evolucion SOAP">
+    <ClinicalPaperSheet
+      record={record}
+      title="Evolucion SOAP"
+      metadata={{
+        source: `clinical entry ${entry.id}`,
+        status: entry.status === "draft" ? "Borrador no firmado" : entry.status,
+        actor: entry.created_by,
+        clinicalDate: formatDateTime(entry.occurred_at),
+      }}
+    >
       <section className="print-section space-y-3">
         <div>
           <h2 className="text-sm font-semibold">{entry.title}</h2>
@@ -228,7 +244,16 @@ export function HospitalDailyPrintSheet({
   sheet: HospitalDailySheet;
 }) {
   return (
-    <ClinicalPaperSheet record={record} title="Hoja diaria hospitalizada">
+    <ClinicalPaperSheet
+      record={record}
+      title="Hoja diaria hospitalizada"
+      metadata={{
+        source: `hoja diaria ${sheet.id}`,
+        status: sheet.status === "closed" ? "Cerrada no firmada" : "Borrador no firmado",
+        actor: sheet.created_by,
+        clinicalDate: sheet.sheet_date,
+      }}
+    >
       <section className="print-section space-y-3">
         <div>
           <h2 className="text-sm font-semibold">Fecha {sheet.sheet_date}</h2>

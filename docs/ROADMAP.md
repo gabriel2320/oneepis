@@ -237,6 +237,15 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
   declaran limites visibles.
 - Fuera de alcance: escritura, IA nueva, dashboard, rutas y OpenAPI.
 
+### PROG-PAPER-METADATA-01: papel con metadata documental visible
+
+- Estado: polish implementado sin endpoint nuevo.
+- Decision: reforzar el marco comun de papel antes de firma legal.
+- Resultado: hojas carta muestran fuente, estado, actor y fecha clinica cuando
+  existen, manteniendo footer de desarrollo y bloqueo de fallback silencioso.
+- Fuera de alcance: firma real, folio, receta valida, adjuntos y custodia
+  documental.
+
 ### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
 - Estado: decision docs-only cerrada y permiso estrecho implementado.

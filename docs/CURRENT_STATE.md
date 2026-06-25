@@ -315,6 +315,8 @@ Consulta:
 Documentos/papel:
 
 - `/pacientes/[patientId]/documentos` es indice real de papel existente: ficha, resumen, evoluciones, ingreso y epicrisis cuando hay entradas disponibles
+- las hojas carta muestran metadata documental comun: fuente, estado, actor y
+  fecha clinica cuando la fuente los expone
 - adjuntos externos, consentimientos, custodia documental, firma real y receta valida siguen bloqueados/futuros
 
 Seguridad clinica:
@@ -384,6 +386,8 @@ Capas:
 - `src/components/clinical/*`: cards, widgets y pantallas clinicas
 - `src/components/print/*`: hojas imprimibles
 - modo papel mantiene toolbar uniforme "Vista papel" y hoja carta con footer de desarrollo cuando aplica
+- el marco de papel muestra metadata documental comun antes del contenido para
+  hacer visible fuente, estado y limites de firma
 - las rutas print no hacen fallback silencioso a otro documento cuando el ID solicitado no existe
 
 Tests API:
