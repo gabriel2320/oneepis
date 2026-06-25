@@ -266,6 +266,16 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: prescripcion valida, firma, folio real, orden, despacho y
   administracion de medicamentos.
 
+### PROG-CONSENT-BLOCK-01: consentimiento bloqueado explicito
+
+- Estado: guardrail visible implementado sin modelo ni endpoint.
+- Decision: mantener consentimientos como borde futuro hasta definir custodia y
+  firma documental.
+- Resultado: el indice de documentos declara requisitos faltantes de plantilla
+  versionada, firmante, fecha, custodia y revocacion.
+- Fuera de alcance: firma real, carga de adjuntos, almacenamiento documental y
+  gestion legal de consentimientos.
+
 ### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
 - Estado: decision docs-only cerrada y permiso estrecho implementado.
