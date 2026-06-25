@@ -276,6 +276,17 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: firma real, carga de adjuntos, almacenamiento documental y
   gestion legal de consentimientos.
 
+### PROG-ATTACHMENT-BLOCK-01: adjuntos externos bloqueados explicitos
+
+- Estado: guardrail visible implementado sin modelo ni endpoint.
+- Decision: mantener adjuntos externos como borde futuro hasta definir
+  almacenamiento documental y seguridad PHI.
+- Resultado: el indice de documentos declara requisitos faltantes de
+  almacenamiento documental, tipo, virus scan, PHI policy, retencion y
+  trazabilidad.
+- Fuera de alcance: carga de archivos, almacenamiento documental, antivirus
+  real, previsualizacion, OCR/RAG, firma y custodia legal.
+
 ### PROG-AMB-PRECONSULTA-PERMISSIONS-00 y 01: decision y permiso estrecho
 
 - Estado: decision docs-only cerrada y permiso estrecho implementado.

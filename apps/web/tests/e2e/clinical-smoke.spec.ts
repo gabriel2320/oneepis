@@ -266,6 +266,9 @@ test("patient documents render paper index and blocked future documents", async 
   await expect(page.getByText("Receta valida")).toBeVisible();
   await expect(page.getByText("Requiere firma, folio, actor, fecha clinica y permisos.")).toBeVisible();
   await expect(page.getByText("Adjuntos externos", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Requiere almacenamiento documental, tipo, virus scan, PHI policy, retencion y trazabilidad."),
+  ).toBeVisible();
   await expect(page.getByText("Consentimientos", { exact: true })).toBeVisible();
   await expect(
     page.getByText("Requiere plantilla versionada, firmante, fecha, custodia y revocacion."),

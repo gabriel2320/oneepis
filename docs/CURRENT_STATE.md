@@ -325,6 +325,9 @@ Documentos/papel:
   fecha clinica cuando la fuente los expone
 - consentimientos siguen bloqueados y declaran requisitos faltantes: plantilla
   versionada, firmante, fecha, custodia y revocacion
+- adjuntos externos siguen bloqueados y declaran requisitos faltantes:
+  almacenamiento documental, tipo, virus scan, PHI policy, retencion y
+  trazabilidad
 - adjuntos externos, consentimientos, custodia documental, firma real y receta valida siguen bloqueados/futuros
 
 Seguridad clinica:
