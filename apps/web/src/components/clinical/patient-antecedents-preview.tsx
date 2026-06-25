@@ -12,9 +12,9 @@ import { DEMO_MODE } from "@/lib/api/client";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 import {
-  antecedentEventTypes,
   buildAntecedentItems,
   categoryLabel,
+  isCuratedAntecedentEvent,
   sourceDetails,
   sourceLabels,
   type AntecedentSource,
@@ -33,7 +33,7 @@ export function PatientAntecedentsPreview({
     enabled: !DEMO_MODE,
   });
   const curatedEvents = (timelineQuery.data?.events ?? [])
-    .filter((event) => antecedentEventTypes.has(event.event_type))
+    .filter(isCuratedAntecedentEvent)
     .slice(0, 4);
   const items = buildAntecedentItems(record, patientId, curatedEvents);
   const sourceCounts = {
