@@ -171,6 +171,11 @@ npm run check:architecture
 npm run check:e2e
 ```
 
+`check:architecture` agrupa pantallas, permisos, papel, drift de contratos,
+trazabilidad y la politica report-only de auditoria de lectura. El reporte de
+lectura se regenera, pero no bloquea por hallazgos hasta cerrar retencion,
+volumen y tests de no regresion.
+
 El gate completo local es:
 
 ```bash

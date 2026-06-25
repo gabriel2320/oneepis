@@ -24,6 +24,7 @@ const report = {
   generated_at: new Date().toISOString(),
   scope: "clinical_read_access_policy_report_only",
   source_report: "reports/read-access-map.json",
+  report_only: true,
   summary,
   blockers_before_blocking: [
     "definir retencion y volumen esperado de eventos de lectura",
@@ -47,6 +48,8 @@ const report = {
   rows,
 };
 
+assertReportOnly(report);
+
 write("reports/read-access-policy.json", `${JSON.stringify(report, null, 2)}\n`);
 write("reports/read-access-policy.md", renderMarkdown(report));
 
@@ -67,6 +70,18 @@ function classifyPolicy(row) {
     rationale: classification.rationale,
     ci_behavior: "report-only",
   };
+}
+
+function assertReportOnly(report) {
+  if (report.summary.blocking_ready) {
+    throw new Error("Read access policy cannot be blocking until retention, volume and tests are defined.");
+  }
+  const blockingRows = report.rows.filter((row) => row.ci_behavior !== "report-only");
+  if (blockingRows.length > 0) {
+    throw new Error(
+      `Read access policy must remain report-only; ${blockingRows.length} row(s) changed CI behavior.`,
+    );
+  }
 }
 
 function proposedPolicy(row) {

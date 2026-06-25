@@ -1,7 +1,8 @@
 {
-  "generated_at": "2026-06-25T01:27:44.002Z",
+  "generated_at": "2026-06-25T01:29:27.566Z",
   "scope": "clinical_read_access_policy_report_only",
   "source_report": "reports/read-access-map.json",
+  "report_only": true,
   "summary": {
     "routes_reviewed": 26,
     "audit_required_p0": 6,
