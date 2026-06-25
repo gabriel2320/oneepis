@@ -232,7 +232,9 @@ Fortalezas actuales:
   basados en `PatientRecordSnapshot`, con paridad basica en papel de ficha y sin
   duplicar fuente primaria
 - eje de episodio esta auditado en `reports/encounter-axis-map.*` sin migraciones nuevas
-- `npm run check:architecture` agrupa `check:screens`, `check:permissions`, `check:paper`, `check:contracts:drift` y `check:traceability`
+- `npm run check:architecture` agrupa `check:screens`, `check:permissions`,
+  `check:paper`, `check:contracts:drift`, `check:traceability` y la politica
+  report-only de auditoria de lectura
 - `npm run check` incluye API, web, contrato, arquitectura y E2E
 - `check:screens` falla si una ruta bloqueada no declara `clinicalUse=blocked`
   o si un papel limitado se marca como `clinically-valid`

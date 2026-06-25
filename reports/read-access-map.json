@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-06-24T22:56:39.445Z",
+  "generated_at": "2026-06-25T01:27:43.996Z",
   "scope": "clinical_read_access_report_only",
   "summary": {
-    "get_routes_checked": 25,
-    "read_audit_candidates": 22,
+    "get_routes_checked": 26,
+    "read_audit_candidates": 23,
     "technical_or_session_exemptions": 3,
-    "report_only_gaps": 22
+    "report_only_gaps": 23
   },
   "rows": [
     {
@@ -115,6 +115,18 @@
       "access_dependency": "router:PATIENT_ROUTER_OPTIONS",
       "current_read_audit": "no implementada",
       "recommendation": "Auditar como lectura de entidad clinica asociada a paciente."
+    },
+    {
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_assistant.py",
+      "function_name": "get_assistant_timeline",
+      "method": "GET",
+      "path": "/{patient_id}/assistant/timeline",
+      "full_path": "/api/v1/patients/{patient_id}/assistant/timeline",
+      "policy": "READ_AUDIT_CANDIDATE",
+      "sensitivity": "clinical_timeline",
+      "access_dependency": "router:PATIENT_ROUTER_OPTIONS",
+      "current_read_audit": "no implementada",
+      "recommendation": "Auditar como lectura longitudinal sensible."
     },
     {
       "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_audit.py",

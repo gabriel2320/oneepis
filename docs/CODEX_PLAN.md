@@ -855,9 +855,10 @@ Reglas:
 Estado: implementado en modo report-only. `npm run audit:read-access` genera
 `reports/read-access-map.*` con rutas `GET` de FastAPI, clasifica lecturas
 clinicas sensibles como `READ_AUDIT_CANDIDATE` y mantiene exenciones tecnicas
-para health, estado IA y sesion. El reporte no esta en `check:architecture`
-porque aun falta revisar volumen, privacidad, retencion y falsos positivos antes
-de convertirlo en guard.
+para health, estado IA y sesion. `check:architecture` regenera el reporte a
+traves de `audit:read-access-policy`, pero no falla por hallazgos porque aun
+falta revisar volumen, privacidad, retencion y falsos positivos antes de
+convertirlo en guard bloqueante.
 
 #### C5-02 Read audit guard proposal
 
@@ -879,7 +880,8 @@ clinica y documentos hospitalarios; `AUDIT_REQUIRED_P1` para entidades clinicas
 de paciente; `REVIEW_VOLUME_POLICY` para listas/busquedas de alto volumen; y
 `EXEMPT_TECHNICAL` para health, sesion y estado IA. El reporte declara
 `blocking_ready=false` hasta definir retencion, volumen, metadata minima y
-tests de no regresion.
+tests de no regresion; `check:architecture` lo incluye solo como reporte
+regenerado.
 
 #### C6 Ficha paciente formal v0.5
 

@@ -1,11 +1,11 @@
 # Read Access Policy - OneEpis
 
-Generado: 2026-06-24T22:56:39.452Z
+Generado: 2026-06-25T01:27:44.002Z
 
 ## Resumen
 
-- Rutas revisadas: 25
-- Auditoria requerida P0: 5
+- Rutas revisadas: 26
+- Auditoria requerida P0: 6
 - Auditoria requerida P1: 15
 - Requieren politica de volumen/retencion: 2
 - Exentas tecnicas: 3
@@ -45,6 +45,7 @@ GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets (apps/api/src/one
 GET /api/v1/hospitalization/patients/{patient_id}/indications (apps/api/src/oneepis_api/api/v1/routes/hospitalization_indications.py) | hospital_document | AUDIT_REQUIRED_P0 | primera_implementacion | report-only | Lectura clinica sensible o documental; debe dejar trail antes de produccion.
 GET /api/v1/patients/{patient_id}/allergies (apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py) | patient_child_entity | AUDIT_REQUIRED_P1 | segunda_implementacion | report-only | Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.
 GET /api/v1/patients/{patient_id}/allergies/{allergy_id} (apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py) | patient_child_entity | AUDIT_REQUIRED_P1 | segunda_implementacion | report-only | Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.
+GET /api/v1/patients/{patient_id}/assistant/timeline (apps/api/src/oneepis_api/api/v1/routes/patient_assistant.py) | clinical_timeline | AUDIT_REQUIRED_P0 | primera_implementacion | report-only | Lectura clinica sensible o documental; debe dejar trail antes de produccion.
 GET /api/v1/patients/{patient_id}/audit-events (apps/api/src/oneepis_api/api/v1/routes/patient_audit.py) | audit_trail | AUDIT_REQUIRED_P0 | primera_implementacion | report-only | Lectura clinica sensible o documental; debe dejar trail antes de produccion.
 GET /api/v1/patients (apps/api/src/oneepis_api/api/v1/routes/patient_core.py) | patient_search_or_identity | REVIEW_VOLUME_POLICY | diseno_retencion | report-only | Puede generar alto volumen o corresponder a catalogo/lista; requiere politica de muestreo o retencion.
 GET /api/v1/patients/{patient_id} (apps/api/src/oneepis_api/api/v1/routes/patient_core.py) | patient_child_entity | AUDIT_REQUIRED_P1 | segunda_implementacion | report-only | Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.

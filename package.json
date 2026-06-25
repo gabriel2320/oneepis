@@ -28,7 +28,7 @@
     "check:contract": "node scripts/python.js apps/api/scripts/export_openapi.py && git diff --exit-code packages/contracts/openapi.json",
     "check:contracts:drift": "node scripts/check-contract-drift.mjs",
     "check:traceability": "node scripts/check-traceability-policy.mjs",
-    "check:architecture": "npm run check:screens && npm run check:permissions && npm run check:paper && npm run check:contracts:drift && npm run check:traceability",
+    "check:architecture": "npm run check:screens && npm run check:permissions && npm run check:paper && npm run check:contracts:drift && npm run check:traceability && npm run audit:read-access-policy",
     "check:e2e": "npm --workspace apps/web run test:e2e",
     "check": "npm run check:api && npm run check:web && npm run check:contract && npm run check:architecture && npm run check:e2e"
   },

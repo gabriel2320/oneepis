@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-06-24T22:56:39.452Z",
+  "generated_at": "2026-06-25T01:27:44.002Z",
   "scope": "clinical_read_access_policy_report_only",
   "source_report": "reports/read-access-map.json",
   "summary": {
-    "routes_reviewed": 25,
-    "audit_required_p0": 5,
+    "routes_reviewed": 26,
+    "audit_required_p0": 6,
     "audit_required_p1": 15,
     "review_volume_policy": 2,
     "exempt_technical": 3,
@@ -127,6 +127,17 @@
       "proposed_policy": "AUDIT_REQUIRED_P1",
       "rollout_phase": "segunda_implementacion",
       "rationale": "Lectura clinica de entidad o tablero con paciente; auditable tras validar volumen.",
+      "ci_behavior": "report-only"
+    },
+    {
+      "route": "GET /api/v1/patients/{patient_id}/assistant/timeline",
+      "route_file": "apps/api/src/oneepis_api/api/v1/routes/patient_assistant.py",
+      "function_name": "get_assistant_timeline",
+      "sensitivity": "clinical_timeline",
+      "current_policy": "READ_AUDIT_CANDIDATE",
+      "proposed_policy": "AUDIT_REQUIRED_P0",
+      "rollout_phase": "primera_implementacion",
+      "rationale": "Lectura clinica sensible o documental; debe dejar trail antes de produccion.",
       "ci_behavior": "report-only"
     },
     {

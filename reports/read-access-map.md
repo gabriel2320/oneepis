@@ -1,13 +1,13 @@
 # Read Access Map - OneEpis
 
-Generado: 2026-06-24T22:56:39.445Z
+Generado: 2026-06-25T01:27:43.996Z
 
 ## Resumen
 
-- Rutas GET revisadas: 25
-- Candidatas a auditoria de lectura: 22
+- Rutas GET revisadas: 26
+- Candidatas a auditoria de lectura: 23
 - Exenciones tecnicas/sesion: 3
-- Brechas report-only: 22
+- Brechas report-only: 23
 
 ## Politica
 
@@ -26,6 +26,7 @@ GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets (apps/api/src/one
 GET /api/v1/hospitalization/patients/{patient_id}/indications (apps/api/src/oneepis_api/api/v1/routes/hospitalization_indications.py) | list_hospital_indications | READ_AUDIT_CANDIDATE | hospital_document | router:require_patient_read_access | no implementada | Auditar como lectura de documento o lista clinica hospitalaria.
 GET /api/v1/patients/{patient_id}/allergies (apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py) | list_allergies | READ_AUDIT_CANDIDATE | patient_child_entity | router:PATIENT_ROUTER_OPTIONS | no implementada | Auditar como lectura de entidad clinica asociada a paciente.
 GET /api/v1/patients/{patient_id}/allergies/{allergy_id} (apps/api/src/oneepis_api/api/v1/routes/patient_allergies.py) | get_allergy | READ_AUDIT_CANDIDATE | patient_child_entity | router:PATIENT_ROUTER_OPTIONS | no implementada | Auditar como lectura de entidad clinica asociada a paciente.
+GET /api/v1/patients/{patient_id}/assistant/timeline (apps/api/src/oneepis_api/api/v1/routes/patient_assistant.py) | get_assistant_timeline | READ_AUDIT_CANDIDATE | clinical_timeline | router:PATIENT_ROUTER_OPTIONS | no implementada | Auditar como lectura longitudinal sensible.
 GET /api/v1/patients/{patient_id}/audit-events (apps/api/src/oneepis_api/api/v1/routes/patient_audit.py) | list_patient_audit_events | READ_AUDIT_CANDIDATE | audit_trail | router:PATIENT_ROUTER_OPTIONS | no implementada | Prioridad alta: lectura de auditoria clinica debe dejar trail.
 GET /api/v1/patients (apps/api/src/oneepis_api/api/v1/routes/patient_core.py) | list_patients | READ_AUDIT_CANDIDATE | patient_search_or_identity | router:PATIENT_ROUTER_OPTIONS | no implementada | Auditar o muestrear segun volumen: expone identidad/lista de pacientes.
 GET /api/v1/patients/{patient_id} (apps/api/src/oneepis_api/api/v1/routes/patient_core.py) | get_patient | READ_AUDIT_CANDIDATE | patient_child_entity | router:PATIENT_ROUTER_OPTIONS | no implementada | Auditar como lectura de entidad clinica asociada a paciente.
