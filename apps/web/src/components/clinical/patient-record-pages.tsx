@@ -4,6 +4,7 @@ import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiInsightPanel } from "@/components/clinical/ai-insight-panel";
 import { AiSafetyPanel } from "@/components/clinical/ai-safety-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { StructuredAntecedentsReadModel } from "@/components/clinical/patient-antecedents-read-model";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
 import { PatientFormalCover } from "@/components/clinical/patient-formal-cover";
 import {
@@ -92,6 +93,12 @@ function PatientSectionContent({
         <VitalsStrip vital={record.latest_vitals} />
         <EncounterTraceSummary record={record} patientId={patientId} />
         <PatientLongitudinalSummary record={record} />
+        <ClinicalSectionCard
+          title="Antecedentes estructurados"
+          description="Read-model de problemas, alergias y medicacion activa desde sus fuentes."
+        >
+          <StructuredAntecedentsReadModel record={record} patientId={patientId} />
+        </ClinicalSectionCard>
         <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
           <ClinicalSectionCard
             title="Linea clinica"
