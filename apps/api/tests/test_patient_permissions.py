@@ -27,6 +27,23 @@ def test_readonly_user_cannot_write_patient(
     assert response.status_code == 403
 
 
+def test_readonly_user_cannot_update_patient(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.patch(
+        f"/api/v1/patients/{patient_id}",
+        headers=readonly_auth,
+        json={"preferred_name": "Lectura"},
+    )
+
+    assert response.status_code == 403
+
+
 def test_readonly_user_can_read_patient_snapshot(
     client: TestClient,
     auth_headers,
@@ -108,3 +125,93 @@ def test_nursing_can_record_vitals_but_not_medical_actions(
         json={"focus": "summary"},
     )
     assert ai_response.status_code == 403
+
+
+def test_nursing_cannot_write_allergies(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/allergies",
+        headers=nursing_auth,
+        json={
+            "substance": "Penicilina",
+            "reaction": "Exantema",
+            "recorded_at": "2026-06-20T12:00:00Z",
+        },
+    )
+    assert create_response.status_code == 403
+
+    allowed_create_response = client.post(
+        f"/api/v1/patients/{patient_id}/allergies",
+        headers=auth,
+        json={
+            "substance": "Aspirina",
+            "reaction": "Urticaria",
+            "recorded_at": "2026-06-20T12:05:00Z",
+        },
+    )
+    assert allowed_create_response.status_code == 201
+    allergy_id = allowed_create_response.json()["id"]
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/allergies/{allergy_id}",
+        headers=nursing_auth,
+        json={"severity": "severe"},
+    )
+    assert update_response.status_code == 403
+
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/allergies/{allergy_id}",
+        headers=nursing_auth,
+    )
+    assert delete_response.status_code == 403
+
+
+def test_readonly_user_cannot_write_clinical_events(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=readonly_auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:00:00Z",
+            "summary": "Evento solo lectura",
+        },
+    )
+    assert create_response.status_code == 403
+
+    allowed_create_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:05:00Z",
+            "summary": "Evento medico",
+        },
+    )
+    assert allowed_create_response.status_code == 201
+    event_id = allowed_create_response.json()["id"]
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{event_id}",
+        headers=readonly_auth,
+        json={"summary": "Intento solo lectura"},
+    )
+    assert update_response.status_code == 403
