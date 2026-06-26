@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from oneepis_api.models.clinical_record import EncounterStatus, EncounterType
+from oneepis_api.models.clinical_record import EncounterStatus, EncounterType, EncounterWorkflowKind
 from oneepis_api.models.patient import CareContext, PatientClinicalStatus, SexAtBirth
 from oneepis_api.schemas.common import APIModel
 
@@ -28,6 +28,7 @@ class PatientContextEncounter(APIModel):
     id: uuid.UUID
     type: EncounterType
     status: EncounterStatus
+    workflow_kind: EncounterWorkflowKind
     reason: str = Field(min_length=1, max_length=200)
     started_at: datetime
     ended_at: datetime | None = None

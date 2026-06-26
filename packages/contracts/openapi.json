@@ -9666,6 +9666,10 @@
             "$ref": "#/components/schemas/EncounterStatus",
             "default": "in_progress"
           },
+          "workflow_kind": {
+            "$ref": "#/components/schemas/EncounterWorkflowKind",
+            "default": "general"
+          },
           "reason": {
             "type": "string",
             "maxLength": 200,
@@ -9730,6 +9734,10 @@
           "status": {
             "$ref": "#/components/schemas/EncounterStatus",
             "default": "in_progress"
+          },
+          "workflow_kind": {
+            "$ref": "#/components/schemas/EncounterWorkflowKind",
+            "default": "general"
           },
           "reason": {
             "type": "string",
@@ -9826,6 +9834,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/EncounterStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "workflow_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EncounterWorkflowKind"
               },
               {
                 "type": "null"
@@ -12136,6 +12154,18 @@
           "unknown"
         ],
         "title": "EncounterType"
+      },
+      "EncounterWorkflowKind": {
+        "type": "string",
+        "enum": [
+          "general",
+          "ambulatory_preconsult",
+          "ambulatory_visit",
+          "hospitalization_admission",
+          "hospitalization_daily",
+          "hospitalization_discharge"
+        ],
+        "title": "EncounterWorkflowKind"
       },
       "EventProposalFromEntry": {
         "properties": {
@@ -14882,6 +14912,9 @@
           "status": {
             "$ref": "#/components/schemas/EncounterStatus"
           },
+          "workflow_kind": {
+            "$ref": "#/components/schemas/EncounterWorkflowKind"
+          },
           "reason": {
             "type": "string",
             "maxLength": 200,
@@ -14923,6 +14956,7 @@
           "id",
           "type",
           "status",
+          "workflow_kind",
           "reason",
           "started_at"
         ],

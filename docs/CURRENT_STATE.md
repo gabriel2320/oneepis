@@ -86,8 +86,8 @@ Estado real al 2026-06-24:
 - la preconsulta minima puede ser completada por `enfermeria`, `medico`,
   `admin` o `dev`
 - el permiso de `enfermeria` es estrecho: solo crea el encuentro ambulatorio
-  tecnico marcado como preconsulta y sigue bloqueado para encuentros generales,
-  SOAP, medicacion, alergias, problemas e IA clinica
+  tecnico con `workflow_kind=ambulatory_preconsult` y sigue bloqueado para
+  encuentros generales, SOAP, medicacion, alergias, problemas e IA clinica
 - `admision` sigue futura hasta existir rol administrativo y limites de
   escritura propios
 - `PROG-CLINICAL-RISK-01` implementa riesgos clinicos minimos con entidad/API
@@ -238,7 +238,8 @@ Permisos finos:
   problemas ni IA clinica
 - encuentros clinicos generales requieren rol medico/admin/dev; la excepcion
   estrecha es la preconsulta ambulatoria minima, donde `enfermeria` puede crear
-  solo el encuentro tecnico de preconsulta
+  solo el encuentro tecnico de preconsulta marcado con
+  `workflow_kind=ambulatory_preconsult`
 - problemas activos requieren rol medico/admin/dev
 - estado de ficha y contexto asistencial se editan desde UI con rol medico/admin/dev
 - solo_lectura puede leer, pero no escribir
@@ -351,7 +352,8 @@ Consulta:
   opcionales y deja evento clinico `clinical_note` con payload `preconsult`
 - la preconsulta minima puede completarla `enfermeria`, `medico`, `admin` o
   `dev`; enfermeria solo obtiene el permiso tecnico necesario para ese flujo,
-  no gestion general de encuentros
+  no gestion general de encuentros; el permiso depende de
+  `workflow_kind=ambulatory_preconsult`, no del texto libre de `notes`
 - rol `admision` sigue futuro
 - agenda avanzada por equipos/recursos y no-show operacional siguen futuras
 - `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden

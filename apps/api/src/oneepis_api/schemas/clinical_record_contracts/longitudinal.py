@@ -10,6 +10,7 @@ from oneepis_api.models.clinical_record import (
     AllergySeverity,
     EncounterStatus,
     EncounterType,
+    EncounterWorkflowKind,
     RecordStatus,
 )
 from oneepis_api.schemas.common import APIModel
@@ -112,6 +113,7 @@ class ActiveProblemRead(ActiveProblemBase):
 class ClinicalEncounterBase(APIModel):
     type: EncounterType = EncounterType.UNKNOWN
     status: EncounterStatus = EncounterStatus.IN_PROGRESS
+    workflow_kind: EncounterWorkflowKind = EncounterWorkflowKind.GENERAL
     reason: str = Field(min_length=1, max_length=200)
     started_at: datetime
     ended_at: datetime | None = None
@@ -126,6 +128,7 @@ class ClinicalEncounterCreate(ClinicalEncounterBase):
 class ClinicalEncounterUpdate(APIModel):
     type: EncounterType | None = None
     status: EncounterStatus | None = None
+    workflow_kind: EncounterWorkflowKind | None = None
     reason: str | None = Field(default=None, min_length=1, max_length=200)
     started_at: datetime | None = None
     ended_at: datetime | None = None

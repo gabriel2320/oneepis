@@ -6,7 +6,12 @@ from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import CurrentUserDep, EncounterActorDep
-from oneepis_api.models.clinical_record import ClinicalEncounter, EncounterStatus, EncounterType
+from oneepis_api.models.clinical_record import (
+    ClinicalEncounter,
+    EncounterStatus,
+    EncounterType,
+    EncounterWorkflowKind,
+)
 from oneepis_api.schemas.clinical_record import (
     ClinicalEncounterCreate,
     ClinicalEncounterRead,
@@ -71,6 +76,7 @@ def create_clinical_encounter(
             "patient_id": str(patient_id),
             "type": encounter.type.value,
             "status": encounter.status.value,
+            "workflow_kind": encounter.workflow_kind.value,
         },
         after=audit_snapshot(encounter),
     )
@@ -94,12 +100,11 @@ def _authorize_encounter_creation(
 
 
 def _is_ambulatory_preconsult(payload: ClinicalEncounterCreate) -> bool:
-    notes = payload.notes or ""
     return (
         payload.type == EncounterType.AMBULATORY
         and payload.status == EncounterStatus.IN_PROGRESS
+        and payload.workflow_kind == EncounterWorkflowKind.AMBULATORY_PRECONSULT
         and payload.ended_at is None
-        and notes.startswith("Preconsulta vinculada a cita ")
     )
 
 

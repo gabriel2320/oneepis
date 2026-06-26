@@ -145,10 +145,11 @@ async function createPreconsult(
   const encounter = await createClinicalEncounter(patientId, {
     type: "ambulatory",
     status: "in_progress",
+    workflow_kind: "ambulatory_preconsult",
     reason,
     started_at: occurredAt,
     location_label: appointment.location_label ?? null,
-    notes: `Preconsulta vinculada a cita ${appointment.id}.`,
+    notes: "Preconsulta vinculada a cita ambulatoria.",
   });
   if (hasAnyVital(payload)) {
     await createVitalSign(patientId, {

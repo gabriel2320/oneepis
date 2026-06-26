@@ -86,7 +86,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes/[patientId]/auditoria` | Seguridad/auditoria | seguimiento | completa | audit events | no | lectura auditoria | no | no | no | auditoria de accesos futura |
 | `/consulta` | Ambulatorio | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
 | `/consulta/agenda` | Ambulatorio | episodio | completa | `clinical_appointments` | si | medico/admin/dev | si | no | no | preconsulta minima enlazada desde atencion; agenda por equipos futura |
-| `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP + preconsulta minima | si | medico/admin/dev; preconsulta enfermeria/medico/admin/dev | si | no | borrador revisable | preconsulta minima con enfermeria implementada; diagnosticos finales futuros |
+| `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP + preconsulta minima | si | medico/admin/dev; preconsulta enfermeria/medico/admin/dev | si | no | borrador revisable | preconsulta minima con `workflow_kind=ambulatory_preconsult`; diagnosticos finales futuros |
 | `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | completa | record + appointments + encounters | no | lectura paciente | no | no | lectura resumida | seguimiento formal e interconsultas futuras |
 | `/hospitalizacion` | Hospitalizacion | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
 | `/hospitalizacion/camas` | Hospitalizacion | episodio | completa | hospitalizacion + camas | si | medico/admin/dev | si | no | no | censo por servicio/equipo |
@@ -156,7 +156,7 @@ tener contrato minimo y flujo humano verificable.
 | Diagnosticos historicos | extension de problemas | contrato que separe problema activo, diagnostico historico y codificacion | no mezclar estado activo con diagnostico cerrado |
 | Ambulatorio minimo | `/consulta/agenda` | `ClinicalAppointment` con estados reales | implementado como agenda persistida; preconsulta minima vive en atencion |
 | Consulta completa | `/consulta/pacientes/[patientId]/atencion` | cierre de encuentro, diagnostico/plan y documento si aplica | SOAP/plan/cierre con auditoria y sin receta valida automatica |
-| Preconsulta ambulatoria | agenda/atencion existentes | reutilizar cita, encuentro ambulatorio, signos vitales y evento clinico de preconsulta | implementada como panel minimo en atencion; enfermeria puede completarla con permiso estrecho y admision sigue futura |
+| Preconsulta ambulatoria | agenda/atencion existentes | reutilizar cita, encuentro ambulatorio con `workflow_kind=ambulatory_preconsult`, signos vitales y evento clinico de preconsulta | implementada como panel minimo en atencion; enfermeria puede completarla con permiso estrecho y admision sigue futura |
 | Resumen ambulatorio | `/consulta/pacientes/[patientId]/resumen` | lectura de record, citas y encuentros existentes | implementado como vista de lectura; seguimiento formal queda futuro |
 | Hospitalizacion critica | ingreso medico | `ClinicalEntry(kind=intake)` vinculado a encuentro hospitalario | papel carta, borrador y auditoria implementados; firma/cierre legal futuros |
 | Evolucion hospitalaria | hoja diaria/evolucion por problema | entradas por problema vinculadas a ingreso | no reemplazar firma real; mantener borrador trazable |

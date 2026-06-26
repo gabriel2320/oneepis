@@ -149,9 +149,10 @@ def test_nursing_can_create_ambulatory_preconsult_encounter(
         json={
             "type": "ambulatory",
             "status": "in_progress",
+            "workflow_kind": "ambulatory_preconsult",
             "reason": "Preconsulta ambulatoria",
             "started_at": "2026-06-20T12:00:00Z",
-            "notes": "Preconsulta vinculada a cita 11111111-1111-4111-8111-111111111111.",
+            "notes": "Preconsulta vinculada a cita ambulatoria.",
         },
     )
 
@@ -159,6 +160,7 @@ def test_nursing_can_create_ambulatory_preconsult_encounter(
     created = response.json()
     assert created["type"] == "ambulatory"
     assert created["status"] == "in_progress"
+    assert created["workflow_kind"] == "ambulatory_preconsult"
 
     audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=nursing_auth)
     assert audit_response.status_code == 200
@@ -200,10 +202,24 @@ def test_nursing_preconsult_permission_does_not_open_general_encounters(
             "status": "in_progress",
             "reason": "Ingreso hospitalario",
             "started_at": "2026-06-20T12:05:00Z",
-            "notes": "Preconsulta vinculada a cita 11111111-1111-4111-8111-111111111111.",
+            "workflow_kind": "ambulatory_preconsult",
+            "notes": "Preconsulta vinculada a cita ambulatoria.",
         },
     )
     assert hospitalization_response.status_code == 403
+
+    text_prefix_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=nursing_auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Control ambulatorio",
+            "started_at": "2026-06-20T12:08:00Z",
+            "notes": "Preconsulta vinculada a cita 11111111-1111-4111-8111-111111111111.",
+        },
+    )
+    assert text_prefix_response.status_code == 403
 
     preconsult_response = client.post(
         f"/api/v1/patients/{patient_id}/encounters",
@@ -211,9 +227,10 @@ def test_nursing_preconsult_permission_does_not_open_general_encounters(
         json={
             "type": "ambulatory",
             "status": "in_progress",
+            "workflow_kind": "ambulatory_preconsult",
             "reason": "Preconsulta ambulatoria",
             "started_at": "2026-06-20T12:10:00Z",
-            "notes": "Preconsulta vinculada a cita 22222222-2222-4222-8222-222222222222.",
+            "notes": "Preconsulta vinculada a cita ambulatoria.",
         },
     )
     assert preconsult_response.status_code == 201

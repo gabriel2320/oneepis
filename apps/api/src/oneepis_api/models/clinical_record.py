@@ -84,6 +84,15 @@ class EncounterStatus(enum.StrEnum):
     CANCELLED = "cancelled"
 
 
+class EncounterWorkflowKind(enum.StrEnum):
+    GENERAL = "general"
+    AMBULATORY_PRECONSULT = "ambulatory_preconsult"
+    AMBULATORY_VISIT = "ambulatory_visit"
+    HOSPITALIZATION_ADMISSION = "hospitalization_admission"
+    HOSPITALIZATION_DAILY = "hospitalization_daily"
+    HOSPITALIZATION_DISCHARGE = "hospitalization_discharge"
+
+
 class ClinicalEntry(Base, IdMixin, TimestampMixin):
     __tablename__ = "clinical_entries"
 
@@ -257,6 +266,15 @@ class ClinicalEncounter(Base, IdMixin, TimestampMixin):
     status: Mapped[EncounterStatus] = mapped_column(
         Enum(EncounterStatus, values_callable=enum_values, name="encounter_status"),
         default=EncounterStatus.IN_PROGRESS,
+        nullable=False,
+    )
+    workflow_kind: Mapped[EncounterWorkflowKind] = mapped_column(
+        Enum(
+            EncounterWorkflowKind,
+            values_callable=enum_values,
+            name="encounter_workflow_kind",
+        ),
+        default=EncounterWorkflowKind.GENERAL,
         nullable=False,
     )
     reason: Mapped[str] = mapped_column(String(200), nullable=False)

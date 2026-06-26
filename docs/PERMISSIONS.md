@@ -46,8 +46,9 @@ autenticar.
 - `X-OneEpis-Actor` solo puede usarse si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`.
 - Ningun permiso habilita diagnostico autonomo, firma automatica ni escritura IA directa.
 - Enfermeria puede completar la preconsulta ambulatoria minima existente:
-  encuentro ambulatorio `in_progress` marcado como preconsulta, signos
-  opcionales y evento clinico de contexto.
+  encuentro ambulatorio `in_progress` con
+  `workflow_kind=ambulatory_preconsult`, signos opcionales y evento clinico de
+  contexto. El texto de `notes` no habilita permisos.
 - Ese permiso no abre gestion general de encuentros: enfermeria no puede crear
   hospitalizaciones, encuentros ambulatorios comunes ni actualizar/cancelar
   encuentros.

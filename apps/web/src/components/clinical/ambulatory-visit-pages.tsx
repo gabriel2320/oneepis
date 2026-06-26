@@ -100,6 +100,7 @@ function AmbulatoryVisitWorkspace({
       const encounter = await createClinicalEncounter(patientId, {
         type: "ambulatory",
         status: "in_progress",
+        workflow_kind: "ambulatory_visit",
         reason: payload.reason,
         started_at: startedAt,
         location_label: emptyToNull(payload.location_label),

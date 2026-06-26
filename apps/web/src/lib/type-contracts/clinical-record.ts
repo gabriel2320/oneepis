@@ -24,6 +24,13 @@ export type RecordStatus = "active" | "inactive" | "resolved" | "entered_in_erro
 export type AllergySeverity = "mild" | "moderate" | "severe" | "unknown";
 export type EncounterType = "ambulatory" | "hospitalization" | "emergency" | "unknown";
 export type EncounterStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
+export type EncounterWorkflowKind =
+  | "general"
+  | "ambulatory_preconsult"
+  | "ambulatory_visit"
+  | "hospitalization_admission"
+  | "hospitalization_daily"
+  | "hospitalization_discharge";
 
 export type ClinicalEntry = {
   id: string;
@@ -209,6 +216,7 @@ export type ActiveProblemUpdate = Partial<ActiveProblemCreate>;
 export type ClinicalEncounterCreate = {
   type?: EncounterType;
   status?: EncounterStatus;
+  workflow_kind?: EncounterWorkflowKind;
   reason: string;
   started_at: string;
   ended_at?: string | null;
@@ -221,6 +229,7 @@ export type ClinicalEncounter = {
   patient_id: string;
   type: EncounterType;
   status: EncounterStatus;
+  workflow_kind: EncounterWorkflowKind;
   reason: string;
   started_at: string;
   ended_at?: string | null;
