@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { careContextLabel, clinicalStatusLabel, patientLandingHref } from "@/lib/patient-display";
 import type { Patient } from "@/lib/types";
 
 export function PatientList({ patients }: { patients: Patient[] }) {
@@ -63,35 +64,6 @@ export function PatientQueueMetric({
       <p className="mt-2 text-2xl font-semibold">{value}</p>
     </div>
   );
-}
-
-function clinicalStatusLabel(status: Patient["clinical_status"]) {
-  const labels: Record<Patient["clinical_status"], string> = {
-    active: "Activa",
-    archived: "Archivada",
-    closed: "Cerrada",
-    draft: "Borrador",
-  };
-  return labels[status];
-}
-
-function careContextLabel(context: Patient["current_care_context"]) {
-  const labels: Record<Patient["current_care_context"], string> = {
-    ambulatory: "Ambulatoria",
-    hospitalized: "Hospitalizada",
-    unknown: "Sin contexto",
-  };
-  return labels[context];
-}
-
-function patientLandingHref(patient: Patient) {
-  if (patient.current_care_context === "hospitalized") {
-    return `/hospitalizacion/pacientes/${patient.id}/hoja-diaria`;
-  }
-  if (patient.current_care_context === "ambulatory") {
-    return `/consulta/pacientes/${patient.id}/atencion`;
-  }
-  return `/pacientes/${patient.id}/ficha`;
 }
 
 function formatDate(value: string) {

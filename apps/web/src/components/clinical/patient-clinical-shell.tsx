@@ -25,6 +25,7 @@ import { TemplateSelector } from "@/components/theme/template-selector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
+import { careContextLabel, clinicalStatusLabel } from "@/lib/patient-display";
 import { findScreenCapability } from "@/lib/screen-capabilities";
 import type { PatientRecordSnapshot } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -131,9 +132,9 @@ export function PatientClinicalShell({
                     {patient.first_name} {patient.last_name}
                   </h1>
                   <Badge variant={patient.clinical_status === "active" ? "safe" : "outline"}>
-                    {patient.clinical_status}
+                    {clinicalStatusLabel(patient.clinical_status)}
                   </Badge>
-                  <Badge variant="outline">{patient.current_care_context}</Badge>
+                  <Badge variant="outline">{careContextLabel(patient.current_care_context)}</Badge>
                   {patient.clinical_identifier ? (
                     <Badge variant="outline">{patient.clinical_identifier}</Badge>
                   ) : null}

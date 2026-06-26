@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/clinical/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { careContextLabel, clinicalStatusLabel } from "@/lib/patient-display";
 import type {
   ActiveProblem,
   Allergy,
@@ -253,7 +254,11 @@ export function LatestVitalsTrend({ vitals }: { vitals: VitalSign[] }) {
 export function PatientLongitudinalSummary({ record }: { record: PatientRecordSnapshot }) {
   return (
     <div className="grid gap-3 md:grid-cols-5">
-      <MetricCard label="Estado ficha" value={record.patient.clinical_status} detail={record.patient.current_care_context} />
+      <MetricCard
+        label="Estado ficha"
+        value={clinicalStatusLabel(record.patient.clinical_status)}
+        detail={careContextLabel(record.patient.current_care_context)}
+      />
       <MetricCard label="Antecedentes" value={`${record.active_problems.length}`} />
       <MetricCard label="Evoluciones" value={`${record.recent_entries.length}`} />
       <MetricCard label="Alergias activas" value={`${record.active_allergies.length}`} />

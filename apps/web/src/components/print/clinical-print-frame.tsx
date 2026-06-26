@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { careContextLabel, clinicalStatusLabel } from "@/lib/patient-display";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 type ClinicalPaperMetadata = {
@@ -76,8 +77,8 @@ export function PrintHeader({
       </div>
       <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
         <p>Fecha nacimiento: {record.patient.birth_date ?? "Sin registro"}</p>
-        <p>Estado ficha: {record.patient.clinical_status}</p>
-        <p>Contexto: {record.patient.current_care_context}</p>
+        <p>Estado ficha: {clinicalStatusLabel(record.patient.clinical_status)}</p>
+        <p>Contexto: {careContextLabel(record.patient.current_care_context)}</p>
       </div>
     </header>
   );
