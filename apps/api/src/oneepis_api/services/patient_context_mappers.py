@@ -26,6 +26,7 @@ def encounter_context(encounter: ClinicalEncounter | None) -> PatientContextEnco
         id=encounter.id,
         type=encounter.type,
         status=encounter.status,
+        workflow_kind=encounter.workflow_kind,
         reason=encounter.reason,
         started_at=encounter.started_at,
         ended_at=encounter.ended_at,

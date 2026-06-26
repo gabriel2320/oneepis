@@ -50,6 +50,7 @@ def test_patient_context_derives_active_hospitalization_without_writing(
     assert payload["applies_changes"] is False
     assert payload["derived_care_context"] == "hospitalization"
     assert payload["active_encounter"]["id"] == hospital_encounter_id
+    assert payload["active_encounter"]["workflow_kind"] == "general"
     assert payload["active_hospitalization"]["id"] == hospital_encounter_id
     assert payload["recent_ambulatory_encounters"][0]["id"] == ambulatory_response.json()["id"]
     assert payload["active_problems"][0]["label"] == "Hipertension arterial"
