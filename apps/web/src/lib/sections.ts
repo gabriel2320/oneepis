@@ -37,7 +37,7 @@ export const oneEpisSections: OneEpisSection[] = [
   section("hospital-beds", "Camas", "/hospitalizacion/camas", "Hospitalizacion", "clinical_write", "available", "Administracion operativa de camas e ingresos.", BedDouble),
   section("paper", "Documentos y papel", "/pacientes", "Documentos", "patient_read", "available", "Documentos se abren desde la ficha de cada paciente.", FileText),
   section("valid-prescription", "Receta valida", "/print/pacientes/[patientId]/receta", "Documentos", "clinical_write", "blocked", "Requiere firma, folio y politica de prescripcion.", ShieldCheck),
-  section("ai-settings", "IA local", "/configuracion/ia", "Configuracion", "ai_access", "available", "Estado de Ollama y limites de IA externa.", Settings),
+  section("ai-settings", "IA local", "/configuracion/ia", "Configuracion", "ai_access", "available", "Estado de IA local y limites de IA externa.", Settings),
   section("external-ai", "IA externa", "/configuracion/ia", "Configuracion", "ai_access", "blocked", "Bloqueada hasta anonimizar payload y auditar autorizacion.", ShieldCheck),
   section("settings", "Configuracion", "/configuracion", "Configuracion", "session", "available", "Preferencias locales y estado de API.", Settings),
 ];
