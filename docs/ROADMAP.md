@@ -232,6 +232,19 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: IA nueva, reglas nuevas, endpoints, OpenAPI y cambios de
   respuesta clinica.
 
+### PROG-CANON-SCREENS-01: canon de pantallas post login/home
+
+- Estado: carril activo despues de PR #72-#77.
+- Decision: revisar pantallas en orden canonico antes de abrir nuevos contratos
+  clinicos: login/home, ambulatorio, hospitalizacion y ficha longitudinal.
+- Resultado previo: `workflow_kind`, helpers ambulatorios/hospitalarios, labels
+  humanos, fixtures demo y helpers HTTP de auth ya quedaron consolidados; la
+  watchlist de tamano esta vacia.
+- Alcance permitido: documentacion canonica, limpieza visual, copy clinico,
+  tests de render/acceso y refactors sin cambio de conducta.
+- Fuera de alcance: migraciones, receta valida, firma legal, orden ejecutable,
+  IA externa, UCI, pabellon, adjuntos reales y consentimientos productivos.
+
 ### PROG-PATIENT-CORE-POLISH-01: ficha de lectura mas clara
 
 - Estado: polish implementado sin entidad ni endpoint nuevo.
