@@ -46,7 +46,7 @@ export function EditPatientStatusPage() {
         <PageTitle title="Estado clinico" description="Estado de ficha y contexto asistencial actual." />
         {DEMO_MODE ? <ErrorState description="El modo demo no permite modificar estado clinico real." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite modificar el estado de ficha." />
+          <ErrorState description="Tu perfil no tiene permiso para modificar el estado de ficha." />
         ) : null}
         <ClinicalSectionCard title="Estado y contexto">
           <PatientStatusForm patientId={patientId} record={record} canWrite={canWrite} />

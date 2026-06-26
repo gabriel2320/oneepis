@@ -94,7 +94,7 @@ function HospitalIndicationWorkspace({ patientId }: { patientId: string }) {
         <ErrorState description="El modo demo no permite guardar indicaciones reales." />
       ) : null}
       {!DEMO_MODE && !userLoading && !canWrite ? (
-        <ErrorState description="Tu rol actual no permite crear indicaciones hospitalarias." />
+        <ErrorState description="Tu perfil no tiene permiso para crear indicaciones hospitalarias." />
       ) : null}
       <HospitalIndicationForm
         formState={formState}

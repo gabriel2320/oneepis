@@ -129,7 +129,7 @@ export function NewSoapEntryPage() {
         />
         {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar evoluciones reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWriteSoap ? (
-          <ErrorState description="Tu rol actual no permite crear evoluciones SOAP." />
+          <ErrorState description="Tu perfil no tiene permiso para crear evoluciones SOAP." />
         ) : null}
         <ClinicalWorkspaceLayout aside={<SoapContextAside record={record} />}>
           <ClinicalSectionCard

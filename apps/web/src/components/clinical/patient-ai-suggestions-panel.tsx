@@ -34,7 +34,7 @@ export function PatientAiSuggestionsPanel({ patientId, canUseAi }: { patientId: 
       <ClinicalSectionCard title="Apoyo contextual" description="Borrador asistido - requiere revision humana.">
         <EmptyState
           title="Apoyo contextual no permitido para este rol"
-          description="Disponible para medico, admin o dev."
+          description="Disponible para perfiles clinicos autorizados."
         />
       </ClinicalSectionCard>
     );

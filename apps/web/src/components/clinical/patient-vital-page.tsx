@@ -69,7 +69,7 @@ export function NewVitalSignPage() {
         <BackLink href={`/pacientes/${patientId}/signos-vitales`} label="Signos vitales" />
         <PageTitle title="Registrar signos vitales" description="Control puntual del paciente." />
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite registrar signos vitales." />
+          <ErrorState description="Tu perfil no tiene permiso para registrar signos vitales." />
         ) : null}
         <ClinicalSectionCard title="Control">
           {formState.ai_action_id ? (

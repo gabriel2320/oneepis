@@ -93,7 +93,7 @@ export function EditHospitalDailySheetPage() {
         {!sheet ? <ErrorState description="No se encontro la evolucion diaria solicitada." /> : null}
         {DEMO_MODE ? <ErrorState description="El modo demo no permite editar hojas reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite editar evolucion diaria hospitalaria." />
+          <ErrorState description="Tu perfil no tiene permiso para editar evolucion diaria hospitalaria." />
         ) : null}
         {sheet?.status === "closed" ? (
           <ErrorState description="Esta evolucion diaria esta cerrada. Puede revisarse e imprimirse, pero no editarse." />
@@ -175,7 +175,7 @@ function DailySheetWorkspace({ patientId }: { patientId: string }) {
       <ClinicalSectionCard title="Nueva evolucion diaria">
         {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar hojas reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite crear evolucion diaria hospitalaria." />
+          <ErrorState description="Tu perfil no tiene permiso para crear evolucion diaria hospitalaria." />
         ) : null}
         <DailySheetForm
           formState={formState}

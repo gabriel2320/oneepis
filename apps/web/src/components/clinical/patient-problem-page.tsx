@@ -64,7 +64,7 @@ export function NewProblemPage() {
         <BackLink href={`/pacientes/${patientId}/ficha`} label="Ficha" />
         <PageTitle title="Agregar antecedente activo" description="Dato longitudinal usado como contexto clinico." />
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite registrar antecedentes activos." />
+          <ErrorState description="Tu perfil no tiene permiso para registrar antecedentes activos." />
         ) : null}
         <ClinicalSectionCard title="Antecedente clinico">
           {formState.ai_action_id ? (

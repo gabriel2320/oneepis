@@ -205,7 +205,7 @@ export function NewPatientPage() {
           <ErrorState description="El modo demo esta activo. Desactiva NEXT_PUBLIC_DEMO_MODE para escribir en API." />
         ) : null}
         {!DEMO_MODE && !userLoading && !canCreate ? (
-          <ErrorState description="Tu rol actual no permite crear fichas de paciente." />
+          <ErrorState description="Tu perfil no tiene permiso para crear fichas de paciente." />
         ) : null}
         <ClinicalSectionCard title="Identificacion">
           <form className="grid gap-4 md:grid-cols-2" onSubmit={form.handleSubmit(handleSubmit)}>

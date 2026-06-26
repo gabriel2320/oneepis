@@ -85,7 +85,7 @@ export function NewHospitalBedPage() {
         </Button>
         {DEMO_MODE ? <ErrorState description="El modo demo no permite crear camas reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite administrar camas." />
+          <ErrorState description="Tu perfil no tiene permiso para administrar camas." />
         ) : null}
         <ClinicalSectionCard title="Cama">
           <form

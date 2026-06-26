@@ -62,7 +62,7 @@ export function NewAllergyPage() {
         <BackLink href={`/pacientes/${patientId}/alergias`} label="Alergias" />
         <PageTitle title="Agregar alergia" description="Registro puntual, auditado y reversible." />
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite registrar alergias." />
+          <ErrorState description="Tu perfil no tiene permiso para registrar alergias." />
         ) : null}
         <ClinicalSectionCard title="Alergia">
           {formState.ai_action_id ? (

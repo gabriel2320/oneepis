@@ -131,7 +131,7 @@ export function PatientEventsPage() {
         />
         {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar eventos reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWriteEvents ? (
-          <ErrorState description="Tu rol actual no permite registrar eventos clinicos." />
+          <ErrorState description="Tu perfil no tiene permiso para registrar eventos clinicos." />
         ) : null}
         <div className="grid gap-4 xl:grid-cols-[420px_minmax(0,1fr)]">
           <ClinicalSectionCard title="Nuevo evento" description="Registra un hecho, no una pantalla completa.">

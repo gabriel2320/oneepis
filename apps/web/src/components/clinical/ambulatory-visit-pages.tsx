@@ -146,7 +146,7 @@ function AmbulatoryVisitWorkspace({
             <ErrorState description="El modo demo no permite guardar atenciones reales." />
           ) : null}
           {!DEMO_MODE && !userLoading && !canWrite ? (
-            <ErrorState description="Tu rol actual no permite crear atencion ambulatoria." />
+            <ErrorState description="Tu perfil no tiene permiso para crear atencion ambulatoria." />
           ) : null}
           <AmbulatoryVisitForm
             formState={formState}

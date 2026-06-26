@@ -68,7 +68,7 @@ export function NewEncounterPage() {
         <PageTitle title="Registrar atencion o ingreso" description="Dato de soporte para vincular evoluciones, hospitalizacion o atencion ambulatoria." />
         {DEMO_MODE ? <ErrorState description="El modo demo no permite crear datos de soporte reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite registrar atenciones o ingresos." />
+          <ErrorState description="Tu perfil no tiene permiso para registrar atenciones o ingresos." />
         ) : null}
         <ClinicalSectionCard title="Dato de soporte">
           <form

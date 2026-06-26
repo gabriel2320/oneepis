@@ -131,7 +131,7 @@ function DischargeSummaryWorkspace({
       >
         {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar epicrisis reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite crear epicrisis hospitalaria." />
+          <ErrorState description="Tu perfil no tiene permiso para crear epicrisis hospitalaria." />
         ) : null}
         {encountersQuery.isError && !DEMO_MODE ? (
           <ErrorState
