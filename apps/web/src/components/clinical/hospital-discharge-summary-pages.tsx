@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createClinicalEntry, listClinicalEncounters } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
 import { demoEncounters } from "@/lib/demo-record";
+import { activeHospitalizationEncounters } from "@/lib/hospitalization-workflows";
 import { canManageClinicalEntries } from "@/lib/permissions";
 import type { ClinicalEncounter, ClinicalEntry } from "@/lib/types";
 
@@ -96,9 +97,7 @@ function DischargeSummaryWorkspace({
   const encounters = DEMO_MODE
     ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
     : (encountersQuery.data ?? []);
-  const hospitalEncounters = encounters.filter(
-    (encounter) => encounter.type === "hospitalization" && encounter.status === "in_progress",
-  );
+  const hospitalEncounters = activeHospitalizationEncounters(encounters);
   const selectedEncounterId = formState.encounter_id || hospitalEncounters[0]?.id || "";
   const dischargeEntries = entries.filter((entry) => entry.kind === "discharge_summary");
   const mutation = useMutation({
