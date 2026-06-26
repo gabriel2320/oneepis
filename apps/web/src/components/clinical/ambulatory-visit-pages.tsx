@@ -20,6 +20,11 @@ import {
   createClinicalEntry,
   listClinicalEncounters,
 } from "@/lib/api/clinical-record";
+import {
+  AMBULATORY_VISIT_WORKFLOW,
+  ambulatoryEntries,
+  ambulatoryVisitEncounters,
+} from "@/lib/ambulatory-workflows";
 import { DEMO_MODE } from "@/lib/api/client";
 import { demoEncounters } from "@/lib/demo-record";
 import { canManageClinicalEntries, canManageEncounters } from "@/lib/permissions";
@@ -93,14 +98,15 @@ function AmbulatoryVisitWorkspace({
   const encounters = DEMO_MODE
     ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
     : (encountersQuery.data ?? []);
-  const ambulatoryEncounters = encounters.filter((encounter) => encounter.type === "ambulatory");
+  const visitEncounters = ambulatoryVisitEncounters(encounters);
+  const visitEntries = ambulatoryEntries(record.recent_entries, visitEncounters);
   const mutation = useMutation({
     mutationFn: async (payload: AmbulatoryVisitFormState) => {
       const startedAt = new Date(payload.started_at).toISOString();
       const encounter = await createClinicalEncounter(patientId, {
         type: "ambulatory",
         status: "in_progress",
-        workflow_kind: "ambulatory_visit",
+        workflow_kind: AMBULATORY_VISIT_WORKFLOW,
         reason: payload.reason,
         started_at: startedAt,
         location_label: emptyToNull(payload.location_label),
@@ -162,7 +168,7 @@ function AmbulatoryVisitWorkspace({
         </ClinicalSectionCard>
         <AmbulatoryClosePanel
           patientId={patientId}
-          encounters={ambulatoryEncounters}
+          encounters={visitEncounters}
           disabled={DEMO_MODE || !canWrite}
         />
       </div>
@@ -180,11 +186,11 @@ function AmbulatoryVisitWorkspace({
             />
           ) : null}
           {!encountersQuery.isLoading || DEMO_MODE ? (
-            <EncounterList encounters={ambulatoryEncounters} />
+            <EncounterList encounters={visitEncounters} />
           ) : null}
         </ClinicalSectionCard>
         <ClinicalSectionCard title="Evoluciones recientes">
-          <ClinicalTimeline entries={record.recent_entries} />
+          <ClinicalTimeline entries={visitEntries} />
         </ClinicalSectionCard>
       </div>
     </div>

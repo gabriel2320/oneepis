@@ -22,15 +22,11 @@ import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/state
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { listPatientAppointments } from "@/lib/api/appointments";
+import { ambulatoryEncounters, ambulatoryEntries } from "@/lib/ambulatory-workflows";
 import { DEMO_MODE } from "@/lib/api/client";
 import { listClinicalEncounters } from "@/lib/api/clinical-record";
 import { demoAppointments, demoEncounters } from "@/lib/demo-record";
-import type {
-  ClinicalAppointment,
-  ClinicalEncounter,
-  ClinicalEntry,
-  PatientRecordSnapshot,
-} from "@/lib/types";
+import type { ClinicalAppointment, PatientRecordSnapshot } from "@/lib/types";
 
 import {
   BackLink,
@@ -94,8 +90,8 @@ function AmbulatorySummaryWorkspace({
   const appointments = DEMO_MODE
     ? demoAppointments.filter((appointment) => appointment.patient_id === patientId)
     : (appointmentsQuery.data ?? []);
-  const ambulatoryEncounters = encounters.filter((encounter) => encounter.type === "ambulatory");
-  const ambulatoryEntries = filterAmbulatoryEntries(record.recent_entries, ambulatoryEncounters);
+  const ambulatoryEncounterItems = ambulatoryEncounters(encounters);
+  const ambulatoryEntryItems = ambulatoryEntries(record.recent_entries, ambulatoryEncounterItems);
 
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
@@ -115,7 +111,7 @@ function AmbulatorySummaryWorkspace({
           </div>
         </ClinicalSectionCard>
         <ClinicalSectionCard title="Evoluciones ambulatorias recientes">
-          <ClinicalTimeline entries={ambulatoryEntries} />
+          <ClinicalTimeline entries={ambulatoryEntryItems} />
         </ClinicalSectionCard>
       </div>
       <div className="space-y-5">
@@ -134,7 +130,7 @@ function AmbulatorySummaryWorkspace({
             <ErrorState description="No se pudieron cargar las atenciones ambulatorias." />
           ) : null}
           {!encountersQuery.isLoading || DEMO_MODE ? (
-            <EncounterList encounters={ambulatoryEncounters} />
+            <EncounterList encounters={ambulatoryEncounterItems} />
           ) : null}
         </ClinicalSectionCard>
         <ClinicalSectionCard title="Limites declarados">
@@ -179,13 +175,6 @@ function AppointmentSummaryList({ appointments }: { appointments: ClinicalAppoin
         </div>
       ))}
     </div>
-  );
-}
-
-function filterAmbulatoryEntries(entries: ClinicalEntry[], encounters: ClinicalEncounter[]) {
-  const encounterIds = new Set(encounters.map((encounter) => encounter.id));
-  return entries.filter(
-    (entry) => entry.tags.includes("ambulatory") || Boolean(entry.encounter_id && encounterIds.has(entry.encounter_id)),
   );
 }
 

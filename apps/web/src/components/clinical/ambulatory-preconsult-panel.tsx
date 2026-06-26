@@ -12,6 +12,7 @@ import {
   createClinicalEvent,
   createVitalSign,
 } from "@/lib/api/clinical-record";
+import { AMBULATORY_PRECONSULT_WORKFLOW } from "@/lib/ambulatory-workflows";
 import { DEMO_MODE } from "@/lib/api/client";
 import { demoAppointments } from "@/lib/demo-record";
 import {
@@ -145,7 +146,7 @@ async function createPreconsult(
   const encounter = await createClinicalEncounter(patientId, {
     type: "ambulatory",
     status: "in_progress",
-    workflow_kind: "ambulatory_preconsult",
+    workflow_kind: AMBULATORY_PRECONSULT_WORKFLOW,
     reason,
     started_at: occurredAt,
     location_label: appointment.location_label ?? null,
