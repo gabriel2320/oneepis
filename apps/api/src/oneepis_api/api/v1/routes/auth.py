@@ -1,13 +1,20 @@
 from __future__ import annotations
 
-import secrets
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from oneepis_api.api.deps import CurrentUserDep, SettingsDep
-from oneepis_api.core.config import Settings
+from oneepis_api.api.v1.routes.auth_http import (
+    GENERIC_AUTH_ERROR,
+    clear_auth_cookies,
+    extract_request_token,
+    read_auth_user,
+    request_metadata,
+    revoke_current_session,
+    set_auth_cookies,
+)
 from oneepis_api.db.session import get_session
 from oneepis_api.models.auth_security import AuthRecoveryPurpose
 from oneepis_api.schemas.auth import (
@@ -20,7 +27,6 @@ from oneepis_api.schemas.auth import (
     UnlockRequest,
 )
 from oneepis_api.services.auth import (
-    AuthenticatedUser,
     AuthError,
     authenticate_local_user,
     create_access_token,
@@ -29,7 +35,6 @@ from oneepis_api.services.auth import (
 from oneepis_api.services.auth_notifications import dispatch_auth_recovery_notification
 from oneepis_api.services.auth_recovery import consume_recovery_token, create_recovery_request
 from oneepis_api.services.auth_security import (
-    AuthRequestMetadata,
     is_login_locked,
     record_blocked_login_attempt,
     record_login_failure,
@@ -38,14 +43,11 @@ from oneepis_api.services.auth_security import (
 from oneepis_api.services.auth_sessions import (
     create_auth_session,
     is_auth_session_active,
-    revoke_auth_session,
     rotate_auth_session_token,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 SessionDep = Annotated[Session, Depends(get_session)]
-
-GENERIC_AUTH_ERROR = "Credenciales invalidas o cuenta no disponible"
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -56,7 +58,7 @@ def login(
     request: Request,
     response: Response,
 ) -> LoginResponse:
-    metadata = _request_metadata(request)
+    metadata = request_metadata(request)
     if is_login_locked(session, settings, payload.email):
         record_blocked_login_attempt(
             session,
@@ -103,12 +105,11 @@ def login(
         expires_at=expires_at,
     )
     session.commit()
-    _set_session_cookie(response, settings, access_token)
-    _set_csrf_cookie(response, settings)
+    set_auth_cookies(response, settings, access_token)
     return LoginResponse(
         access_token=access_token,
         expires_at=expires_at,
-        user=_read_user(user),
+        user=read_auth_user(user),
     )
 
 
@@ -119,7 +120,7 @@ def request_password_recovery(
     session: SessionDep,
     request: Request,
 ) -> AuthRequestAccepted:
-    metadata = _request_metadata(request)
+    metadata = request_metadata(request)
     dispatch = create_recovery_request(
         session,
         settings,
@@ -145,7 +146,7 @@ def request_unlock(
     session: SessionDep,
     request: Request,
 ) -> AuthRequestAccepted:
-    metadata = _request_metadata(request)
+    metadata = request_metadata(request)
     dispatch = create_recovery_request(
         session,
         settings,
@@ -176,7 +177,7 @@ def confirm_unlock(
         settings,
         token=payload.token,
         purpose=AuthRecoveryPurpose.UNLOCK,
-        metadata=_request_metadata(request),
+        metadata=request_metadata(request),
     )
     session.commit()
     return AuthRequestAccepted()
@@ -184,7 +185,7 @@ def confirm_unlock(
 
 @router.get("/me", response_model=AuthUserRead)
 def get_me(user: CurrentUserDep) -> AuthUserRead:
-    return _read_user(user)
+    return read_auth_user(user)
 
 
 @router.post("/refresh", response_model=LoginResponse)
@@ -194,7 +195,7 @@ def refresh_session(
     request: Request,
     response: Response,
 ) -> LoginResponse:
-    token = _extract_request_token(request, settings)
+    token = extract_request_token(request, settings)
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -223,9 +224,12 @@ def refresh_session(
             expires_at=expires_at,
         )
     session.commit()
-    _set_session_cookie(response, settings, access_token)
-    _set_csrf_cookie(response, settings)
-    return LoginResponse(access_token=access_token, expires_at=expires_at, user=_read_user(user))
+    set_auth_cookies(response, settings, access_token)
+    return LoginResponse(
+        access_token=access_token,
+        expires_at=expires_at,
+        user=read_auth_user(user),
+    )
 
 
 @router.post("/logout", response_model=AuthRequestAccepted)
@@ -235,83 +239,7 @@ def logout(
     request: Request,
     response: Response,
 ) -> AuthRequestAccepted:
-    _revoke_current_session(session, settings, request)
+    revoke_current_session(session, settings, request)
     session.commit()
-    response.delete_cookie(
-        settings.auth_session_cookie_name,
-        path="/",
-        httponly=True,
-        secure=_secure_cookie(settings),
-        samesite="lax",
-    )
-    response.delete_cookie(
-        settings.auth_csrf_cookie_name,
-        path="/",
-        secure=_secure_cookie(settings),
-        samesite="lax",
-    )
+    clear_auth_cookies(response, settings)
     return AuthRequestAccepted()
-
-
-def _read_user(user: AuthenticatedUser) -> AuthUserRead:
-    return AuthUserRead(
-        email=user.email,
-        name=user.name,
-        roles=sorted(user.roles, key=lambda role: role.value),
-        actor_id=user.actor_id,
-    )
-
-
-def _request_metadata(request: Request) -> AuthRequestMetadata:
-    return AuthRequestMetadata(
-        ip_address=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent"),
-    )
-
-
-def _revoke_current_session(session: Session, settings: Settings, request: Request) -> None:
-    token = _extract_request_token(request, settings)
-    if not token:
-        return
-    try:
-        user = verify_access_token(settings, token)
-    except AuthError:
-        return
-    revoke_auth_session(session, user.session_id)
-
-
-def _extract_request_token(request: Request, settings: Settings) -> str | None:
-    authorization = request.headers.get("Authorization")
-    if authorization:
-        scheme, _, token = authorization.partition(" ")
-        if scheme.lower() == "bearer" and token:
-            return token.strip()
-    return request.cookies.get(settings.auth_session_cookie_name)
-
-
-def _set_session_cookie(response: Response, settings: Settings, token: str) -> None:
-    response.set_cookie(
-        settings.auth_session_cookie_name,
-        token,
-        max_age=settings.auth_token_ttl_minutes * 60,
-        path="/",
-        httponly=True,
-        secure=_secure_cookie(settings),
-        samesite="lax",
-    )
-
-
-def _set_csrf_cookie(response: Response, settings: Settings) -> None:
-    response.set_cookie(
-        settings.auth_csrf_cookie_name,
-        secrets.token_urlsafe(32),
-        max_age=settings.auth_token_ttl_minutes * 60,
-        path="/",
-        httponly=False,
-        secure=_secure_cookie(settings),
-        samesite="lax",
-    )
-
-
-def _secure_cookie(settings: Settings) -> bool:
-    return settings.environment.strip().lower() != "development"
