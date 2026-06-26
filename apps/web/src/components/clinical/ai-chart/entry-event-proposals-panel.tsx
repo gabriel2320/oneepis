@@ -230,7 +230,7 @@ function proposalGenerationBlockedReason({
     return "Modo demo: no se generan propuestas reales.";
   }
   if (!canUseAi) {
-    return "Generar propuestas AI-Chart requiere rol admin, medico o dev.";
+    return "Generar propuestas asistidas requiere un perfil autorizado.";
   }
   return null;
 }
@@ -253,10 +253,10 @@ function acceptProposalBlockedReason({
     return "Esta propuesta ya tiene una decision en esta sesion.";
   }
   if (!canUseAi) {
-    return "Registrar propuestas AI-Chart requiere rol admin, medico o dev.";
+    return "Registrar propuestas asistidas requiere un perfil autorizado.";
   }
   if (!canCreateEvents) {
-    return "Registrar eventos clinicos requiere rol admin, medico, enfermeria o dev.";
+    return "Registrar eventos clinicos requiere un perfil clinico autorizado.";
   }
   return null;
 }

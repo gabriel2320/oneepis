@@ -230,7 +230,7 @@ function soapSaveBlockedReason({
     return "Modo demo: no se guardan borradores reales.";
   }
   if (!canWriteSoap) {
-    return "Guardar evoluciones SOAP requiere rol admin, medico o dev.";
+    return "Guardar evoluciones SOAP requiere un perfil clinico autorizado.";
   }
   if (!humanReviewed) {
     return "Marca la revision humana antes de guardar.";
