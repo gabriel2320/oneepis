@@ -36,7 +36,7 @@ export function HospitalBedsPage() {
       domain="hospital"
       title="Camas"
       description="Tablero hospitalario desde ingresos activos."
-      actions={[{ href: "/hospitalizacion/camas/nueva", label: "Nueva cama" }]}
+      actions={[{ href: "/hospitalizacion/camas/nueva", label: "Registrar cama" }]}
     >
       <div className="space-y-4">
         <ClinicalSectionCard title="Pacientes hospitalizados">
@@ -78,7 +78,7 @@ export function NewHospitalBedPage() {
   const selectedEncounterId = emptyToNull(formState.encounter_id);
 
   return (
-    <DomainModulePage domain="hospital" title="Nueva cama" description="Cama hospitalaria estructurada y auditada.">
+    <DomainModulePage domain="hospital" title="Registrar cama" description="Cama hospitalaria estructurada y auditada.">
       <div className="max-w-xl space-y-5">
         <Button asChild variant="outline" size="sm">
           <Link href="/hospitalizacion/camas">Volver a camas</Link>

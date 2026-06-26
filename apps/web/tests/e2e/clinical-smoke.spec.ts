@@ -190,8 +190,8 @@ test("hospitalization beds render active board", async ({ page }) => {
   await expect(page.getByLabel("Asignar ingreso a Medicina / 302 / Cama B")).toBeDisabled();
   await expect(page.getByRole("button", { name: "Asignar" }).first()).toBeDisabled();
 
-  await page.getByRole("link", { name: "Nueva cama" }).click();
-  await expect(page.getByRole("heading", { name: "Nueva cama" })).toBeVisible();
+  await page.getByRole("link", { name: "Registrar cama" }).click();
+  await expect(page.getByRole("heading", { name: "Registrar cama" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar cama" })).toBeDisabled();
 });
 
@@ -528,6 +528,7 @@ test("hospital physical home renders only hospital places without patient data",
   await expect(main.getByRole("heading", { name: "Nueva medicacion" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "Nueva alergia" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "Nuevo problema" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Registrar cama" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "Nueva cama" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "Receta valida" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "AI-Chart" })).toHaveCount(0);
