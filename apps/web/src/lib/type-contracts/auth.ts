@@ -18,3 +18,19 @@ export type LoginResponse = {
   expires_at: string;
   user: AuthUser;
 };
+
+export type AuthRequestAccepted = {
+  accepted: true;
+};
+
+export type PasswordRecoveryRequest = {
+  email: string;
+};
+
+export type UnlockRequest = {
+  email: string;
+};
+
+export type UnlockConfirmationRequest = {
+  token: string;
+};

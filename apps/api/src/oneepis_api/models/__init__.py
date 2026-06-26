@@ -1,4 +1,10 @@
 from oneepis_api.models.audit import AuditEvent
+from oneepis_api.models.auth_security import (
+    AuthLoginLock,
+    AuthRecoveryToken,
+    AuthSecurityEvent,
+    AuthSession,
+)
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
@@ -18,6 +24,10 @@ from oneepis_api.models.patient import Patient
 __all__ = [
     "Allergy",
     "AuditEvent",
+    "AuthLoginLock",
+    "AuthRecoveryToken",
+    "AuthSecurityEvent",
+    "AuthSession",
     "ClinicalEncounter",
     "ClinicalAppointment",
     "ClinicalEvent",

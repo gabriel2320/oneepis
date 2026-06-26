@@ -3,9 +3,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
+from sqlalchemy.orm import Session
 
 from oneepis_api.core.config import Settings, get_settings
+from oneepis_api.db.session import get_session
 from oneepis_api.services.auth import (
     AuthenticatedUser,
     AuthError,
@@ -13,8 +15,10 @@ from oneepis_api.services.auth import (
     create_dev_user,
     verify_access_token,
 )
+from oneepis_api.services.auth_sessions import is_auth_session_active
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
+SessionDep = Annotated[Session, Depends(get_session)]
 AuthorizationHeader = Annotated[str | None, Header(alias="Authorization")]
 ActorHeader = Annotated[
     str | None,
@@ -24,21 +28,31 @@ ActorHeader = Annotated[
 
 def get_current_user(
     settings: SettingsDep,
+    session: SessionDep,
+    request: Request,
     authorization: AuthorizationHeader = None,
     actor: ActorHeader = None,
 ) -> AuthenticatedUser:
     if not settings.auth_enabled:
         return create_dev_user(actor or "dev.system")
 
-    token = _extract_bearer_token(authorization)
+    token = _extract_bearer_token(authorization) or request.cookies.get(
+        settings.auth_session_cookie_name
+    )
     if token:
         try:
-            return verify_access_token(settings, token)
+            user = verify_access_token(settings, token)
         except AuthError as exc:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired authentication token",
             ) from exc
+        if not is_auth_session_active(session, settings, user.session_id, token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired authentication token",
+            )
+        return user
 
     if settings.auth_allow_dev_actor_header and actor:
         return create_dev_user(actor)

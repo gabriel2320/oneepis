@@ -9,6 +9,7 @@ from oneepis_api.core.config import get_settings
 from oneepis_api.db.base import Base
 from oneepis_api.models import (  # noqa: F401
     audit,
+    auth_security,
     clinical_record,
     clinical_risk,
     hospitalization,

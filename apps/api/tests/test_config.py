@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from oneepis_api.core.config import Settings
+from oneepis_api.services.auth import hash_password
 
 
 def test_development_allows_default_security_settings() -> None:
@@ -26,6 +27,11 @@ def test_development_allows_default_security_settings() -> None:
             "auth_local_users": "admin@example.local|secret|Admin|admin",
             "auth_enabled": False,
         },
+        {
+            "auth_secret": "prod-secret",
+            "auth_local_users": f"admin@example.local|{hash_password('secret')}|Admin|admin",
+            "auth_notification_provider": "development_log",
+        },
     ],
 )
 def test_non_development_rejects_insecure_auth_settings(override: dict[str, object]) -> None:
@@ -34,10 +40,11 @@ def test_non_development_rejects_insecure_auth_settings(override: dict[str, obje
 
 
 def test_non_development_accepts_explicit_secure_auth_settings() -> None:
+    password_hash = hash_password("secret")
     settings = Settings(
         environment="production",
         auth_secret="prod-secret",
-        auth_local_users="admin@example.local|secret|Admin|admin",
+        auth_local_users=f"admin@example.local|{password_hash}|Admin|admin",
     )
 
     assert settings.environment == "production"
