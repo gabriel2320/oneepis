@@ -29,7 +29,8 @@ La UI usa API real por defecto. Los datos demo quedan reservados para `NEXT_PUBL
 
 Superficies principales:
 
-- `/pacientes`: mesa clinica de entrada.
+- `/home`: mapa fisico del hospital post-login.
+- `/pacientes`: mesa clinica interna para seleccionar ficha cuando un servicio lo requiere.
 - `/pacientes/[patientId]/ficha`: centro longitudinal.
 - `/pacientes/[patientId]/ai-chart`: inteligencia clinica simulada y auditable.
 - `/hospitalizacion`: flujo hospitalario minimo.
@@ -40,13 +41,26 @@ El arbol completo de rutas y estado por superficie vive en `docs/SCREEN_TREE.md`
 
 ## Requisitos
 
-- Node.js 22 (`.nvmrc`)
+- Node.js 22 (`.nvmrc` y `.node-version`)
 - npm 11.13.0 (`packageManager`)
 - Python 3.12.x
 - PostgreSQL 15+ o Docker
 - Ollama opcional para IA local
 
+Package manager oficial: npm. pnpm fue evaluado y queda diferido a un PR de
+migracion dedicado para no mezclar cambio funcional clinico con cambio de
+lockfile, bootstrap, CI y auditoria de dependencias.
+
 ## Desarrollo local
+
+0. Alinea toolchain:
+
+```bash
+nvm install 22
+nvm use 22
+npm i -g npm@11.13.0
+npm run check:toolchain
+```
 
 1. Copia variables locales:
 

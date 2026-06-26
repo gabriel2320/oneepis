@@ -43,6 +43,8 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Camas hospitalarias pasaron a modelo estructurado con sala, habitacion y cama.
 - Se agrego administracion UI de camas y asignacion auditada de ingresos activos.
 - Se mantuvo hospitalizacion como flujo clinico, no como dashboard central.
+- La experiencia hospitalaria debe mantenerse separada de la ambulatoria en
+  navegacion, acciones y copy visible.
 
 ### PR-037 a PR-045: endurecimiento y dieta
 
@@ -77,6 +79,8 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Atencion ambulatoria minima quedo conectada usando endpoints existentes:
   crea encuentro ambulatorio y evolucion SOAP vinculada.
 - No se habia creado agenda productiva ni API nueva para consulta en esta etapa.
+- La experiencia ambulatoria debe mantenerse separada de hospitalizacion en
+  navegacion, acciones y copy visible.
 
 ### PR-063: limpieza de identidad local
 

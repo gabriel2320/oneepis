@@ -73,7 +73,7 @@ Widgets clinicos:
 Widgets por contexto:
 
 - hospitalizado: `BedBoard`, `RoundList`, `DailySheet`, `CriticalAlerts`, `LatestVitalsTrend`
-- ambulatorio: `AppointmentList`, `VisitWorkspace`, `PatientLongitudinalSummary`, `QuickSoapEditor`
+- ambulatorio: `AmbulatoryCommandCenter`, `AppointmentList`, `PatientLongitudinalSummary`, `QuickSoapEditor`
 
 ## Criterios UI
 

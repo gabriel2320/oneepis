@@ -181,14 +181,48 @@ Auth local:
 
 - `POST /api/v1/auth/login`
 - `GET /api/v1/auth/me`
+- `POST /api/v1/auth/password-recovery-requests`
+- `POST /api/v1/auth/unlock-requests`
+- `POST /api/v1/auth/unlock-confirmations`
 - roles iniciales: `admin`, `medico`, `enfermeria`, `solo_lectura`, `dev`
+- `/` y `/login` son entrada publica sin perfiles ni accesos clinicos; login
+  exitoso redirige a `/home`
+- `/login/desbloquear/confirmar?token=...` es el destino publico generico
+  para consumir tokens de desbloqueo sin exponer si el token era valido
+- `/home` muestra el mapa fisico del hospital como lugares o servicios reales,
+  no como dashboard ni arbol de acciones
+- `/pacientes` queda como entrada interna/contextual desde lugares como
+  Farmacia, Laboratorio, Enfermeria o Archivo clinico cuando se requiere
+  seleccionar paciente
+- `/mapa` queda como alias legacy hacia `/home`
+- el login emite cookie `HttpOnly` (`ONEEPIS_AUTH_SESSION_COOKIE_NAME`) y el
+  frontend usa un marcador local no sensible; el bearer de la respuesta queda
+  como compatibilidad temporal para clientes existentes
+- los tokens nuevos incluyen `sid`; la sesion se registra en `auth_sessions` y
+  `POST /auth/logout` revoca server-side la sesion antes de limpiar cookies
+- `POST /auth/refresh` rota el token vigente de la sesion; el token anterior
+  queda invalido por hash de token server-side
+- mutaciones autenticadas por cookie requieren double-submit CSRF
+  (`ONEEPIS_AUTH_CSRF_COOKIE_NAME` + header `X-OneEpis-CSRF`); bearer conserva
+  compatibilidad sin CSRF
+- auth local soporta hashes PBKDF2 y bloqueo temporal por intentos fallidos;
+  passwords planos quedan como compatibilidad solo de desarrollo
+- recuperacion y desbloqueo registran solicitud generica con adaptador de correo
+  deshabilitado por defecto; no confirman existencia de usuario y tienen limite
+  temporal por identificador
+- confirmacion de desbloqueo consume token de un solo uso, limpia bloqueo
+  temporal asociado y mantiene respuesta generica aunque el token no exista
+- `ONEEPIS_AUTH_NOTIFICATION_PROVIDER=development_log` solo se acepta en
+  desarrollo y genera el enlace de desbloqueo local; fuera de desarrollo no se
+  simula envio sin proveedor real
 - rutas de paciente requieren autenticacion
 - escrituras clinicas se reparten por permiso fino; `admin` y `dev` pueden
   operar todo el entorno local gobernado, `medico` escribe actos medicos y
   `enfermeria` queda acotada a signos/eventos/laboratorio/riesgos y
   preconsulta ambulatoria minima
 - IA clinica requiere `admin`, `medico` o `dev`
-- fuera de `development`, la API rechaza secreto default, usuarios default, actor dev y auth desactivada
+- fuera de `development`, la API rechaza secreto default, usuarios default,
+  passwords planos, actor dev, auth desactivada y valores de auth no positivos
 
 Higiene local:
 
@@ -411,6 +445,14 @@ Tests API:
 - fixtures compartidas en `apps/api/tests/conftest.py`
 - cobertura paciente separada por dominios: ficha, permisos, auditoria, IA y encuentros
 - cobertura hospitalizacion separada por board, camas y hoja diaria
+- la UI operativa separa shells por dominio: `AmbulatoryClinicalShell` gobierna
+  `/consulta/**` y `HospitalClinicalShell` gobierna `/hospitalizacion/**`
+- las entradas de dominio usan `DomainModulePage`: `/consulta` y
+  `/consulta/agenda` quedan bajo navegacion ambulatoria; `/hospitalizacion`,
+  `/hospitalizacion/rondas` y `/hospitalizacion/camas` quedan bajo navegacion
+  hospitalaria
+- `PatientClinicalShell` queda para ficha longitudinal neutra; no debe volver a
+  mezclar acciones operativas ambulatorias y hospitalarias en el mismo header
 - cobertura de riesgos clinicos prueba permisos, ownership, fuente de otro
   paciente, auditoria `before/after` y ausencia de `DELETE`
 - `ClinicalPatch` cubre aceptacion, rechazo, target no soportado, bloqueo por falta de confirmacion humana y bloqueo de evolucion no borrador; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported` o `ai.clinical_patch.blocked`
@@ -423,6 +465,12 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - mover una ruta visible bajo `apps/web/src/app` exige actualizar el mapa maestro o falla `npm run check:screens`
 - mantener la regla de producto: paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
 - sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
+- sostener `/consulta/**` y `/hospitalizacion/**` como experiencias operativas
+  separadas; compartir componentes solo cuando no mezcle navegacion, acciones o
+  copy de dominio
+- no reintroducir placeholders de entrada ambulatoria como pantallas finales:
+  `/consulta` debe mostrar estacion ambulatoria mantenible y `/consulta/agenda`
+  la agenda persistida real
 - `apps/web/src/components/print/clinical-print.tsx` salio de near-limit tras
   separar receta bloqueada; no volver a inflarlo con mas papel sin extraer.
 - los contratos frontend de Assistant Read e IA clinica ya se separaron de

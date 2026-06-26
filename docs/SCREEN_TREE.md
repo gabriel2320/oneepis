@@ -50,8 +50,13 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 
 | Ruta | Modulo | Momento clinico | Estado | Fuente de verdad | Escritura | Permisos | Auditoria | Papel | IA permitida | Pendiente para completar |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/` | Acceso/configuracion | seguimiento | completa | redirect App Router | no | publico/control UI | no | no | no | mantener entrada a `/pacientes` |
-| `/login` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | no | no | no | seleccion institucion/rol futura |
+| `/` | Acceso/configuracion | seguimiento | completa | redirect App Router | no | publico/control UI | no | no | no | redirigir a login o home segun sesion |
+| `/login` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | no | no | no | correo productivo y usuarios persistentes futuros |
+| `/login/recuperar` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | security event + rate-limit | no | no | adaptador correo futuro |
+| `/login/desbloquear` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | security event + rate-limit | no | no | desbloqueo administrativo futuro |
+| `/login/desbloquear/confirmar` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | security event | no | no | destino de correo institucional futuro |
+| `/home` | Acceso/configuracion | seguimiento | completa | mapa fisico hospitalario + Screen Capability Registry | no | sesion local | no | no | no | mantener el mapa como lugares fisicos, no como arbol de acciones |
+| `/mapa` | Acceso/configuracion | seguimiento | completa | redirect App Router | no | sesion local | no | no | no | alias legacy hacia home |
 | `/configuracion` | Acceso/configuracion | seguimiento | completa | App Router | no | sesion local | no | no | estado/config | administracion clinica futura |
 | `/configuracion/apariencia` | Acceso/configuracion | seguimiento | completa | preferencias UI | no | sesion local | no | no | no | tokens visuales futuros |
 | `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | no | sesion local | no | no | estado Ollama | IA externa bloqueada: anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI |
