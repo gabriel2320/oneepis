@@ -68,7 +68,7 @@ export function AppointmentCreatePanel({
     >
       {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar citas reales." /> : null}
       {!DEMO_MODE && !userLoading && !canWrite ? (
-        <ErrorState description="Tu rol actual no permite crear citas ambulatorias." />
+        <ErrorState description="Tu perfil no tiene permiso para crear citas ambulatorias." />
       ) : null}
       {patients.length === 0 && !patientsLoading ? (
         <EmptyState title="Sin pacientes disponibles" description="Crea un paciente antes de agendar." />

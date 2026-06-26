@@ -82,7 +82,7 @@ export function NewMedicationPage() {
         <BackLink href={`/pacientes/${patientId}/medicacion`} label="Medicacion" />
         <PageTitle title="Agregar medicamento" description="Medicacion activa del paciente." />
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite registrar medicacion." />
+          <ErrorState description="Tu perfil no tiene permiso para registrar medicacion." />
         ) : null}
         <ClinicalSectionCard title="Medicamento">
           {formState.ai_action_id ? (

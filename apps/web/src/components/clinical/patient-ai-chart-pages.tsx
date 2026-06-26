@@ -209,7 +209,7 @@ export function PatientAiChartPage() {
         />
         {DEMO_MODE ? <ErrorState description="El modo demo no permite generar borradores reales." /> : null}
         {!DEMO_MODE && !userLoading && !canUseAi ? (
-          <ErrorState description="Tu rol actual no permite usar IA clinica." />
+          <ErrorState description="Tu perfil no tiene permiso para usar IA clinica." />
         ) : null}
         <AiChartStep
           step="1"

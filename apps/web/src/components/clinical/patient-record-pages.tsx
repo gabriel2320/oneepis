@@ -120,7 +120,7 @@ function PatientSectionContent({
         <ClinicalSectionCard title="IA clinica">
           <EmptyState
             title="IA no permitida para este rol"
-            description="Las sugerencias clinicas quedan disponibles para medico, admin o dev."
+            description="Las sugerencias clinicas quedan disponibles para perfiles clinicos autorizados."
           />
         </ClinicalSectionCard>
       );

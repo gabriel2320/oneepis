@@ -134,7 +134,7 @@ function HospitalAdmissionWorkspace({
       >
         {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar ingresos reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite crear ingreso medico hospitalario." />
+          <ErrorState description="Tu perfil no tiene permiso para crear ingreso medico hospitalario." />
         ) : null}
         {encountersQuery.isError && !DEMO_MODE ? (
           <ErrorState

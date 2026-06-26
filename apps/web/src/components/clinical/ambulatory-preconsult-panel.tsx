@@ -92,7 +92,7 @@ export function AmbulatoryPreconsultPanel({ patientId }: { patientId: string }) 
       ) : null}
       {!DEMO_MODE && !userLoading && !canWrite ? (
         <p className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
-          Tu rol actual no permite registrar preconsulta completa.
+          Tu perfil no tiene permiso para registrar preconsulta completa.
         </p>
       ) : null}
       {appointments.length === 0 && !appointmentsQuery.isLoading ? (

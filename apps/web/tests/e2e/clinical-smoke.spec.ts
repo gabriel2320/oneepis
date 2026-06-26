@@ -49,6 +49,8 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Sugerencias Ollama")).toHaveCount(0);
   await expect(page.getByText(/Borrador IA/)).toHaveCount(0);
   await expect(page.getByText(/Ollama activo|Ollama pendiente/)).toHaveCount(0);
+  await expect(page.getByText("Tu rol actual no permite")).toHaveCount(0);
+  await expect(page.getByText("medico, admin")).toHaveCount(0);
 });
 
 test("patient navigation groups clinical areas on desktop", async ({ page }, testInfo) => {
