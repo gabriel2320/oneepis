@@ -1,31 +1,27 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const appRoot = path.join(repoRoot, "apps/web/src/app");
-const screenTreePath = path.join(repoRoot, "docs/SCREEN_TREE.md");
-
-const requiredRouteHeader =
-  "| Ruta | Modulo | Momento clinico | Estado | Fuente de verdad | Escritura | Permisos | Auditoria | Papel | IA permitida | Pendiente para completar |";
-const allowedStatuses = new Set([
-  "completa",
-  "completa/en expansion gobernada",
-  "preparada",
-  "bloqueada",
-  "futura",
-]);
+import {
+  allowedStatuses,
+  appRoot,
+  duplicates,
+  extractRealRouteRows,
+  readScreenRegistry,
+  routeHeader,
+  screenTreePath,
+} from "./screen-registry.mjs";
 
 const screenTree = readFileSync(screenTreePath, "utf8");
+const registryRows = readScreenRegistry();
 const errors = [];
 
-if (!screenTree.includes(requiredRouteHeader)) {
+if (!screenTree.includes(routeHeader)) {
   errors.push("docs/SCREEN_TREE.md no tiene la cabecera obligatoria de rutas reales.");
 }
 
 const visibleRoutes = discoverVisibleRoutes();
 const realRouteRows = extractRealRouteRows(screenTree);
 const documentedRoutes = new Set(realRouteRows.map((row) => row.route));
+const registryRoutes = new Set(registryRows.map((row) => row.routePattern));
 const missingRoutes = visibleRoutes.filter((route) => !documentedRoutes.has(route));
 
 for (const route of duplicates(realRouteRows.map((row) => row.route))) {
@@ -34,6 +30,18 @@ for (const route of duplicates(realRouteRows.map((row) => row.route))) {
 
 for (const route of missingRoutes) {
   errors.push(`Ruta visible sin fila en SCREEN_TREE: ${route}`);
+}
+
+for (const route of visibleRoutes) {
+  if (!registryRoutes.has(route)) {
+    errors.push(`Ruta visible sin fila en screen-capabilities.registry.json: ${route}`);
+  }
+}
+
+for (const route of registryRoutes) {
+  if (!visibleRoutes.includes(route)) {
+    errors.push(`Ruta registrada sin page.tsx visible: ${route}`);
+  }
 }
 
 for (const row of realRouteRows) {
@@ -79,43 +87,4 @@ function walk(root) {
     }
     return [fullPath];
   });
-}
-
-function extractRealRouteRows(markdown) {
-  const lines = markdown.split(/\r?\n/);
-  const headerIndex = lines.findIndex((line) => line.trim() === requiredRouteHeader);
-  if (headerIndex === -1) {
-    return [];
-  }
-
-  const rows = [];
-  for (const line of lines.slice(headerIndex + 2)) {
-    if (!line.startsWith("|")) {
-      break;
-    }
-    const cells = line
-      .split("|")
-      .slice(1, -1)
-      .map((cell) => cell.trim());
-    if (cells.length < 11) {
-      continue;
-    }
-    rows.push({
-      route: cells[0].replace(/^`|`$/g, ""),
-      status: cells[3],
-    });
-  }
-  return rows;
-}
-
-function duplicates(items) {
-  const seen = new Set();
-  const repeated = new Set();
-  for (const item of items) {
-    if (seen.has(item)) {
-      repeated.add(item);
-    }
-    seen.add(item);
-  }
-  return [...repeated].sort();
 }

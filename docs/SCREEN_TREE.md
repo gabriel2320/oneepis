@@ -27,9 +27,10 @@ Avances `v0.5-patient-core` ya consolidados:
 - PR #17 promovio `/pacientes/[patientId]/documentos` a indice de papel existente.
 - Adjuntos externos, consentimientos, receta valida, firma y agenda avanzada siguen futuras/bloqueadas aunque existan accesos de lectura o papel.
 
-La matriz documental se refleja operativamente en el Screen Capability Registry
-frontend. Cada ruta visible debe existir aqui y en `apps/web/src/lib/screen-capabilities.ts`.
-El gate `npm run check:screens` valida ambos lados.
+La tabla de rutas reales se genera desde
+`apps/web/src/lib/screen-capabilities.registry.json`. No editarla manualmente:
+usar `npm run generate:screens`. El gate `npm run check:screens` valida que la
+tabla generada, las rutas visibles y el registry no tengan drift.
 
 ## Navegacion objetivo
 
@@ -48,64 +49,71 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 
 ## Rutas reales y estado
 
+<!-- screen-routes:start -->
+
+<!-- Esta tabla se genera desde apps/web/src/lib/screen-capabilities.registry.json. -->
+<!-- No editar manualmente: usar npm run generate:screens. -->
+
 | Ruta | Modulo | Momento clinico | Estado | Fuente de verdad | Escritura | Permisos | Auditoria | Papel | IA permitida | Pendiente para completar |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/` | Acceso/configuracion | seguimiento | completa | redirect App Router | no | publico/control UI | no | no | no | redirigir a login o home segun sesion |
-| `/login` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | no | no | no | correo productivo y usuarios persistentes futuros |
-| `/login/recuperar` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | security event + rate-limit | no | no | adaptador correo futuro |
-| `/login/desbloquear` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | security event + rate-limit | no | no | desbloqueo administrativo futuro |
-| `/login/desbloquear/confirmar` | Acceso/configuracion | seguimiento | completa | auth local | no | publico/control UI | security event | no | no | destino de correo institucional futuro |
-| `/home` | Acceso/configuracion | seguimiento | completa | mapa fisico hospitalario + Screen Capability Registry | no | sesion local | no | no | no | mantener el mapa como lugares fisicos, no como arbol de acciones |
-| `/mapa` | Acceso/configuracion | seguimiento | completa | redirect App Router | no | sesion local | no | no | no | alias legacy hacia home |
-| `/configuracion` | Acceso/configuracion | seguimiento | completa | App Router | no | sesion local | no | no | estado/config | administracion clinica futura |
-| `/configuracion/apariencia` | Acceso/configuracion | seguimiento | completa | preferencias UI | no | sesion local | no | no | no | tokens visuales futuros |
-| `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | no | sesion local | no | no | estado Ollama | IA externa bloqueada: anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI |
-| `/configuracion/api` | Acceso/configuracion | seguimiento | completa | config API/OpenAPI | no | sesion local | no | no | no | health y versionado |
-| `/pacientes` | Nucleo paciente | paciente | completa | API pacientes / demo | no | lectura paciente | no | no | no | buscador universal avanzado y ultimos abiertos |
-| `/pacientes/nuevo` | Nucleo paciente | paciente | completa | API pacientes | si | escritura paciente | si | no | no | identidad administrativa mas completa |
-| `/pacientes/[patientId]` | Nucleo paciente | paciente | completa | redirect App Router | no | lectura paciente | no | no | no | mantener como entrada a ficha |
-| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente + assistant timeline | no | lectura paciente | no | carta | lectura/pendientes | antecedentes, resultados y timeline avanzada existen en ficha; documentos longitudinales siguen futuros |
-| `/pacientes/[patientId]/estado` | Nucleo paciente | seguimiento | completa | API paciente | si | medico/admin/dev | si | no | no | estados clinicos mas finos |
-| `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | si | escritura clinica | si | no | lectura contextual | curaduria minima de antecedentes con categoria/fuente/limite; clasificacion estructurada futura |
-| `/pacientes/[patientId]/problemas` | Nucleo paciente | paciente | completa | problemas activos | no | lectura paciente | no | no | lectura contextual | diagnosticos historicos/CIE-10 futuros |
-| `/pacientes/[patientId]/problemas/nuevo` | Nucleo paciente | acto clinico | completa | problemas activos | si | medico/admin/dev | si | no | no | clasificacion diagnostica futura |
-| `/pacientes/[patientId]/alergias` | Seguridad/auditoria | paciente | completa | alergias activas | no | lectura paciente | no | no | lectura contextual | alertas criticas mas amplias |
-| `/pacientes/[patientId]/alergias/nueva` | Seguridad/auditoria | acto clinico | completa | alergias activas | si | medico/admin/dev | si | no | no | reacciones adversas futuras |
-| `/pacientes/[patientId]/medicacion` | Medicacion/vademecum | paciente | completa/en expansion gobernada | medicacion activa + vademecum local curado | no | lectura paciente | no | no | sugeridos deterministas | vademecum real curado, interacciones y receta futura |
-| `/pacientes/[patientId]/medicacion/nueva` | Medicacion/vademecum | acto clinico | completa/en expansion gobernada | medicacion activa + validacion dosis | si | escritura clinica | si | no | no generativa | receta/orden no se deriva automaticamente |
-| `/pacientes/[patientId]/signos-vitales` | Ordenes/resultados | seguimiento | completa | signos vitales | no | lectura paciente | no | no | series | tabla/grafico mas amplio |
-| `/pacientes/[patientId]/signos-vitales/nuevo` | Ordenes/resultados | acto clinico | completa | signos vitales | si | enfermeria/medico/admin/dev | si | no | no | escalas y monitoreo futuros |
-| `/pacientes/[patientId]/encuentros` | Episodios | episodio | completa | API encuentros | no | lectura paciente | no | no | lectura contextual | episodio ambulatorio/hospitalizado mas explicito |
-| `/pacientes/[patientId]/encuentros/nuevo` | Episodios | episodio | completa | API encuentros | si | medico/admin/dev | si | no | no | preconsulta minima ya integrada en atencion; admision avanzada futura |
-| `/pacientes/[patientId]/evoluciones` | Episodios | acto clinico | completa | clinical entries | no | lectura paciente | no | carta | lectura contextual | filtros por episodio/problema |
-| `/pacientes/[patientId]/evoluciones/nueva` | Episodios | acto clinico | completa | clinical entries | si | medico/admin/dev | si | carta | borrador revisable | firma real futura |
-| `/pacientes/[patientId]/evoluciones/desde-eventos` | Episodios | acto clinico | completa | eventos + AI-Chart | si | medico/admin/dev + permiso IA | si | carta | borrador revisable | mantener como borrador revisado |
-| `/pacientes/[patientId]/documentos` | Documentos/papel | documento | completa | record + print routes | no | lectura paciente | no | carta | no | adjuntos externos, consentimientos y firma real futuros |
-| `/pacientes/[patientId]/ia` | IA clinica | seguimiento | completa | AI status/sugerencias | no | lectura paciente + permiso IA | no | no | apoyo contextual | IA como apoyo, no modulo central |
-| `/pacientes/[patientId]/ai-chart` | IA clinica | acto clinico | completa | AI-Chart + Assistant Read | si via `ClinicalPatch` | medico/admin/dev + permiso IA | si si confirma | SOAP carta | lectura, series, borrador | mantener `v0.4-assistant-read` cerrado; no expandir IA antes de nucleo paciente |
-| `/pacientes/[patientId]/auditoria` | Seguridad/auditoria | seguimiento | completa | audit events | no | lectura auditoria | no | no | no | auditoria de accesos futura |
-| `/consulta` | Ambulatorio | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
-| `/consulta/agenda` | Ambulatorio | episodio | completa | `clinical_appointments` | si | medico/admin/dev | si | no | no | preconsulta minima enlazada desde atencion; agenda por equipos futura |
-| `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP + preconsulta minima | si | medico/admin/dev; preconsulta enfermeria/medico/admin/dev | si | no | borrador revisable | preconsulta minima con `workflow_kind=ambulatory_preconsult`; diagnosticos finales futuros |
-| `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | completa | record + appointments + encounters | no | lectura paciente | no | no | lectura resumida | seguimiento formal e interconsultas futuras |
-| `/hospitalizacion` | Hospitalizacion | seguimiento | completa | App Router | no | lectura paciente | no | no | no | mantener como indice simple |
-| `/hospitalizacion/camas` | Hospitalizacion | episodio | completa | hospitalizacion + camas | si | medico/admin/dev | si | no | no | censo por servicio/equipo |
-| `/hospitalizacion/camas/nueva` | Hospitalizacion | episodio | completa | camas | si | medico/admin/dev | si | no | no | administracion institucional futura |
-| `/hospitalizacion/rondas` | Hospitalizacion | seguimiento | completa | ingresos + camas + hojas | no | lectura paciente | no | carta | lectura contextual | read-model backend si escala |
-| `/hospitalizacion/pacientes/[patientId]/epicrisis` | Hospitalizacion | documento | completa | `clinical_entries(kind=discharge_summary)` | si | medico/admin/dev | si | carta | borrador revisable | firma real, cierre legal y alta formal futuros |
-| `/hospitalizacion/pacientes/[patientId]/ingreso` | Hospitalizacion | documento | completa | `clinical_entries(kind=intake)` | si | medico/admin/dev | si | carta | borrador revisable | firma real y cierre legal futuros |
-| `/hospitalizacion/pacientes/[patientId]/hoja-diaria` | Hospitalizacion | acto clinico | completa | hojas diarias | si | medico/admin/dev | si | carta | lectura contextual | evolucion hospitalaria por problema |
-| `/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar` | Hospitalizacion | acto clinico | completa | hojas diarias | si | medico/admin/dev | si | carta | no | firma/bloqueo legal futuro |
-| `/hospitalizacion/pacientes/[patientId]/indicaciones` | Hospitalizacion | acto clinico | completa | indicaciones draft | si | medico/admin/dev | si | carta | apoyo no ejecutable | ejecucion bloqueada: orden firmada, doble chequeo, MAR activo, administracion y auditoria futuras |
-| `/print/pacientes/[patientId]/ficha` | Documentos/papel | documento | completa | record paciente | no | lectura paciente | no | carta | no | paridad con ficha expandida |
-| `/print/pacientes/[patientId]/evolucion/[entryId]` | Documentos/papel | documento | completa | clinical entry | no | lectura paciente | no | carta | no | firma real futura |
-| `/print/pacientes/[patientId]/resumen` | Documentos/papel | documento | completa | record paciente | no | lectura paciente | no | carta | resumen no persistido | resumen IA no persistido |
-| `/print/pacientes/[patientId]/receta` | Documentos/papel | documento | bloqueada | politica receta | no | lectura paciente | no | bloqueado | no | receta valida requiere firma, folio, actor, fecha clinica y permisos |
-| `/print/hospitalizacion/rondas` | Documentos/papel | documento | completa | rondas lectura | no | lectura paciente | no | carta | no | read-model si escala |
-| `/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]` | Documentos/papel | documento | completa | `clinical_entries(kind=discharge_summary)` | no | lectura paciente | no | carta | no | firma real futura |
-| `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` | Documentos/papel | documento | completa | `clinical_entries(kind=intake)` | no | lectura paciente | no | carta | no | firma real futura |
-| `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]` | Documentos/papel | documento | completa | hoja diaria | no | lectura paciente | no | carta | no | firma real futura |
-| `/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]` | Documentos/papel | documento | completa | indicacion draft | no | lectura paciente | no | carta | no | no equivale a orden firmada |
+| `/` | Acceso/configuracion | seguimiento | completa | redirect App Router | none | publico/control UI | none | none | no | redirige a login o home segun sesion |
+| `/login` | Acceso/configuracion | seguimiento | completa | auth local | none | publico/control UI | none | none | no | correo productivo y usuarios persistentes futuros |
+| `/login/recuperar` | Acceso/configuracion | seguimiento | completa | auth local | none | publico/control UI | security_event | none | no | envio correo futuro |
+| `/login/desbloquear` | Acceso/configuracion | seguimiento | completa | auth local | none | publico/control UI | security_event | none | no | desbloqueo administrativo futuro |
+| `/login/desbloquear/confirmar` | Acceso/configuracion | seguimiento | completa | auth local | none | publico/control UI | security_event | none | no | destino de correo institucional futuro |
+| `/home` | Acceso/configuracion | seguimiento | completa | mapa fisico hospitalario + Screen Capability Registry | none | sesion local | none | none | no | mantener lugares fisicos, no arbol de acciones |
+| `/mapa` | Acceso/configuracion | seguimiento | completa | redirect App Router | none | sesion local | none | none | no | alias legacy hacia home |
+| `/configuracion` | Acceso/configuracion | seguimiento | completa | App Router | none | sesion local | none | none | lectura contextual | administracion clinica futura |
+| `/configuracion/apariencia` | Acceso/configuracion | seguimiento | completa | preferencias UI | none | sesion local | none | none | no | tokens visuales futuros |
+| `/configuracion/api` | Acceso/configuracion | seguimiento | completa | config API/OpenAPI | none | sesion local | none | none | no | health y versionado |
+| `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | none | sesion local | none | none | lectura contextual | IA externa bloqueada hasta gateway PHI |
+| `/consulta` | Ambulatorio | seguimiento | completa | App Router | none | lectura paciente | none | none | no | indice simple |
+| `/consulta/agenda` | Ambulatorio | episodio | completa | clinical appointments | clinical_write | medico/admin/dev | writes | none | no | preconsulta minima enlazada; agenda por equipos futura |
+| `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP + preconsulta | clinical_write | medico/admin/dev; preconsulta enfermeria/medico/admin/dev | writes | none | borrador revisable | preconsulta minima con workflow_kind; diagnosticos finales futuros |
+| `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | completa | record + appointments + encounters | none | lectura paciente | none | none | lectura resumida | seguimiento formal futuro |
+| `/hospitalizacion` | Hospitalizacion | seguimiento | completa/en expansion gobernada | App Router | none | lectura paciente | none | none | no | indice simple; firma/alta legal futuras |
+| `/hospitalizacion/camas` | Hospitalizacion | episodio | completa/en expansion gobernada | hospitalizacion + camas | clinical_write | medico/admin/dev | writes | none | no | censo minimo por servicio/equipo |
+| `/hospitalizacion/camas/nueva` | Hospitalizacion | episodio | completa/en expansion gobernada | camas | clinical_write | medico/admin/dev | writes | none | no | administracion institucional futura |
+| `/hospitalizacion/pacientes/[patientId]/epicrisis` | Hospitalizacion | documento | completa/en expansion gobernada | clinical entry discharge_summary | clinical_write | medico/admin/dev | writes | carta | borrador revisable | firma/cierre legal futuros |
+| `/hospitalizacion/pacientes/[patientId]/ingreso` | Hospitalizacion | documento | completa/en expansion gobernada | clinical entry intake | clinical_write | medico/admin/dev | writes | carta | borrador revisable | borrador no firmado |
+| `/hospitalizacion/pacientes/[patientId]/hoja-diaria` | Hospitalizacion | acto clinico | completa/en expansion gobernada | hojas diarias | clinical_write | medico/admin/dev | writes | carta | lectura resumida | evolucion por problema y firma futura |
+| `/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar` | Hospitalizacion | acto clinico | completa/en expansion gobernada | hojas diarias | clinical_write | medico/admin/dev | writes | carta | no | firma/bloqueo legal futuro |
+| `/hospitalizacion/pacientes/[patientId]/indicaciones` | Hospitalizacion | acto clinico | completa/en expansion gobernada | indicaciones draft | draft_only | medico/admin/dev | writes | carta | lectura resumida | orden ejecutable y firma futura |
+| `/hospitalizacion/rondas` | Hospitalizacion | seguimiento | completa/en expansion gobernada | ingresos + camas + hojas | none | lectura paciente | none | carta | lectura resumida | read-model backend si escala |
+| `/pacientes` | Nucleo paciente | paciente | completa | API pacientes / demo | none | lectura paciente | none | none | no | buscador universal avanzado |
+| `/pacientes/nuevo` | Nucleo paciente | paciente | completa | API pacientes | patient_write | escritura paciente | writes | none | no | identidad administrativa |
+| `/pacientes/[patientId]` | Nucleo paciente | paciente | completa | redirect App Router | none | lectura paciente | none | none | no | entrada a ficha |
+| `/pacientes/[patientId]/ai-chart` | IA clinica | acto clinico | completa/en expansion gobernada | AI-Chart + Assistant Read | clinical_patch | medico/admin/dev + permiso IA | patch_writes | SOAP carta | lectura, series, borrador | mantener v0.4 cerrado |
+| `/pacientes/[patientId]/alergias` | Seguridad/auditoria | paciente | completa | alergias activas | none | lectura paciente | none | none | lectura contextual | alertas criticas mas amplias |
+| `/pacientes/[patientId]/alergias/nueva` | Seguridad/auditoria | acto clinico | completa | alergias activas | clinical_write | medico/admin/dev | writes | none | no | reacciones adversas futuras |
+| `/pacientes/[patientId]/auditoria` | Seguridad/auditoria | seguimiento | completa | audit events | none | lectura auditoria | none | none | no | auditoria de accesos futura |
+| `/pacientes/[patientId]/documentos` | Documentos/papel | documento | completa/en expansion gobernada | record + print routes | none | lectura paciente | none | carta | no | adjuntos externos y consentimientos futuros |
+| `/pacientes/[patientId]/encuentros` | Episodios | episodio | completa | API encuentros | none | lectura paciente | none | none | lectura contextual | episodio mas explicito |
+| `/pacientes/[patientId]/encuentros/nuevo` | Episodios | episodio | completa | API encuentros | clinical_write | medico/admin/dev | writes | none | no | preconsulta minima en atencion; admision avanzada futura |
+| `/pacientes/[patientId]/estado` | Nucleo paciente | seguimiento | completa | API paciente | clinical_write | medico/admin/dev | writes | none | no | estados clinicos mas finos |
+| `/pacientes/[patientId]/eventos` | Nucleo paciente | acto clinico | completa | clinical events | clinical_write | escritura clinica | writes | none | lectura contextual | curaduria de antecedentes |
+| `/pacientes/[patientId]/evoluciones` | Episodios | acto clinico | completa | clinical entries | none | lectura paciente | none | carta | lectura contextual | filtros por episodio/problema |
+| `/pacientes/[patientId]/evoluciones/desde-eventos` | Episodios | acto clinico | completa | eventos + AI-Chart | clinical_write | medico/admin/dev + permiso IA | writes | carta | borrador revisable | borrador revisado |
+| `/pacientes/[patientId]/evoluciones/nueva` | Episodios | acto clinico | completa | clinical entries | clinical_write | medico/admin/dev | writes | carta | borrador revisable | firma real futura |
+| `/pacientes/[patientId]/ficha` | Nucleo paciente | paciente | completa | record paciente | none | lectura paciente | none | carta | lectura resumida | antecedentes/resultados minimos |
+| `/pacientes/[patientId]/ia` | IA clinica | seguimiento | completa | AI status/sugerencias | none | lectura paciente + permiso IA | none | none | lectura resumida | apoyo no central |
+| `/pacientes/[patientId]/medicacion` | Medicacion/vademecum | paciente | completa/en expansion gobernada | medicacion activa + vademecum | none | lectura paciente | none | none | validacion local | interacciones y receta futura |
+| `/pacientes/[patientId]/medicacion/nueva` | Medicacion/vademecum | acto clinico | completa/en expansion gobernada | medicacion + validacion dosis | clinical_write | escritura clinica | writes | none | validacion local | sin receta/orden automatica |
+| `/pacientes/[patientId]/problemas` | Nucleo paciente | paciente | completa | problemas activos | none | lectura paciente | none | none | lectura contextual | diagnosticos historicos |
+| `/pacientes/[patientId]/problemas/nuevo` | Nucleo paciente | acto clinico | completa | problemas activos | clinical_write | medico/admin/dev | writes | none | no | clasificacion diagnostica |
+| `/pacientes/[patientId]/signos-vitales` | Ordenes/resultados | seguimiento | completa | signos vitales | none | lectura paciente | none | none | series | tabla/grafico amplio |
+| `/pacientes/[patientId]/signos-vitales/nuevo` | Ordenes/resultados | acto clinico | completa | signos vitales | clinical_write | enfermeria/medico/admin/dev | writes | none | no | escalas y monitoreo |
+| `/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry discharge_summary | none | lectura paciente | none | carta | no | borrador no firmado |
+| `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]` | Documentos/papel | documento | completa/en expansion gobernada | hoja diaria | none | lectura paciente | none | carta | no | firma real futura |
+| `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry intake | none | lectura paciente | none | carta | no | borrador no firmado |
+| `/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]` | Documentos/papel | documento | completa/en expansion gobernada | indicacion draft | none | lectura paciente | none | carta | no | no equivale a orden firmada |
+| `/print/hospitalizacion/rondas` | Documentos/papel | documento | completa/en expansion gobernada | rondas lectura | none | lectura paciente | none | carta | no | read-model si escala |
+| `/print/pacientes/[patientId]/evolucion/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry | none | lectura paciente | none | carta | no | firma real futura |
+| `/print/pacientes/[patientId]/ficha` | Documentos/papel | documento | completa/en expansion gobernada | record paciente | none | lectura paciente | none | carta | no | paridad con ficha expandida |
+| `/print/pacientes/[patientId]/receta` | Documentos/papel | documento | bloqueada | politica receta | none | lectura paciente | none | bloqueado | no | receta valida requiere firma/folio |
+| `/print/pacientes/[patientId]/resumen` | Documentos/papel | documento | completa/en expansion gobernada | record paciente | none | lectura paciente | none | carta | lectura resumida | resumen IA no persistido |
+
+<!-- screen-routes:end -->
 
 ## Superficies futuras del mapa maestro
 

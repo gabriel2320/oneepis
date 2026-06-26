@@ -163,7 +163,12 @@ function DomainClinicalShell({
   const activeNavItem = navItems.find((item) => item.key === activeSection);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background"
+      data-ai-provider-visible="false"
+      data-internal-roles-hidden="true"
+      data-workspace={domain}
+    >
       <aside
         data-print-hidden="true"
         className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r bg-card lg:block"

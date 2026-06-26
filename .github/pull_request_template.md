@@ -12,6 +12,15 @@
 - [ ] Papel, auditoria, permisos y OpenAPI fueron considerados.
 - [ ] Usa los comandos minimos necesarios para validar el cambio.
 
+## Canon budget
+
+- [ ] Toca como maximo 1 documento canonico.
+- [ ] Toca como maximo 1 registry/contrato.
+- [ ] Toca como maximo 1 test/gate nuevo o modificado.
+- [ ] Si excede el presupuesto, explica que dano clinico, seguridad rota, setup roto o claim falso evita.
+- [ ] No abre PR separado de reconciliacion posterior.
+- [ ] No edita manualmente tablas generadas; usa el generador correspondiente.
+
 ## Cambios clinicos
 
 - [ ] No usa datos reales ni PHI.
@@ -50,6 +59,7 @@
 - [ ] Deje un test, gate, simplificacion, regla o pantalla menos ambigua.
 - [ ] Revise archivos near-limit reportados por `check:size`.
 - [ ] No cree documento nuevo si `CURRENT_STATE`, `GOVERNANCE`, `SCREEN_TREE` o `CODEX_PLAN` bastaban.
+- [ ] Si es docs-only, corrige seguridad, claim clinico/legal, setup roto, permisos contradictorios o produccion/no-produccion.
 
 - Regla aprendida:
 - Riesgo residual:

@@ -1,9 +1,20 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const demoPatientId = "11111111-1111-4111-8111-111111111111";
 const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
 const demoIntakeEntryId = "61111111-1111-4111-8111-111111111111";
 const demoDischargeSummaryEntryId = "62222222-2222-4222-8222-222222222222";
+
+async function expectSemanticShell(page: Page, workspace: "patient" | "ambulatory" | "hospital") {
+  const shell = page.locator(`[data-workspace="${workspace}"]`);
+  await expect(shell).toBeVisible();
+  await expect(shell).toHaveAttribute("data-ai-provider-visible", "false");
+  await expect(shell).toHaveAttribute("data-internal-roles-hidden", "true");
+}
+
+async function expectNoInternalTerms(locator: Locator) {
+  await expect(locator).not.toContainText(/\bworkflow_kind\b|ClinicalEncounter|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente|Si Ollama esta apagado|aunque Ollama no este disponible/);
+}
 
 test("patients index renders clinical work queue", async ({ page }) => {
   await page.goto("/pacientes");
@@ -18,7 +29,9 @@ test("patients index renders clinical work queue", async ({ page }) => {
 
 test("patient ficha renders clinical shell and AI draft area", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
+  const main = page.getByRole("main");
 
+  await expectSemanticShell(page, "patient");
   await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
   await expect(page.getByText("Hoja clinica viva")).toBeVisible();
   await expect(page.getByText("Linea clinica longitudinal")).toBeVisible();
@@ -46,11 +59,9 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByRole("link", { name: "Ver papel", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Apoyo contextual" })).toBeVisible();
   await expect(page.getByText(/Borrador asistido/)).toBeVisible();
-  await expect(page.getByText("Sugerencias Ollama")).toHaveCount(0);
   await expect(page.getByText(/Borrador IA/)).toHaveCount(0);
-  await expect(page.getByText(/Ollama activo|Ollama pendiente/)).toHaveCount(0);
   await expect(page.getByText("Tu rol actual no permite")).toHaveCount(0);
-  await expect(page.getByText("medico, admin")).toHaveCount(0);
+  await expectNoInternalTerms(main);
 });
 
 test("patient navigation groups clinical areas on desktop", async ({ page }, testInfo) => {
@@ -94,7 +105,9 @@ test("patient navigation mobile selector changes sections", async ({ page }, tes
 
 test("AI-Chart renders event proposals from written entries", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/ai-chart`);
+  const main = page.getByRole("main");
 
+  await expectSemanticShell(page, "patient");
   await expect(page.getByRole("heading", { name: "AI-Chart Core" })).toBeVisible();
   await expect(page.getByText("Leer contexto")).toBeVisible();
   await expect(page.getByText("Seleccionar evidencia")).toBeVisible();
@@ -108,10 +121,7 @@ test("AI-Chart renders event proposals from written entries", async ({ page }) =
     page.getByText("AI-Chart mantiene reglas, plantillas y auditoria aunque la IA local no este disponible."),
   ).toBeVisible();
   await expect(page.getByText("IA clinica:")).toBeVisible();
-  await expect(page.getByText("requiere admin, medico")).toHaveCount(0);
-  await expect(page.getByText("rol admin")).toHaveCount(0);
-  await expect(page.getByText("Si Ollama esta apagado")).toHaveCount(0);
-  await expect(page.getByText("aunque Ollama no este disponible")).toHaveCount(0);
+  await expectNoInternalTerms(main);
   await expect(
     page.getByText("Estados: pendiente / registrando / registrada en ficha / rechazada."),
   ).toBeVisible();
@@ -173,8 +183,7 @@ test("hospitalization home renders compact operational board", async ({ page }) 
   await expect(main.getByText("Atencion ambulatoria")).toHaveCount(0);
   await expect(main.getByText("Preconsulta ambulatoria")).toHaveCount(0);
   await expect(main.getByText("Control ambulatorio demo")).toHaveCount(0);
-  await expect(main.getByText("workflow_kind")).toHaveCount(0);
-  await expect(main.getByText("ClinicalEncounter")).toHaveCount(0);
+  await expectNoInternalTerms(main);
 });
 
 test("hospitalization beds render active board", async ({ page }) => {
@@ -213,6 +222,7 @@ test("hospital daily evolution renders active read-only worklist", async ({ page
 test("hospital admission renders governed intake draft workspace", async ({ page }) => {
   await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/ingreso`);
 
+  await expectSemanticShell(page, "hospital");
   await expect(page.getByRole("heading", { name: "Ingreso medico hospitalario" })).toBeVisible();
   await expect(page.getByText("Borrador de ingreso")).toBeVisible();
   await expect(page.getByLabel("Hospitalizacion activa")).toContainText("Hospitalizacion demo");
@@ -220,8 +230,7 @@ test("hospital admission renders governed intake draft workspace", async ({ page
   await expect(page.getByRole("button", { name: "Guardar ingreso" })).toBeDisabled();
   await expect(page.getByText("Atencion ambulatoria")).toHaveCount(0);
   await expect(page.getByText("Preconsulta ambulatoria")).toHaveCount(0);
-  await expect(page.getByText("workflow_kind")).toHaveCount(0);
-  await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
+  await expectNoInternalTerms(page.getByRole("main"));
 });
 
 test("hospital domain navigation is isolated on desktop", async ({ page }, testInfo) => {

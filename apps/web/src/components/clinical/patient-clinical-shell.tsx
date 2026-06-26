@@ -53,7 +53,12 @@ export function PatientClinicalShell({
   const screenCapability = findScreenCapability(pathname);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background"
+      data-ai-provider-visible="false"
+      data-internal-roles-hidden="true"
+      data-workspace="patient"
+    >
       <aside
         data-print-hidden="true"
         className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r bg-card lg:block"
