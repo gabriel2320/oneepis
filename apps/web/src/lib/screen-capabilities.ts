@@ -58,8 +58,13 @@ const AI = {
 } satisfies Record<string, ScreenAiCapability[]>;
 
 export const screenCapabilities: ScreenCapability[] = [
-  capability("/", "Acceso/configuracion", "seguimiento", "completa", "redirect App Router", "none", "publico/control UI", "none", "none", AI.none, "entrada a pacientes"),
-  capability("/login", "Acceso/configuracion", "seguimiento", "completa", "auth local", "none", "publico/control UI", "none", "none", AI.none, "seleccion institucion/rol futura"),
+  capability("/", "Acceso/configuracion", "seguimiento", "completa", "redirect App Router", "none", "publico/control UI", "none", "none", AI.none, "redirige a login o home segun sesion"),
+  capability("/login", "Acceso/configuracion", "seguimiento", "completa", "auth local", "none", "publico/control UI", "none", "none", AI.none, "correo productivo y usuarios persistentes futuros"),
+  capability("/login/recuperar", "Acceso/configuracion", "seguimiento", "completa", "auth local", "none", "publico/control UI", "security_event", "none", AI.none, "envio correo futuro"),
+  capability("/login/desbloquear", "Acceso/configuracion", "seguimiento", "completa", "auth local", "none", "publico/control UI", "security_event", "none", AI.none, "desbloqueo administrativo futuro"),
+  capability("/login/desbloquear/confirmar", "Acceso/configuracion", "seguimiento", "completa", "auth local", "none", "publico/control UI", "security_event", "none", AI.none, "destino de correo institucional futuro"),
+  capability("/home", "Acceso/configuracion", "seguimiento", "completa", "mapa fisico hospitalario + Screen Capability Registry", "none", "sesion local", "none", "none", AI.none, "mantener lugares fisicos, no arbol de acciones"),
+  capability("/mapa", "Acceso/configuracion", "seguimiento", "completa", "redirect App Router", "none", "sesion local", "none", "none", AI.none, "alias legacy hacia home"),
   capability("/configuracion", "Acceso/configuracion", "seguimiento", "completa", "App Router", "none", "sesion local", "none", "none", AI.read, "administracion clinica futura"),
   capability("/configuracion/apariencia", "Acceso/configuracion", "seguimiento", "completa", "preferencias UI", "none", "sesion local", "none", "none", AI.none, "tokens visuales futuros"),
   capability("/configuracion/api", "Acceso/configuracion", "seguimiento", "completa", "config API/OpenAPI", "none", "sesion local", "none", "none", AI.none, "health y versionado"),

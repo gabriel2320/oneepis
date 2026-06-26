@@ -6,7 +6,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
-import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { HospitalClinicalShell } from "@/components/clinical/clinical-domain-shell";
+import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import { createHospitalDailySheet, updateHospitalDailySheet } from "@/lib/api/hospitalization";
 import { DEMO_MODE } from "@/lib/api/client";
@@ -47,16 +48,16 @@ export function DailySheetPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="ficha">
+    <HospitalClinicalShell record={record} activeSection="evolucion-diaria">
       <div className="space-y-5">
-        <BackLink href="/hospitalizacion/camas" label="Camas hospitalarias" />
+        <BackLink href="/hospitalizacion/rondas" label="Evolucion diaria" />
         <PageTitle
-          title="Hoja diaria hospitalizada"
+          title="Evolucion diaria hospitalaria"
           description="Registro diario minimo, auditado y preparado para papel."
         />
         <DailySheetWorkspace patientId={patientId} />
       </div>
-    </PatientClinicalShell>
+    </HospitalClinicalShell>
   );
 }
 
@@ -79,29 +80,29 @@ export function EditHospitalDailySheetPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="ficha">
+    <HospitalClinicalShell record={record} activeSection="evolucion-diaria">
       <div className="max-w-3xl space-y-5">
         <BackLink
           href={`/hospitalizacion/pacientes/${patientId}/hoja-diaria`}
-          label="Hoja diaria"
+          label="Evolucion diaria"
         />
         <PageTitle
-          title="Editar hoja diaria"
+          title="Editar evolucion diaria"
           description="Correccion manual auditada de un registro hospitalizado."
         />
-        {!sheet ? <ErrorState description="No se encontro la hoja diaria solicitada." /> : null}
+        {!sheet ? <ErrorState description="No se encontro la evolucion diaria solicitada." /> : null}
         {DEMO_MODE ? <ErrorState description="El modo demo no permite editar hojas reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite editar hoja diaria hospitalizada." />
+          <ErrorState description="Tu rol actual no permite editar evolucion diaria hospitalaria." />
         ) : null}
         {sheet?.status === "closed" ? (
-          <ErrorState description="Esta hoja diaria esta cerrada. Puede revisarse e imprimirse, pero no editarse." />
+          <ErrorState description="Esta evolucion diaria esta cerrada. Puede revisarse e imprimirse, pero no editarse." />
         ) : null}
         {sheet ? (
           <EditDailySheetForm patientId={patientId} sheet={sheet} canWrite={canWrite} />
         ) : null}
       </div>
-    </PatientClinicalShell>
+    </HospitalClinicalShell>
   );
 }
 
@@ -128,7 +129,7 @@ function EditDailySheetForm({
   });
 
   return (
-    <ClinicalSectionCard title={`Hoja diaria ${sheet.sheet_date}`}>
+    <ClinicalSectionCard title={`Evolucion diaria ${sheet.sheet_date}`}>
       <DailySheetForm
         formState={formState}
         setFormState={setFormState}
@@ -137,7 +138,7 @@ function EditDailySheetForm({
         onSubmit={() => mutation.mutate(toDailySheetPayload(formState))}
       />
       {mutation.isError ? (
-        <p className="mt-3 text-sm text-destructive">No se pudo actualizar la hoja diaria.</p>
+        <p className="mt-3 text-sm text-destructive">No se pudo actualizar la evolucion diaria.</p>
       ) : null}
     </ClinicalSectionCard>
   );
@@ -159,11 +160,11 @@ function DailySheetWorkspace({ patientId }: { patientId: string }) {
 
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
-      <ClinicalSectionCard title="Hojas registradas">
+      <ClinicalSectionCard title="Evoluciones registradas">
         {dailySheets.isLoading ? <LoadingRows rows={3} /> : null}
         {dailySheets.isError ? (
           <ErrorState
-            description="No se pudo cargar la hoja diaria hospitalizada."
+            description="No se pudo cargar la evolucion diaria hospitalaria."
             onRetry={dailySheets.refetch}
           />
         ) : null}
@@ -171,15 +172,15 @@ function DailySheetWorkspace({ patientId }: { patientId: string }) {
           <DailySheetList sheets={dailySheets.items} patientId={patientId} />
         ) : null}
       </ClinicalSectionCard>
-      <ClinicalSectionCard title="Nueva hoja diaria">
+      <ClinicalSectionCard title="Nueva evolucion diaria">
         {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar hojas reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite crear hoja diaria hospitalizada." />
+          <ErrorState description="Tu rol actual no permite crear evolucion diaria hospitalaria." />
         ) : null}
         <DailySheetForm
           formState={formState}
           setFormState={setFormState}
-          submitLabel={mutation.isPending ? "Guardando..." : "Guardar hoja diaria"}
+          submitLabel={mutation.isPending ? "Guardando..." : "Guardar evolucion diaria"}
           disabled={mutation.isPending || DEMO_MODE || !canWrite}
           onSubmit={() => mutation.mutate(toDailySheetPayload(formState))}
         />

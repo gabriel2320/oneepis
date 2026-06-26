@@ -1,4 +1,4 @@
-import { API_ACTOR, apiFetch, getStoredAuthToken } from "@/lib/api/client";
+import { API_ACTOR, apiFetch } from "@/lib/api/client";
 import type {
   AIStreamEvent,
   ClinicalIntentActionDecisionRequest,
@@ -74,10 +74,6 @@ export async function streamClinicalCommandPreview({
   onEvent: (event: AIStreamEvent) => void;
 }): Promise<ClinicalIntentRouteResponse> {
   const headers = new Headers({ "Content-Type": "application/json" });
-  const token = getStoredAuthToken();
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
   if (API_ACTOR) {
     headers.set("X-OneEpis-Actor", API_ACTOR);
   }

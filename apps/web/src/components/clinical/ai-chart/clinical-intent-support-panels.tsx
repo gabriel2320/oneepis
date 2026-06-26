@@ -10,7 +10,7 @@ import { clinicalActionKey, clinicalActionTarget } from "./ai-chart-utils";
 export function ProblemsEvidencePanel({ intent }: { intent: ClinicalIntentResponse }) {
   return (
     <div className="rounded-md border p-3">
-      <p className="text-sm font-medium">Problemas y evidencia</p>
+      <p className="text-sm font-medium">Antecedentes y evidencia</p>
       <div className="mt-2 space-y-3">
         {intent.problem_contexts.length > 0 ? (
           intent.problem_contexts.map((context) => (
@@ -52,7 +52,7 @@ export function ProblemsEvidencePanel({ intent }: { intent: ClinicalIntentRespon
             </div>
           ))
         ) : (
-          <p className="text-xs text-muted-foreground">Sin problemas estructurados.</p>
+          <p className="text-xs text-muted-foreground">Sin antecedentes estructurados.</p>
         )}
       </div>
     </div>

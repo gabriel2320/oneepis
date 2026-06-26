@@ -39,7 +39,7 @@ type ClinicalIntentCommandBarProps = {
 const intentActions: { intent: ClinicalIntentType; label: string }[] = [
   { intent: "summarize_patient", label: "Resume paciente" },
   { intent: "daily_changes", label: "Que cambio" },
-  { intent: "active_problems", label: "Problemas activos" },
+  { intent: "active_problems", label: "Antecedentes activos" },
   { intent: "timeline", label: "Timeline" },
   { intent: "draft_soap", label: "Prepara SOAP" },
   { intent: "show_sources", label: "Fuentes" },

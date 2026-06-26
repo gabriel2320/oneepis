@@ -161,7 +161,7 @@ export function ClinicalRiskPreview({
               rows={2}
               value={humanAction}
               onChange={(event) => setHumanAction(event.target.value)}
-              placeholder="Ej.: reevaluar en ronda y educar medidas de prevencion."
+              placeholder="Ej.: reevaluar en evolucion diaria y educar medidas de prevencion."
             />
           </div>
           <Button type="submit" size="sm" disabled={!canSubmit || createMutation.isPending}>

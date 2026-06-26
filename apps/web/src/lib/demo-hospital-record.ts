@@ -27,6 +27,28 @@ export const demoHospitalBeds: HospitalBed[] = [
     created_at: "2026-06-20T08:30:00Z",
     updated_at: "2026-06-20T08:30:00Z",
   },
+  {
+    id: "94444444-4444-4444-8444-444444444444",
+    ward: "Medicina",
+    room: "304",
+    bed_label: "A",
+    status: "occupied",
+    encounter_id: "84444444-4444-4444-8444-444444444444",
+    notes: "Cama demo ocupada para indicaciones tipo papel.",
+    created_at: "2026-06-22T08:00:00Z",
+    updated_at: "2026-06-24T11:30:00Z",
+  },
+  {
+    id: "95555555-5555-4555-8555-555555555555",
+    ward: "Pediatria",
+    room: "210",
+    bed_label: "C",
+    status: "cleaning",
+    encounter_id: null,
+    notes: "Cama demo en limpieza para transiciones de tablero.",
+    created_at: "2026-06-24T12:00:00Z",
+    updated_at: "2026-06-24T12:00:00Z",
+  },
 ];
 
 export const demoHospitalDailySheets: HospitalDailySheet[] = [
@@ -45,6 +67,21 @@ export const demoHospitalDailySheets: HospitalDailySheet[] = [
     created_at: "2026-06-20T09:00:00Z",
     updated_at: "2026-06-20T09:00:00Z",
   },
+  {
+    id: "a4444444-4444-4444-8444-444444444444",
+    patient_id: "14444444-4444-4444-8444-444444444444",
+    encounter_id: "84444444-4444-4444-8444-444444444444",
+    status: "draft",
+    sheet_date: "2026-06-24",
+    clinical_summary: "Paciente demo hospitalizada por cuadro respiratorio ficticio, estable con vigilancia.",
+    overnight_events: "Febricula aislada y tos persistente, sin eventos criticos demo.",
+    active_plan: "Mantener manejo de soporte, control de signos vitales y reevaluacion respiratoria.",
+    pending_tasks: "Revisar examenes demo, completar evolucion SOAP libre e indicaciones del dia.",
+    safety_notes: "Alergia severa a penicilina registrada; no usar para decisiones reales.",
+    created_by: "medico.demo",
+    created_at: "2026-06-24T08:00:00Z",
+    updated_at: "2026-06-24T08:00:00Z",
+  },
 ];
 
 export const demoHospitalIndications: HospitalIndication[] = [
@@ -61,5 +98,35 @@ export const demoHospitalIndications: HospitalIndication[] = [
     created_by: "profesional.demo",
     created_at: "2026-06-20T10:30:00Z",
     updated_at: "2026-06-20T10:30:00Z",
+  },
+  {
+    id: "b4444444-4444-4444-8444-444444444444",
+    patient_id: "14444444-4444-4444-8444-444444444444",
+    encounter_id: "84444444-4444-4444-8444-444444444444",
+    status: "draft",
+    indicated_at: "2026-06-24T09:15:00Z",
+    title: "Indicaciones respiratorias demo",
+    indication_text:
+      "Dieta liviana segun tolerancia.\nReposo relativo en sala.\nControl signos vitales cada 6 horas.\nOxigeno si saturacion menor a meta demo.\nAnalgesia segun necesidad y reevaluacion clinica.",
+    rationale: "Borrador ficticio para validar hoja de indicaciones tipo papel.",
+    safety_notes: "Alergia severa a penicilina. Documento no firmado ni ejecutable.",
+    created_by: "medico.demo",
+    created_at: "2026-06-24T09:15:00Z",
+    updated_at: "2026-06-24T09:15:00Z",
+  },
+  {
+    id: "b4444444-4444-4444-8444-444444444445",
+    patient_id: "14444444-4444-4444-8444-444444444444",
+    encounter_id: "84444444-4444-4444-8444-444444444444",
+    status: "closed",
+    indicated_at: "2026-06-23T17:00:00Z",
+    title: "Indicaciones cerradas demo",
+    indication_text:
+      "Hidratacion oral.\nKinesioterapia respiratoria demo.\nAvisar por fiebre persistente o dificultad respiratoria.",
+    rationale: "Cierre ficticio para revisar estado bloqueado.",
+    safety_notes: "Cerrada demo; no equivale a orden firmada.",
+    created_by: "medico.demo",
+    created_at: "2026-06-23T17:00:00Z",
+    updated_at: "2026-06-23T17:30:00Z",
   },
 ];

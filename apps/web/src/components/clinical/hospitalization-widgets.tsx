@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { ClipboardList, FileText, Printer } from "lucide-react";
+import {
+  ClipboardList,
+  FileText,
+  Printer,
+} from "lucide-react";
 
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +20,7 @@ import { dailySheetStatusLabel } from "./hospital-daily-sheet-widgets";
 
 export function BedBoard({ items = [] }: { items?: HospitalizationBoardItem[] }) {
   if (items.length === 0) {
-    return <EmptyState title="Sin hospitalizaciones activas" description="No hay encuentros hospitalarios en curso." />;
+    return <EmptyState title="Sin hospitalizaciones activas" description="No hay ingresos hospitalarios en curso." />;
   }
 
   return (
@@ -52,7 +56,7 @@ export function BedBoard({ items = [] }: { items?: HospitalizationBoardItem[] })
             </Button>
             <Button asChild variant="outline" size="sm">
               <Link href={`/hospitalizacion/pacientes/${item.patient.id}/hoja-diaria`}>
-                Hoja diaria
+                Evolucion diaria
               </Link>
             </Button>
           </div>
@@ -67,10 +71,10 @@ export function RoundList({ board }: { board: HospitalizationBoardState }) {
     return <LoadingRows rows={3} />;
   }
   if (board.isError) {
-    return <ErrorState description="No se pudo cargar la ronda hospitalaria." onRetry={board.refetch} />;
+    return <ErrorState description="No se pudo cargar la evolucion diaria hospitalaria." onRetry={board.refetch} />;
   }
   if (board.items.length === 0) {
-    return <EmptyState title="Sin pacientes en ronda" description="No hay ingresos hospitalarios activos." />;
+    return <EmptyState title="Sin pacientes hospitalizados" description="No hay ingresos hospitalarios activos." />;
   }
 
   return (
@@ -130,7 +134,7 @@ function HospitalRoundItem({ item }: { item: HospitalizationBoardItem }) {
           <Button asChild variant="outline" size="sm">
             <Link href={`/hospitalizacion/pacientes/${item.patient.id}/hoja-diaria`}>
               <ClipboardList className="h-4 w-4" />
-              Hoja diaria
+              Evolucion diaria
             </Link>
           </Button>
           {latestDailySheet ? (
@@ -149,13 +153,13 @@ function HospitalRoundItem({ item }: { item: HospitalizationBoardItem }) {
       <div className="mt-4 rounded-md bg-muted/40 p-3">
         {dailySheets.isLoading ? <LoadingRows rows={1} /> : null}
         {dailySheets.isError ? (
-          <ErrorState description="No se pudo cargar la hoja diaria." onRetry={dailySheets.refetch} />
+          <ErrorState description="No se pudo cargar la evolucion diaria." onRetry={dailySheets.refetch} />
         ) : null}
         {!dailySheets.isLoading && !dailySheets.isError && latestDailySheet ? (
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-semibold uppercase text-muted-foreground">
-                Ultima hoja diaria {latestDailySheet.sheet_date}
+                Ultima evolucion diaria {latestDailySheet.sheet_date}
               </p>
               <Badge variant={latestDailySheet.status === "closed" ? "safe" : "outline"}>
                 {dailySheetStatusLabel[latestDailySheet.status]}
@@ -176,8 +180,8 @@ function HospitalRoundItem({ item }: { item: HospitalizationBoardItem }) {
         ) : null}
         {!dailySheets.isLoading && !dailySheets.isError && !latestDailySheet ? (
           <EmptyState
-            title="Sin hoja diaria para este ingreso"
-            description="La ronda puede continuar leyendo ficha y cama, pero falta el registro diario."
+            title="Sin evolucion diaria para este ingreso"
+            description="El flujo puede continuar leyendo ficha y cama, pero falta la evolucion diaria."
           />
         ) : null}
       </div>

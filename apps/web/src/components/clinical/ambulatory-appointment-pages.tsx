@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AppointmentCreatePanel } from "@/components/clinical/ambulatory-appointment-create-panel";
 import { AppointmentList } from "@/components/clinical/ambulatory-appointment-list";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
-import { ModulePage } from "@/components/clinical/module-pages";
+import { DomainModulePage } from "@/components/clinical/clinical-domain-module";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import { Input } from "@/components/ui/input";
 import { listAppointments } from "@/lib/api/appointments";
@@ -35,7 +35,8 @@ export function AmbulatoryAppointmentPage() {
     : (appointmentsQuery.data ?? []);
 
   return (
-    <ModulePage
+    <DomainModulePage
+      domain="ambulatory"
       title="Agenda"
       description="Agenda ambulatoria persistida, con estados reales y enlace a atencion."
     >
@@ -64,7 +65,7 @@ export function AmbulatoryAppointmentPage() {
           selectedDate={selectedDate}
         />
       </div>
-    </ModulePage>
+    </DomainModulePage>
   );
 }
 

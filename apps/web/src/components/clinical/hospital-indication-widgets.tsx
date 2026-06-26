@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FileText, Lock, Printer, Save } from "lucide-react";
 
+import { FreeTextClinicalEditor, PaperLikePanel } from "@/components/clinical/clinical-workspace";
 import { EmptyState } from "@/components/clinical/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,65 +44,76 @@ export function HospitalIndicationForm({
   onSubmit: () => void;
 }) {
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSubmit();
-      }}
+    <PaperLikePanel
+      title="Nueva indicacion hospitalaria"
+      description="Borrador tipo papel; requiere cierre y revision humana."
     >
-      <Field label="Fecha y hora">
-        <Input
-          type="datetime-local"
-          disabled={disabled}
-          value={formState.indicated_at}
-          onChange={(event) => setFormState({ ...formState, indicated_at: event.target.value })}
-        />
-      </Field>
-      <Field label="Titulo">
-        <Input
-          disabled={disabled}
-          value={formState.title}
-          onChange={(event) => setFormState({ ...formState, title: event.target.value })}
-        />
-      </Field>
-      <Field label="Indicacion">
-        <Textarea
-          className="min-h-28"
-          disabled={disabled}
-          value={formState.indication_text}
-          onChange={(event) =>
-            setFormState({ ...formState, indication_text: event.target.value })
-          }
-        />
-      </Field>
-      <Field label="Motivo">
-        <Textarea
-          disabled={disabled}
-          value={formState.rationale}
-          onChange={(event) => setFormState({ ...formState, rationale: event.target.value })}
-        />
-      </Field>
-      <Field label="Seguridad">
-        <Textarea
-          disabled={disabled}
-          value={formState.safety_notes}
-          onChange={(event) => setFormState({ ...formState, safety_notes: event.target.value })}
-        />
-      </Field>
-      <Button
-        type="submit"
-        disabled={
-          disabled ||
-          !formState.indicated_at ||
-          !formState.title.trim() ||
-          !formState.indication_text.trim()
-        }
+      <form
+        className="space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
       >
-        <Save className="h-4 w-4" />
-        {submitLabel}
-      </Button>
-    </form>
+        <div className="grid gap-4 md:grid-cols-[180px_minmax(0,1fr)]">
+          <Field label="Fecha y hora">
+            <Input
+              type="datetime-local"
+              disabled={disabled}
+              value={formState.indicated_at}
+              onChange={(event) => setFormState({ ...formState, indicated_at: event.target.value })}
+            />
+          </Field>
+          <Field label="Titulo">
+            <Input
+              disabled={disabled}
+              value={formState.title}
+              placeholder="Indicaciones medicas"
+              onChange={(event) => setFormState({ ...formState, title: event.target.value })}
+            />
+          </Field>
+        </div>
+        <FreeTextClinicalEditor
+          label="Indicaciones"
+          value={formState.indication_text}
+          disabled={disabled}
+          minHeightClassName="min-h-[420px]"
+          placeholder={"Dieta:\nReposo/actividad:\nControl signos vitales:\nMedicamentos:\nExamenes/controles:"}
+          onChange={(value) => setFormState({ ...formState, indication_text: value })}
+        />
+        <details className="rounded-md border bg-muted/20 p-3">
+          <summary className="cursor-pointer text-sm font-medium">Motivo y seguridad</summary>
+          <div className="mt-4 grid gap-4">
+            <Field label="Motivo">
+              <Textarea
+                disabled={disabled}
+                value={formState.rationale}
+                onChange={(event) => setFormState({ ...formState, rationale: event.target.value })}
+              />
+            </Field>
+            <Field label="Seguridad">
+              <Textarea
+                disabled={disabled}
+                value={formState.safety_notes}
+                onChange={(event) => setFormState({ ...formState, safety_notes: event.target.value })}
+              />
+            </Field>
+          </div>
+        </details>
+        <Button
+          type="submit"
+          disabled={
+            disabled ||
+            !formState.indicated_at ||
+            !formState.title.trim() ||
+            !formState.indication_text.trim()
+          }
+        >
+          <Save className="h-4 w-4" />
+          {submitLabel}
+        </Button>
+      </form>
+    </PaperLikePanel>
   );
 }
 

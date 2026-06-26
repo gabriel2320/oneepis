@@ -12,7 +12,8 @@ import { TemplateSelector } from "@/components/theme/template-selector";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
-import { AppointmentList, VisitWorkspace } from "@/components/clinical/ambulatory-widgets";
+import { AmbulatoryCommandCenter } from "@/components/clinical/ambulatory-command-center";
+import { DomainModulePage } from "@/components/clinical/clinical-domain-module";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
@@ -21,30 +22,14 @@ import { findScreenCapability } from "@/lib/screen-capabilities";
 
 export function AmbulatoryHomePage() {
   return (
-    <ModulePage
-      title="Consulta"
-      description="Base para agenda, atencion y resumen longitudinal."
+    <DomainModulePage
+      domain="ambulatory"
+      title="Consultas ambulatorias"
+      description="Flujo ambulatorio centrado en la atencion clinica."
       actions={[{ href: "/consulta/agenda", label: "Agenda" }]}
     >
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ClinicalSectionCard title="Agenda">
-          <AppointmentList />
-        </ClinicalSectionCard>
-        <ClinicalSectionCard title="Atencion">
-          <VisitWorkspace />
-        </ClinicalSectionCard>
-      </div>
-    </ModulePage>
-  );
-}
-
-export function AppointmentPage() {
-  return (
-    <ModulePage title="Agenda" description="Agenda ambulatoria lista para integracion.">
-      <ClinicalSectionCard title="AppointmentList">
-        <AppointmentList />
-      </ClinicalSectionCard>
-    </ModulePage>
+      <AmbulatoryCommandCenter />
+    </DomainModulePage>
   );
 }
 

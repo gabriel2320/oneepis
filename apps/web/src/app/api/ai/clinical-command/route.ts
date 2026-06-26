@@ -52,9 +52,17 @@ async function routeClinicalCommand(
 ): Promise<ClinicalCommandRouteResult> {
   const headers = new Headers({ "Content-Type": "application/json" });
   const authorization = request.headers.get("Authorization");
+  const cookie = request.headers.get("Cookie");
+  const csrf = csrfFromCookie(cookie);
   const actor = request.headers.get("X-OneEpis-Actor");
   if (authorization) {
     headers.set("Authorization", authorization);
+  }
+  if (cookie) {
+    headers.set("Cookie", cookie);
+  }
+  if (csrf) {
+    headers.set("X-OneEpis-CSRF", csrf);
   }
   if (actor) {
     headers.set("X-OneEpis-Actor", actor);
@@ -77,6 +85,18 @@ async function routeClinicalCommand(
     };
   }
   return { ok: true, route: routeResponseSchema.parse(await response.json()) };
+}
+
+function csrfFromCookie(cookie: string | null) {
+  if (!cookie) {
+    return null;
+  }
+  const prefix = "oneepis_csrf=";
+  const csrfCookie = cookie
+    .split(";")
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(prefix));
+  return csrfCookie ? decodeURIComponent(csrfCookie.slice(prefix.length)) : null;
 }
 
 function createClinicalCommandTextStream(result: ClinicalCommandRouteResult) {

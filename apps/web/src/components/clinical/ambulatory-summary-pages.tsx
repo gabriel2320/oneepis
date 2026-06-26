@@ -5,8 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarClock } from "lucide-react";
 
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { AmbulatoryClinicalShell } from "@/components/clinical/clinical-domain-shell";
 import { formatDateTime } from "@/components/clinical/date-format";
-import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import {
   AllergyList,
   ClinicalTimeline,
@@ -52,12 +53,12 @@ export function AmbulatorySummaryPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="encuentros">
+    <AmbulatoryClinicalShell record={record} activeSection="resumen-ambulatorio">
       <div className="space-y-5">
         <BackLink href="/consulta" label="Consulta" />
         <PageTitle
           title="Resumen ambulatorio"
-          description="Lectura consolidada de controles, citas, problemas y borradores; no crea recetas ni ordenes."
+          description="Lectura de apoyo para la atencion clinica ambulatoria; no crea recetas ni ordenes."
           action={
             <Button asChild variant="outline" size="sm">
               <Link href={`/consulta/pacientes/${patientId}/atencion`}>Abrir atencion</Link>
@@ -66,7 +67,7 @@ export function AmbulatorySummaryPage() {
         />
         <AmbulatorySummaryWorkspace patientId={patientId} record={record} />
       </div>
-    </PatientClinicalShell>
+    </AmbulatoryClinicalShell>
   );
 }
 
@@ -106,7 +107,7 @@ function AmbulatorySummaryWorkspace({
             <VitalsStrip vital={record.latest_vitals} />
           </div>
         </ClinicalSectionCard>
-        <ClinicalSectionCard title="Problemas y tratamientos">
+        <ClinicalSectionCard title="Antecedentes y tratamientos">
           <div className="grid gap-4 lg:grid-cols-3">
             <ProblemList problems={record.active_problems} />
             <AllergyList allergies={record.active_allergies} />
@@ -127,10 +128,10 @@ function AmbulatorySummaryWorkspace({
             <AppointmentSummaryList appointments={appointments} />
           ) : null}
         </ClinicalSectionCard>
-        <ClinicalSectionCard title="Encuentros ambulatorios">
+        <ClinicalSectionCard title="Atenciones ambulatorias">
           {encountersQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
           {encountersQuery.isError && !DEMO_MODE ? (
-            <ErrorState description="No se pudieron cargar los encuentros ambulatorios." />
+            <ErrorState description="No se pudieron cargar las atenciones ambulatorias." />
           ) : null}
           {!encountersQuery.isLoading || DEMO_MODE ? (
             <EncounterList encounters={ambulatoryEncounters} />
