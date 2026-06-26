@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ClipboardList, LoaderCircle, ShieldCheck } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { confirmUnlock } from "@/lib/api/auth";
 
@@ -44,11 +44,14 @@ export function UnlockConfirmPage() {
             <span className="block text-xs text-muted-foreground">Acceso privado</span>
           </span>
         </div>
-        <ClinicalSectionCard
+        <AuthCard
           title="Confirmar desbloqueo"
           description="Procesa el enlace institucional sin revelar informacion de la cuenta."
         >
-          <div className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground" aria-live="polite">
+          <div
+            className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground"
+            aria-live="polite"
+          >
             <span className="inline-flex items-center gap-2">
               {mutation.isPending ? (
                 <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -61,7 +64,7 @@ export function UnlockConfirmPage() {
           <Button asChild className="mt-4 w-full">
             <Link href="/login">Volver a ingresar</Link>
           </Button>
-        </ClinicalSectionCard>
+        </AuthCard>
       </div>
     </main>
   );

@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ClipboardList, LogIn } from "lucide-react";
 import { useState } from "react";
 
-import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { AuthCard } from "@/components/auth/auth-card";
 import { ErrorState } from "@/components/clinical/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ export function LoginPage() {
           </span>
         </div>
 
-        <ClinicalSectionCard
+        <AuthCard
           title="Ingresar"
           description="Acceso privado a secciones clinicas autorizadas."
         >
@@ -102,7 +102,7 @@ export function LoginPage() {
               />
             </div>
           ) : null}
-        </ClinicalSectionCard>
+        </AuthCard>
       </div>
     </main>
   );

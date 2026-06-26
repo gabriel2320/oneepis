@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ClipboardList, Send } from "lucide-react";
 import { useState } from "react";
 
-import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { AuthCard } from "@/components/auth/auth-card";
 import { ErrorState } from "@/components/clinical/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,9 +36,12 @@ export function AuthRequestPage({ mode }: { mode: "recovery" | "unlock" }) {
             <span className="block text-xs text-muted-foreground">Acceso privado</span>
           </span>
         </div>
-        <ClinicalSectionCard title={title} description={description}>
+        <AuthCard title={title} description={description}>
           {mutation.isSuccess ? (
-            <div className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground" aria-live="polite">
+            <div
+              className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground"
+              aria-live="polite"
+            >
               Solicitud enviada. Revisa los canales institucionales configurados o contacta a tu administrador.
             </div>
           ) : (
@@ -59,7 +62,11 @@ export function AuthRequestPage({ mode }: { mode: "recovery" | "unlock" }) {
                   onChange={(event) => setEmail(event.target.value)}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={mutation.isPending || !email.trim()}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={mutation.isPending || !email.trim()}
+              >
                 <Send className="h-4 w-4" />
                 {mutation.isPending ? "Enviando..." : "Enviar solicitud"}
               </Button>
@@ -70,10 +77,13 @@ export function AuthRequestPage({ mode }: { mode: "recovery" | "unlock" }) {
               <ErrorState description="No se pudo registrar la solicitud. Intenta nuevamente." />
             </div>
           ) : null}
-          <Link className="mt-4 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline" href="/login">
+          <Link
+            className="mt-4 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
+            href="/login"
+          >
             Volver a ingresar
           </Link>
-        </ClinicalSectionCard>
+        </AuthCard>
       </div>
     </main>
   );
