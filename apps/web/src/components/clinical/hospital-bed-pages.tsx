@@ -7,9 +7,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { DomainModulePage } from "@/components/clinical/clinical-domain-module";
 import { HospitalBedAdminContent } from "@/components/clinical/hospital-bed-admin";
 import { BedBoard } from "@/components/clinical/hospitalization-widgets";
-import { ModulePage } from "@/components/clinical/module-pages";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +32,10 @@ export function HospitalBedsPage() {
   const beds = useHospitalBeds();
 
   return (
-    <ModulePage
+    <DomainModulePage
+      domain="hospital"
       title="Camas"
-      description="Tablero hospitalario desde encuentros activos."
+      description="Tablero hospitalario desde ingresos activos."
       actions={[{ href: "/hospitalizacion/camas/nueva", label: "Nueva cama" }]}
     >
       <div className="space-y-4">
@@ -45,7 +46,7 @@ export function HospitalBedsPage() {
           <HospitalBedAdminContent beds={beds} board={board} />
         </ClinicalSectionCard>
       </div>
-    </ModulePage>
+    </DomainModulePage>
   );
 }
 
@@ -77,7 +78,7 @@ export function NewHospitalBedPage() {
   const selectedEncounterId = emptyToNull(formState.encounter_id);
 
   return (
-    <ModulePage title="Nueva cama" description="Cama hospitalaria estructurada y auditada.">
+    <DomainModulePage domain="hospital" title="Nueva cama" description="Cama hospitalaria estructurada y auditada.">
       <div className="max-w-xl space-y-5">
         <Button asChild variant="outline" size="sm">
           <Link href="/hospitalizacion/camas">Volver a camas</Link>
@@ -175,7 +176,7 @@ export function NewHospitalBedPage() {
           </form>
         </ClinicalSectionCard>
       </div>
-    </ModulePage>
+    </DomainModulePage>
   );
 }
 

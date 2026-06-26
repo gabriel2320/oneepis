@@ -43,11 +43,12 @@ export function EncounterWorkspace({ patientId, user }: { patientId: string; use
 
   return (
     <ClinicalSectionCard
-      title="Encuentros"
+      title="Atenciones e ingresos vinculados"
+      description="Dato de soporte para otros flujos; la ficha principal se centra en evoluciones y documentos clinicos."
       action={
         canWrite ? (
           <Button asChild size="sm">
-            <Link href={`/pacientes/${patientId}/encuentros/nuevo`}>Nuevo</Link>
+            <Link href={`/pacientes/${patientId}/encuentros/nuevo`}>Registrar soporte</Link>
           </Button>
         ) : (
           <NoPermissionButton label="Sin permiso" />
@@ -56,7 +57,7 @@ export function EncounterWorkspace({ patientId, user }: { patientId: string; use
     >
       {encountersQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
       {encountersQuery.isError && !DEMO_MODE ? (
-        <ErrorState description="No se pudieron cargar los encuentros." onRetry={() => encountersQuery.refetch()} />
+        <ErrorState description="No se pudieron cargar las atenciones e ingresos." onRetry={() => encountersQuery.refetch()} />
       ) : null}
       {encounters ? <EncounterList encounters={encounters} /> : null}
     </ClinicalSectionCard>
@@ -135,7 +136,8 @@ export function ProblemWorkspace({
   const canWrite = canManageProblems(user);
   return (
     <ClinicalSectionCard
-      title="Problemas activos"
+      title="Antecedentes clinicos activos"
+      description="Dato longitudinal usado como contexto en evolucion, indicaciones, receta bloqueada y resumen."
       action={
         canWrite ? (
           <Button asChild size="sm">

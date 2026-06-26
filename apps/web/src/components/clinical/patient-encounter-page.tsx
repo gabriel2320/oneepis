@@ -49,7 +49,7 @@ export function NewEncounterPage() {
     mutationFn: (payload: ClinicalEncounterCreate) => createClinicalEncounter(patientId, payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["clinical-encounters", patientId] });
-      router.push(`/pacientes/${patientId}/encuentros`);
+      router.push(`/pacientes/${patientId}/ficha`);
     },
   });
 
@@ -62,15 +62,15 @@ export function NewEncounterPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="encuentros">
+    <PatientClinicalShell record={record} activeSection="ficha">
       <div className="max-w-xl space-y-5">
-        <BackLink href={`/pacientes/${patientId}/encuentros`} label="Encuentros" />
-        <PageTitle title="Nuevo encuentro" description="Consulta, ingreso o atencion ligada al paciente." />
-        {DEMO_MODE ? <ErrorState description="El modo demo no permite crear encuentros reales." /> : null}
+        <BackLink href={`/pacientes/${patientId}/ficha`} label="Ficha" />
+        <PageTitle title="Registrar atencion o ingreso" description="Dato de soporte para vincular evoluciones, hospitalizacion o atencion ambulatoria." />
+        {DEMO_MODE ? <ErrorState description="El modo demo no permite crear datos de soporte reales." /> : null}
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite crear encuentros clinicos." />
+          <ErrorState description="Tu rol actual no permite registrar atenciones o ingresos." />
         ) : null}
-        <ClinicalSectionCard title="Encuentro">
+        <ClinicalSectionCard title="Dato de soporte">
           <form
             className="space-y-4"
             onSubmit={(event) => {

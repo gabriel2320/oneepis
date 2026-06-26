@@ -35,10 +35,7 @@ export const soapSchema = z.object({
   encounter_id: z.string().optional(),
   title: z.string().min(1, "Titulo requerido"),
   occurred_at: z.string().min(1, "Fecha requerida"),
-  subjective: z.string().optional(),
-  objective: z.string().optional(),
-  assessment: z.string().optional(),
-  plan: z.string().optional(),
+  body: z.string().min(1, "Evolucion requerida"),
 });
 
 export type SoapFormValues = z.infer<typeof soapSchema>;

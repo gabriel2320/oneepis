@@ -13,6 +13,22 @@ class LoginRequest(APIModel):
     password: str = Field(min_length=1, max_length=120)
 
 
+class AuthRequestAccepted(APIModel):
+    accepted: bool = True
+
+
+class PasswordRecoveryRequest(APIModel):
+    email: str = Field(min_length=3, max_length=160)
+
+
+class UnlockRequest(APIModel):
+    email: str = Field(min_length=3, max_length=160)
+
+
+class UnlockConfirmationRequest(APIModel):
+    token: str = Field(min_length=20, max_length=256)
+
+
 class AuthUserRead(APIModel):
     email: str
     name: str

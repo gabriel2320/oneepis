@@ -5,7 +5,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
-import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { ClinicalWorkspaceLayout } from "@/components/clinical/clinical-workspace";
+import { HospitalClinicalShell } from "@/components/clinical/clinical-domain-shell";
+import { MedicationVademecumPanel } from "@/components/clinical/medication-vademecum-panel";
+import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import {
   createHospitalIndication,
@@ -44,16 +47,16 @@ export function HospitalIndicationsPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="ficha">
+    <HospitalClinicalShell record={record} activeSection="indicaciones">
       <div className="space-y-5">
-        <BackLink href="/hospitalizacion/rondas" label="Rondas" />
+        <BackLink href="/hospitalizacion/rondas" label="Evolucion diaria" />
         <PageTitle
           title="Indicaciones hospitalarias"
           description="Borradores auditados; no equivalen a orden firmada ni receta."
         />
         <HospitalIndicationWorkspace patientId={patientId} />
       </div>
-    </PatientClinicalShell>
+    </HospitalClinicalShell>
   );
 }
 
@@ -84,7 +87,27 @@ function HospitalIndicationWorkspace({ patientId }: { patientId: string }) {
   });
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
+    <ClinicalWorkspaceLayout
+      aside={<MedicationVademecumPanel patientId={patientId} canWrite={!DEMO_MODE && canWrite} />}
+    >
+      {DEMO_MODE ? (
+        <ErrorState description="El modo demo no permite guardar indicaciones reales." />
+      ) : null}
+      {!DEMO_MODE && !userLoading && !canWrite ? (
+        <ErrorState description="Tu rol actual no permite crear indicaciones hospitalarias." />
+      ) : null}
+      <HospitalIndicationForm
+        formState={formState}
+        setFormState={setFormState}
+        submitLabel={createMutation.isPending ? "Guardando..." : "Guardar borrador"}
+        disabled={createMutation.isPending || DEMO_MODE || !canWrite}
+        onSubmit={() => createMutation.mutate(toHospitalIndicationPayload(formState))}
+      />
+      {createMutation.isError ? (
+        <p className="text-sm text-destructive">
+          No se pudo guardar. Verifica que exista un ingreso hospitalario activo.
+        </p>
+      ) : null}
       <ClinicalSectionCard
         title="Borradores registrados"
         description="Lectura hospitalaria; cerrar bloquea edicion posterior."
@@ -120,26 +143,6 @@ function HospitalIndicationWorkspace({ patientId }: { patientId: string }) {
           </p>
         </div>
       </ClinicalSectionCard>
-      <ClinicalSectionCard title="Nueva indicacion">
-        {DEMO_MODE ? (
-          <ErrorState description="El modo demo no permite guardar indicaciones reales." />
-        ) : null}
-        {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite crear indicaciones hospitalarias." />
-        ) : null}
-        <HospitalIndicationForm
-          formState={formState}
-          setFormState={setFormState}
-          submitLabel={createMutation.isPending ? "Guardando..." : "Guardar borrador"}
-          disabled={createMutation.isPending || DEMO_MODE || !canWrite}
-          onSubmit={() => createMutation.mutate(toHospitalIndicationPayload(formState))}
-        />
-        {createMutation.isError ? (
-          <p className="mt-3 text-sm text-destructive">
-            No se pudo guardar. Verifica que exista un ingreso hospitalario activo.
-          </p>
-        ) : null}
-      </ClinicalSectionCard>
-    </div>
+    </ClinicalWorkspaceLayout>
   );
 }

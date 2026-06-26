@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from oneepis_api.models.clinical_record import RecordStatus
+from oneepis_api.models.clinical_record import ClinicalEncounter, RecordStatus
 from oneepis_api.models.lab import LabPanel, LabResult, LabResultFlag
 from oneepis_api.schemas.clinical_record import AssistantTimelineItem
 
@@ -18,9 +18,9 @@ def fetch_lab_results_for_timeline(
     limit: int,
 ) -> list[LabResult]:
     statement = (
-        select(LabResult)
-        .join(LabPanel)
-        .options(selectinload(LabResult.panel))
+            select(LabResult)
+            .join(LabPanel)
+            .options(selectinload(LabResult.panel).selectinload(LabPanel.encounter))
         .where(
             LabResult.patient_id == patient_id,
             LabResult.status == RecordStatus.ACTIVE,
@@ -45,6 +45,7 @@ def lab_timeline_items(
             summary=_lab_timeline_summary(result),
             source_label="lab_results",
             source_path=lab_result_source_path(patient_id, result.panel_id, result.id),
+            **_encounter_metadata(result.panel.encounter),
         )
         for result in lab_results
     ]
@@ -65,3 +66,14 @@ def _truncate(value: str, max_length: int = 240) -> str:
     if len(normalized) <= max_length:
         return normalized
     return f"{normalized[: max_length - 3].rstrip()}..."
+
+
+def _encounter_metadata(encounter: ClinicalEncounter | None) -> dict[str, object]:
+    if encounter is None:
+        return {"scope": "longitudinal"}
+    return {
+        "encounter_id": encounter.id,
+        "encounter_type": encounter.type,
+        "encounter_status": encounter.status,
+        "scope": encounter.type.value if encounter.type.value != "unknown" else "unknown",
+    }

@@ -7,6 +7,7 @@ import { LogIn, LogOut, ShieldCheck } from "lucide-react";
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { logoutLocal } from "@/lib/api/auth";
 import { DEMO_MODE, setStoredAuthToken } from "@/lib/api/client";
 
 export function SessionButton({ compact = false }: { compact?: boolean }) {
@@ -32,14 +33,19 @@ export function SessionButton({ compact = false }: { compact?: boolean }) {
     <div className={compact ? "flex items-center gap-2" : "space-y-2"}>
       <Badge variant="safe" className="max-w-full truncate">
         <ShieldCheck className="mr-1 h-3 w-3" />
-        {user ? `${user.name} - ${user.roles.join(", ")}` : "Sesion activa"}
+        {user ? user.name : "Sesion activa"}
       </Badge>
       <Button
         type="button"
         variant="ghost"
         size="sm"
         className={compact ? "" : "w-full justify-start"}
-        onClick={() => {
+        onClick={async () => {
+          try {
+            await logoutLocal();
+          } catch {
+            // Local cleanup still matters if the session already expired server-side.
+          }
           setStoredAuthToken(null);
           queryClient.removeQueries({ queryKey: ["auth"] });
         }}

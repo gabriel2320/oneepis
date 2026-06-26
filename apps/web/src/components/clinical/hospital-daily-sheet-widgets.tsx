@@ -143,7 +143,7 @@ export function DailySheetList({
   if (sheets.length === 0) {
     return (
       <EmptyState
-        title="Sin hojas diarias"
+        title="Sin evoluciones diarias"
         description="Aun no hay registro diario para este ingreso hospitalario."
       />
     );
@@ -155,7 +155,7 @@ export function DailySheetList({
         <article key={sheet.id} className="rounded-md border p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-sm font-semibold">Hoja diaria {sheet.sheet_date}</p>
+              <p className="text-sm font-semibold">Evolucion diaria {sheet.sheet_date}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Registrada por {sheet.created_by} - {formatDateTime(sheet.created_at)}
               </p>

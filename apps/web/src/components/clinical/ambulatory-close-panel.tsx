@@ -40,16 +40,16 @@ export function AmbulatoryClosePanel({
   return (
     <ClinicalSectionCard
       title="Cierre de consulta"
-      description="Cierra el encuentro ambulatorio como estado administrativo; no firma receta ni evolucion."
+      description="Cierra la atencion ambulatoria como estado administrativo; no firma receta ni evolucion."
     >
       <div className="mb-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
-        <CloseFact label="Encuentros en curso" value={String(openEncounters.length)} />
+        <CloseFact label="Atenciones en curso" value={String(openEncounters.length)} />
         <CloseFact label="Cerrados" value={String(completedEncounters.length)} />
         <CloseFact label="Destino" value="completed + ended_at" />
       </div>
       {openEncounters.length === 0 ? (
         <EmptyState
-          title="Sin encuentros abiertos"
+          title="Sin atenciones abiertas"
           description="No hay consultas ambulatorias en curso para cerrar."
         />
       ) : (
@@ -79,7 +79,7 @@ export function AmbulatoryClosePanel({
                 onClick={() => closeMutation.mutate(encounter.id)}
               >
                 <CheckCircle2 className="h-4 w-4" />
-                {closeMutation.isPending ? "Cerrando..." : "Cerrar encuentro"}
+                {closeMutation.isPending ? "Cerrando..." : "Cerrar atencion"}
               </Button>
             </article>
           ))}
@@ -87,7 +87,7 @@ export function AmbulatoryClosePanel({
       )}
       {closeMutation.isError ? (
         <p className="mt-3 text-sm text-destructive">
-          No se pudo cerrar el encuentro. Revisa API, permisos y auditoria.
+          No se pudo cerrar la atencion. Revisa API, permisos y auditoria.
         </p>
       ) : null}
       <p className="mt-3 text-xs text-muted-foreground">

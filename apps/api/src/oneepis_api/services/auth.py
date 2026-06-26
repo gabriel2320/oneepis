@@ -4,6 +4,7 @@ import base64
 import hashlib
 import hmac
 import json
+import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
@@ -26,11 +27,12 @@ class AuthenticatedUser:
     name: str
     roles: frozenset[UserRole]
     actor_id: str
+    session_id: str | None = None
 
 
 @dataclass(frozen=True)
 class LocalAuthUser(AuthenticatedUser):
-    password: str
+    password: str = ""
 
 
 class AuthError(ValueError):
@@ -69,7 +71,7 @@ def authenticate_local_user(
     user = parse_local_users(settings).get(email.lower())
     if user is None:
         return None
-    if not hmac.compare_digest(user.password, password):
+    if not verify_password(settings, password, user.password):
         return None
     return AuthenticatedUser(
         email=user.email,
@@ -79,9 +81,31 @@ def authenticate_local_user(
     )
 
 
+def hash_password(password: str, *, iterations: int = 310_000) -> str:
+    salt = secrets.token_urlsafe(24)
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        iterations,
+    )
+    return f"pbkdf2_sha256${iterations}${salt}${_b64encode(digest)}"
+
+
+def verify_password(settings: Settings, password: str, stored_password: str) -> bool:
+    if stored_password.startswith("pbkdf2_sha256$"):
+        return _verify_pbkdf2_password(password, stored_password)
+
+    if settings.environment.strip().lower() == "development":
+        return hmac.compare_digest(stored_password, password)
+
+    return False
+
+
 def create_access_token(
     settings: Settings,
     user: AuthenticatedUser,
+    session_id: str | None = None,
     now: datetime | None = None,
 ) -> tuple[str, datetime]:
     issued_at = now or datetime.now(UTC)
@@ -92,7 +116,10 @@ def create_access_token(
         "roles": sorted(role.value for role in user.roles),
         "iat": int(issued_at.timestamp()),
         "exp": int(expires_at.timestamp()),
+        "jti": secrets.token_urlsafe(18),
     }
+    if session_id:
+        payload["sid"] = session_id
     encoded_payload = _b64encode(
         json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     )
@@ -135,6 +162,7 @@ def verify_access_token(
         name=name,
         roles=frozenset(roles),
         actor_id=email,
+        session_id=str(payload.get("sid") or "") or None,
     )
 
 
@@ -171,6 +199,22 @@ def _sign(secret: str, encoded_payload: str) -> str:
         hashlib.sha256,
     ).digest()
     return _b64encode(digest)
+
+
+def _verify_pbkdf2_password(password: str, stored_password: str) -> bool:
+    try:
+        _scheme, iterations_text, salt, expected_digest = stored_password.split("$", maxsplit=3)
+        iterations = int(iterations_text)
+    except ValueError:
+        return False
+
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        iterations,
+    )
+    return hmac.compare_digest(_b64encode(digest), expected_digest)
 
 
 def _b64encode(value: bytes) -> str:

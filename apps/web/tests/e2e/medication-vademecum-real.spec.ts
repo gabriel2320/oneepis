@@ -2,6 +2,12 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 
 const patientId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const catalogItemId = "10000000-0000-4000-8000-000000000101";
+const authUser = {
+  email: "medico@oneepis.local",
+  name: "Medico E2E",
+  roles: ["medico"],
+  actor_id: "e2e-medico",
+};
 
 test.skip(
   process.env.NEXT_PUBLIC_DEMO_MODE !== "false",
@@ -36,7 +42,10 @@ test("Medication page renders vademecum and dose validation without executable p
 });
 
 async function mockClinicalApi(page: Page) {
-  await page.route("http://127.0.0.1:8000/api/v1/**", async (route) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("oneepis.auth.session", "active");
+  });
+  await page.route("**/api/v1/**", async (route) => {
     await fulfillApi(route);
   });
 }
@@ -45,13 +54,19 @@ async function fulfillApi(route: Route) {
   const request = route.request();
   const url = new URL(request.url());
   const path = url.pathname;
+  const origin = request.headers().origin ?? "http://127.0.0.1:3002";
   const corsHeaders = {
-    "access-control-allow-origin": "*",
+    "access-control-allow-origin": origin,
+    "access-control-allow-credentials": "true",
     "access-control-allow-methods": "GET,POST,OPTIONS",
-    "access-control-allow-headers": "authorization,content-type,x-oneepis-actor",
+    "access-control-allow-headers": "authorization,content-type,x-oneepis-actor,x-oneepis-csrf",
   };
   if (request.method() === "OPTIONS") {
     await route.fulfill({ status: 204, headers: corsHeaders });
+    return;
+  }
+  if (path === "/api/v1/auth/me") {
+    await route.fulfill({ json: authUser, headers: corsHeaders });
     return;
   }
   if (path === `/api/v1/patients/${patientId}/record`) {

@@ -7,7 +7,6 @@ from sqlalchemy import select
 
 from oneepis_api.api.deps import ClinicalEntryActorDep
 from oneepis_api.models.clinical_record import (
-    ClinicalEncounter,
     ClinicalEntry,
     ClinicalEntryKind,
     ClinicalEntryStatus,
@@ -26,6 +25,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    require_encounter_for_patient,
     require_patient,
     require_patient_child,
     validate_encounter_for_patient,
@@ -194,15 +194,10 @@ def validate_entry_encounter(
             status_code=422,
             detail="Hospital clinical documents require a hospitalization encounter",
         )
-    encounter = require_patient_child(
+    require_encounter_for_patient(
         session,
-        ClinicalEncounter,
-        encounter_id,
         patient_id,
-        "Encounter not found",
+        encounter_id,
+        expected_type=EncounterType.HOSPITALIZATION,
+        detail="Encounter not found",
     )
-    if encounter.type != EncounterType.HOSPITALIZATION:
-        raise HTTPException(
-            status_code=422,
-            detail="Hospital clinical documents require a hospitalization encounter",
-        )

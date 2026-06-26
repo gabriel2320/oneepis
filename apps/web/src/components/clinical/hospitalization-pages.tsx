@@ -1,32 +1,26 @@
 "use client";
 
 import { ClinicalSectionCard } from "@/components/clinical/cards";
-import { HospitalizationBoardContent } from "@/components/clinical/hospital-bed-pages";
+import { DomainModulePage } from "@/components/clinical/clinical-domain-module";
+import { HospitalCommandCenter } from "@/components/clinical/hospital-command-center";
 import { RoundList } from "@/components/clinical/hospitalization-widgets";
 import { useHospitalizationBoard } from "@/components/clinical/hospitalization-data";
-import { ModulePage } from "@/components/clinical/module-pages";
 
 export function HospitalHomePage() {
   const board = useHospitalizationBoard();
 
   return (
-    <ModulePage
+    <DomainModulePage
+      domain="hospital"
       title="Hospitalizacion"
-      description="Base para camas, rondas, hoja diaria e indicaciones."
+      description="Flujo clasico hospitalario: ingreso, evolucion diaria, indicaciones y epicrisis."
       actions={[
         { href: "/hospitalizacion/camas", label: "Camas" },
-        { href: "/hospitalizacion/rondas", label: "Rondas" },
+        { href: "/hospitalizacion/rondas", label: "Evolucion diaria" },
       ]}
     >
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ClinicalSectionCard title="Camas">
-          <HospitalizationBoardContent board={board} />
-        </ClinicalSectionCard>
-        <ClinicalSectionCard title="Rondas">
-          <RoundList board={board} />
-        </ClinicalSectionCard>
-      </div>
-    </ModulePage>
+      <HospitalCommandCenter board={board} />
+    </DomainModulePage>
   );
 }
 
@@ -34,17 +28,18 @@ export function HospitalRoundsPage() {
   const board = useHospitalizationBoard();
 
   return (
-    <ModulePage
-      title="Rondas"
-      description="Lectura diaria de pacientes hospitalizados activos."
-      actions={[{ href: "/print/hospitalizacion/rondas", label: "Imprimir ronda" }]}
+    <DomainModulePage
+      domain="hospital"
+      title="Evolucion diaria hospitalaria"
+      description="Pacientes hospitalizados activos con acceso a ingreso, evolucion diaria, indicaciones y epicrisis."
+      actions={[{ href: "/print/hospitalizacion/rondas", label: "Imprimir listado" }]}
     >
       <ClinicalSectionCard
-        title="Ronda activa"
-        description="Pacientes, cama, ultimo registro diario y accesos a ficha/papel."
+        title="Pacientes hospitalizados"
+        description="Cama, ultimo registro diario y accesos al flujo hospitalario clasico."
       >
         <RoundList board={board} />
       </ClinicalSectionCard>
-    </ModulePage>
+    </DomainModulePage>
   );
 }

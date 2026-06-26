@@ -5,24 +5,20 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
-  AlertTriangle,
   BrainCircuit,
-  CalendarClock,
-  ClipboardList,
-  GitBranch,
   FileText,
-  HeartPulse,
-  History,
-  Pill,
   Printer,
   Settings,
-  ShieldAlert,
-  type LucideIcon,
   UserRound,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { SessionButton } from "@/components/auth/session-button";
+import {
+  clinicalNavForContext,
+  clinicalNavGroupsForContext,
+} from "@/components/clinical/patient-clinical-nav";
+import { ClinicalSessionFooter } from "@/components/clinical/clinical-workspace";
 import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
@@ -32,53 +28,6 @@ import { getAiStatus } from "@/lib/api/ai";
 import { findScreenCapability } from "@/lib/screen-capabilities";
 import type { PatientRecordSnapshot } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-type ClinicalNavItem = {
-  key: string;
-  label: string;
-  icon: LucideIcon;
-};
-
-type ClinicalNavGroup = {
-  title: string;
-  items: ClinicalNavItem[];
-};
-
-const clinicalNavGroups: ClinicalNavGroup[] = [
-  {
-    title: "Ficha",
-    items: [
-      { key: "ficha", label: "Resumen", icon: ClipboardList },
-      { key: "evoluciones", label: "Evoluciones", icon: FileText },
-      { key: "encuentros", label: "Encuentros", icon: CalendarClock },
-    ],
-  },
-  {
-    title: "Datos",
-    items: [
-      { key: "eventos", label: "Eventos", icon: GitBranch },
-      { key: "problemas", label: "Problemas", icon: ShieldAlert },
-      { key: "alergias", label: "Alergias", icon: AlertTriangle },
-      { key: "medicacion", label: "Medicamentos", icon: Pill },
-      { key: "signos-vitales", label: "Signos vitales", icon: HeartPulse },
-    ],
-  },
-  {
-    title: "IA",
-    items: [
-      { key: "ai-chart", label: "AI-Chart", icon: BrainCircuit },
-      { key: "ia", label: "IA clinica", icon: BrainCircuit },
-    ],
-  },
-  {
-    title: "Control",
-    items: [
-      { key: "documentos", label: "Documentos", icon: FileText },
-      { key: "auditoria", label: "Auditoria", icon: History },
-    ],
-  },
-];
-const clinicalNav = clinicalNavGroups.flatMap((group) => group.items);
 
 export function PatientClinicalShell({
   record,
@@ -97,7 +46,9 @@ export function PatientClinicalShell({
     record.active_allergies.find((item) => item.severity === "severe") ??
     record.active_allergies[0];
   const latestEntry = record.recent_entries[0];
-  const activeNavItem = clinicalNav.find((item) => activeSection === item.key);
+  const navGroups = clinicalNavGroupsForContext(patient.current_care_context);
+  const navItems = clinicalNavForContext(patient.current_care_context);
+  const activeNavItem = navItems.find((item) => activeSection === item.key);
   const screenCapability = findScreenCapability(pathname);
 
   return (
@@ -119,14 +70,14 @@ export function PatientClinicalShell({
             </Link>
           </div>
           <nav aria-label="Navegacion paciente" className="flex-1 space-y-4 overflow-y-auto p-3">
-            {clinicalNavGroups.map((group) => (
+            {navGroups.map((group) => (
               <div key={group.title} className="space-y-1">
                 <p className="px-3 text-[11px] font-semibold uppercase text-muted-foreground">
                   {group.title}
                 </p>
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const href = `/pacientes/${patient.id}/${item.key}`;
+                  const href = item.href?.(patient.id) ?? `/pacientes/${patient.id}/${item.key}`;
                   const isActive = activeSection === item.key || pathname === href;
                   return (
                     <Link
@@ -220,9 +171,13 @@ export function PatientClinicalShell({
                 id="patient-section"
                 value={activeNavItem?.key ?? "ficha"}
                 className="h-9 w-full rounded-md border bg-background px-3 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                onChange={(event) => router.push(`/pacientes/${patient.id}/${event.target.value}`)}
+                onChange={(event) => {
+                  const selectedKey = event.currentTarget.value;
+                  const selected = navItems.find((item) => item.key === selectedKey);
+                  router.push(selected?.href?.(patient.id) ?? `/pacientes/${patient.id}/${selectedKey}`);
+                }}
               >
-                {clinicalNavGroups.map((group) => (
+                {navGroups.map((group) => (
                   <optgroup key={group.title} label={group.title}>
                     {group.items.map((item) => (
                       <option key={item.key} value={item.key}>
@@ -236,6 +191,7 @@ export function PatientClinicalShell({
           </div>
         </header>
         <main className="mx-auto max-w-7xl p-4 md:p-6">{children}</main>
+        <ClinicalSessionFooter record={record} aiAvailable={aiStatus.data?.available} />
       </div>
     </div>
   );

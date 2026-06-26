@@ -3,6 +3,7 @@ import type {
   ClinicalEncounter,
   PatientRecordSnapshot,
 } from "@/lib/types";
+import { demoScenarioRecords } from "@/lib/demo-scenario-records";
 
 export {
   demoHospitalBeds,
@@ -129,8 +130,8 @@ export const demoRecords: PatientRecordSnapshot[] = [
       preferred_name: "Beta",
       birth_date: "1991-09-03",
       sex_at_birth: "unknown",
-      clinical_status: "draft",
-      current_care_context: "unknown",
+      clinical_status: "active",
+      current_care_context: "hospitalized",
       clinical_identifier: "DEMO-002",
       created_at: "2026-06-20T10:00:00Z",
       updated_at: "2026-06-20T10:00:00Z",
@@ -179,6 +180,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
     active_problems: [],
     recent_entries: [],
   },
+  ...demoScenarioRecords,
 ];
 
 export const demoEncounters: ClinicalEncounter[] = [
@@ -221,6 +223,45 @@ export const demoEncounters: ClinicalEncounter[] = [
     created_at: "2026-06-20T09:30:00Z",
     updated_at: "2026-06-20T09:30:00Z",
   },
+  {
+    id: "84444444-4444-4444-8444-444444444444",
+    patient_id: "14444444-4444-4444-8444-444444444444",
+    type: "hospitalization",
+    status: "in_progress",
+    reason: "Neumonia demo en sala",
+    started_at: "2026-06-22T07:55:00Z",
+    ended_at: null,
+    location_label: "Medicina / 304 / Cama A",
+    notes: "Hospitalizacion ficticia para validar indicaciones, hoja diaria y vademecum lateral.",
+    created_at: "2026-06-22T07:55:00Z",
+    updated_at: "2026-06-24T11:30:00Z",
+  },
+  {
+    id: "85555555-5555-4555-8555-555555555555",
+    patient_id: "15555555-5555-4555-8555-555555555555",
+    type: "ambulatory",
+    status: "in_progress",
+    reason: "Control respiratorio pediatrico demo",
+    started_at: "2026-06-24T14:30:00Z",
+    ended_at: null,
+    location_label: "Consulta demo pediatria",
+    notes: "Encuentro ficticio para SOAP libre y medicacion ambulatoria.",
+    created_at: "2026-06-24T14:30:00Z",
+    updated_at: "2026-06-24T15:00:00Z",
+  },
+  {
+    id: "86666666-6666-4666-8666-666666666666",
+    patient_id: "16666666-6666-4666-8666-666666666666",
+    type: "hospitalization",
+    status: "completed",
+    reason: "Hospitalizacion cerrada demo",
+    started_at: "2026-06-19T09:00:00Z",
+    ended_at: "2026-06-24T10:00:00Z",
+    location_label: "Cirugia demo",
+    notes: "Encuentro cerrado para documentos y epicrisis.",
+    created_at: "2026-06-19T09:00:00Z",
+    updated_at: "2026-06-24T10:00:00Z",
+  },
 ];
 
 export const demoAppointments: ClinicalAppointment[] = [
@@ -251,5 +292,33 @@ export const demoAppointments: ClinicalAppointment[] = [
     created_by: "sistema",
     created_at: "2026-06-20T10:00:00Z",
     updated_at: "2026-06-20T10:00:00Z",
+  },
+  {
+    id: "a5555555-5555-4555-8555-555555555555",
+    patient_id: "15555555-5555-4555-8555-555555555555",
+    starts_at: "2026-06-24T14:30:00Z",
+    ends_at: "2026-06-24T15:00:00Z",
+    reason: "Control respiratorio pediatrico demo",
+    location_label: "Box demo pediatria",
+    clinician_label: "Equipo pediatria",
+    notes: "Cita ficticia para validar resumen ambulatorio.",
+    status: "in_progress",
+    created_by: "sistema",
+    created_at: "2026-06-23T13:00:00Z",
+    updated_at: "2026-06-24T14:30:00Z",
+  },
+  {
+    id: "a6666666-6666-4666-8666-666666666666",
+    patient_id: "16666666-6666-4666-8666-666666666666",
+    starts_at: "2026-06-27T09:00:00Z",
+    ends_at: "2026-06-27T09:20:00Z",
+    reason: "Control post alta demo",
+    location_label: "Box demo 3",
+    clinician_label: "Equipo egreso",
+    notes: "Seguimiento ficticio posterior a epicrisis demo.",
+    status: "scheduled",
+    created_by: "sistema",
+    created_at: "2026-06-24T10:10:00Z",
+    updated_at: "2026-06-24T10:10:00Z",
   },
 ];

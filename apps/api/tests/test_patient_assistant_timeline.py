@@ -134,6 +134,68 @@ def test_assistant_timeline_reads_longitudinal_sources_without_writing(
     assert after_audit == before_audit
 
 
+def test_assistant_timeline_exposes_encounter_metadata(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Timeline", last_name="Encounter")
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Control con contexto",
+            "started_at": "2026-06-20T10:00:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
+    entry_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json={
+            "encounter_id": encounter_id,
+            "kind": "progress",
+            "occurred_at": "2026-06-20T10:30:00Z",
+            "title": "Evolucion con episodio",
+            "assessment": "Seguimiento ambulatorio estructurado.",
+        },
+    )
+    assert entry_response.status_code == 201
+    lab_response = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "encounter_id": encounter_id,
+            "occurred_at": "2026-06-20T10:45:00Z",
+            "panel_name": "Perfil con episodio",
+            "results": [{"name": "Creatinina", "value": "1.0"}],
+        },
+    )
+    assert lab_response.status_code == 201
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/timeline?limit=10",
+        headers=auth,
+    )
+
+    assert response.status_code == 200
+    items = response.json()["items"]
+    encounter_item = next(item for item in items if item["item_type"] == "encounter")
+    entry_item = next(item for item in items if item["item_type"] == "clinical_entry")
+    lab_item = next(item for item in items if item["item_type"] == "lab_result")
+    assert encounter_item["encounter_id"] == encounter_id
+    assert encounter_item["encounter_type"] == "ambulatory"
+    assert encounter_item["encounter_status"] == "in_progress"
+    assert encounter_item["scope"] == "ambulatory"
+    assert entry_item["encounter_id"] == encounter_id
+    assert entry_item["encounter_type"] == "ambulatory"
+    assert lab_item["encounter_id"] == encounter_id
+    assert lab_item["encounter_type"] == "ambulatory"
+
+
 def test_assistant_timeline_allows_readonly_user(
     client: TestClient,
     auth_headers,

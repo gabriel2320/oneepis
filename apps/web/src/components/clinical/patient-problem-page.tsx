@@ -46,7 +46,7 @@ export function NewProblemPage() {
     mutationFn: (payload: ActiveProblemCreate) => createActiveProblem(patientId, payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["patient-record", patientId] });
-      router.push(`/pacientes/${patientId}/problemas`);
+      router.push(`/pacientes/${patientId}/ficha`);
     },
   });
 
@@ -59,14 +59,14 @@ export function NewProblemPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="problemas">
+    <PatientClinicalShell record={record} activeSection="ficha">
       <div className="max-w-xl space-y-5">
-        <BackLink href={`/pacientes/${patientId}/problemas`} label="Problemas" />
-        <PageTitle title="Agregar problema activo" description="Problema clinico longitudinal." />
+        <BackLink href={`/pacientes/${patientId}/ficha`} label="Ficha" />
+        <PageTitle title="Agregar antecedente activo" description="Dato longitudinal usado como contexto clinico." />
         {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu rol actual no permite registrar problemas activos." />
+          <ErrorState description="Tu rol actual no permite registrar antecedentes activos." />
         ) : null}
-        <ClinicalSectionCard title="Problema">
+        <ClinicalSectionCard title="Antecedente clinico">
           {formState.ai_action_id ? (
             <div className="mb-4 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
               Formulario prellenado desde AI-Chart. Revisa y edita antes de guardar.

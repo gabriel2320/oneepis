@@ -27,7 +27,7 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Fuentes actuales", { exact: true })).toBeVisible();
   await expect(page.getByText("Sin escritura", { exact: true })).toBeVisible();
   await expect(page.getByText("Fuentes usadas")).toBeVisible();
-  await expect(page.getByText("Problema activo: 1")).toBeVisible();
+  await expect(page.getByText("Antecedente activo: 1")).toBeVisible();
   await expect(page.getByText("Alergia: 1")).toBeVisible();
   await expect(page.getByText("Medicacion activa: 1")).toBeVisible();
   await expect(page.getByText("Eventos curados: 0")).toBeVisible();
@@ -55,11 +55,20 @@ test("patient navigation groups clinical areas on desktop", async ({ page }, tes
 
   const nav = page.getByRole("navigation", { name: "Navegacion paciente" });
   await expect(nav.getByText("Ficha", { exact: true })).toBeVisible();
-  await expect(nav.getByText("Datos", { exact: true })).toBeVisible();
+  await expect(nav.getByText("Ambulatorio", { exact: true })).toBeVisible();
+  await expect(nav.getByText("Hospitalizado", { exact: true })).not.toBeVisible();
   await expect(nav.getByText("IA", { exact: true })).toBeVisible();
   await expect(nav.getByText("Control", { exact: true })).toBeVisible();
+  await expect(nav.getByRole("link", { name: /Atencion clinica/ })).toBeVisible();
   await expect(nav.getByRole("link", { name: /AI-Chart/ })).toBeVisible();
   await expect(nav.getByRole("link", { name: /Auditoria/ })).toBeVisible();
+
+  await page.goto(`/pacientes/${demoHospitalizedPatientId}/ficha`);
+  const hospitalNav = page.getByRole("navigation", { name: "Navegacion paciente" });
+  await expect(hospitalNav.getByText("Hospitalizado", { exact: true })).toBeVisible();
+  await expect(hospitalNav.getByText("Ambulatorio", { exact: true })).not.toBeVisible();
+  await expect(hospitalNav.getByRole("link", { name: /Ingreso/ })).toBeVisible();
+  await expect(hospitalNav.getByRole("link", { name: /Evolucion diaria/ })).toBeVisible();
 });
 
 test("patient navigation mobile selector changes sections", async ({ page }, testInfo) => {
@@ -69,9 +78,9 @@ test("patient navigation mobile selector changes sections", async ({ page }, tes
 
   const selector = page.getByLabel("Seccion clinica");
   await expect(selector).toBeVisible();
-  await selector.selectOption("problemas");
-  await expect(page).toHaveURL(new RegExp(`/pacientes/${demoPatientId}/problemas$`));
-  await expect(page.getByText("Problemas activos")).toBeVisible();
+  await selector.selectOption("atencion-ambulatoria");
+  await expect(page).toHaveURL(new RegExp(`/consulta/pacientes/${demoPatientId}/atencion$`));
+  await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
 });
 
 test("AI-Chart renders event proposals from written entries", async ({ page }) => {
@@ -112,15 +121,36 @@ test("patient events expose curation presets for patient core", async ({ page })
   await expect(page.getByText("fuente y limite visible")).toBeVisible();
 });
 
-test("patient encounters render list and creation screen", async ({ page }) => {
+test("patient support data routes stay secondary", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/encuentros`);
 
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "Nuevo" })).toBeVisible();
+  await expect(page.getByText("Atenciones e ingresos vinculados")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Registrar soporte" })).toBeVisible();
 
   await page.goto(`/pacientes/${demoPatientId}/encuentros/nuevo`);
-  await expect(page.getByRole("heading", { name: "Nuevo encuentro" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Registrar atencion o ingreso" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar encuentro" })).toBeDisabled();
+});
+
+test("hospitalization home renders compact operational board", async ({ page }) => {
+  await page.goto("/hospitalizacion");
+
+  await expect(page.getByRole("heading", { name: "Hospitalizacion" })).toBeVisible();
+  const nav = page.getByRole("navigation", { name: "Navegacion hospitalizacion" });
+  await expect(nav.getByRole("link", { name: "Estacion hospitalaria" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Camas" })).toBeVisible();
+  await expect(nav.getByText("Agenda", { exact: true })).toHaveCount(0);
+  await expect(nav.getByText("Seleccionar paciente", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Ingresos activos")).toBeVisible();
+  await expect(page.getByText("Sin cama", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver evolucion completa" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Trabajo hospitalario de hoy" })).toBeVisible();
+  await expect(page.getByText("Paciente Demo Beta")).toBeVisible();
+  await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
+  await expect(page.getByText("Ingreso sin cama demo")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Administrar camas" })).toBeVisible();
+  await expect(page.getByText("Administracion de camas")).not.toBeVisible();
 });
 
 test("hospitalization beds render active board", async ({ page }) => {
@@ -132,26 +162,26 @@ test("hospitalization beds render active board", async ({ page }) => {
   await expect(page.getByText("Medicina / 301 / Cama A").first()).toBeVisible();
   await expect(page.getByText("Medicina / 302 / Cama B")).toBeVisible();
   await expect(page.getByText("Administracion de camas")).toBeVisible();
-  await expect(page.getByText("Ocupada")).toBeVisible();
+  await expect(page.getByText("Ocupada").first()).toBeVisible();
   await expect(page.getByLabel("Asignar ingreso a Medicina / 302 / Cama B")).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Asignar" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Asignar" }).first()).toBeDisabled();
 
   await page.getByRole("link", { name: "Nueva cama" }).click();
   await expect(page.getByRole("heading", { name: "Nueva cama" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar cama" })).toBeDisabled();
 });
 
-test("hospital rounds render active read-only worklist", async ({ page }) => {
+test("hospital daily evolution renders active read-only worklist", async ({ page }) => {
   await page.goto("/hospitalizacion/rondas");
 
-  await expect(page.getByRole("heading", { name: "Rondas" })).toBeVisible();
-  await expect(page.getByText("Ronda activa")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evolucion diaria hospitalaria" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pacientes hospitalizados" })).toBeVisible();
   await expect(page.getByText("Paciente Demo Beta")).toBeVisible();
   await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
-  await expect(page.getByText("Ultima hoja diaria 2026-06-20")).toBeVisible();
+  await expect(page.getByText("Ultima evolucion diaria 2026-06-20")).toBeVisible();
   await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
   await expect(page.getByText("Ingreso sin cama demo")).toBeVisible();
-  await expect(page.getByText("Sin hoja diaria para este ingreso")).toBeVisible();
+  await expect(page.getByText("Sin evolucion diaria para este ingreso")).toBeVisible();
   await expect(page.getByRole("link", { name: /Ingreso/ }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: /Epicrisis/ }).first()).toBeVisible();
 });
@@ -164,6 +194,22 @@ test("hospital admission renders governed intake draft workspace", async ({ page
   await expect(page.getByLabel("Hospitalizacion activa")).toContainText("Hospitalizacion demo");
   await expect(page.getByText("Sin ingreso medico registrado")).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar ingreso" })).toBeDisabled();
+});
+
+test("hospital domain navigation is isolated on desktop", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "desktop sidebar only");
+
+  await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/ingreso`);
+
+  const nav = page.getByRole("navigation", { name: "Navegacion hospitalaria" });
+  await expect(nav).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Ingreso" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Evolucion diaria" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Indicaciones" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Epicrisis" })).toBeVisible();
+  await expect(nav.getByText("Agenda", { exact: true })).toHaveCount(0);
+  await expect(nav.getByText("Atencion clinica", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Nueva SOAP" })).toHaveCount(0);
 });
 
 test("hospital discharge summary renders governed draft workspace", async ({ page }) => {
@@ -179,16 +225,16 @@ test("hospital discharge summary renders governed draft workspace", async ({ pag
 test("hospital daily sheet renders patient workspace", async ({ page }) => {
   await page.goto(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria`);
 
-  await expect(page.getByRole("heading", { name: "Hoja diaria hospitalizada" })).toBeVisible();
-  const dailySheetCard = page.getByRole("article").filter({ hasText: "Hoja diaria 2026-06-20" });
+  await expect(page.getByRole("heading", { name: "Evolucion diaria hospitalaria" })).toBeVisible();
+  const dailySheetCard = page.getByRole("article").filter({ hasText: "Evolucion diaria 2026-06-20" });
   await expect(dailySheetCard).toBeVisible();
   await expect(dailySheetCard.getByText("Borrador")).toBeVisible();
   await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
   await expect(page.getByRole("link", { name: "Editar" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Guardar hoja diaria" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Guardar evolucion diaria" })).toBeDisabled();
 
   await page.getByRole("link", { name: "Editar" }).click();
-  await expect(page.getByRole("heading", { name: "Editar hoja diaria" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Editar evolucion diaria" })).toBeVisible();
   await expect(page.locator("textarea").first()).toHaveValue(
     "Hoja diaria demo para validar flujo hospitalizado sin datos reales.",
   );
@@ -215,6 +261,11 @@ test("ambulatory agenda renders persisted appointment workflow", async ({ page }
   await page.goto("/consulta/agenda");
 
   await expect(page.getByRole("heading", { name: "Agenda", exact: true })).toBeVisible();
+  const nav = page.getByRole("navigation", { name: "Navegacion ambulatorio" });
+  await expect(nav.getByRole("link", { name: "Consultas" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Agenda" })).toBeVisible();
+  await expect(nav.getByText("Camas", { exact: true })).toHaveCount(0);
+  await expect(nav.getByText("Evolucion diaria", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Agenda ambulatoria persistida")).toBeVisible();
   await expect(page.getByText("Control ambulatorio demo")).toBeVisible();
   await expect(page.getByText("Programada", { exact: true })).toBeVisible();
@@ -224,11 +275,26 @@ test("ambulatory agenda renders persisted appointment workflow", async ({ page }
   await expect(page.getByRole("button", { name: "Guardar cita" })).toBeDisabled();
 });
 
+test("ambulatory home renders operational entry without hospital navigation", async ({ page }) => {
+  await page.goto("/consulta");
+
+  await expect(page.getByRole("heading", { name: "Consultas ambulatorias" })).toBeVisible();
+  const nav = page.getByRole("navigation", { name: "Navegacion ambulatorio" });
+  await expect(nav.getByRole("link", { name: "Consultas" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Agenda" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Seleccionar paciente" })).toBeVisible();
+  await expect(nav.getByText("Camas", { exact: true })).toHaveCount(0);
+  await expect(nav.getByText("Epicrisis", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Agenda ambulatoria" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Atencion clinica" })).toBeVisible();
+  await expect(page.getByText("La consulta no activa receta valida")).toBeVisible();
+});
+
 test("ambulatory visit renders linked encounter workspace", async ({ page }) => {
   await page.goto(`/consulta/pacientes/${demoPatientId}/atencion`);
 
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
-  await expect(page.getByText("Encuentro ambulatorio y evolucion SOAP vinculada.")).toBeVisible();
+  await expect(page.getByText("Atencion clinica ambulatoria con evolucion vinculada.")).toBeVisible();
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
   await expect(page.getByText("Preconsulta ambulatoria")).toBeVisible();
@@ -239,20 +305,36 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByRole("button", { name: "Registrar preconsulta" })).toBeDisabled();
   await expect(page.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(page.getByText("Cierre de consulta")).toBeVisible();
-  await expect(page.getByText("Encuentros en curso")).toBeVisible();
+  await expect(page.getByText("Atenciones en curso")).toBeVisible();
   await expect(page.getByText("Destino")).toBeVisible();
   await expect(page.getByText("completed + ended_at")).toBeVisible();
   await expect(page.getByText("no firmado")).toBeVisible();
   await expect(page.getByText("Al cerrar se guardara fecha de termino y auditoria backend.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Cerrar encuentro" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Cerrar atencion" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
+});
+
+test("ambulatory domain navigation is isolated on desktop", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "desktop sidebar only");
+
+  await page.goto(`/consulta/pacientes/${demoPatientId}/atencion`);
+
+  const nav = page.getByRole("navigation", { name: "Navegacion ambulatoria" });
+  await expect(nav).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Atencion clinica" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Resumen" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Agenda" })).toBeVisible();
+  await expect(nav.getByText("Ingreso", { exact: true })).toHaveCount(0);
+  await expect(nav.getByText("Epicrisis", { exact: true })).toHaveCount(0);
+  await expect(nav.getByText("Indicaciones", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Nueva SOAP" })).toHaveCount(0);
 });
 
 test("ambulatory summary renders real read-only patient context", async ({ page }) => {
   await page.goto(`/consulta/pacientes/${demoPatientId}/resumen`);
 
   await expect(page.getByRole("heading", { name: "Resumen ambulatorio" })).toBeVisible();
-  await expect(page.getByText("Lectura consolidada de controles")).toBeVisible();
+  await expect(page.getByText("Lectura de apoyo para la atencion clinica ambulatoria")).toBeVisible();
   await expect(page.getByText("Snapshot ambulatorio")).toBeVisible();
   await expect(page.getByText("Problema demo activo")).toBeVisible();
   await expect(page.getByText("Control ambulatorio demo")).toBeVisible();
@@ -319,6 +401,69 @@ test("login route renders local auth form", async ({ page }) => {
   await page.goto("/login");
 
   await expect(page.getByRole("heading", { name: "Ingresar" })).toBeVisible();
-  await expect(page.getByLabel("Email")).toBeVisible();
-  await expect(page.getByLabel("Clave")).toBeVisible();
+  await expect(page.getByLabel("Usuario o correo")).toBeVisible();
+  await expect(page.getByLabel("Contraseña")).toBeVisible();
+  await expect(page.getByLabel("Usuario o correo")).toHaveValue("");
+  await expect(page.getByLabel("Contraseña")).toHaveValue("");
+  await expect(page.getByRole("button", { name: "Ingresar" })).toBeDisabled();
+  await expect(page.getByRole("link", { name: "Olvide mi contraseña" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Tengo mi login bloqueado" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Pacientes|Consulta|Hospitalizacion/ })).toHaveCount(0);
+});
+
+test("recovery and unlock routes render generic request forms", async ({ page }) => {
+  await page.goto("/login/recuperar");
+  await expect(page.getByRole("heading", { name: "Recuperar contraseña" })).toBeVisible();
+  await expect(page.getByLabel("Usuario o correo")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Enviar solicitud" })).toBeDisabled();
+
+  await page.goto("/login/desbloquear");
+  await expect(page.getByRole("heading", { name: "Desbloquear login" })).toBeVisible();
+  await expect(page.getByLabel("Usuario o correo")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Enviar solicitud" })).toBeDisabled();
+
+  await page.goto("/login/desbloquear/confirmar");
+  await expect(page.getByRole("heading", { name: "Confirmar desbloqueo" })).toBeVisible();
+  await expect(page.getByText("El enlace de desbloqueo no esta disponible")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Pacientes|Consulta|Hospitalizacion/ })).toHaveCount(0);
+});
+
+test("legacy sections map redirects to hospital physical home", async ({ page }) => {
+  await page.goto("/mapa");
+  await expect(page).toHaveURL(/\/home$/);
+});
+
+test("hospital physical home renders only hospital places without patient data", async ({ page }) => {
+  await page.goto("/home");
+  const main = page.getByRole("main");
+
+  await expect(page.getByRole("heading", { name: "Mapa del hospital" })).toBeVisible();
+  await expect(
+    main.getByText("Selecciona el servicio o unidad donde deseas trabajar segun tus credenciales."),
+  ).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Administracion" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Consultas ambulatorias" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Hospitalizacion" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Farmacia" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Laboratorio" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Imagenologia" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Pabellon" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Unidad de cuidados intensivos" })).toBeVisible();
+  await expect(main.getByRole("button", { name: "Futuro" }).first()).toBeDisabled();
+  await expect(main.getByRole("button", { name: "Bloqueado" })).toBeDisabled();
+  await expect(main.getByRole("heading", { name: "Nueva evolucion" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Nueva medicacion" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Nueva alergia" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Nuevo problema" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Nueva cama" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Receta valida" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "AI-Chart" })).toHaveCount(0);
+  await expect(main.getByText("Fichas visibles")).toHaveCount(0);
+  await expect(main.getByText("Mesa clinica")).toHaveCount(0);
+  await expect(main.getByText("Paciente Demo Alfa")).not.toBeVisible();
+
+  const hrefs = await main.locator("a").evaluateAll((links) =>
+    links.map((link) => link.getAttribute("href") ?? ""),
+  );
+  expect(hrefs.some((href) => /\[[^\]]+\]/.test(href))).toBe(false);
 });

@@ -115,6 +115,13 @@ from oneepis_api.schemas.clinical_record_contracts.medication_catalog import (
     MedicationDraftValidationResponse,
     MedicationSourceReference,
 )
+from oneepis_api.schemas.clinical_record_contracts.patient_context import (
+    PatientContextEncounter,
+    PatientContextListItem,
+    PatientContextPatient,
+    PatientContextResponse,
+    PatientContextTimelineItem,
+)
 
 __all__ = [
     "ActiveProblemBase",
@@ -212,6 +219,11 @@ __all__ = [
     "MedicationRead",
     "MedicationSourceReference",
     "MedicationUpdate",
+    "PatientContextEncounter",
+    "PatientContextListItem",
+    "PatientContextPatient",
+    "PatientContextResponse",
+    "PatientContextTimelineItem",
     "VitalSignBase",
     "VitalSignCreate",
     "VitalSignRead",

@@ -22,21 +22,21 @@ const TIMELINE_FILTERS: Array<{ value: TimelineFilter; label: string }> = [
   { value: "all", label: "Todo" },
   { value: "clinical_entry", label: "Evoluciones" },
   { value: "clinical_event", label: "Eventos" },
-  { value: "encounter", label: "Encuentros" },
+  { value: "encounter", label: "Atenciones" },
   { value: "vital_sign", label: "Signos" },
   { value: "medication", label: "Medicacion" },
-  { value: "problem", label: "Problemas" },
+  { value: "problem", label: "Antecedentes" },
   { value: "allergy", label: "Alergias" },
   { value: "lab_result", label: "Laboratorio" },
 ];
 
 const TYPE_LABELS: Record<AssistantTimelineItemType, string> = {
-  encounter: "Encuentro",
+  encounter: "Atencion/ingreso",
   clinical_entry: "Evolucion",
   clinical_event: "Evento",
   vital_sign: "Signos vitales",
   medication: "Medicacion",
-  problem: "Problema",
+  problem: "Antecedente",
   allergy: "Alergia",
   lab_result: "Laboratorio",
 };

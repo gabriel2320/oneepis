@@ -68,6 +68,129 @@
         }
       }
     },
+    "/api/v1/auth/password-recovery-requests": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Request Password Recovery",
+        "operationId": "request_password_recovery_api_v1_auth_password_recovery_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordRecoveryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthRequestAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/unlock-requests": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Request Unlock",
+        "operationId": "request_unlock_api_v1_auth_unlock_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlockRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthRequestAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/unlock-confirmations": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Confirm Unlock",
+        "operationId": "confirm_unlock_api_v1_auth_unlock_confirmations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlockConfirmationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthRequestAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/me": {
       "get": {
         "tags": [
@@ -128,6 +251,48 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Refresh Session",
+        "operationId": "refresh_session_api_v1_auth_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthRequestAccepted"
                 }
               }
             }
@@ -631,6 +796,83 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PatientAiSuggestionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/{patient_id}/context": {
+      "get": {
+        "tags": [
+          "patients"
+        ],
+        "summary": "Get Patient Context",
+        "operationId": "get_patient_context_api_v1_patients__patient_id__context_get",
+        "parameters": [
+          {
+            "name": "patient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Patient Id"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "X-OneEpis-Actor",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Oneepis-Actor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientContextResponse"
                 }
               }
             }
@@ -8791,6 +9033,50 @@
             "maxLength": 240,
             "minLength": 1,
             "title": "Source Path"
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "encounter_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EncounterType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "encounter_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EncounterStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "ambulatory",
+              "hospitalization",
+              "emergency",
+              "longitudinal",
+              "unknown"
+            ],
+            "title": "Scope",
+            "default": "longitudinal"
           }
         },
         "type": "object",
@@ -8943,6 +9229,17 @@
           "created_at"
         ],
         "title": "AuditEventRead"
+      },
+      "AuthRequestAccepted": {
+        "properties": {
+          "accepted": {
+            "type": "boolean",
+            "title": "Accepted",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "AuthRequestAccepted"
       },
       "AuthUserRead": {
         "properties": {
@@ -14466,6 +14763,21 @@
         "type": "object",
         "title": "MedicationUpdate"
       },
+      "PasswordRecoveryRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "PasswordRecoveryRequest"
+      },
       "PatientAiSuggestionRequest": {
         "properties": {
           "focus": {
@@ -14556,6 +14868,385 @@
           "archived"
         ],
         "title": "PatientClinicalStatus"
+      },
+      "PatientContextEncounter": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EncounterType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EncounterStatus"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "location_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "status",
+          "reason",
+          "started_at"
+        ],
+        "title": "PatientContextEncounter"
+      },
+      "PatientContextListItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 320
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "source_type": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Source Type"
+          },
+          "source_path": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Source Path"
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "encounter_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EncounterType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "source_type",
+          "source_path"
+        ],
+        "title": "PatientContextListItem"
+      },
+      "PatientContextPatient": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "first_name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Last Name"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
+          },
+          "sex_at_birth": {
+            "$ref": "#/components/schemas/SexAtBirth"
+          },
+          "clinical_status": {
+            "$ref": "#/components/schemas/PatientClinicalStatus"
+          },
+          "current_care_context": {
+            "$ref": "#/components/schemas/CareContext"
+          },
+          "clinical_identifier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinical Identifier"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "sex_at_birth",
+          "clinical_status",
+          "current_care_context"
+        ],
+        "title": "PatientContextPatient"
+      },
+      "PatientContextResponse": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Patient Id"
+          },
+          "patient": {
+            "$ref": "#/components/schemas/PatientContextPatient"
+          },
+          "derived_care_context": {
+            "type": "string",
+            "enum": [
+              "ambulatory",
+              "hospitalization",
+              "emergency",
+              "unknown"
+            ],
+            "title": "Derived Care Context"
+          },
+          "active_encounter": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PatientContextEncounter"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active_hospitalization": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PatientContextEncounter"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recent_ambulatory_encounters": {
+            "items": {
+              "$ref": "#/components/schemas/PatientContextEncounter"
+            },
+            "type": "array",
+            "title": "Recent Ambulatory Encounters"
+          },
+          "active_problems": {
+            "items": {
+              "$ref": "#/components/schemas/PatientContextListItem"
+            },
+            "type": "array",
+            "title": "Active Problems"
+          },
+          "allergies": {
+            "items": {
+              "$ref": "#/components/schemas/PatientContextListItem"
+            },
+            "type": "array",
+            "title": "Allergies"
+          },
+          "active_medications": {
+            "items": {
+              "$ref": "#/components/schemas/PatientContextListItem"
+            },
+            "type": "array",
+            "title": "Active Medications"
+          },
+          "active_risks": {
+            "items": {
+              "$ref": "#/components/schemas/PatientContextListItem"
+            },
+            "type": "array",
+            "title": "Active Risks"
+          },
+          "recent_labs": {
+            "items": {
+              "$ref": "#/components/schemas/PatientContextListItem"
+            },
+            "type": "array",
+            "title": "Recent Labs"
+          },
+          "timeline": {
+            "items": {
+              "$ref": "#/components/schemas/PatientContextTimelineItem"
+            },
+            "type": "array",
+            "title": "Timeline"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Data"
+          },
+          "limits": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limits"
+          },
+          "applies_changes": {
+            "type": "boolean",
+            "title": "Applies Changes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "patient",
+          "derived_care_context"
+        ],
+        "title": "PatientContextResponse"
+      },
+      "PatientContextTimelineItem": {
+        "properties": {
+          "item_type": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Item Type"
+          },
+          "item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Item Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "source_path": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Source Path"
+          },
+          "encounter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encounter Id"
+          },
+          "encounter_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EncounterType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_type",
+          "item_id",
+          "occurred_at",
+          "label",
+          "summary",
+          "source_path"
+        ],
+        "title": "PatientContextTimelineItem"
       },
       "PatientCreate": {
         "properties": {
@@ -14954,6 +15645,36 @@
           "unknown"
         ],
         "title": "SexAtBirth"
+      },
+      "UnlockConfirmationRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 20,
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "UnlockConfirmationRequest"
+      },
+      "UnlockRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "UnlockRequest"
       },
       "UserRole": {
         "type": "string",

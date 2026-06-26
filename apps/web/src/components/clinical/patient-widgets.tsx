@@ -109,7 +109,7 @@ export function MedicationList({ medications }: { medications: Medication[] }) {
 
 export function ProblemList({ problems }: { problems: ActiveProblem[] }) {
   if (problems.length === 0) {
-    return <EmptyState title="Sin problemas activos" description="No hay problemas clinicos activos registrados." />;
+    return <EmptyState title="Sin antecedentes activos" description="No hay antecedentes clinicos activos registrados." />;
   }
 
   return (
@@ -149,7 +149,7 @@ export function ClinicalTimeline({ entries }: { entries: ClinicalEntry[] }) {
               </p>
             </div>
             <div className="flex gap-2">
-              {entry.encounter_id ? <Badge variant="outline">Encuentro vinculado</Badge> : null}
+              {entry.encounter_id ? <Badge variant="outline">Atencion vinculada</Badge> : null}
               <Badge variant="outline">{entry.kind}</Badge>
               <Badge variant={entry.status === "signed" ? "safe" : "secondary"}>{entry.status}</Badge>
             </div>
@@ -169,7 +169,7 @@ export function ClinicalTimeline({ entries }: { entries: ClinicalEntry[] }) {
 
 export function EncounterList({ encounters }: { encounters: ClinicalEncounter[] }) {
   if (encounters.length === 0) {
-    return <EmptyState title="Sin encuentros" description="Crea una consulta, ingreso o atencion inicial." />;
+    return <EmptyState title="Sin atenciones vinculadas" description="Crea una consulta, ingreso o atencion inicial." />;
   }
 
   return (
@@ -254,7 +254,7 @@ export function PatientLongitudinalSummary({ record }: { record: PatientRecordSn
   return (
     <div className="grid gap-3 md:grid-cols-5">
       <MetricCard label="Estado ficha" value={record.patient.clinical_status} detail={record.patient.current_care_context} />
-      <MetricCard label="Problemas" value={`${record.active_problems.length}`} />
+      <MetricCard label="Antecedentes" value={`${record.active_problems.length}`} />
       <MetricCard label="Evoluciones" value={`${record.recent_entries.length}`} />
       <MetricCard label="Alergias activas" value={`${record.active_allergies.length}`} />
       <MetricCard label="Medicacion activa" value={`${record.active_medications.length}`} />

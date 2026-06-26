@@ -6,6 +6,7 @@ from typing import Literal
 
 from pydantic import Field
 
+from oneepis_api.models.clinical_record import EncounterStatus, EncounterType
 from oneepis_api.schemas.common import APIModel
 
 AssistantTimelineItemType = Literal[
@@ -28,6 +29,12 @@ class AssistantTimelineItem(APIModel):
     summary: str = Field(min_length=1, max_length=320)
     source_label: str = Field(min_length=1, max_length=160)
     source_path: str = Field(min_length=1, max_length=240)
+    encounter_id: uuid.UUID | None = None
+    encounter_type: EncounterType | None = None
+    encounter_status: EncounterStatus | None = None
+    scope: Literal["ambulatory", "hospitalization", "emergency", "longitudinal", "unknown"] = (
+        "longitudinal"
+    )
 
 
 class AssistantTimelineResponse(APIModel):

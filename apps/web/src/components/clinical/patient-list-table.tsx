@@ -15,7 +15,7 @@ export function PatientList({ patients }: { patients: Patient[] }) {
       {patients.map((patient) => (
         <Link
           key={patient.id}
-          href={`/pacientes/${patient.id}/ficha`}
+          href={patientLandingHref(patient)}
           className="grid gap-3 border-b p-4 transition-colors last:border-b-0 hover:bg-muted/70 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] md:items-center"
         >
           <div className="min-w-0">
@@ -82,6 +82,16 @@ function careContextLabel(context: Patient["current_care_context"]) {
     unknown: "Sin contexto",
   };
   return labels[context];
+}
+
+function patientLandingHref(patient: Patient) {
+  if (patient.current_care_context === "hospitalized") {
+    return `/hospitalizacion/pacientes/${patient.id}/hoja-diaria`;
+  }
+  if (patient.current_care_context === "ambulatory") {
+    return `/consulta/pacientes/${patient.id}/atencion`;
+  }
+  return `/pacientes/${patient.id}/ficha`;
 }
 
 function formatDate(value: string) {

@@ -11,13 +11,14 @@ export function useCurrentUser() {
   const query = useQuery({
     queryKey: ["auth", "me", token],
     queryFn: getCurrentUser,
-    enabled: Boolean(token) && !DEMO_MODE,
+    enabled: !DEMO_MODE,
     staleTime: 60_000,
     retry: false,
   });
+  const session = token ?? (query.data || query.isLoading ? "active" : null);
 
   return {
-    token,
+    token: session,
     user: query.data ?? null,
     isLoading: query.isLoading,
     isError: query.isError,

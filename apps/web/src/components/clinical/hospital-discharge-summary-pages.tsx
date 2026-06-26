@@ -7,8 +7,9 @@ import { Printer, Save } from "lucide-react";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
+import { HospitalClinicalShell } from "@/components/clinical/clinical-domain-shell";
 import { formatDateTime } from "@/components/clinical/date-format";
-import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import { EmptyState, ErrorState } from "@/components/clinical/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,16 +64,16 @@ export function HospitalDischargeSummaryPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="ficha">
+    <HospitalClinicalShell record={record} activeSection="epicrisis">
       <div className="space-y-5">
-        <BackLink href="/hospitalizacion/rondas" label="Rondas" />
+        <BackLink href="/hospitalizacion/rondas" label="Evolucion diaria" />
         <PageTitle
           title="Alta y epicrisis"
           description="Borrador de egreso hospitalario vinculado a una hospitalizacion activa."
         />
         <DischargeSummaryWorkspace patientId={patientId} entries={record.recent_entries} />
       </div>
-    </PatientClinicalShell>
+    </HospitalClinicalShell>
   );
 }
 
@@ -135,7 +136,7 @@ function DischargeSummaryWorkspace({
         ) : null}
         {encountersQuery.isError && !DEMO_MODE ? (
           <ErrorState
-            description="No se pudieron cargar encuentros hospitalarios."
+            description="No se pudieron cargar ingresos hospitalarios."
             onRetry={() => encountersQuery.refetch()}
           />
         ) : null}

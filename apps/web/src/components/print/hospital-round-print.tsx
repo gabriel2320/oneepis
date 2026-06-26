@@ -47,8 +47,8 @@ export function PrintHospitalRoundPage() {
   return (
     <PrintPage>
       <PrintToolbar />
-      {isLoading ? <p className="p-6 text-sm">Cargando ronda hospitalaria...</p> : null}
-      {isError ? <p className="p-6 text-sm">No se pudo cargar la ronda hospitalaria.</p> : null}
+      {isLoading ? <p className="p-6 text-sm">Cargando listado hospitalario...</p> : null}
+      {isError ? <p className="p-6 text-sm">No se pudo cargar el listado hospitalario.</p> : null}
       {!isLoading && !isError ? <HospitalRoundPrintSheet rows={rows} /> : null}
     </PrintPage>
   );
@@ -59,7 +59,7 @@ function HospitalRoundPrintSheet({ rows }: { rows: RoundPrintRow[] }) {
     <article className="print-sheet mx-auto min-h-[279mm] max-w-4xl border bg-card p-8 shadow-sm print:min-h-[250mm]">
       <header className="border-b pb-4">
         <p className="text-xs font-semibold uppercase text-muted-foreground">OneEpis</p>
-        <h1 className="mt-1 text-2xl font-semibold">Ronda hospitalaria</h1>
+        <h1 className="mt-1 text-2xl font-semibold">Evolucion diaria hospitalaria</h1>
         <p className="mt-2 text-sm text-muted-foreground" suppressHydrationWarning>
           Fecha operacional: {new Date().toLocaleDateString("es-CL")}
         </p>
@@ -67,7 +67,7 @@ function HospitalRoundPrintSheet({ rows }: { rows: RoundPrintRow[] }) {
       <div className="space-y-4 py-6">
         {rows.length === 0 ? (
           <section className="print-section rounded-md border border-dashed p-4">
-            <h2 className="text-sm font-semibold">Sin pacientes en ronda</h2>
+            <h2 className="text-sm font-semibold">Sin pacientes hospitalizados</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               No hay ingresos hospitalarios activos para imprimir.
             </p>
@@ -109,7 +109,7 @@ function HospitalRoundPrintRow({ row }: { row: RoundPrintRow }) {
       {latestDailySheet ? (
         <div className="mt-4 border-t pt-3">
           <p className="text-xs font-semibold uppercase text-muted-foreground">
-            Ultima hoja diaria {latestDailySheet.sheet_date} -{" "}
+            Ultima evolucion diaria {latestDailySheet.sheet_date} -{" "}
             {latestDailySheet.status === "closed" ? "Cerrada" : "Borrador"}
           </p>
           <p className="mt-2 whitespace-pre-wrap text-sm">{latestDailySheet.clinical_summary}</p>
@@ -126,9 +126,9 @@ function HospitalRoundPrintRow({ row }: { row: RoundPrintRow }) {
         </div>
       ) : (
         <div className="mt-4 border-t pt-3">
-          <p className="text-sm font-semibold">Sin hoja diaria para este ingreso</p>
+          <p className="text-sm font-semibold">Sin evolucion diaria para este ingreso</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            La ronda imprime cama e ingreso, pero falta registro diario.
+            El listado imprime cama e ingreso, pero falta registro diario.
           </p>
         </div>
       )}

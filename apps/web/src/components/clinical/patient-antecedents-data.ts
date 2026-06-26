@@ -27,21 +27,21 @@ export const antecedentEventTypes = new Set([
 ]);
 
 export const sourceLabels: Record<AntecedentSource, string> = {
-  problemas: "Problemas",
+  problemas: "Antecedentes activos",
   alergias: "Alergias",
   medicacion: "Medicacion",
   eventos: "Eventos curados",
 };
 
 export const sourceDetails: Record<AntecedentSource, string> = {
-  problemas: "Diagnosticos/problemas activos registrados.",
+  problemas: "Diagnosticos o antecedentes activos registrados.",
   alergias: "Sustancias, reaccion y severidad visibles.",
   medicacion: "Tratamiento activo; no equivale a receta.",
   eventos: "Hechos curados desde timeline clinica.",
 };
 
 export const antecedentCategoryLabels: Record<string, string> = {
-  problema_activo: "Problema activo",
+  problema_activo: "Antecedente activo",
   alergia: "Alergia",
   medicacion_activa: "Medicacion activa",
   diagnostico_historico: "Diagnostico historico",

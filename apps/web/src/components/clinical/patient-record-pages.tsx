@@ -1,17 +1,11 @@
 "use client";
 
-import Link from "next/link";
-
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AiInsightPanel } from "@/components/clinical/ai-insight-panel";
 import { AiSafetyPanel } from "@/components/clinical/ai-safety-panel";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
-import { ClinicalRiskPreview } from "@/components/clinical/clinical-risk-preview";
-import { FullTimelinePreview } from "@/components/clinical/full-timeline-preview";
-import { LabResultsPreview } from "@/components/clinical/lab-results-preview";
-import { PatientAntecedentsPreview } from "@/components/clinical/patient-antecedents-preview";
-import { PatientAiSuggestionsPanel } from "@/components/clinical/patient-ai-suggestions-panel";
 import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { PatientFichaWorkspace } from "@/components/clinical/patient-ficha-workspace";
 import { PatientPaperDocuments } from "@/components/clinical/patient-paper-documents";
 import {
   AllergyWorkspace,
@@ -22,24 +16,13 @@ import {
   VitalsWorkspace,
 } from "@/components/clinical/patient-record-workspaces";
 import {
-  AllergyList,
   ClinicalTimeline,
-  CriticalAlerts,
-  MedicationList,
-  PatientLongitudinalSummary,
   QuickSoapEditor,
-  VitalsStrip,
 } from "@/components/clinical/patient-widgets";
 import { EmptyState, ErrorState } from "@/components/clinical/states";
 import { AppShell } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
 import { DEMO_MODE } from "@/lib/api/client";
-import {
-  canManageClinicalEntries,
-  canManageClinicalRisks,
-  canManagePatient,
-  canUseClinicalAi,
-} from "@/lib/permissions";
+import { canManageClinicalEntries, canUseClinicalAi } from "@/lib/permissions";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 import {
@@ -93,68 +76,9 @@ function PatientSectionContent({
   const { user } = useCurrentUser();
   const canWriteSoap = canManageClinicalEntries(user);
   const canUseAi = canUseClinicalAi(user);
-  const canEditPatient = canManagePatient(user);
-  const canWriteRisks = canManageClinicalRisks(user);
 
   if (section === "ficha") {
-    return (
-      <div className="space-y-4">
-        <CriticalAlerts record={record} />
-        <VitalsStrip vital={record.latest_vitals} />
-        <div className="flex flex-col gap-3 border-b pb-4 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold">Hoja clinica viva</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Lectura longitudinal del paciente: datos criticos arriba, evolucion clinica al centro
-              y apoyo IA como riel contextual.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2" data-print-hidden="true">
-            {canEditPatient ? (
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/pacientes/${patientId}/estado`}>Editar estado</Link>
-              </Button>
-            ) : (
-              <NoPermissionButton label="Estado bloqueado" />
-            )}
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/print/pacientes/${patientId}/ficha`}>Ver papel</Link>
-            </Button>
-          </div>
-        </div>
-        <PatientLongitudinalSummary record={record} />
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <div className="space-y-4">
-            <ClinicalSectionCard
-              title="Linea clinica longitudinal"
-              description="Evoluciones recientes como cuerpo principal de la ficha."
-              action={
-                canWriteSoap ? (
-                  <QuickSoapEditor href={`/pacientes/${patientId}/evoluciones/nueva`} />
-                ) : (
-                  <NoPermissionButton label="SOAP no permitido" />
-                )
-              }
-            >
-              <ClinicalTimeline entries={record.recent_entries} />
-            </ClinicalSectionCard>
-            <PatientAntecedentsPreview patientId={patientId} record={record} />
-            <FullTimelinePreview patientId={patientId} />
-          </div>
-          <aside className="space-y-4">
-            <ClinicalSectionCard title="Alergias">
-              <AllergyList allergies={record.active_allergies} />
-            </ClinicalSectionCard>
-            <ClinicalSectionCard title="Medicacion activa">
-              <MedicationList medications={record.active_medications} />
-            </ClinicalSectionCard>
-            <ClinicalRiskPreview patientId={patientId} canWrite={canWriteRisks} />
-            <LabResultsPreview patientId={patientId} />
-            <PatientAiSuggestionsPanel patientId={patientId} canUseAi={canUseAi} />
-          </aside>
-        </div>
-      </div>
-    );
+    return <PatientFichaWorkspace patientId={patientId} record={record} />;
   }
 
   if (section === "evoluciones") {

@@ -107,7 +107,7 @@ export function PrintHospitalDailySheetPage() {
         <HospitalDailyPrintSheet record={record} sheet={sheet} />
       ) : (
         <p className="p-6 text-sm">
-          {record ? "Hoja diaria no encontrada." : "Cargando hoja diaria..."}
+          {record ? "Evolucion diaria no encontrada." : "Cargando evolucion diaria..."}
         </p>
       )}
     </PrintPage>
@@ -205,9 +205,9 @@ export function HospitalDailyPrintSheet({
   return (
     <ClinicalPaperSheet
       record={record}
-      title="Hoja diaria hospitalizada"
+      title="Evolucion diaria hospitalaria"
       metadata={{
-        source: `hoja diaria ${sheet.id}`,
+        source: `evolucion diaria ${sheet.id}`,
         status: sheet.status === "closed" ? "Cerrada no firmada" : "Borrador no firmado",
         actor: sheet.created_by,
         clinicalDate: sheet.sheet_date,

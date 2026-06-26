@@ -11,7 +11,8 @@ import {
   type AmbulatoryVisitFormState,
 } from "@/components/clinical/ambulatory-visit-form";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
-import { PatientClinicalLoading, PatientClinicalShell } from "@/components/clinical/patient-clinical-shell";
+import { AmbulatoryClinicalShell } from "@/components/clinical/clinical-domain-shell";
+import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import { ClinicalTimeline, EncounterList, PatientLongitudinalSummary } from "@/components/clinical/patient-widgets";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import {
@@ -57,16 +58,16 @@ export function AmbulatoryVisitPage() {
   }
 
   return (
-    <PatientClinicalShell record={record} activeSection="encuentros">
+    <AmbulatoryClinicalShell record={record} activeSection="atencion-ambulatoria">
       <div className="space-y-5">
         <BackLink href="/consulta" label="Consulta" />
         <PageTitle
           title="Atencion ambulatoria"
-          description="Encuentro ambulatorio y evolucion SOAP vinculada."
+          description="Atencion clinica ambulatoria con evolucion vinculada."
         />
         <AmbulatoryVisitWorkspace patientId={patientId} record={record} />
       </div>
-    </PatientClinicalShell>
+    </AmbulatoryClinicalShell>
   );
 }
 
@@ -130,30 +131,9 @@ function AmbulatoryVisitWorkspace({
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
       <div className="space-y-5">
-        <ClinicalSectionCard title="Resumen longitudinal">
-          <PatientLongitudinalSummary record={record} />
-        </ClinicalSectionCard>
-        <ClinicalSectionCard title="Encuentros ambulatorios">
-          {encountersQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
-          {encountersQuery.isError && !DEMO_MODE ? (
-            <ErrorState
-              description="No se pudieron cargar los encuentros ambulatorios."
-              onRetry={() => encountersQuery.refetch()}
-            />
-          ) : null}
-          {!encountersQuery.isLoading || DEMO_MODE ? (
-            <EncounterList encounters={ambulatoryEncounters} />
-          ) : null}
-        </ClinicalSectionCard>
-        <ClinicalSectionCard title="Evoluciones recientes">
-          <ClinicalTimeline entries={record.recent_entries} />
-        </ClinicalSectionCard>
-      </div>
-      <div className="space-y-5">
-        <AmbulatoryPreconsultPanel patientId={patientId} />
         <ClinicalSectionCard
-          title="Nueva atencion"
-          description="Guarda encuentro ambulatorio y SOAP como borrador auditable."
+          title="Atencion clinica"
+          description="Registro principal ambulatorio: motivo, evaluacion y plan en una atencion auditable."
         >
           {DEMO_MODE ? (
             <ErrorState description="El modo demo no permite guardar atenciones reales." />
@@ -184,6 +164,27 @@ function AmbulatoryVisitWorkspace({
           encounters={ambulatoryEncounters}
           disabled={DEMO_MODE || !canWrite}
         />
+      </div>
+      <div className="space-y-5">
+        <AmbulatoryPreconsultPanel patientId={patientId} />
+        <ClinicalSectionCard title="Contexto longitudinal">
+          <PatientLongitudinalSummary record={record} />
+        </ClinicalSectionCard>
+        <ClinicalSectionCard title="Atenciones previas">
+          {encountersQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
+          {encountersQuery.isError && !DEMO_MODE ? (
+            <ErrorState
+              description="No se pudieron cargar las atenciones ambulatorias."
+              onRetry={() => encountersQuery.refetch()}
+            />
+          ) : null}
+          {!encountersQuery.isLoading || DEMO_MODE ? (
+            <EncounterList encounters={ambulatoryEncounters} />
+          ) : null}
+        </ClinicalSectionCard>
+        <ClinicalSectionCard title="Evoluciones recientes">
+          <ClinicalTimeline entries={record.recent_entries} />
+        </ClinicalSectionCard>
       </div>
     </div>
   );
