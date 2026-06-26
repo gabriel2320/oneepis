@@ -155,7 +155,7 @@ export function PatientSummaryPrintSheet({
       <section className="print-section rounded-md border border-info/30 bg-info/10 p-3">
         <h2 className="text-sm font-semibold">Resumen IA</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          No se imprime contenido IA persistido. Las sugerencias Ollama son borradores y no sustituyen
+          No se imprime contenido IA persistido. Las sugerencias asistidas son borradores y no sustituyen
           texto clinico firmado.
         </p>
       </section>

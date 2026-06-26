@@ -418,8 +418,9 @@ test("SOAP editor exposes local assisted review without autosave", async ({ page
 
 test("AI settings and print routes render", async ({ page }) => {
   await page.goto("/configuracion/ia");
-  await expect(page.getByRole("heading", { name: "IA local" })).toBeVisible();
-  await expect(page.getByText("Estado Ollama")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "IA local", exact: true })).toBeVisible();
+  await expect(page.getByText("Estado IA local")).toBeVisible();
+  await expect(page.getByText("Estado Ollama")).toHaveCount(0);
   await expect(page.getByText("IA externa")).toBeVisible();
   await expect(
     page.getByText("Requiere anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI."),
@@ -429,6 +430,8 @@ test("AI settings and print routes render", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
   await expect(page.getByText("Vista papel")).toBeVisible();
   await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+  await expect(page.getByText("sugerencias asistidas")).toBeVisible();
+  await expect(page.getByText("sugerencias Ollama")).toHaveCount(0);
 
   await page.goto(`/print/hospitalizacion/pacientes/${demoPatientId}/ingreso/${demoIntakeEntryId}`);
   await expect(page.getByRole("heading", { name: "Ingreso medico hospitalario" })).toBeVisible();
