@@ -70,9 +70,9 @@ export function AiSettingsPage() {
   const aiQuery = useQuery({ queryKey: ["ai-status"], queryFn: getAiStatus });
 
   return (
-    <ModulePage title="IA local" description="Proveedor Ollama desacoplado y seguro.">
+    <ModulePage title="IA local" description="Proveedor local desacoplado y seguro.">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <ClinicalSectionCard title="Estado Ollama">
+        <ClinicalSectionCard title="Estado IA local">
           {aiQuery.isLoading ? <LoadingRows rows={2} /> : null}
           {aiQuery.isError ? <ErrorState description="No se pudo consultar /ai/status." /> : null}
           {aiQuery.data ? (
