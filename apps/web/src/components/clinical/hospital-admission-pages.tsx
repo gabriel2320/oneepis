@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/clinical-record";
 import { DEMO_MODE } from "@/lib/api/client";
 import { demoEncounters } from "@/lib/demo-record";
+import { activeHospitalizationEncounters } from "@/lib/hospitalization-workflows";
 import { canManageClinicalEntries } from "@/lib/permissions";
 import type { ClinicalEncounter, ClinicalEntry } from "@/lib/types";
 
@@ -99,9 +100,7 @@ function HospitalAdmissionWorkspace({
   const encounters = DEMO_MODE
     ? demoEncounters.filter((encounter) => encounter.patient_id === patientId)
     : (encountersQuery.data ?? []);
-  const hospitalEncounters = encounters.filter(
-    (encounter) => encounter.type === "hospitalization" && encounter.status === "in_progress",
-  );
+  const hospitalEncounters = activeHospitalizationEncounters(encounters);
   const selectedEncounterId = formState.encounter_id || hospitalEncounters[0]?.id || "";
   const admissionEntries = entries.filter((entry) => entry.kind === "intake");
   const mutation = useMutation({

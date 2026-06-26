@@ -16,6 +16,7 @@ import {
   demoHospitalIndications,
   demoRecords,
 } from "@/lib/demo-record";
+import { activeHospitalizationEncounters } from "@/lib/hospitalization-workflows";
 import type { HospitalBedStatus, HospitalizationBoardItem } from "@/lib/types";
 
 export function useHospitalizationBoard() {
@@ -124,8 +125,7 @@ export const hospitalBedTransitionOptions: {
 ];
 
 export function getDemoHospitalizations(): HospitalizationBoardItem[] {
-  return demoEncounters
-    .filter((encounter) => encounter.type === "hospitalization" && encounter.status === "in_progress")
+  return activeHospitalizationEncounters(demoEncounters)
     .flatMap((encounter) => {
       const record = demoRecords.find((item) => item.patient.id === encounter.patient_id);
       const bed = demoHospitalBeds.find((item) => item.encounter_id === encounter.id) ?? null;
