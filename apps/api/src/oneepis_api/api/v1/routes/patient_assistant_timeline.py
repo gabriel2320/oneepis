@@ -143,6 +143,7 @@ def _encounter_items(
             summary=f"{encounter.reason} ({encounter.type.value}, {encounter.status.value})",
             source_label="encounters",
             source_path=f"/api/v1/patients/{patient_id}/encounters/{encounter.id}",
+            **_encounter_metadata(encounter),
         )
         for encounter in encounters
     ]
@@ -161,6 +162,7 @@ def _entry_items(
             summary=truncate(" / ".join(entry_sections(entry)) or entry.kind.value),
             source_label="clinical_entries",
             source_path=f"/api/v1/patients/{patient_id}/clinical-entries/{entry.id}",
+            **_encounter_metadata(entry.encounter),
         )
         for entry in entries
     ]
@@ -176,6 +178,7 @@ def _event_items(patient_id: uuid.UUID, events: list[ClinicalEvent]) -> list[Ass
             summary=event.summary,
             source_label="clinical_events",
             source_path=clinical_event_source_path(patient_id, event.id),
+            **_encounter_metadata(event.encounter),
         )
         for event in events
     ]
@@ -279,3 +282,14 @@ def _warnings(*, has_more: bool, limit: int) -> list[str]:
     if not has_more:
         return []
     return [f"Timeline limitado a {limit} items; aumenta limit o consulta dominios fuente."]
+
+
+def _encounter_metadata(encounter: ClinicalEncounter | None) -> dict[str, object]:
+    if encounter is None:
+        return {"scope": "longitudinal"}
+    return {
+        "encounter_id": encounter.id,
+        "encounter_type": encounter.type,
+        "encounter_status": encounter.status,
+        "scope": encounter.type.value if encounter.type.value != "unknown" else "unknown",
+    }

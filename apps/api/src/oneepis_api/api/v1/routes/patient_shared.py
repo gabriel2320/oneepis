@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from oneepis_api.api.deps import require_patient_read_access
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
-from oneepis_api.models.clinical_record import ClinicalEncounter
+from oneepis_api.models.clinical_record import ClinicalEncounter, EncounterType
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
 
@@ -60,6 +60,29 @@ def validate_encounter_for_patient(
         patient_id,
         "Encounter not found",
     )
+
+
+def require_encounter_for_patient(
+    session: Session,
+    patient_id: uuid.UUID,
+    encounter_id: uuid.UUID,
+    *,
+    expected_type: EncounterType | None = None,
+    detail: str = "Encounter not found",
+) -> ClinicalEncounter:
+    encounter = require_patient_child(
+        session,
+        ClinicalEncounter,
+        encounter_id,
+        patient_id,
+        detail,
+    )
+    if expected_type is not None and encounter.type != expected_type:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"Encounter must be {expected_type.value}",
+        )
+    return encounter
 
 
 def apply_update(model: object, payload: object) -> list[str]:

@@ -16,6 +16,10 @@ export type AssistantTimelineItem = {
   summary: string;
   source_label: string;
   source_path: string;
+  encounter_id?: string | null;
+  encounter_type?: "ambulatory" | "hospitalization" | "emergency" | "unknown" | null;
+  encounter_status?: "scheduled" | "in_progress" | "completed" | "cancelled" | null;
+  scope: "ambulatory" | "hospitalization" | "emergency" | "longitudinal" | "unknown";
 };
 
 export type AssistantTimelineResponse = {
