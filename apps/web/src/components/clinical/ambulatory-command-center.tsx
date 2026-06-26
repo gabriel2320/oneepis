@@ -34,10 +34,11 @@ export function AmbulatoryCommandCenter() {
           title="Limites ambulatorios"
           description="La consulta no activa receta valida, firma legal, orden ejecutable ni admision productiva."
         >
-          <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
+          <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-4">
             <AmbulatoryLimit label="Preconsulta" value="Minima y autorizada por rol." />
             <AmbulatoryLimit label="Cierre" value="Administrativo y auditable; no firma." />
             <AmbulatoryLimit label="Receta" value="Bloqueada hasta contrato legal." />
+            <AmbulatoryLimit label="Hospitalizacion" value="Se trabaja en su propia estacion." />
           </div>
         </ClinicalSectionCard>
       </section>
