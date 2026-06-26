@@ -59,7 +59,7 @@ export function HospitalBedAdminContent({
         description="Crea una cama para iniciar el tablero estructurado."
         action={
           <Button asChild size="sm">
-            <Link href="/hospitalizacion/camas/nueva">Nueva cama</Link>
+            <Link href="/hospitalizacion/camas/nueva">Registrar cama</Link>
           </Button>
         }
       />
