@@ -9,7 +9,7 @@ test("patients index renders clinical work queue", async ({ page }) => {
   await page.goto("/pacientes");
 
   await expect(page.getByRole("heading", { name: "Pacientes" })).toBeVisible();
-  await expect(page.getByText("Mesa clinica")).toBeVisible();
+  await expect(page.getByText("Mesa de pacientes")).toBeVisible();
   await expect(page.getByText("Fichas visibles", { exact: true })).toBeVisible();
   await expect(page.getByText("Hospitalizadas", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Mesa de pacientes")).toBeVisible();
@@ -522,7 +522,7 @@ test("hospital physical home renders only hospital places without patient data",
   await expect(main.getByRole("heading", { name: "Documentos del paciente" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "Dashboard" })).toHaveCount(0);
   await expect(main.getByText("Fichas visibles")).toHaveCount(0);
-  await expect(main.getByText("Mesa clinica")).toHaveCount(0);
+  await expect(main.getByText("Mesa de pacientes")).toHaveCount(0);
   await expect(main.getByText("Actividad reciente")).toHaveCount(0);
   await expect(main.getByText("Estadisticas")).toHaveCount(0);
   await expect(main.getByText("Paciente Demo Alfa")).not.toBeVisible();

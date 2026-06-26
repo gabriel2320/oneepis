@@ -29,7 +29,7 @@ export type OneEpisSection = {
 };
 
 export const oneEpisSections: OneEpisSection[] = [
-  section("patients", "Pacientes", "/pacientes", "Nucleo paciente", "patient_read", "available", "Mesa clinica de entrada a fichas autorizadas.", UserRound),
+  section("patients", "Pacientes", "/pacientes", "Nucleo paciente", "patient_read", "available", "Mesa interna para seleccionar fichas autorizadas.", UserRound),
   section("new-patient", "Nuevo paciente", "/pacientes/nuevo", "Nucleo paciente", "patient_write", "available", "Registro administrativo minimo para abrir ficha.", ClipboardList),
   section("appointments", "Agenda ambulatoria", "/consulta/agenda", "Ambulatorio", "clinical_write", "available", "Citas, check-in y enlace a atencion.", CalendarDays),
   section("ambulatory", "Consulta", "/consulta", "Ambulatorio", "patient_read", "available", "Acceso a flujos ambulatorios autorizados.", Stethoscope),

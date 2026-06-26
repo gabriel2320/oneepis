@@ -57,7 +57,7 @@ export function PatientsIndexPage() {
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-md border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground">
                 <ClipboardList className="h-3.5 w-3.5" />
-                Mesa clinica
+                Mesa de pacientes
               </div>
               <h1 className="mt-3 text-2xl font-semibold tracking-normal md:text-3xl">Pacientes</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
