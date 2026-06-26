@@ -93,6 +93,7 @@ async function expectAmbulatoryWorkspace(page: Page) {
   await expectSemanticShell(page, "ambulatory");
   await expect(page.getByRole("navigation", { name: "Navegacion ambulatoria" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
+  await expect(main.getByText("Canon ambulatorio")).toBeVisible();
   await expect(main.getByText("Preconsulta ambulatoria")).toBeVisible();
   await expect(main.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(main.getByText("Ingreso medico hospitalario")).toHaveCount(0);

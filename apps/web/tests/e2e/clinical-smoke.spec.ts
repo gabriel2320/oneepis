@@ -327,6 +327,7 @@ test("ambulatory agenda renders persisted appointment workflow", async ({ page }
 
 test("ambulatory home renders operational entry without hospital navigation", async ({ page }) => {
   await page.goto("/consulta");
+  const main = page.getByRole("main");
 
   await expect(page.getByRole("heading", { name: "Consultas ambulatorias" })).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Navegacion ambulatorio" });
@@ -338,6 +339,8 @@ test("ambulatory home renders operational entry without hospital navigation", as
   await expect(page.getByRole("heading", { name: "Agenda ambulatoria" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Atencion clinica" })).toBeVisible();
   await expect(page.getByText("La consulta no activa receta valida")).toBeVisible();
+  await expect(main.getByText("Hospitalizacion")).toBeVisible();
+  await expect(main.getByText("Se trabaja en su propia estacion.")).toBeVisible();
   await expect(page.getByText("Paciente Demo Alfa")).toHaveCount(0);
   await expect(page.getByText("Hospitalizacion demo")).toHaveCount(0);
   await expect(page.getByText("Ingreso sin cama demo")).toHaveCount(0);
@@ -351,6 +354,11 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
 
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
   await expect(page.getByText("Atencion clinica ambulatoria con evolucion vinculada.")).toBeVisible();
+  await expect(page.getByText("Canon ambulatorio")).toBeVisible();
+  await expect(page.getByText("Preconsulta minima")).toBeVisible();
+  await expect(page.getByText("Encuentro ambulatorio")).toBeVisible();
+  await expect(page.getByText("Borrador SOAP")).toBeVisible();
+  await expect(page.getByText("Lectura longitudinal")).toBeVisible();
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
   await expect(page.getByText("Preconsulta ambulatoria")).toBeVisible();
