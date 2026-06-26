@@ -155,7 +155,7 @@ function clinicalCommandBlockedReason({
     return "Modo demo: no se ejecutan intenciones reales.";
   }
   if (!canUseAi) {
-    return "Usar la barra clinica requiere rol admin, medico o dev.";
+    return "Usar la barra clinica requiere un perfil autorizado.";
   }
   if (!hasText) {
     return "Escribe una instruccion clinica para ejecutar.";
@@ -177,7 +177,7 @@ function clinicalIntentBlockedReason({
     return "Modo demo: no se ejecutan intenciones reales.";
   }
   if (!canUseAi) {
-    return "Usar intenciones clinicas requiere rol admin, medico o dev.";
+    return "Usar intenciones clinicas requiere un perfil autorizado.";
   }
   return null;
 }

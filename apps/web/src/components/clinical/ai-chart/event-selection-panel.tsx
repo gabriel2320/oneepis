@@ -77,7 +77,7 @@ function eventSelectionBlockedReason({
     return "Modo demo: no se generan borradores reales.";
   }
   if (!canUseAi) {
-    return "Usar IA clinica requiere rol admin, medico o dev.";
+    return "Usar IA clinica requiere un perfil autorizado.";
   }
   if (selectedCount === 0) {
     return "Selecciona al menos un evento fuente.";

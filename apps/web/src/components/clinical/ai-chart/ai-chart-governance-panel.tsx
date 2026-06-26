@@ -42,11 +42,11 @@ export function AiChartGovernancePanel({
           <li>Si la IA local esta apagada, se usa degradacion local.</li>
         </ul>
         <ul className="space-y-1 text-xs text-muted-foreground">
-          <li>IA clinica: {canUseAi ? "habilitada" : "requiere admin, medico o dev"}</li>
-          <li>Guardar SOAP: {canWriteSoap ? "habilitado" : "requiere admin, medico o dev"}</li>
+          <li>IA clinica: {canUseAi ? "habilitada" : "requiere perfil autorizado"}</li>
+          <li>Guardar SOAP: {canWriteSoap ? "habilitado" : "requiere perfil clinico autorizado"}</li>
           <li>
             Registrar eventos:{" "}
-            {canCreateEvents ? "habilitado" : "requiere admin, medico, enfermeria o dev"}
+            {canCreateEvents ? "habilitado" : "requiere perfil clinico autorizado"}
           </li>
         </ul>
       </div>

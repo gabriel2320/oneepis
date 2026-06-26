@@ -105,6 +105,9 @@ test("AI-Chart renders event proposals from written entries", async ({ page }) =
   await expect(
     page.getByText("AI-Chart mantiene reglas, plantillas y auditoria aunque la IA local no este disponible."),
   ).toBeVisible();
+  await expect(page.getByText("IA clinica:")).toBeVisible();
+  await expect(page.getByText("requiere admin, medico")).toHaveCount(0);
+  await expect(page.getByText("rol admin")).toHaveCount(0);
   await expect(page.getByText("Si Ollama esta apagado")).toHaveCount(0);
   await expect(page.getByText("aunque Ollama no este disponible")).toHaveCount(0);
   await expect(
