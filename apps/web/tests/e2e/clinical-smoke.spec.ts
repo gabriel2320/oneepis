@@ -288,6 +288,12 @@ test("ambulatory home renders operational entry without hospital navigation", as
   await expect(page.getByRole("heading", { name: "Agenda ambulatoria" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Atencion clinica" })).toBeVisible();
   await expect(page.getByText("La consulta no activa receta valida")).toBeVisible();
+  await expect(page.getByText("Paciente Demo Alfa")).toHaveCount(0);
+  await expect(page.getByText("Hospitalizacion demo")).toHaveCount(0);
+  await expect(page.getByText("Ingreso sin cama demo")).toHaveCount(0);
+  await expect(page.getByText("Indicaciones hospitalarias")).toHaveCount(0);
+  await expect(page.getByText("workflow_kind")).toHaveCount(0);
+  await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
 test("ambulatory visit renders linked encounter workspace", async ({ page }) => {
@@ -312,6 +318,11 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByText("Al cerrar se guardara fecha de termino y auditoria backend.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Cerrar atencion" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
+  await expect(page.getByText("Ingreso medico hospitalario")).toHaveCount(0);
+  await expect(page.getByText("Indicaciones hospitalarias")).toHaveCount(0);
+  await expect(page.getByText("Epicrisis")).toHaveCount(0);
+  await expect(page.getByText("workflow_kind")).toHaveCount(0);
+  await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
 test("ambulatory domain navigation is isolated on desktop", async ({ page }, testInfo) => {
@@ -340,6 +351,11 @@ test("ambulatory summary renders real read-only patient context", async ({ page 
   await expect(page.getByText("Control ambulatorio demo")).toBeVisible();
   await expect(page.getByText("No emite receta valida")).toBeVisible();
   await expect(page.getByRole("link", { name: "Abrir atencion" })).toBeVisible();
+  await expect(page.getByText("Hospitalizacion demo")).toHaveCount(0);
+  await expect(page.getByText("Ingreso sin cama demo")).toHaveCount(0);
+  await expect(page.getByText("Indicaciones hospitalarias")).toHaveCount(0);
+  await expect(page.getByText("workflow_kind")).toHaveCount(0);
+  await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
 test("patient documents render paper index and blocked future documents", async ({ page }) => {
