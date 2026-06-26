@@ -99,7 +99,7 @@ export function NewSoapEntryPage() {
         [
           response.summary,
           ...response.structured_points.map((point) => `- ${point}`),
-          "Borrador IA - requiere revision humana.",
+          "Borrador asistido - requiere revision humana.",
         ].join("\n"),
       );
     },
@@ -143,7 +143,11 @@ export function NewSoapEntryPage() {
                 disabled={reviewMutation.isPending || !canUseAi}
                 onClick={() => reviewMutation.mutate(form.getValues())}
               >
-                {canUseAi ? (reviewMutation.isPending ? "Revisando..." : "Revisar con Ollama") : "IA no permitida"}
+                {canUseAi
+                  ? reviewMutation.isPending
+                    ? "Revisando..."
+                    : "Revisar con apoyo local"
+                  : "Apoyo local no permitido"}
               </Button>
             }
           >
@@ -183,10 +187,10 @@ export function NewSoapEntryPage() {
             </form>
           </ClinicalSectionCard>
           {reviewMutation.isError ? (
-            <ErrorState description="Ollama no pudo revisar el borrador. La evolucion sigue editable." />
+            <ErrorState description="No se pudo revisar el borrador. La evolucion sigue editable." />
           ) : null}
           {aiReview ? (
-            <ClinicalSectionCard title="Revision Ollama" description="Borrador IA - requiere revision humana.">
+            <ClinicalSectionCard title="Revision asistida" description="Borrador asistido - requiere revision humana.">
               <pre className="whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-sm">{aiReview}</pre>
             </ClinicalSectionCard>
           ) : null}

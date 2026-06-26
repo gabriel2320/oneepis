@@ -403,14 +403,17 @@ test("patient documents render paper index and blocked future documents", async 
   await expect(page.getByRole("link", { name: "Ver papel" }).first()).toBeVisible();
 });
 
-test("SOAP editor exposes Ollama review without autosave", async ({ page }) => {
+test("SOAP editor exposes local assisted review without autosave", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/evoluciones/nueva`);
 
   await expect(page.getByRole("heading", { name: "Nueva evolucion SOAP" })).toBeVisible();
   const encounterSelect = page.locator('select[name="encounter_id"]');
   await expect(encounterSelect).toContainText("Encuentro demo - ambulatory");
-  await expect(page.getByRole("button", { name: "Revisar con Ollama" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Revisar con apoyo local" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeVisible();
+  await expect(page.getByText("Revision Ollama")).toHaveCount(0);
+  await expect(page.getByText(/Borrador IA/)).toHaveCount(0);
+  await expect(page.getByText(/Ollama activo|Ollama pendiente/)).toHaveCount(0);
 });
 
 test("AI settings and print routes render", async ({ page }) => {

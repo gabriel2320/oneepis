@@ -46,7 +46,7 @@ export function AiInsightPanel() {
       });
       setInsight(response);
     } catch (exception) {
-      setError(exception instanceof Error ? exception.message : "No se pudo consultar Ollama.");
+      setError(exception instanceof Error ? exception.message : "No se pudo consultar la IA local.");
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +61,7 @@ export function AiInsightPanel() {
             IA clinica local
           </CardTitle>
           <Badge variant={status?.available ? "safe" : "warning"}>
-            {status?.available ? "Ollama activo" : "Ollama pendiente"}
+            {status?.available ? "IA local activa" : "IA local pendiente"}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
