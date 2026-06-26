@@ -12,6 +12,9 @@ Mientras el repositorio este publico:
 
 OneEpis maneja información clínica sensible. Este scaffold no debe considerarse listo para producción sanitaria sin revisión legal, operacional y de seguridad.
 
+El checklist versionado de gates no productivos vive en
+`docs/NO_PRODUCTION_CHECKLIST.md`.
+
 ## Reglas Iniciales
 
 - No guardar identificadores nacionales en claro. Usar hashes o identificadores internos.
@@ -20,6 +23,8 @@ OneEpis maneja información clínica sensible. Este scaffold no debe considerars
 - Mantener IA local y auditable con Ollama.
 - Registrar eventos relevantes en auditoría.
 - Cifrado, control de acceso granular y retención documental quedan como hitos antes de producción.
+- Backups, restore, auditoría de accesos, logs PHI-safe, gestión formal de
+  secretos y gobernanza legal/clínica son gates explícitos antes de producción.
 
 ## Configuracion fuera de Desarrollo
 

@@ -1,18 +1,17 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { appRoot, duplicates, readScreenRegistry, repoRoot } from "./screen-registry.mjs";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const appRoot = path.join(repoRoot, "apps/web/src/app");
-const registryPath = path.join(repoRoot, "apps/web/src/lib/screen-capabilities.ts");
-
-const registry = readFileSync(registryPath, "utf8");
 const visibleRoutes = discoverVisibleRoutes();
-const registeredRouteList = extractRegisteredRoutes(registry);
+const registeredRouteList = readScreenRegistry().map((row) => row.routePattern);
 const registeredRoutes = new Set(registeredRouteList);
+const screenCapabilitiesSource = readFileSync(
+  path.join(repoRoot, "apps/web/src/lib/screen-capabilities.ts"),
+  "utf8",
+);
 const errors = [];
 
-if (/if\s*\(\s*!capability\s*\)\s*return\s+true\s*;/.test(registry)) {
+if (/if\s*\(\s*!capability\s*\)\s*return\s+true\s*;/.test(screenCapabilitiesSource)) {
   errors.push("isClinicalIntentAllowed debe bloquear IA cuando no existe ScreenCapability.");
 }
 
@@ -61,26 +60,4 @@ function walk(root) {
     }
     return stats.isFile() ? [fullPath] : [];
   });
-}
-
-function extractRegisteredRoutes(source) {
-  const routes = [];
-  const pattern = /capability\(\s*"([^"]+)"/g;
-  let match;
-  while ((match = pattern.exec(source)) !== null) {
-    routes.push(match[1]);
-  }
-  return routes;
-}
-
-function duplicates(items) {
-  const seen = new Set();
-  const repeated = new Set();
-  for (const item of items) {
-    if (seen.has(item)) {
-      repeated.add(item);
-    }
-    seen.add(item);
-  }
-  return [...repeated].sort();
 }

@@ -45,12 +45,41 @@ Responsabilidades canonicas:
 - `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart, no historial.
 - `docs/AI_CHART_CORE.md`: contrato conceptual de AI-Chart.
 - `docs/VISUAL_INTELLIGENCE_COUPLING.md`: regla inteligencia -> UI visible.
-- `docs/SCREEN_TREE.md`: rutas y estado por superficie.
+- `apps/web/src/lib/screen-capabilities.registry.json`: fuente estructurada de
+  rutas visibles, estado, permisos, papel e IA permitida.
+- `docs/SCREEN_TREE.md`: narrativa clinica y tabla generada de rutas reales.
 - reportes fechados como `docs/ONEEPIS_REPORT_*.md`: snapshots de auditoria,
   no fuente canonica viva.
 
 Los documentos largos de vision son cantera conceptual. No son backlog directo
 si no pasan antes por el plan progresivo y la escalera OneEpis.
+
+## Politica Anti-Canonitis
+
+El canon no es producto. El canon existe para prevenir dano, drift o
+sobrepromesa clinica.
+
+Orden de verdad:
+
+1. Backend/API/PostgreSQL.
+2. OpenAPI/tipos.
+3. Tests/gates.
+4. Registry ejecutable.
+5. Docs generados.
+6. Docs narrativos.
+
+Reglas:
+
+- Un PR no debe crear canon manual si puede crear memoria ejecutable.
+- `screen-capabilities.registry.json` gobierna la tabla de rutas reales; usar
+  `npm run generate:screens` para actualizar `docs/SCREEN_TREE.md`.
+- Prohibido editar manualmente la tabla generada de `SCREEN_TREE.md`.
+- `CURRENT_STATE.md` debe mantenerse bajo 180 lineas y no debe funcionar como
+  cronica de PRs.
+- Docs-only solo entra si corrige seguridad, claim clinico/legal, setup roto,
+  permisos contradictorios o produccion/no-produccion.
+- Docs-only no entra por reconciliacion cosmetica, historial de PR, copy no
+  riesgoso ni roadmap decorativo.
 
 ## Semaforo De Cambio
 
@@ -66,7 +95,8 @@ Antes de implementar, clasificar cada pasada:
 
 ## Politica de Pantallas
 
-Toda pantalla clinica debe tener un estado explicito en `docs/SCREEN_TREE.md`:
+Toda pantalla clinica debe tener un estado explicito en
+`apps/web/src/lib/screen-capabilities.registry.json`:
 
 - `completa`: tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
 - `completa/en expansion gobernada`: funciona, pero tiene un subdominio acotado en crecimiento con guardrails activos.
@@ -76,13 +106,16 @@ Toda pantalla clinica debe tener un estado explicito en `docs/SCREEN_TREE.md`:
 
 Reglas:
 
-- Ninguna pantalla nueva entra sin estado explicito en `docs/SCREEN_TREE.md`.
-- Todo PR que agregue, quite o mueva una ruta visible bajo `apps/web/src/app` debe actualizar `docs/SCREEN_TREE.md`.
-- Todo PR que agregue, quite o mueva una ruta visible bajo `apps/web/src/app` debe actualizar el Screen Capability Registry.
-- El guard `npm run check:screens` debe fallar si una ruta visible queda sin fila documentada, sin `ScreenCapability` o duplicada en el mapa/registry.
+- Ninguna pantalla nueva entra sin estado explicito en el registry estructurado.
+- Todo PR que agregue, quite o mueva una ruta visible bajo `apps/web/src/app`
+  debe actualizar el registry y regenerar `docs/SCREEN_TREE.md`.
+- El guard `npm run check:screens` debe fallar si una ruta visible queda sin
+  registry, si el markdown generado tiene drift o si hay rutas duplicadas.
 - Una pantalla preparada debe mostrar su estado pendiente en UI y quedar cubierta por E2E si es visible.
 - Una pantalla completa exige contrato backend antes de UI amplia si maneja datos clinicos nuevos.
-- Una pantalla promovida a completa debe actualizar en el mismo PR: `docs/SCREEN_TREE.md`, Screen Capability Registry, E2E smoke y `docs/CURRENT_STATE.md`.
+- Una pantalla promovida a completa debe actualizar en el mismo PR: registry,
+  tabla generada, E2E smoke y `CURRENT_STATE` solo si cambia estado operativo
+  real.
 - Si escribe, debe tener permisos, auditoria, actor, `correlation_id`, OpenAPI y test API.
 - Si produce documento clinico, debe tener papel carta o declarar explicitamente que no tiene papel aun.
 - No se promueve una pantalla por apariencia: debe cerrar un acto clinico real.
@@ -198,6 +231,21 @@ evitables que no deben repetirse:
 - pnpm no es package manager activo. Cualquier migracion a pnpm debe ir en PR dedicado con lockfile, bootstrap, CI, docs y auditoria de dependencias actualizados en conjunto.
 - La alerta moderada `GHSA-qx2v-qp2m-jg93` de PostCSS anidado en `next@16.2.9` queda como waiver explicito mientras no exista parche estable de Next; no ejecutar `npm audit fix --force` si propone degradar o saltar a canary.
 - Report-only no significa ignorado: hallazgos de alto riesgo deben triagearse antes de cualquier hito productivo sanitario.
+- El gate PostgreSQL/Alembic en CI complementa los tests SQLite: debe validar
+  `upgrade head` desde cero y un smoke `downgrade -1`/`upgrade head`.
+- Los gates no productivos versionados viven en
+  `docs/NO_PRODUCTION_CHECKLIST.md`.
+
+## Congelamiento de Pantallas
+
+El siguiente ciclo congela nuevas pantallas visibles. El trabajo permitido debe
+profundizar confiabilidad de login/home, ambulatorio, hospitalizacion, ficha
+longitudinal, papel, auditoria y seguridad clinica. Cualquier pantalla nueva
+requiere justificar por que no cabe dentro de una superficie existente y debe
+pasar por Screen Tree antes de implementarse.
+
+La auditoria clinica por escenarios vive en
+`docs/CLINICAL_SCENARIO_AUDIT.md`.
 
 ## Escalera OneEpis
 

@@ -1,580 +1,102 @@
 # Current State
 
-## Fase 1 cerrada, PR #1 mergeado, Fase 2 gobernada
+Fecha: 2026-06-26
 
-OneEpis ya tiene una base E2E real:
+Este documento es estado operativo vigente, no historial. El historial
+cronologico vive en `docs/ROADMAP.md`; los reportes fechados son snapshots y no
+fuente canonica viva.
 
-1. Crear paciente en UI.
-2. Abrir ficha.
-3. Crear evolucion SOAP.
-4. Persistir en PostgreSQL via FastAPI.
-5. Registrar auditoria por escritura.
-6. Refrescar UI con React Query.
+## Estado Real Hoy
 
-El modo demo solo debe usarse con `NEXT_PUBLIC_DEMO_MODE=true`.
+- OneEpis es una ficha clinica longitudinal con entrada por login limpio,
+  `/home` como mapa fisico del hospital y mundos operativos separados para
+  ambulatorio y hospitalizacion.
+- La identidad clinica sigue siendo `Patient` unico; los contextos se separan
+  con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
+  eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
+- Ambulatorio minimo existe: agenda persistida, preconsulta minima gobernada,
+  atencion ambulatoria, resumen de lectura y ficha comun.
+- Hospitalizacion minima existe: camas, rondas, ingreso borrador, hoja diaria,
+  indicaciones borrador y epicrisis borrador; no equivale a firma, alta legal,
+  orden ejecutable ni MAR.
+- Documentos/papel existe como proyeccion carta e indice de papel existente;
+  adjuntos externos, consentimientos y firma real siguen fuera.
+- AI-Chart/Assistant Read existe como apoyo contextual gobernado; la IA resume
+  y propone borradores revisables, no decide, no firma y no escribe sin
+  confirmacion humana/backend.
+- El registry estructurado de pantallas vive en
+  `apps/web/src/lib/screen-capabilities.registry.json`; la tabla de rutas reales
+  en `docs/SCREEN_TREE.md` se genera desde ese registry.
 
-PR #1 (`[codex] Close AI-Chart phase 1`) fue revisado como cambio de riesgo,
-endurecido y mergeado por squash en `main` el 2026-06-23.
+## Proximo Objetivo Unico
 
-Programa de lectura `PROG-ASSISTANT-READ-01`: cerrado como release
-`v0.4-assistant-read` el 2026-06-23, con walkthrough humano aprobado,
-changelog y tag publicados.
+Reducir canon manual y mejorar confiabilidad de flujos existentes. No abrir
+pantallas nuevas durante este ciclo.
 
-Programa activo: `PROG-PATIENT-CORE-01`.
+Criterio de exito:
 
-Este programa inicia el crecimiento tradicional posterior a `v0.4`: nucleo
-paciente, antecedentes leidos desde fuentes existentes, linea clinica, ficha
-sobria, laboratorio minimo y preparacion contractual de ambulatorio/
-hospitalizacion. No autoriza IA nueva, dashboard, chat libre ni escritura
-automatica.
+- `SCREEN_TREE` deja de funcionar como segunda base de datos manual.
+- `CURRENT_STATE` queda bajo 180 lineas y solo contiene estado vigente.
+- Los PRs futuros declaran presupuesto de canon.
+- Los tests protegen contratos clinicos/semanticos, no frases cosmeticas.
 
-Estado real al 2026-06-26:
+Criterio de no-hacer:
 
-- prototipo visual aprobado como base de ficha clinica tradicional gobernada
-- release `v0.4-assistant-read` cerrado y tagueado en `main`
-- el siguiente objetivo de producto es `v0.5-patient-core`
-- PR #31 corrige el bootstrap PostgreSQL: las migraciones
-  `202606200012_medication_catalog` y `202606200015_clinical_risks` migran
-  desde una base temporal limpia hasta `202606200015`
-- avances iniciales de `v0.5-patient-core` ya mergeados:
-  - PR #15: agenda ambulatoria minima persistida con `ClinicalAppointment`
-  - PR #16: resumen ambulatorio real de solo lectura
-  - PR #17: indice de documentos/papel existente desde rutas print
-  - PR #25: preconsulta ambulatoria minima dentro de atencion
-  - PR #32: linea de tiempo avanzada read-only dentro de ficha reutilizando
-    `assistant/timeline`
-  - PR #34: polish read-only de ficha/antecedentes con fuentes y faltantes mas claros
-  - PR #35: enfermeria habilitada para completar solo preconsulta minima
-  - PR #36: dieta frontend de clientes/contratos Assistant Read e IA clinica
-  - PR #39: dieta de utilidades AI-Chart; `ai-chart-utils.ts` queda como fachada
-    estable y las acciones/reglas visuales pasan a modulos enfocados
-  - PR #40: dieta de eventos paciente; presets de curaduria y timeline visual
-    salen de `patient-event-pages.tsx`
-  - PR #41: dieta de labs assistant; parsing, matching y resumen de valores de
-    laboratorio salen de `patient_assistant_labs.py`
-  - PR #42: reconciliacion documental post dieta
-  - PR #43: `gitleaks` bloqueante en `security-report`; dependencias y analisis
-    estatico siguen report-only
-  - PR #44-#45: dieta faseada de `clinical_intent.py` con contexto/texto y
-    review items extraidos
-  - PR #46: marco de papel clinico mas serio y `clinical-print.tsx` fuera de
-    near-limit
-  - PR #47: polish read-only de ficha paciente con fuentes, limites y faltantes
-    mas visibles en antecedentes, timeline y laboratorio
-  - PR #72: `workflow_kind` queda modelado en `ClinicalEncounter` y la
-    preconsulta de enfermeria deja de depender del texto libre de `notes`
-  - PR #73: helpers ambulatorios centralizados para distinguir visita,
-    preconsulta y encuentros ambulatorios sin duplicar reglas en UI
-  - PR #74: helpers de hospitalizacion centralizados para filtrar encuentros
-    hospitalarios activos sin duplicar logica entre pantallas
-  - PR #75: labels humanos de estado/contexto de paciente centralizados en
-    frontend; se evita mostrar valores crudos en ficha, lista y papel
-  - PR #76: fixtures demo de encounters/citas separados de `demo-record.ts`,
-    manteniendo el agregador como fachada compatible
-  - PR #77: helpers HTTP de auth extraidos de `auth.py`; cookies, metadata,
-    token de request y mapeo de usuario quedan fuera del router
-  - dieta final de `clinical_intent.py`: las respuestas de intencion clinica
-    salen a `clinical_intent_responses.py` y el orquestador queda fuera de
-    near-limit sin cambio de conducta
-- bloques de consolidacion, dieta y polish inicial de ficha quedan cerrados:
-  documentacion reconciliada, `patient-list-pages.tsx`, utilidades AI-Chart,
-  eventos paciente, labs assistant y `clinical_intent.py` fuera del reporte
-  near-limit, antecedentes con fuentes usadas y timeline/laboratorio con
-  limites y faltantes visibles
-- sigue faltando expansion tradicional por episodios: nucleo paciente ampliado, ambulatorio avanzado, hospitalizacion firmada/legal, adjuntos, resultados amplios y seguridad clinica
-- el mapa maestro de pantallas vive en `docs/SCREEN_TREE.md` como matriz completa con ruta, modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente
-- los estados validos de pantalla son `completa`, `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`
-- una pantalla preparada no cuenta como feature final y debe declarar su estado pendiente
-- una pantalla bloqueada existe para evitar uso clinico hasta cumplir contrato clinico/legal; no cuenta como feature final
-- `npm run check:screens` valida que toda ruta visible de `apps/web/src/app` este documentada en `docs/SCREEN_TREE.md`
-- existe un Screen Capability Registry frontend en `apps/web/src/lib/screen-capabilities.ts`
-- el registry declara por ruta estado, permisos, escritura, auditoria, papel, complejidad futura e IA permitida
-- `npm run check:screens` tambien valida que toda ruta visible tenga `ScreenCapability` y que no haya rutas duplicadas en mapa/registry
-- la barra de intenciones clinicas bloquea ejecucion directa y re-ejecucion de intenciones que la pantalla actual no declare como permitidas
-- si no existe `ScreenCapability`, la UI bloquea intenciones IA por defecto
-- `PROG-AMB-PRECONSULTA-01` implementa preconsulta ambulatoria minima dentro de
-  `/consulta/pacientes/{patient_id}/atencion`, sin ruta, tabla ni endpoint nuevo
-  y reutilizando cita, encuentro, signos vitales y evento clinico
-- la preconsulta minima puede ser completada por `enfermeria`, `medico`,
-  `admin` o `dev`
-- el permiso de `enfermeria` es estrecho: solo crea el encuentro ambulatorio
-  tecnico con `workflow_kind=ambulatory_preconsult` y sigue bloqueado para
-  encuentros generales, SOAP, medicacion, alergias, problemas e IA clinica
-- `admision` sigue futura hasta existir rol administrativo y limites de
-  escritura propios
-- `PROG-CLINICAL-RISK-01` implementa riesgos clinicos minimos con entidad/API
-  bajo paciente, permisos, auditoria, OpenAPI, UI compacta en ficha y E2E
-  visible; no crea dashboard, scores automaticos ni IA nueva
-- `PROG-PATIENT-CORE-NEXT-00` queda decidido y `PROG-PATIENT-TIMELINE-01`
-  esta cerrado por PR #32: linea de tiempo paciente avanzada de solo lectura
-  dentro de ficha, reutilizando `assistant/timeline` sin crear API, entidad o
-  ruta nueva
-- existe `GET /api/v1/patients/{patient_id}/assistant/timeline`
-- existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
-- existe `POST /api/v1/patients/{patient_id}/assistant/chart`
-- existe `POST /api/v1/patients/{patient_id}/assistant/correlate`
-- existe `GET /api/v1/patients/{patient_id}/context` como contexto canonico
-  de lectura para humano/IA; no existe vista web dedicada
-  `/pacientes/[patientId]/contexto` y sigue pendiente decidir si aporta valor
-  sin crear dashboard
-- existe panel web minimo `Assistant Read` dentro de `/pacientes/[patientId]/ai-chart`
-- el panel Assistant Read expone badges de solo lectura, fuentes inspeccionables y ausencia de IA externa
-- no se autoriza escritura clinica desde el programa
-- el timeline assistant es solo lectura, no crea auditoria ni escribe ficha
-- el timeline devuelve fuentes, limites y faltantes por dominio, incluyendo `lab_results` activos
-- la ficha muestra linea de tiempo avanzada con filtros por dominio, fuentes,
-  limites y faltantes desde `assistant/timeline`, sin entidad nueva
-- la busqueda assistant es deterministica, solo lectura y devuelve fuentes/snippets
-- chart assistant devuelve series graficables simples, no imagenes ni graficos acoplados
-- correlate assistant devuelve relaciones descriptivas por presets cerrados, con fuentes y faltantes
-- `ClinicalPatch` v0 soporta escritura confirmada solo para `clinical_event` y `evolution`
-- el backend bloquea aceptar patches con `requires_human_confirmation=false`
-- el backend bloquea guardar evoluciones AI-Chart que no queden en `status=draft`
-- la UI de propuestas desde evolucion exige permiso AI para confirmar patches
-- `PROG-PATIENT-RECORD-READ-POLISH-02` quedo cerrado por PR #34
-- `PROG-AMB-PRECONSULTA-PERMISSIONS-01` quedo cerrado por PR #35
-- `PROG-DIET-FRONTEND-CONTRACTS-01` quedo cerrado por PR #36
-- `PROG-DIET-AI-CHART-UTILS-01` quedo cerrado por PR #39
-- `PROG-DIET-PATIENT-EVENTS-01` quedo cerrado por PR #40
-- `PROG-DIET-ASSISTANT-LABS-01` quedo cerrado por PR #41
-- la deuda near-limit vigente queda cerrada; `npm run check:size` no reporta
-  watchlist y los siguientes PRs deben seguir siendo pequenos, empezando por
-  canon visual de pantallas antes de abrir clinica nueva
+- No crear nueva pantalla clinica.
+- No crear modulo de IA nuevo.
+- No promover receta, firma, orden ejecutable, UCI, pabellon, adjuntos o
+  consentimientos productivos.
+- No abrir PR docs-only salvo que evite dano clinico, seguridad rota, setup roto
+  o claim publico falso.
 
-Lecciones post #15-#17:
+## Gates Obligatorios
 
-- cada pantalla promovida a `completa` debe actualizar `SCREEN_TREE`, `screen-capabilities.ts`, E2E smoke y este documento en el mismo PR
-- no dejar placeholders visibles cuando una ruta empieza a mostrar datos reales
-- evitar selectores E2E ambiguos: usar texto exacto o scope por card cuando el texto aparece en badges y descripciones
-- vigilar archivos entre 300 y 350 lineas antes de agregarles comportamiento; extraer componentes pequenos primero
-- mantener los documentos canonicos sincronizados para no volver a declarar como `preparada` una superficie ya completa
-- validar migraciones nuevas contra una DB PostgreSQL temporal limpia; los tests
-  API no sustituyen el bootstrap Alembic completo
+- Todo cambio: `npm run check:toolchain`.
+- Pantallas/rutas/registry: `npm run check:screens`.
+- API o permisos backend: `npm run check:api`.
+- UI: `npm run check:web`.
+- OpenAPI: `npm run check:contract`.
+- Flujo visible o papel: `npm run check:e2e`.
+- Cambios transversales: `npm run check`.
 
-## Backend
+CI agrega:
 
-Router principal: `apps/api/src/oneepis_api/api/v1/routes/patients.py`.
+- `security-report`: `gitleaks` bloqueante; dependency review, CodeQL, OSV npm
+  advisory check y `pip-audit` report-only hasta politica explicita.
+- `postgres-alembic`: PostgreSQL 15, `alembic upgrade head` desde cero y smoke
+  `downgrade -1`/`upgrade head`.
 
-Dominios CRUD:
+## Riesgos Vivos
 
-- pacientes
-- encuentros clinicos
-- clinical entries con vinculo opcional a encuentro
-- clinical events como hechos longitudinales
-- laboratorio/examenes estructurados minimos como paneles y resultados
-- riesgos clinicos minimos
-- problemas activos
-- alergias
-- medicacion
-- signos vitales
+- Produccion sanitaria: OneEpis no esta listo para uso clinico real ni software
+  certificado.
+- Seguridad: faltan secretos formales, cifrado, backups/restore, retencion,
+  auditoria de accesos, logs PHI-safe y control contextual por institucion/equipo.
+- Identidad: auth local sirve para desarrollo; usuarios persistentes, sesiones
+  productivas, revocacion y recuperacion institucional siguen pendientes.
+- Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro.
+- IA externa: bloqueada hasta gateway PHI, anonimizacion, autorizacion, auditoria
+  y politica explicita.
+- Legal clinico: firma, receta valida, orden ejecutable, MAR, consentimientos y
+  adjuntos productivos siguen bloqueados.
 
-Medicacion con vademecum:
+El checklist versionado de no-produccion vive en
+`docs/NO_PRODUCTION_CHECKLIST.md`.
 
-- existe catalogo local versionado `MedicationCatalogItem`/`MedicationDoseRule`
-- existe `GET /api/v1/medication-catalog`
-- existe `GET /api/v1/medication-catalog/{catalog_item_id}`
-- existe `GET /api/v1/patients/{patient_id}/medication-drafting-context`
-- existe `POST /api/v1/patients/{patient_id}/medications/validate-draft`
-- `POST /api/v1/patients/{patient_id}/medications` revalida dosis antes de guardar
-- una dosis fuera de rango curado bloquea sin `dose_override_reason`
-- el override guarda snapshot de regla, fuente, alerta y justificacion en auditoria
-- el fixture incluido es demo sintetico y declara `no uso clinico`
-- FDA/openFDA, Drugs@FDA, FAERS, enforcement e ISP/ANAMED quedan como fuentes de evidencia para curaduria local; no se consultan en vivo desde UI clinica
-- receta valida, orden ejecutable, firma, folio, despacho y administracion siguen bloqueados/futuros
+## Decisiones Activas
 
-Auditoria:
-
-- cada escritura usa `record_audit_event`
-- actor via token local de `/api/v1/auth/login`
-- `X-OneEpis-Actor` queda solo como fallback dev si `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`
-- lectura: `GET /api/v1/patients/{patient_id}/audit-events`
-- cada request recibe `correlation_id` y se expone en `X-OneEpis-Correlation-ID`
-- eventos guardan `request_method`, `request_path` y snapshots `before/after` cuando aplica
-- detalle operativo en `docs/AUDIT.md`
-
-Auth local:
-
-- `POST /api/v1/auth/login`
-- `GET /api/v1/auth/me`
-- `POST /api/v1/auth/password-recovery-requests`
-- `POST /api/v1/auth/unlock-requests`
-- `POST /api/v1/auth/unlock-confirmations`
-- roles iniciales: `admin`, `medico`, `enfermeria`, `solo_lectura`, `dev`
-- `/` y `/login` son entrada publica sin perfiles ni accesos clinicos; login
-  exitoso redirige a `/home`
-- `/login/desbloquear/confirmar?token=...` es el destino publico generico
-  para consumir tokens de desbloqueo sin exponer si el token era valido
-- `/home` muestra el mapa fisico del hospital como lugares o servicios reales,
-  no como dashboard ni arbol de acciones
-- `/pacientes` queda como entrada interna/contextual desde lugares como
-  Farmacia, Laboratorio, Enfermeria o Archivo clinico cuando se requiere
-  seleccionar paciente
-- `/mapa` queda como alias legacy hacia `/home`
-- los helpers HTTP de auth viven en
-  `apps/api/src/oneepis_api/api/v1/routes/auth_http.py`; el router `auth.py`
-  debe mantenerse como orquestador de endpoints, no como contenedor de cookies,
-  metadata o extraccion de token
-- el login emite cookie `HttpOnly` (`ONEEPIS_AUTH_SESSION_COOKIE_NAME`) y el
-  frontend usa un marcador local no sensible; el bearer de la respuesta queda
-  como compatibilidad temporal para clientes existentes
-- los tokens nuevos incluyen `sid`; la sesion se registra en `auth_sessions` y
-  `POST /auth/logout` revoca server-side la sesion antes de limpiar cookies
-- `POST /auth/refresh` rota el token vigente de la sesion; el token anterior
-  queda invalido por hash de token server-side
-- mutaciones autenticadas por cookie requieren double-submit CSRF
-  (`ONEEPIS_AUTH_CSRF_COOKIE_NAME` + header `X-OneEpis-CSRF`); bearer conserva
-  compatibilidad sin CSRF
-- auth local soporta hashes PBKDF2 y bloqueo temporal por intentos fallidos;
-  passwords planos quedan como compatibilidad solo de desarrollo
-- recuperacion y desbloqueo registran solicitud generica con adaptador de correo
-  deshabilitado por defecto; no confirman existencia de usuario y tienen limite
-  temporal por identificador
-- confirmacion de desbloqueo consume token de un solo uso, limpia bloqueo
-  temporal asociado y mantiene respuesta generica aunque el token no exista
-- `ONEEPIS_AUTH_NOTIFICATION_PROVIDER=development_log` solo se acepta en
-  desarrollo y genera el enlace de desbloqueo local; fuera de desarrollo no se
-  simula envio sin proveedor real
-- rutas de paciente requieren autenticacion
-- escrituras clinicas se reparten por permiso fino; `admin` y `dev` pueden
-  operar todo el entorno local gobernado, `medico` escribe actos medicos y
-  `enfermeria` queda acotada a signos/eventos/laboratorio/riesgos y
-  preconsulta ambulatoria minima
-- IA clinica requiere `admin`, `medico` o `dev`
-- fuera de `development`, la API rechaza secreto default, usuarios default,
-  passwords planos, actor dev, auth desactivada y valores de auth no positivos
-
-Higiene local:
-
-- en `development`, la API rechaza escrituras de paciente con terminos de fixtures externos conocidos
-- esta guardia evita recontaminar PostgreSQL local con datos de proyectos previos
-- no reemplaza permisos, auditoria ni limpieza manual de bases ya contaminadas
-
-Permisos finos:
-
-- matriz viva en `docs/PERMISSIONS.md`
-- enfermeria puede registrar signos vitales, eventos clinicos, laboratorio
-  minimo y riesgos clinicos, pero no encuentros, SOAP, medicacion, alergias,
-  problemas ni IA clinica
-- encuentros clinicos generales requieren rol medico/admin/dev; la excepcion
-  estrecha es la preconsulta ambulatoria minima, donde `enfermeria` puede crear
-  solo el encuentro tecnico de preconsulta marcado con
-  `workflow_kind=ambulatory_preconsult`
-- problemas activos requieren rol medico/admin/dev
-- estado de ficha y contexto asistencial se editan desde UI con rol medico/admin/dev
-- solo_lectura puede leer, pero no escribir
-- frontend deshabilita acciones sin permiso; backend las rechaza con 403
-
-IA:
-
-- `GET /api/v1/ai/status`
-- `POST /api/v1/ai/clinical-insights`
-- `POST /api/v1/patients/{patient_id}/ai/suggestions`
-- `POST /api/v1/patients/{patient_id}/ai/clinical-intent`
-- `POST /api/v1/patients/{patient_id}/ai/clinical-intent-route`
-- `POST /api/v1/patients/{patient_id}/ai/review-item-decision`
-- `POST /api/v1/patients/{patient_id}/ai/draft-soap-from-events`
-- `POST /api/v1/patients/{patient_id}/ai/event-proposals-from-entry`
-- `POST /api/v1/patients/{patient_id}/ai/confirm-clinical-patch`
-- `GET/POST/PATCH /api/v1/patients/{patient_id}/lab-panels`
-- `GET/PATCH /api/v1/patients/{patient_id}/lab-panels/{panel_id}/results/{result_id}`
-- factory compatible en `services/ai/provider.py`
-- contrato, providers, parsing y sugerencias snapshot separados en `services/ai/*`
-- Ollama es first-class en desarrollo, con fallback no bloqueante
-- `/configuracion/ia` declara IA externa bloqueada hasta existir payload
-  anonimizado, preview humano, autorizacion explicita, auditoria y politica PHI
-- AI-Chart Core funciona como Nivel 0: reglas, plantillas, fuentes, faltantes, review items auditados, hoja SOAP con margen inteligente, propuestas de eventos desde evoluciones escritas y guardado por `ClinicalPatch` confirmado aunque Ollama este apagado
-- las aceptaciones `ClinicalPatch` quedan limitadas por contrato: confirmacion humana obligatoria, evolucion siempre borrador no firmado y auditoria de bloqueo cuando no aplica
-
-Assistant Read Layer:
-
-- `GET /api/v1/patients/{patient_id}/assistant/timeline`
-- `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
-- `POST /api/v1/patients/{patient_id}/assistant/chart`
-- `POST /api/v1/patients/{patient_id}/assistant/correlate`
-- solo lectura con rol de lectura de paciente
-- une encuentros, evoluciones, eventos, signos vitales, medicacion activa, problemas activos y alergias activas
-- busca texto en encuentros, evoluciones, eventos, signos vitales con notas, medicacion activa, problemas activos, alergias activas y resultados de laboratorio estructurados
-- devuelve series de signos vitales y examenes numericos desde `lab_results` activos y eventos legacy `exam_result`
-- correlaciona por presets cerrados: fiebre/infeccion, renal/medicacion, respiratorio/oxigenacion, hemoglobina/sangrado y cambios de medicacion
-- cada item expone tipo, fecha, resumen y ruta fuente existente
-- cada resultado de busqueda expone tipo, fecha, snippet, campos coincidentes y ruta fuente existente
-- cada punto graficable expone fecha, valor, fuente y ruta fuente existente
-- cada correlacion expone evidencia, resumen descriptivo y faltantes; no diagnostica ni prescribe
-- declara dominios faltantes y limite aplicado
-- no escribe ficha, no audita modificacion y no depende de Ollama
-- UI minima integrada en AI-Chart con tabs Timeline, Buscar, Series y Correlacion
-- el tab Series muestra fuentes accionables y lectura acotada de paneles de laboratorio recientes
-- backend Assistant Read esta dividido por dominio en rutas/helper de timeline, busqueda, series, correlacion y utilidades comunes
-- `patient_assistant.py` queda como agregador de routers y ya no requiere excepcion de tamano en `check:size`
-- pendiente: decidir si `/pacientes/[patientId]/contexto` aporta valor como vista dedicada sin crear dashboard
-
-Laboratorio estructurado:
-
-- existe entidad minima `LabPanel`/`LabResult` para paneles y resultados de examenes
-- no existe UI amplia ni navegacion propia de laboratorio todavia
-- existe lectura minima de paneles/resultados recientes dentro de Assistant Read, sin escritura ni carga masiva
-- existe lectura minima de paneles/resultados recientes dentro de la ficha, sin escritura, carga masiva ni navegacion nueva
-- la ficha inicia antecedentes clinicos de solo lectura desde problemas, alergias, medicacion y eventos curados; los presets de eventos guardan categoria, fuente y limite en `payload.antecedent`; vacunas, dispositivos y diagnosticos codificados siguen pendientes de contrato propio
-- `docs/SCREEN_TREE.md` registra contratos minimos bloqueantes para agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional; no se debe crear UI amplia de esas superficies antes de cumplirlos
-- `POST /api/v1/patients/{patient_id}/lab-panels` crea un panel con 1 a 100 resultados
-- `PATCH` corrige paneles/resultados y usa `entered_in_error`; no existe `DELETE`
-- lectura usa permisos de ficha, incluyendo `solo_lectura`
-- escritura usa `admin`, `medico`, `enfermeria` o `dev`
-- cada escritura genera auditoria `lab_panel.created`, `lab_panel.updated` o `lab_result.updated`
-- no migra historicos ni crea automaticamente `clinical_events.exam_result`
-- compatibilidad: Assistant Read combina resultados estructurados activos y eventos legacy `exam_result` para series/correlaciones
-- resultados no numericos se almacenan pero no se grafican como tendencia
-
-Hospitalizacion:
-
-- `GET /api/v1/hospitalization/active`
-- `GET/POST/PATCH /api/v1/hospitalization/beds`
-- `GET/POST/PATCH /api/v1/hospitalization/patients/{patient_id}/daily-sheets`
-- `GET/POST/PATCH /api/v1/hospitalization/patients/{patient_id}/indications`
-- tablero `/hospitalizacion/camas` lee encuentros `hospitalization` en curso
-- camas estructuradas con sala/habitacion/cama y asignacion auditada a encuentros activos
-- UI `/hospitalizacion/camas` administra estados y `/hospitalizacion/camas/nueva` crea camas
-- camas disponibles pueden asignarse a ingresos activos sin cama; una cama ocupada debe liberarse antes de reasignarse
-- ingreso medico hospitalario minimo existe como `ClinicalEntry(kind=intake)` vinculado a encuentro `hospitalization` en curso
-- `/hospitalizacion/pacientes/[patientId]/ingreso` crea borradores de ingreso con permisos medico/admin/dev y auditoria de `clinical_entry.created`
-- `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` imprime hoja carta por ID estricto y no equivale a firma legal
-- epicrisis preliminar existe como `ClinicalEntry(kind=discharge_summary)` vinculado a encuentro `hospitalization` en curso
-- `/hospitalizacion/pacientes/[patientId]/epicrisis` crea borradores de epicrisis con permisos medico/admin/dev y auditoria de `clinical_entry.created`
-- `/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]` imprime hoja carta por ID estricto y no equivale a alta firmada
-- hoja diaria hospitalizada tiene PostgreSQL, API, permisos, auditoria, OpenAPI, crear/listar/editar/cerrar UI y print
-- estado de hoja diaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
-- fecha de hoja diaria: debe estar dentro de la ventana del ingreso hospitalario asociado usando fecha clinica local `America/Santiago`, no el dia UTC crudo
-- `/hospitalizacion/rondas` es vista de lectura: ingresos activos, cama, ultima hoja diaria y accesos a ficha/papel
-- `/print/hospitalizacion/rondas` imprime ronda de lectura con ingresos activos, cama y ultima hoja diaria
-- indicacion hospitalaria minima tiene PostgreSQL, API, permisos, auditoria, OpenAPI, UI y papel
-- estado de indicacion hospitalaria: `draft` o `closed`; `closed` bloquea edicion posterior sin equivaler a firma legal
-- la pantalla de indicaciones declara ejecucion bloqueada hasta existir orden
-  firmada, doble chequeo, MAR activo, registro de administracion y auditoria de
-  ejecucion
-- receta ya tiene politica de gobierno en `docs/GOVERNANCE.md`, pero aun no tiene modelo, endpoint ni firma real
-- la ruta print de receta permanece bloqueada y muestra requisitos faltantes:
-  firma profesional, folio institucional, actor/permisos, fecha clinica y
-  politica de prescripcion activa
-- aun no existen indicaciones firmadas, recetas validas ni rondas con escritura clinica propia
-
-Consulta:
-
-- `/consulta/pacientes/{patient_id}/atencion` usa endpoints existentes para crear encuentro ambulatorio y evolucion SOAP vinculada
-- la misma pantalla permite cerrar un encuentro ambulatorio en curso como `completed` usando el PATCH existente de encuentros; es cierre administrativo auditado, no firma ni receta valida
-- el panel de cierre ambulatorio declara encuentros en curso/cerrados, destino
-  `completed + ended_at`, estado no firmado y auditoria esperada antes de
-  ejecutar el cierre
-- agenda ambulatoria minima existe como `ClinicalAppointment`, con persistencia, estados, permisos y auditoria
-- `/consulta/agenda` lista citas por dia, permite crear cita programada y enlaza a la atencion del paciente
-- preconsulta ambulatoria minima esta integrada dentro de la atencion: toma cita
-  programada/en check-in/en curso, crea encuentro ambulatorio, registra signos
-  opcionales y deja evento clinico `clinical_note` con payload `preconsult`
-- la preconsulta minima puede completarla `enfermeria`, `medico`, `admin` o
-  `dev`; enfermeria solo obtiene el permiso tecnico necesario para ese flujo,
-  no gestion general de encuentros; el permiso depende de
-  `workflow_kind=ambulatory_preconsult`, no del texto libre de `notes`
-- rol `admision` sigue futuro
-- agenda avanzada por equipos/recursos y no-show operacional siguen futuras
-- `/consulta/pacientes/{patient_id}/resumen` es lectura minima real: snapshot, citas, encuentros, evoluciones, problemas, alergias y medicacion; no escribe ni emite receta/orden
-- seguimiento formal, interconsultas y cierre documental ambulatorio siguen futuros
-
-Documentos/papel:
-
-- `/pacientes/[patientId]/documentos` es indice real de papel existente: ficha, resumen, evoluciones, ingreso y epicrisis cuando hay entradas disponibles
-- las hojas carta muestran metadata documental comun: fuente, estado, actor y
-  fecha clinica cuando la fuente los expone
-- consentimientos siguen bloqueados y declaran requisitos faltantes: plantilla
-  versionada, firmante, fecha, custodia y revocacion
-- adjuntos externos siguen bloqueados y declaran requisitos faltantes:
-  almacenamiento documental, tipo, virus scan, PHI policy, retencion y
-  trazabilidad
-- adjuntos externos, consentimientos, custodia documental, firma real y receta valida siguen bloqueados/futuros
-
-Seguridad clinica:
-
-- riesgos clinicos estructurados tienen implementacion minima: caida, UPP, TEV,
-  aislamiento, evento adverso y otro
-- existe `ClinicalRisk` con paciente, encuentro opcional, tipo, severidad,
-  estado, fuente inspeccionable, razon, accion humana, revision y `created_by`
-- existe API bajo paciente para listar, crear, leer y corregir riesgos; no
-  existe ruta global `/risks` ni dashboard de seguridad
-- lectura usa permisos de ficha, incluyendo `solo_lectura`; escritura usa
-  `admin`, `medico`, `enfermeria` o `dev`
-- cada escritura genera auditoria `clinical_risk.created` o
-  `clinical_risk.updated` con `before/after` cuando aplica
-- la ficha muestra una tarjeta compacta de riesgos activos; demo declara que no
-  simula seguridad clinica productiva
-- no hay scores automaticos, no hay bloqueo clinico inferido, no hay IA nueva y
-  no existe `ClinicalPatch` para riesgos
-
-## Frontend
-
-Rutas App Router bajo `apps/web/src/app`.
-
-Capas:
-
-- `src/app/api/ai/clinical-command/route.ts`: BFF streaming con Vercel AI SDK; orquesta FastAPI y no reemplaza la API clinica canonica
-- `src/lib/api/*`: clientes API por dominio
-- `src/lib/api/auth.ts`: login local y sesion actual
-- `src/lib/types.ts`: agregador de contratos TypeScript por dominio
-- `src/components/auth/*`: login local y badge de sesion
-- `src/components/layout/app-shell.tsx`: navegacion global
-- temas visuales usan tokens de superficie (`surface`, `surface-subtle`, `surface-raised`) y selector con swatch
-- `src/components/clinical/patient-clinical-shell.tsx`: mesa clinica por paciente
-- `src/components/clinical/patient-*-pages.tsx`: pantallas paciente importadas directo por App Router
-- `/pacientes` funciona como mesa clinica de entrada con buscador, metricas operativas y lista escaneable
-- navegacion paciente agrupada visualmente en Ficha, Datos, IA y Control; mobile usa selector compacto de seccion clinica
-- las pantallas visibles pueden mostrar badges comunes de estado, papel, escritura e IA permitida desde el Screen Capability Registry
-- `/pacientes/[patientId]/ficha` se organiza como hoja clinica viva: cabecera critica, linea longitudinal y riel contextual de faltantes/IA/acciones
-- `/pacientes/[patientId]/eventos` registra hechos clinicos longitudinales y ofrece curaduria minima de antecedentes con categoria, fuente y limite visible
-- `/pacientes/[patientId]/medicacion` integra vademecum local, favoritos, sugeridos deterministicas, historial y copia de indicaciones previas como borrador humano
-- `/pacientes/[patientId]/medicacion/nueva` valida dosis contra reglas curadas y exige justificacion si hay bloqueo antes de guardar
-- `/pacientes/[patientId]/ficha` muestra riesgos clinicos minimos en el riel contextual; permite registro manual y marcar resuelto solo con permisos
-- `/pacientes/[patientId]/ai-chart` muestra inteligencia simulada, intenciones clinicas, propuestas revisables y hoja SOAP editable con margen inteligente
-- AI-Chart muestra un flujo visual guiado: leer contexto, seleccionar evidencia, revisar propuestas, generar borrador SOAP y confirmar como borrador no firmado
-- AI-Chart envia la barra clinica al BFF de Next, que delega la resolucion estructurada en FastAPI y transmite eventos tipados JSONL con AI SDK
-- AI-Chart no guarda propuestas desde campos sueltos; envia `ClinicalPatch` al backend para aceptar/rechazar/guardar
-- AI-Chart muestra estado operativo de eventos, evoluciones, seleccion, modo y permisos antes de generar o guardar
-- AI-Chart consulta el registry para bloquear intenciones no permitidas por la pantalla antes de ejecutar botones dirigidos
-- Assistant Read mantiene el panel orquestador separado de sus secciones de timeline, busqueda, series y correlacion.
-- AI-Chart explica acciones bloqueadas con condicion o rol habilitante
-- AI-Chart inicia Context Builder serio mostrando explicaciones por problema: por que una evidencia se asocia o queda sin vinculo
-- AI-Chart muestra faltantes con razon y contexto asistencial, no solo nombres de datos ausentes
-- AI-Chart agrupa reglas narrativas de mejoria/empeoramiento como `Curso clinico`
-- AI-Chart etiqueta el curso clinico por dominio cuando el texto reciente permite distinguir respiratorio, dolor, infeccioso, hemodinamico, metabolico o digestivo
-- AI-Chart evita negaciones obvias de curso clinico y corrobora dominios respiratorio, infeccioso o hemodinamico con signos vitales cuando existen dos controles comparables
-- AI-Chart asocia problemas con eventos por vocabulario clinico local explicable cuando no hay coincidencia literal
-- AI-Chart evita negaciones obvias al asociar por vocabulario local para reducir falsos positivos
-- AI-Chart prioriza asociaciones SNOMED CT cuando el problema trae codigo y el evento incluye conceptos/ancestros derivados de repositorios terminologicos externos licenciados
-- AI-Chart agrega pendientes por problema activo segun dominio clinico probable: respiratorio, metabolico, hemodinamico, infeccioso o renal
-- AI-Chart muestra razon de asociacion y fuente abreviada por cada evidencia vinculada a problema
-- AI-Chart usa resultados `lab_results` activos como evidencia explicable para problemas compatibles por dominio clinico local, sin crear escritura ni auditoria de modificacion
-- AI-Chart vuelve a mantener `patient-ai-chart-pages.tsx` bajo presupuesto como orquestador; el flujo de propuestas desde evolucion vive en su seccion propia
-- Propuestas desde evolucion muestran estado visible `pendiente`, `registrando`, `registrada en ficha` o `rechazada` antes y despues de confirmar el `ClinicalPatch`
-- Las decisiones de propuesta se consideran durables via auditoria; la UI mantiene estado local de sesion para operacion inmediata
-- La vista de operaciones `ClinicalPatch` esta extraida como componente reusable para evitar inflar paneles AI-Chart
-- `src/components/clinical/ambulatory-visit-pages.tsx`: atencion ambulatoria minima sobre encuentros y SOAP
-- `src/components/clinical/*`: cards, widgets y pantallas clinicas
-- `src/components/print/*`: hojas imprimibles
-- modo papel mantiene toolbar uniforme "Vista papel" y hoja carta con footer de desarrollo cuando aplica
-- el marco de papel muestra metadata documental comun antes del contenido para
-  hacer visible fuente, estado y limites de firma
-- las rutas print no hacen fallback silencioso a otro documento cuando el ID solicitado no existe
-
-Tests API:
-
-- fixtures compartidas en `apps/api/tests/conftest.py`
-- cobertura paciente separada por dominios: ficha, permisos, auditoria, IA y encuentros
-- cobertura hospitalizacion separada por board, camas y hoja diaria
-- la UI operativa separa shells por dominio: `AmbulatoryClinicalShell` gobierna
-  `/consulta/**` y `HospitalClinicalShell` gobierna `/hospitalizacion/**`
-- las entradas de dominio usan `DomainModulePage`: `/consulta` y
-  `/consulta/agenda` quedan bajo navegacion ambulatoria; `/hospitalizacion`,
-  `/hospitalizacion/rondas` y `/hospitalizacion/camas` quedan bajo navegacion
-  hospitalaria
-- `PatientClinicalShell` queda para ficha longitudinal neutra; no debe volver a
-  mezclar acciones operativas ambulatorias y hospitalarias en el mismo header
-- la siguiente cadena aceptada es canon de pantallas: login/home, ambulatorio,
-  hospitalizacion y ficha longitudinal; no agrega migraciones, contratos
-  clinicos nuevos ni superficies IA nuevas
-- cobertura de riesgos clinicos prueba permisos, ownership, fuente de otro
-  paciente, auditoria `before/after` y ausencia de `DELETE`
-- `ClinicalPatch` cubre aceptacion, rechazo, target no soportado, bloqueo por falta de confirmacion humana y bloqueo de evolucion no borrador; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported` o `ai.clinical_patch.blocked`
-
-Deuda visible a resolver antes de nuevo crecimiento clinico:
-
-- no agregar nueva clinica core sin flujo completo PostgreSQL/API/permisos/auditoria/OpenAPI/UI
-- no agregar pantallas clinicas nuevas sin registrar estado explicito en `docs/SCREEN_TREE.md`
-- promover pantallas preparadas a completas solo con contrato backend, permisos, auditoria si escribe, pruebas y papel cuando aplique
-- mover una ruta visible bajo `apps/web/src/app` exige actualizar el mapa maestro o falla `npm run check:screens`
-- mantener la regla de producto: paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
-- sostener `/pacientes` como mesa clinica de entrada, no como dashboard ni portada generica
-- sostener `/consulta/**` y `/hospitalizacion/**` como experiencias operativas
-  separadas; compartir componentes solo cuando no mezcle navegacion, acciones o
-  copy de dominio
-- no reintroducir placeholders de entrada ambulatoria como pantallas finales:
-  `/consulta` debe mostrar estacion ambulatoria mantenible y `/consulta/agenda`
-  la agenda persistida real
-- `apps/web/src/components/print/clinical-print.tsx` salio de near-limit tras
-  separar receta bloqueada; no volver a inflarlo con mas papel sin extraer.
-- los contratos frontend de Assistant Read e IA clinica ya se separaron de
-  `clinical-record.ts`; vigilar cualquier nuevo near-limit antes de sumar
-  dominios.
-- `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; `patient-ai-chart-pages.tsx` queda bajo presupuesto tras extraer intencion, evidencia y borrador, y no debe volver a inflarse.
-- `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon; Assistant Read backend ya no usa excepcion propia.
-- `npm run check:screens` bloquea rutas visibles sin fila en `SCREEN_TREE` o sin `ScreenCapability`.
-- `npm run check:toolchain` bloquea divergencia de matriz local/CI: Node 22, npm 11.13.0 y Python 3.12.x.
-- `npm run check:contract` verifica OpenAPI sin reescribir el contrato y valida drift minimo Assistant Read contra los tipos TS manuales.
-- Playwright E2E corre con `workers: 1` para evitar 404 transitorios del dev server al compilar rutas dinamicas en paralelo.
-- tras R-01, cualquier crecimiento AI-Chart debe entrar en componentes existentes o extraer subpaneles; no agregar bloques inline grandes a la pagina.
-- `apps/api/src/oneepis_api/services/clinical_intent.py` salio de watchlist tras
-  separar respuestas de intencion; router, acciones, reglas de cambios,
-  examenes y medicacion viven en modulos de dominio.
-- `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
-- `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
-- adjuntos externos, consentimientos y receta siguen como bordes bloqueados/futuros; no expandir todos a la vez.
-- watchlist de tamano actual: vacia segun `npm run check:size`.
-- `patient-list-pages.tsx`, `ai-chart-utils.ts`, `patient-event-pages.tsx`,
-  `patient_assistant_labs.py`, `clinical_record.py`, `clinical_patch.py`,
-  `patient_assistant_correlation.py`, `clinical-intent-result-panel.tsx`,
-  `patient-ai-chart-pages.tsx`, `ambulatory-appointment-pages.tsx`,
-  `assistant-read-sections.tsx`, `patient-record-workspaces.tsx`,
-  `ambulatory-visit-pages.tsx`, `demo-record.ts` y `auth.py` ya salieron
-  del reporte near-limit; no volver a agregarles comportamiento sin revisar
-  primero su presupuesto.
-- agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.
-- receta impresa sigue bloqueada hasta tener firma, folio, actor, fecha clinica y permisos claros.
-- rondas lee hojas diarias por paciente activo; aceptable por ahora, pero requerira read-model backend si escala.
-
-Release gates demo:
-
-- Releases previstos: `v0.1-base-ficha`, `v0.2-hospitalizacion`, `v0.3-ai-chart-core`, `v0.4-assistant-read`.
-- Cada release exige tag, changelog, CI verde, checklist de demo y plan de rollback.
-- Checklist `v0.4-assistant-read`: paciente, hospitalizacion, evolucion, signo vital, evento clinico, laboratorio estructurado reciente, AI-Chart/Assistant Read, impresion y auditoria.
-- Criterios `v0.4`: fuentes inspeccionables, limites/faltantes visibles, cero escritura automatica, cero chat libre, cero RAG, cero IA externa activa y compatibilidad `lab_results` + `clinical_events.exam_result`.
-- Rediseño visual inicial no cambia backend, OpenAPI, rutas clinicas ni permisos; cualquier tag `v0.4` sigue requiriendo walkthrough humano y CI verde.
-- Estado `v0.4-assistant-read`: walkthrough humano aprobado el 2026-06-23; changelog y tag `v0.4-assistant-read` creados sobre `main`.
-- Rollback `v0.4`: desactivar superficie web Assistant Read sin tocar datos clinicos; mantener endpoints de lectura y laboratorio minimo porque no migran historicos ni escriben automaticamente.
-- Pantallas preparadas no cuentan como feature completa; si se vuelven visibles deben declarar estado pendiente hasta tener backend/flujo real.
-- Hallazgos del walkthrough semanal van a este documento o a issues; no crear documentos dispersos.
-
-Accesibilidad, performance y observabilidad pendientes:
-
-- Accesibilidad: validar teclado, foco visible, contraste y labels en `/pacientes`, ficha, AI-Chart y print; agregar Playwright + axe solo cuando el paquete y el flujo queden cerrados.
-- Performance: probar ficha y AI-Chart con dataset sintetico grande, revisar limites por dominio y confirmar indices contra queries reales.
-- Observabilidad: mantener logs sin PHI, exponer correlation ID frontend/backend, reforzar health checks utiles y errores trazables.
-
-## Auditoria rapida 2026-06-23
-
-- Ultimos bloques completados: hoja diaria, cierre, reglas de fecha, rondas de lectura, fecha clinica local, politica de indicaciones/receta, indicacion minima, atencion ambulatoria minima, mesa `/pacientes` v2, temas visuales v2, AI-Chart Core Nivel 0, PR #1 mergeado y endurecimiento `ClinicalPatch`.
-- Se detecto contaminacion local de datos desde fixtures externos en PostgreSQL de desarrollo; la base local fue limpiada y el nuevo foco es blindar identidad/datos antes de crecer.
-- Validacion reciente local Assistant Read UI: typecheck/lint web y contrato cliente manual actualizado.
-- Validacion reciente Context Builder: problemas renales/metabolicos pueden resolver faltantes con laboratorio estructurado activo.
-- Rediseño grafico-web inicial: navegacion paciente agrupada, ficha como hoja clinica viva, AI-Chart con pasos guiados, paridad papel basica y tokens clinicos V2 documentados.
-- Validacion reciente rediseño visual: `npm run check:size`, `npm run check:web`, `npm run check:e2e`, `npm run check:contract` y `npm run check:api`.
-- Seguridad CI: `security-report` bloquea secretos/PHI con `gitleaks`; dependency review, CodeQL, OSV npm advisory check y `pip-audit` siguen report-only hasta politica explicita.
-- Post-prototipo: `docs/SCREEN_TREE.md` clasifica rutas reales y superficies futuras por modulo, momento clinico, estado, fuente de verdad, escritura, permisos, auditoria, papel, IA permitida y pendiente.
-- Validacion remota PR #1: `api`, `web` y `contracts-e2e` verdes antes del squash merge.
-- Release `v0.4-assistant-read`: changelog creado, tag publicado y walkthrough humano aprobado el 2026-06-23.
-- Siguiente bloque de producto despues de `v0.4`: `PROG-PATIENT-CORE-01`, nucleo paciente tradicional y laboratorio/ficha sobria, sin nueva IA ni dashboard.
-
-## Historial
-
-El historial cronologico vive en `docs/ROADMAP.md`.
-La guia operativa para agentes vive en `docs/CODEX_PLAN.md`.
-
-Regla IA: todo output de Ollama es borrador, requiere revision humana y no escribe ficha automaticamente.
-
-## Gates actuales
-
-Comandos esperados antes de entregar cambios:
-
-```bash
-npm run check:screens
-npm run check:toolchain
-npm run check:api
-npm run check:web
-npm run check:contract
-npm run check:e2e
-npm run check
-```
+- Paciente une; encounter separa; timeline reconcilia; auditoria prueba; IA
+  resume, no decide.
+- `screen-capabilities.registry.json` es la fuente de verdad estructurada para
+  rutas visibles; `docs/SCREEN_TREE.md` conserva narrativa clinica y la tabla
+  generada.
+- `docs/CLINICAL_SCENARIO_AUDIT.md` define el walkthrough clinico minimo:
+  consulta ambulatoria, hospitalizacion con indicacion borrador y paciente con
+  riesgo/alergia/medicacion.
+- `npm` 11.13.0 es el package manager oficial; pnpm queda diferido a PR dedicado.
+- Los estados validos de pantalla son `completa`,
+  `completa/en expansion gobernada`, `preparada`, `bloqueada` y `futura`.
+- Una pantalla completa no autoriza claims legales: si hay borrador, guardrail o
+  flujo minimo, debe declararse `completa/en expansion gobernada`.
+- La proxima mejora debe atravesar un paciente ficticio por un flujo real antes
+  que agregar mapa, copy o canon narrativo.

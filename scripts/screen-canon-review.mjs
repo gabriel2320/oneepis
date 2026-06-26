@@ -1,18 +1,13 @@
 import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const screenTreePath = path.join(repoRoot, "docs/SCREEN_TREE.md");
-const capabilitiesPath = path.join(repoRoot, "apps/web/src/lib/screen-capabilities.ts");
-
-const routeHeader =
-  "| Ruta | Modulo | Momento clinico | Estado | Fuente de verdad | Escritura | Permisos | Auditoria | Papel | IA permitida | Pendiente para completar |";
+import {
+  extractRealRouteRows,
+  readScreenRegistry,
+  screenTreePath,
+} from "./screen-registry.mjs";
 
 const screenTree = readFileSync(screenTreePath, "utf8");
-const capabilitiesSource = readFileSync(capabilitiesPath, "utf8");
 const routes = extractRouteRows(screenTree);
-const capabilities = new Set(extractRegisteredRoutes(capabilitiesSource));
+const capabilities = new Set(readScreenRegistry().map((row) => row.routePattern));
 const errors = [];
 
 const phases = [
@@ -55,50 +50,11 @@ function phase(id, label, modules, filter = null) {
 }
 
 function extractRouteRows(markdown) {
-  const lines = markdown.split(/\r?\n/);
-  const headerIndex = lines.findIndex((line) => line.trim() === routeHeader);
-  if (headerIndex === -1) {
+  const rows = extractRealRouteRows(markdown);
+  if (rows.length === 0) {
     errors.push("No se encontro la tabla de rutas reales en docs/SCREEN_TREE.md.");
-    return [];
-  }
-
-  const rows = [];
-  for (const line of lines.slice(headerIndex + 2)) {
-    if (!line.startsWith("|")) {
-      break;
-    }
-    const cells = line
-      .split("|")
-      .slice(1, -1)
-      .map((cell) => cell.trim());
-    if (cells.length < 11) {
-      continue;
-    }
-    rows.push({
-      route: stripBackticks(cells[0]),
-      module: cells[1],
-      clinicalMoment: cells[2],
-      status: cells[3],
-      truthSource: cells[4],
-      writePolicy: cells[5],
-      permissionPolicy: cells[6],
-      auditPolicy: cells[7],
-      paperPolicy: cells[8],
-      aiPolicy: cells[9],
-      pending: cells[10],
-    });
   }
   return rows;
-}
-
-function extractRegisteredRoutes(source) {
-  const routes = [];
-  const pattern = /capability\(\s*"([^"]+)"/g;
-  let match;
-  while ((match = pattern.exec(source)) !== null) {
-    routes.push(match[1]);
-  }
-  return routes;
 }
 
 function validateRoutes(routes, capabilities, errors) {
@@ -180,10 +136,6 @@ function printReviewQueue(routes, phases) {
       console.log(`- ${row.route} | ${row.status} | ${row.module}`);
     }
   }
-}
-
-function stripBackticks(value) {
-  return value.replace(/^`|`$/g, "");
 }
 
 function normalize(value) {
