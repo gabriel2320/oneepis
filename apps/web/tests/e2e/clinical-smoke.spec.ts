@@ -135,6 +135,7 @@ test("patient support data routes stay secondary", async ({ page }) => {
 
 test("hospitalization home renders compact operational board", async ({ page }) => {
   await page.goto("/hospitalizacion");
+  const main = page.getByRole("main");
 
   await expect(page.getByRole("heading", { name: "Hospitalizacion" })).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Navegacion hospitalizacion" });
@@ -151,6 +152,11 @@ test("hospitalization home renders compact operational board", async ({ page }) 
   await expect(page.getByText("Ingreso sin cama demo")).toBeVisible();
   await expect(page.getByRole("link", { name: "Administrar camas" })).toBeVisible();
   await expect(page.getByText("Administracion de camas")).not.toBeVisible();
+  await expect(main.getByText("Atencion ambulatoria")).toHaveCount(0);
+  await expect(main.getByText("Preconsulta ambulatoria")).toHaveCount(0);
+  await expect(main.getByText("Control ambulatorio demo")).toHaveCount(0);
+  await expect(main.getByText("workflow_kind")).toHaveCount(0);
+  await expect(main.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
 test("hospitalization beds render active board", async ({ page }) => {
@@ -194,6 +200,10 @@ test("hospital admission renders governed intake draft workspace", async ({ page
   await expect(page.getByLabel("Hospitalizacion activa")).toContainText("Hospitalizacion demo");
   await expect(page.getByText("Sin ingreso medico registrado")).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar ingreso" })).toBeDisabled();
+  await expect(page.getByText("Atencion ambulatoria")).toHaveCount(0);
+  await expect(page.getByText("Preconsulta ambulatoria")).toHaveCount(0);
+  await expect(page.getByText("workflow_kind")).toHaveCount(0);
+  await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
 test("hospital domain navigation is isolated on desktop", async ({ page }, testInfo) => {
@@ -220,6 +230,10 @@ test("hospital discharge summary renders governed draft workspace", async ({ pag
   await expect(page.getByLabel("Hospitalizacion para epicrisis")).toContainText("Hospitalizacion demo");
   await expect(page.getByText("Epicrisis preliminar demo")).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar epicrisis" })).toBeDisabled();
+  await expect(page.getByText("Atencion ambulatoria")).toHaveCount(0);
+  await expect(page.getByText("Preconsulta ambulatoria")).toHaveCount(0);
+  await expect(page.getByText("workflow_kind")).toHaveCount(0);
+  await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
 test("hospital daily sheet renders patient workspace", async ({ page }) => {
@@ -255,6 +269,10 @@ test("hospital indications render governed draft workspace", async ({ page }) =>
   await expect(page.getByRole("link", { name: "Imprimir", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Cerrar borrador" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeDisabled();
+  await expect(page.getByText("Atencion ambulatoria")).toHaveCount(0);
+  await expect(page.getByText("Preconsulta ambulatoria")).toHaveCount(0);
+  await expect(page.getByText("workflow_kind")).toHaveCount(0);
+  await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
 test("ambulatory agenda renders persisted appointment workflow", async ({ page }) => {
