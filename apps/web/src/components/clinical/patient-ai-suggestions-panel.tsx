@@ -20,17 +20,20 @@ export function PatientAiSuggestionsPanel({ patientId, canUseAi }: { patientId: 
 
   if (DEMO_MODE) {
     return (
-      <ClinicalSectionCard title="Sugerencias Ollama" description="Borrador IA - requiere revision humana.">
-        <EmptyState title="IA no disponible en demo" description="Usa API real para sugerencias locales." />
+      <ClinicalSectionCard title="Apoyo contextual" description="Borrador asistido - requiere revision humana.">
+        <EmptyState
+          title="Apoyo contextual no disponible en demo"
+          description="Usa API real para sugerencias locales."
+        />
       </ClinicalSectionCard>
     );
   }
 
   if (!canUseAi) {
     return (
-      <ClinicalSectionCard title="Sugerencias Ollama" description="Borrador IA - requiere revision humana.">
+      <ClinicalSectionCard title="Apoyo contextual" description="Borrador asistido - requiere revision humana.">
         <EmptyState
-          title="IA no permitida para este rol"
+          title="Apoyo contextual no permitido para este rol"
           description="Disponible para medico, admin o dev."
         />
       </ClinicalSectionCard>
@@ -39,8 +42,8 @@ export function PatientAiSuggestionsPanel({ patientId, canUseAi }: { patientId: 
 
   return (
     <ClinicalSectionCard
-      title="Sugerencias Ollama"
-      description="Borrador IA - requiere revision humana."
+      title="Apoyo contextual"
+      description="Borrador asistido - requiere revision humana."
       action={
         <Button
           type="button"
@@ -91,7 +94,9 @@ function PatientAiSuggestionList({ response }: { response: PatientAiSuggestionsR
           </div>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground">Borrador IA - requiere revision humana.</p>
+      <p className="text-xs text-muted-foreground">
+        Borrador asistido - requiere revision humana.
+      </p>
     </div>
   );
 }

@@ -153,7 +153,7 @@ export function PatientClinicalShell({
                 <SessionButton compact />
                 <Badge variant={aiStatus.data?.available ? "safe" : "warning"}>
                   <BrainCircuit className="mr-1 h-3 w-3" />
-                  {aiStatus.data?.available ? "Ollama activo" : "Ollama pendiente"}
+                  {aiStatus.data?.available ? "IA local activa" : "IA local pendiente"}
                 </Badge>
                 <Button asChild size="sm">
                   <Link href={`/pacientes/${patient.id}/evoluciones/nueva`}>

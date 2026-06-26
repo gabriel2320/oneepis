@@ -44,8 +44,11 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Limite visible: 3 paneles recientes")).toBeVisible();
   await expect(page.getByText("No hay carga masiva")).toBeVisible();
   await expect(page.getByRole("link", { name: "Ver papel", exact: true })).toBeVisible();
-  await expect(page.getByText("Sugerencias Ollama")).toBeVisible();
-  await expect(page.getByText(/Borrador IA/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Apoyo contextual" })).toBeVisible();
+  await expect(page.getByText(/Borrador asistido/)).toBeVisible();
+  await expect(page.getByText("Sugerencias Ollama")).toHaveCount(0);
+  await expect(page.getByText(/Borrador IA/)).toHaveCount(0);
+  await expect(page.getByText(/Ollama activo|Ollama pendiente/)).toHaveCount(0);
 });
 
 test("patient navigation groups clinical areas on desktop", async ({ page }, testInfo) => {
