@@ -101,7 +101,7 @@ export function EntryEventProposalsPanel({
       ) : null}
       {!canUseAi ? (
         <p className="mt-2 text-xs text-muted-foreground">
-          Generar propuestas AI-Chart requiere rol admin, medico o dev.
+          Generar propuestas asistidas requiere un perfil autorizado.
         </p>
       ) : null}
       {hasGenerateError ? (
