@@ -44,6 +44,11 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Alergia: 1")).toBeVisible();
   await expect(page.getByText("Medicacion activa: 1")).toBeVisible();
   await expect(page.getByText("Eventos curados: 0")).toBeVisible();
+  await expect(page.getByText("Mapa longitudinal del paciente")).toBeVisible();
+  await expect(page.getByText("Contexto operativo")).toBeVisible();
+  await expect(page.getByText("Actos con episodio")).toBeVisible();
+  await expect(page.getByText("Datos longitudinales", { exact: true })).toBeVisible();
+  await expect(page.getByText("El paciente es unico; los episodios separan el contexto")).toBeVisible();
   await expect(page.getByText("Faltantes declarados")).toBeVisible();
   await expect(page.getByText("Linea de tiempo avanzada")).toBeVisible();
   await expect(page.getByText("Fuentes visibles")).toBeVisible();

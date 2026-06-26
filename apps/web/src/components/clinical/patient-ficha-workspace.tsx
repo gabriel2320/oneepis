@@ -20,12 +20,14 @@ import {
   VitalsStrip,
 } from "@/components/clinical/patient-widgets";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   canManageClinicalEntries,
   canManageClinicalRisks,
   canManagePatient,
   canUseClinicalAi,
 } from "@/lib/permissions";
+import { careContextLabel } from "@/lib/patient-display";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 import { NoPermissionButton } from "./patient-page-shared";
@@ -49,6 +51,7 @@ export function PatientFichaWorkspace({
       <VitalsStrip vital={record.latest_vitals} />
       <FichaHeader patientId={patientId} canEditPatient={canEditPatient} />
       <PatientLongitudinalSummary record={record} />
+      <PatientLongitudinalMap record={record} />
       <ClinicalWorkspaceLayout
         aside={
           <FichaContextRail
@@ -75,6 +78,64 @@ export function PatientFichaWorkspace({
         <PatientAntecedentsPreview patientId={patientId} record={record} />
         <FullTimelinePreview patientId={patientId} />
       </ClinicalWorkspaceLayout>
+    </div>
+  );
+}
+
+function PatientLongitudinalMap({ record }: { record: PatientRecordSnapshot }) {
+  const linkedEntries = record.recent_entries.filter((entry) => entry.encounter_id).length;
+  const unlinkedEntries = record.recent_entries.length - linkedEntries;
+  const longitudinalItems =
+    record.active_problems.length +
+    record.active_allergies.length +
+    record.active_medications.length;
+
+  return (
+    <ClinicalSectionCard
+      title="Mapa longitudinal del paciente"
+      description="El paciente es unico; los episodios separan el contexto y la ficha reconcilia antecedentes."
+    >
+      <div className="grid gap-3 md:grid-cols-3">
+        <LongitudinalMapItem
+          label="Contexto operativo"
+          value={careContextLabel(record.patient.current_care_context)}
+          detail="Orienta el lugar de trabajo sin duplicar ficha."
+        />
+        <LongitudinalMapItem
+          label="Actos con episodio"
+          value={`${linkedEntries}`}
+          detail={
+            unlinkedEntries > 0
+              ? `${unlinkedEntries} acto longitudinal sin episodio.`
+              : "Evoluciones recientes vinculadas a contexto clinico."
+          }
+        />
+        <LongitudinalMapItem
+          label="Datos longitudinales"
+          value={`${longitudinalItems}`}
+          detail="Problemas, alergias y medicacion activa como contexto comun."
+        />
+      </div>
+    </ClinicalSectionCard>
+  );
+}
+
+function LongitudinalMapItem({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+}) {
+  return (
+    <div className="rounded-md border bg-muted/20 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">{label}</p>
+        <Badge variant="outline">{value}</Badge>
+      </div>
+      <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
     </div>
   );
 }
