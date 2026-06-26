@@ -53,6 +53,10 @@ test("patient navigation groups clinical areas on desktop", async ({ page }, tes
 
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
 
+  await expect(page.getByRole("link", { name: /OneEpis Mapa del hospital/ })).toHaveAttribute(
+    "href",
+    "/home",
+  );
   const nav = page.getByRole("navigation", { name: "Navegacion paciente" });
   await expect(nav.getByText("Ficha", { exact: true })).toBeVisible();
   await expect(nav.getByText("Ambulatorio", { exact: true })).toBeVisible();

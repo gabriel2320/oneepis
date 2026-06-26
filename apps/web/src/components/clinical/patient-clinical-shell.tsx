@@ -60,13 +60,13 @@ export function PatientClinicalShell({
       >
         <div className="flex h-full flex-col">
           <div className="border-b p-4">
-            <Link href="/pacientes" className="flex items-center gap-3">
+            <Link href="/home" className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <UserRound className="h-5 w-5" />
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold">OneEpis</span>
-                <span className="block truncate text-xs text-muted-foreground">Mesa clinica</span>
+                <span className="block truncate text-xs text-muted-foreground">Mapa del hospital</span>
               </span>
             </Link>
           </div>
