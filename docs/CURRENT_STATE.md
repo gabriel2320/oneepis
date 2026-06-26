@@ -28,7 +28,7 @@ sobria, laboratorio minimo y preparacion contractual de ambulatorio/
 hospitalizacion. No autoriza IA nueva, dashboard, chat libre ni escritura
 automatica.
 
-Estado real al 2026-06-24:
+Estado real al 2026-06-26:
 
 - prototipo visual aprobado como base de ficha clinica tradicional gobernada
 - release `v0.4-assistant-read` cerrado y tagueado en `main`
@@ -61,6 +61,18 @@ Estado real al 2026-06-24:
     near-limit
   - PR #47: polish read-only de ficha paciente con fuentes, limites y faltantes
     mas visibles en antecedentes, timeline y laboratorio
+  - PR #72: `workflow_kind` queda modelado en `ClinicalEncounter` y la
+    preconsulta de enfermeria deja de depender del texto libre de `notes`
+  - PR #73: helpers ambulatorios centralizados para distinguir visita,
+    preconsulta y encuentros ambulatorios sin duplicar reglas en UI
+  - PR #74: helpers de hospitalizacion centralizados para filtrar encuentros
+    hospitalarios activos sin duplicar logica entre pantallas
+  - PR #75: labels humanos de estado/contexto de paciente centralizados en
+    frontend; se evita mostrar valores crudos en ficha, lista y papel
+  - PR #76: fixtures demo de encounters/citas separados de `demo-record.ts`,
+    manteniendo el agregador como fachada compatible
+  - PR #77: helpers HTTP de auth extraidos de `auth.py`; cookies, metadata,
+    token de request y mapeo de usuario quedan fuera del router
   - dieta final de `clinical_intent.py`: las respuestas de intencion clinica
     salen a `clinical_intent_responses.py` y el orquestador queda fuera de
     near-limit sin cambio de conducta
@@ -101,7 +113,10 @@ Estado real al 2026-06-24:
 - existe `GET /api/v1/patients/{patient_id}/assistant/search?q=...`
 - existe `POST /api/v1/patients/{patient_id}/assistant/chart`
 - existe `POST /api/v1/patients/{patient_id}/assistant/correlate`
-- no existe todavia ruta `/pacientes/[patientId]/contexto`
+- existe `GET /api/v1/patients/{patient_id}/context` como contexto canonico
+  de lectura para humano/IA; no existe vista web dedicada
+  `/pacientes/[patientId]/contexto` y sigue pendiente decidir si aporta valor
+  sin crear dashboard
 - existe panel web minimo `Assistant Read` dentro de `/pacientes/[patientId]/ai-chart`
 - el panel Assistant Read expone badges de solo lectura, fuentes inspeccionables y ausencia de IA externa
 - no se autoriza escritura clinica desde el programa
@@ -122,9 +137,9 @@ Estado real al 2026-06-24:
 - `PROG-DIET-AI-CHART-UTILS-01` quedo cerrado por PR #39
 - `PROG-DIET-PATIENT-EVENTS-01` quedo cerrado por PR #40
 - `PROG-DIET-ASSISTANT-LABS-01` quedo cerrado por PR #41
-- la deuda near-limit vigente queda cerrada; el siguiente bloque debe elegirse
-  pequeno: papel serio o contrato minimo paciente/ficha; no abrir IA nueva ni
-  dominio amplio
+- la deuda near-limit vigente queda cerrada; `npm run check:size` no reporta
+  watchlist y los siguientes PRs deben seguir siendo pequenos, empezando por
+  canon visual de pantallas antes de abrir clinica nueva
 
 Lecciones post #15-#17:
 
@@ -195,6 +210,10 @@ Auth local:
   Farmacia, Laboratorio, Enfermeria o Archivo clinico cuando se requiere
   seleccionar paciente
 - `/mapa` queda como alias legacy hacia `/home`
+- los helpers HTTP de auth viven en
+  `apps/api/src/oneepis_api/api/v1/routes/auth_http.py`; el router `auth.py`
+  debe mantenerse como orquestador de endpoints, no como contenedor de cookies,
+  metadata o extraccion de token
 - el login emite cookie `HttpOnly` (`ONEEPIS_AUTH_SESSION_COOKIE_NAME`) y el
   frontend usa un marcador local no sensible; el bearer de la respuesta queda
   como compatibilidad temporal para clientes existentes
@@ -455,6 +474,9 @@ Tests API:
   hospitalaria
 - `PatientClinicalShell` queda para ficha longitudinal neutra; no debe volver a
   mezclar acciones operativas ambulatorias y hospitalarias en el mismo header
+- la siguiente cadena aceptada es canon de pantallas: login/home, ambulatorio,
+  hospitalizacion y ficha longitudinal; no agrega migraciones, contratos
+  clinicos nuevos ni superficies IA nuevas
 - cobertura de riesgos clinicos prueba permisos, ownership, fuente de otro
   paciente, auditoria `before/after` y ausencia de `DELETE`
 - `ClinicalPatch` cubre aceptacion, rechazo, target no soportado, bloqueo por falta de confirmacion humana y bloqueo de evolucion no borrador; targets fuera de alcance no escriben ficha y quedan auditados como `ai.clinical_patch.unsupported` o `ai.clinical_patch.blocked`
@@ -476,7 +498,8 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/web/src/components/print/clinical-print.tsx` salio de near-limit tras
   separar receta bloqueada; no volver a inflarlo con mas papel sin extraer.
 - los contratos frontend de Assistant Read e IA clinica ya se separaron de
-  `clinical-record.ts`; vigilar los nuevos near-limit antes de sumar dominios.
+  `clinical-record.ts`; vigilar cualquier nuevo near-limit antes de sumar
+  dominios.
 - `apps/web/src/components/clinical/ai-chart/*` concentra subcomponentes AI-Chart; `patient-ai-chart-pages.tsx` queda bajo presupuesto tras extraer intencion, evidencia y borrador, y no debe volver a inflarse.
 - `npm run check:size` bloquea archivos nuevos o modificados sobre 350 lineas salvo excepcion explicita con tope y razon; Assistant Read backend ya no usa excepcion propia.
 - `npm run check:screens` bloquea rutas visibles sin fila en `SCREEN_TREE` o sin `ScreenCapability`.
@@ -490,13 +513,13 @@ Deuda visible a resolver antes de nuevo crecimiento clinico:
 - `apps/api/src/oneepis_api/services/clinical_patch.py` concentra aplicacion y auditoria de patches aceptados/rechazados.
 - `apps/api/src/oneepis_api/api/v1/routes/patient_events.py` sigue agrupando eventos e intenciones; no refactorizar mas sin otra familia de rutas IA.
 - adjuntos externos, consentimientos y receta siguen como bordes bloqueados/futuros; no expandir todos a la vez.
-- watchlist de tamano actual: vacia segun `node scripts/check-file-size.mjs`.
+- watchlist de tamano actual: vacia segun `npm run check:size`.
 - `patient-list-pages.tsx`, `ai-chart-utils.ts`, `patient-event-pages.tsx`,
   `patient_assistant_labs.py`, `clinical_record.py`, `clinical_patch.py`,
   `patient_assistant_correlation.py`, `clinical-intent-result-panel.tsx`,
   `patient-ai-chart-pages.tsx`, `ambulatory-appointment-pages.tsx`,
   `assistant-read-sections.tsx`, `patient-record-workspaces.tsx`,
-  `ambulatory-visit-pages.tsx` y `demo-record.ts` ya salieron
+  `ambulatory-visit-pages.tsx`, `demo-record.ts` y `auth.py` ya salieron
   del reporte near-limit; no volver a agregarles comportamiento sin revisar
   primero su presupuesto.
 - agenda avanzada/productiva, alta/epicrisis firmada y papel tradicional amplio siguen con contrato minimo documentado en `docs/SCREEN_TREE.md`; su proximo PR debe implementar uno solo.

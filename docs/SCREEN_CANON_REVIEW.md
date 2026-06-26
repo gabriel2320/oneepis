@@ -10,7 +10,8 @@ login -> mapa fisico -> lugar de trabajo -> paciente longitudinal -> episodio ->
 Regla de producto:
 
 ```text
-Patient une. Encounter separa. Timeline reconcilia. Auditoria prueba. Contexto canonico explica.
+Paciente une. Lugar orienta. Encounter separa. Timeline reconcilia.
+Auditoria prueba. IA resume, no decide.
 ```
 
 ## Algoritmo de revision
@@ -59,6 +60,34 @@ Para cada ruta visible, seguir este orden antes de agregar comportamiento:
    - Bloqueo si esta futura/bloqueada.
    - E2E solo para flujos principales.
 
+## Secuencia de PR vigente
+
+1. Reconciliar documentos canonicos con el estado real.
+   - Marcar como cerrados `workflow_kind`, helpers ambulatorios/hospitalarios,
+     labels humanos, fixtures demo separados y helpers HTTP de auth.
+   - No tocar conducta de producto.
+
+2. Revisar login y mapa fisico.
+   - `/login`, recuperacion, desbloqueo, `/home`, `/mapa`, `AppShell` y logo.
+   - Criterio: sin roles/perfiles/credenciales demo antes de sesion; Home solo
+     lugares fisicos.
+
+3. Revisar mundo ambulatorio.
+   - `/consulta`, `/consulta/agenda`, atencion y resumen.
+   - Criterio: cita + encuentro ambulatorio como fuente operacional, sin
+     mezclar acciones hospitalarias ni ficha longitudinal.
+
+4. Revisar mundo hospitalizado.
+   - `/hospitalizacion`, camas, rondas, ingreso, hoja diaria, indicaciones y
+     epicrisis.
+   - Criterio: borrador/no firmado visible donde corresponda; sin orden
+     ejecutable, MAR, firma legal, UCI ni pabellon productivo.
+
+5. Revisar ficha longitudinal tradicional.
+   - `/pacientes/[patientId]/ficha` y subpantallas nucleares.
+   - Criterio: ficha unica del paciente, no dashboard, con IA solo como lectura
+     contextual con fuentes, limites y faltantes.
+
 ## Orden canonico
 
 1. Login y cuenta.
@@ -82,7 +111,7 @@ Para cada ruta visible, seguir este orden antes de agregar comportamiento:
 5. Ficha tradicional longitudinal.
    - `/pacientes/[patientId]/ficha` como hoja clinica viva.
    - Debe reunir antecedentes, problemas, alergias, medicacion, riesgos,
-     documentos, timeline y contexto.
+     documentos, timeline y contexto canonico de lectura.
 
 6. Documentos y papel.
    - Print routes con fuente especifica, estado documental y footer si no hay
@@ -117,4 +146,3 @@ Una pantalla esta lista para promocion si cumple todo lo siguiente:
 - Duplicar paciente por mundo ambulatorio/hospitalizado.
 - Agregar dashboard, metricas o timeline reciente en el mapa fisico.
 - Agregar componentes grandes inline en paginas cuando existe shell o workspace.
-
