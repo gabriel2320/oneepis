@@ -409,6 +409,15 @@ test("login route renders local auth form", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Olvide mi contraseña" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Tengo mi login bloqueado" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Pacientes|Consulta|Hospitalizacion/ })).toHaveCount(0);
+  await expect(page.getByText("medico@oneepis.local")).toHaveCount(0);
+  await expect(page.getByText("admin@oneepis.local")).toHaveCount(0);
+  await expect(page.getByText("enfermeria@oneepis.local")).toHaveCount(0);
+  await expect(page.getByText("medico", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("admin", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("dev", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("perfil", { exact: false })).toHaveCount(0);
+  await expect(page.getByText("Seleccionar rol", { exact: false })).toHaveCount(0);
+  await expect(page.getByText("Roles disponibles", { exact: false })).toHaveCount(0);
 });
 
 test("recovery and unlock routes render generic request forms", async ({ page }) => {
@@ -431,6 +440,12 @@ test("recovery and unlock routes render generic request forms", async ({ page })
 test("legacy sections map redirects to hospital physical home", async ({ page }) => {
   await page.goto("/mapa");
   await expect(page).toHaveURL(/\/home$/);
+});
+
+test("root entry redirects to hospital physical home", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/home$/);
+  await expect(page.getByRole("heading", { name: "Mapa del hospital" })).toBeVisible();
 });
 
 test("hospital physical home renders only hospital places without patient data", async ({ page }) => {
@@ -458,8 +473,14 @@ test("hospital physical home renders only hospital places without patient data",
   await expect(main.getByRole("heading", { name: "Nueva cama" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "Receta valida" })).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "AI-Chart" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Signos vitales" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Medicacion activa" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Documentos del paciente" })).toHaveCount(0);
+  await expect(main.getByRole("heading", { name: "Dashboard" })).toHaveCount(0);
   await expect(main.getByText("Fichas visibles")).toHaveCount(0);
   await expect(main.getByText("Mesa clinica")).toHaveCount(0);
+  await expect(main.getByText("Actividad reciente")).toHaveCount(0);
+  await expect(main.getByText("Estadisticas")).toHaveCount(0);
   await expect(main.getByText("Paciente Demo Alfa")).not.toBeVisible();
 
   const hrefs = await main.locator("a").evaluateAll((links) =>
