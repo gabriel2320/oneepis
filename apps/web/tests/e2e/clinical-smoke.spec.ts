@@ -101,6 +101,12 @@ test("AI-Chart renders event proposals from written entries", async ({ page }) =
   await expect(page.getByText("Estado operativo")).toBeVisible();
   await expect(page.getByText("Seleccionados")).toBeVisible();
   await expect(page.getByText("propuesta revisable")).toBeVisible();
+  await expect(page.getByText("Si la IA local esta apagada, se usa degradacion local.")).toBeVisible();
+  await expect(
+    page.getByText("AI-Chart mantiene reglas, plantillas y auditoria aunque la IA local no este disponible."),
+  ).toBeVisible();
+  await expect(page.getByText("Si Ollama esta apagado")).toHaveCount(0);
+  await expect(page.getByText("aunque Ollama no este disponible")).toHaveCount(0);
   await expect(
     page.getByText("Estados: pendiente / registrando / registrada en ficha / rechazada."),
   ).toBeVisible();

@@ -149,7 +149,7 @@ export function GenerativeAiStatus({
         <div>
           <p className="font-medium">Estado IA generativa</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            AI-Chart mantiene reglas, plantillas y auditoria aunque Ollama no este disponible.
+            AI-Chart mantiene reglas, plantillas y auditoria aunque la IA local no este disponible.
           </p>
         </div>
         <span className="rounded-md border px-2 py-1 text-xs text-muted-foreground">{label}</span>
