@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, AlertTriangle, Pill, Sparkles } from "lucide-react";
+import { Activity, AlertTriangle, Sparkles } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { MetricCard, TimelineCard } from "@/components/clinical/cards";
@@ -15,12 +15,13 @@ import type {
   Allergy,
   ClinicalEntry,
   ClinicalEncounter,
-  Medication,
   PatientRecordSnapshot,
   VitalSign,
 } from "@/lib/types";
 
 import { formatDateTime } from "./date-format";
+
+export { MedicationList } from "@/components/clinical/patient-medication-list";
 
 export function VitalsStrip({ vital }: { vital?: VitalSign | null }) {
   if (!vital) {
@@ -69,39 +70,6 @@ export function AllergyList({ allergies }: { allergies: Allergy[] }) {
             <p className="text-sm text-muted-foreground">{allergy.reaction ?? "Reaccion no documentada"}</p>
           </div>
           <Badge variant={allergy.severity === "severe" ? "warning" : "outline"}>{allergy.severity}</Badge>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function MedicationList({ medications }: { medications: Medication[] }) {
-  if (medications.length === 0) {
-    return <EmptyState title="Sin medicacion activa" description="No hay medicamentos vigentes." />;
-  }
-
-  return (
-    <div className="space-y-2">
-      {medications.map((medication) => (
-        <div key={medication.id} className="rounded-md border p-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="flex items-center gap-2 text-sm font-semibold">
-                <Pill className="h-4 w-4 text-primary" />
-                {medication.name}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {[medication.dose, medication.route, medication.frequency].filter(Boolean).join(" / ") ||
-                  "Detalle pendiente"}
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              {Boolean(medication.dose_check_snapshot?.blocking) ? (
-                <Badge variant="warning">alerta dosis</Badge>
-              ) : null}
-              <Badge variant="outline">{medication.status}</Badge>
-            </div>
-          </div>
         </div>
       ))}
     </div>

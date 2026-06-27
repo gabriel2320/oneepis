@@ -120,6 +120,8 @@ const medication = {
   ended_on: null,
   dose_check_snapshot: {},
   dose_override_reason: null,
+  source: null,
+  missing_fields: ["source"],
   created_at: createdAt,
   updated_at: createdAt,
 };
