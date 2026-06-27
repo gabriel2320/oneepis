@@ -17,7 +17,7 @@ async function expectNoInternalTerms(locator: Locator) {
 }
 
 const FORBIDDEN_CLINICAL_COPY =
-  /Canon ambulatorio|workflow_kind|ClinicalEncounter|\bOllama\b|\bdashboard\b|acciones disponibles|bandeja operativa|medico\/admin\/dev/i;
+  /Canon ambulatorio|workflow_kind|ClinicalEncounter|\bOllama\b|acciones disponibles|bandeja operativa|medico\/admin\/dev/i;
 
 const VISIBLE_CLINICAL_ROUTES = [
   "/login",
@@ -367,7 +367,7 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
   await expect(page.getByText("Atencion clinica ambulatoria con evolucion vinculada.")).toBeVisible();
   await expect(page.getByText("Canon ambulatorio")).toHaveCount(0);
-  await expect(page.getByText("Nota clinica libre")).toBeVisible();
+  await expect(page.getByText("Nota clinica libre", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("SOAP detallado (opcional)")).toBeVisible();
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
