@@ -44,8 +44,8 @@ export function AmbulatoryClosePanel({
     >
       <div className="mb-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
         <CloseFact label="Atenciones en curso" value={String(openEncounters.length)} />
-        <CloseFact label="Cerrados" value={String(completedEncounters.length)} />
-        <CloseFact label="Destino" value="completed + ended_at" />
+        <CloseFact label="Cerradas" value={String(completedEncounters.length)} />
+        <CloseFact label="Estado al cerrar" value="Atencion terminada, sin firma" />
       </div>
       {openEncounters.length === 0 ? (
         <EmptyState
@@ -63,7 +63,8 @@ export function AmbulatoryClosePanel({
                     Inicio: {formatDateTime(encounter.started_at)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Al cerrar se guardara fecha de termino y auditoria backend.
+                    Al cerrar, la atencion queda terminada para la agenda; no firma evolucion ni
+                    emite documento legal.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -76,7 +77,14 @@ export function AmbulatoryClosePanel({
                 type="button"
                 size="sm"
                 disabled={disabled || closeMutation.isPending}
-                onClick={() => closeMutation.mutate(encounter.id)}
+                onClick={() => {
+                  const confirmed = window.confirm(
+                    "Cerrar la atencion la marca como terminada para la agenda. No firma evolucion ni emite documento legal. Continuar?",
+                  );
+                  if (confirmed) {
+                    closeMutation.mutate(encounter.id);
+                  }
+                }}
               >
                 <CheckCircle2 className="h-4 w-4" />
                 {closeMutation.isPending ? "Cerrando..." : "Cerrar atencion"}

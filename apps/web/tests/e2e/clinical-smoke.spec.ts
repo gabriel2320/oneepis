@@ -17,7 +17,7 @@ async function expectNoInternalTerms(locator: Locator) {
 }
 
 const FORBIDDEN_CLINICAL_COPY =
-  /Canon ambulatorio|workflow_kind|ClinicalEncounter|\bOllama\b|acciones disponibles|bandeja operativa|medico\/admin\/dev/i;
+  /Canon ambulatorio|workflow_kind|ClinicalEncounter|\bOllama\b|acciones disponibles|bandeja operativa|medico\/admin\/dev|completed \+ ended_at|\bended_at\b/i;
 
 const VISIBLE_CLINICAL_ROUTES = [
   "/login",
@@ -381,10 +381,15 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(page.getByText("Cierre de consulta")).toBeVisible();
   await expect(page.getByText("Atenciones en curso")).toBeVisible();
-  await expect(page.getByText("Destino")).toBeVisible();
-  await expect(page.getByText("completed + ended_at")).toBeVisible();
+  await expect(page.getByText("Estado al cerrar")).toBeVisible();
+  await expect(page.getByText("Atencion terminada, sin firma")).toBeVisible();
+  await expect(page.getByText("completed + ended_at")).toHaveCount(0);
   await expect(page.getByText("no firmado")).toBeVisible();
-  await expect(page.getByText("Al cerrar se guardara fecha de termino y auditoria backend.")).toBeVisible();
+  await expect(
+    page.getByText(
+      "Al cerrar, la atencion queda terminada para la agenda; no firma evolucion ni emite documento legal.",
+    ),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Cerrar atencion" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar atencion" })).toBeDisabled();
   await expect(page.getByText("Ingreso medico hospitalario")).toHaveCount(0);
