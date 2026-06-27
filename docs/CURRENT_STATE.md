@@ -28,6 +28,8 @@ fuente canonica viva.
   lectura y escritura sin rutas nuevas.
 - Logs PHI-safe backend (#110): sanitizador reutilizable y filtro de logging
   activo al arrancar la API; sin Sentry/OTel ni observabilidad productiva.
+- Contrato auth/sesion ejecutable (#111): tests de revocacion en lecturas
+  clinicas y gate OpenAPI sobre rutas auth y GET protegidos de paciente.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -47,9 +49,8 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Checks ejecutables del gap auth/sesion (no auth productiva): pruebas y gates que
-protejan el contrato actual de login, CSRF y revocacion sin abrir identidad
-institucional.
+ClinicalOrder draft backend-only: modelo y contrato con estados
+`draft|cancelled|entered_in_error`, sin firma ni ejecucion, sin rutas nuevas.
 
 Criterio de exito:
 
