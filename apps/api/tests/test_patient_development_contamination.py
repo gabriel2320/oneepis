@@ -20,6 +20,26 @@ def test_development_rejects_foreign_project_patient_name(
     assert "foreign project fixture terms" in response.json()["detail"]
 
 
+def test_development_rejects_foreign_project_clinical_identifier(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    response = client.post(
+        "/api/v1/patients",
+        headers=auth_headers(client),
+        json={
+            "first_name": "Paciente",
+            "last_name": "Demo",
+            "birth_date": "1986-06-06",
+            "sex_at_birth": "unknown",
+            "clinical_identifier": "PACMED-001",
+        },
+    )
+
+    assert response.status_code == 422
+    assert "pacmed" in response.json()["detail"]
+
+
 def test_development_rejects_foreign_project_patient_update(
     client: TestClient,
     auth_headers,
