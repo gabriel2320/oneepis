@@ -13,6 +13,7 @@ import type {
   ClinicalEncounter,
   ClinicalEncounterCreate,
   ClinicalEncounterUpdate,
+  ClinicalOrder,
   ClinicalEvent,
   ClinicalEventCreate,
   ClinicalEventUpdate,
@@ -198,4 +199,8 @@ export function updateVitalSign(patientId: string, vitalSignId: string, payload:
 
 export function listAuditEvents(patientId: string) {
   return apiFetch<AuditEvent[]>(`/api/v1/patients/${patientId}/audit-events?limit=80`);
+}
+
+export function listClinicalOrders(patientId: string, limit = 20) {
+  return apiFetch<ClinicalOrder[]>(`/api/v1/patients/${patientId}/clinical-orders?limit=${limit}`);
 }

@@ -32,6 +32,8 @@ fuente canonica viva.
   clinicas y gate OpenAPI sobre rutas auth y GET protegidos de paciente.
 - ClinicalOrder borrador backend (#112): modelo, migracion y API con estados
   `draft|cancelled|entered_in_error`; sin firma, ejecucion ni rutas web nuevas.
+- Orden borrador visible en ficha (#113): panel en `/ficha` con leyenda
+  borrador/no ejecutable/no firmado y lectura API; sin dashboard ni ruta nueva.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -51,8 +53,8 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Mostrar orden borrador en superficie clinica existente (#113): copy explicito
-de borrador no ejecutable/no firmado, sin rutas nuevas ni dashboard.
+Resultados con fuente (#114): lectura de laboratorio con origen visible; sin
+LIS/RIS/PACS ni rutas nuevas.
 
 Criterio de exito:
 
