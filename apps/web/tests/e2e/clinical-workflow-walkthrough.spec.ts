@@ -99,6 +99,7 @@ async function expectAmbulatoryWorkspace(page: Page) {
   await expect(main.getByText("Canon ambulatorio")).toHaveCount(0);
   await expect(main.getByText("Nota clinica libre", { exact: true }).first()).toBeVisible();
   await expect(main.getByText("Preconsulta ambulatoria")).toBeVisible();
+  await main.locator("details").filter({ hasText: "Preconsulta ambulatoria" }).locator("summary").click();
   await expect(main.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(main.getByText("Ingreso medico hospitalario")).toHaveCount(0);
   await expect(main.getByText("Indicaciones hospitalarias")).toHaveCount(0);

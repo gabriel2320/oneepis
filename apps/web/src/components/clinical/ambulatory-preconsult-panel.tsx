@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useCurrentUser } from "@/components/auth/use-current-user";
-import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
 import { listPatientAppointments, updatePatientAppointment } from "@/lib/api/appointments";
 import {
@@ -74,62 +73,64 @@ export function AmbulatoryPreconsultPanel({ patientId }: { patientId: string }) 
     appointmentsQuery.isLoading;
 
   return (
-    <ClinicalSectionCard
-      title="Preconsulta ambulatoria"
-      description="Check-in clinico minimo: signos, faltantes y revision humana antes de la atencion."
-    >
-      {appointmentsQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={2} /> : null}
-      {appointmentsQuery.isError && !DEMO_MODE ? (
-        <ErrorState
-          description="No se pudieron cargar las citas del paciente."
-          onRetry={() => appointmentsQuery.refetch()}
-        />
-      ) : null}
-      {DEMO_MODE ? (
-        <p className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
-          Modo demo: la preconsulta se muestra como flujo visible y queda bloqueada para escritura.
+    <details className="rounded-md border bg-card">
+      <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-foreground">
+        Preconsulta ambulatoria
+      </summary>
+      <div className="space-y-3 border-t px-3 pb-3 pt-2">
+        <p className="text-xs text-muted-foreground">
+          Check-in clinico minimo antes de la atencion. No emite diagnostico, receta, orden ni firma.
         </p>
-      ) : null}
-      {!DEMO_MODE && !userLoading && !canWrite ? (
-        <p className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
-          Tu perfil no tiene permiso para registrar preconsulta completa.
-        </p>
-      ) : null}
-      {appointments.length === 0 && !appointmentsQuery.isLoading ? (
-        <EmptyState
-          title="Sin citas para preconsulta"
-          description="Agenda una cita o revisa que no este completada, cancelada o no-show."
-        />
-      ) : null}
-      {appointments.length > 0 ? (
-        <PreconsultForm
-          appointments={appointments}
-          disabled={disabled}
-          formState={{ ...formState, appointment_id: selectedAppointmentId }}
-          setFormState={setFormState}
-          onSubmit={() =>
-            mutation.mutate({
-              ...formState,
-              appointment_id: selectedAppointmentId,
-              chief_complaint: formState.chief_complaint || selectedAppointment?.reason || "",
-            })
-          }
-        />
-      ) : null}
-      {mutation.isError ? (
-        <p className="mt-3 text-sm text-destructive">
-          No se pudo registrar la preconsulta. Revisa API, permisos y pertenencia de la cita.
-        </p>
-      ) : null}
-      {mutation.data ? (
-        <p className="mt-3 text-sm text-muted-foreground">
-          Preconsulta registrada: {mutation.data.summary}
-        </p>
-      ) : null}
-      <p className="mt-3 text-xs text-muted-foreground">
-        No emite diagnostico, receta, orden ni firma. Todo queda como borrador auditable.
-      </p>
-    </ClinicalSectionCard>
+        {appointmentsQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={2} /> : null}
+        {appointmentsQuery.isError && !DEMO_MODE ? (
+          <ErrorState
+            description="No se pudieron cargar las citas del paciente."
+            onRetry={() => appointmentsQuery.refetch()}
+          />
+        ) : null}
+        {DEMO_MODE ? (
+          <p className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+            Modo demo: la preconsulta se muestra como flujo visible y queda bloqueada para escritura.
+          </p>
+        ) : null}
+        {!DEMO_MODE && !userLoading && !canWrite ? (
+          <p className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+            Tu perfil no tiene permiso para registrar preconsulta completa.
+          </p>
+        ) : null}
+        {appointments.length === 0 && !appointmentsQuery.isLoading ? (
+          <EmptyState
+            title="Sin citas para preconsulta"
+            description="Agenda una cita o revisa que no este completada, cancelada o no-show."
+          />
+        ) : null}
+        {appointments.length > 0 ? (
+          <PreconsultForm
+            appointments={appointments}
+            disabled={disabled}
+            formState={{ ...formState, appointment_id: selectedAppointmentId }}
+            setFormState={setFormState}
+            onSubmit={() =>
+              mutation.mutate({
+                ...formState,
+                appointment_id: selectedAppointmentId,
+                chief_complaint: formState.chief_complaint || selectedAppointment?.reason || "",
+              })
+            }
+          />
+        ) : null}
+        {mutation.isError ? (
+          <p className="text-sm text-destructive">
+            No se pudo registrar la preconsulta. Revisa API, permisos y pertenencia de la cita.
+          </p>
+        ) : null}
+        {mutation.data ? (
+          <p className="text-sm text-muted-foreground">
+            Preconsulta registrada: {mutation.data.summary}
+          </p>
+        ) : null}
+      </div>
+    </details>
   );
 }
 
