@@ -80,6 +80,16 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("No ejecutable", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("No firmado", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Borrador, no ejecutable, no firmado.")).toBeVisible();
+  for (const executableBadge of [
+    "Ejecutable",
+    "Firmado",
+    "Firmada",
+    "Orden activa",
+    "Administrada",
+    "Dispensada",
+  ]) {
+    await expect(page.getByText(executableBadge, { exact: true })).toHaveCount(0);
+  }
   await expect(page.getByText("Limites visibles y faltantes")).toBeVisible();
   await expect(page.getByText("Limite visible: 3 paneles recientes")).toBeVisible();
   await expect(page.getByText("No hay carga masiva")).toBeVisible();
