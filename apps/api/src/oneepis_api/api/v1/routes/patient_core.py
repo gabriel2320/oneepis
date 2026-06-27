@@ -15,7 +15,12 @@ from oneepis_api.schemas.patient import (
     PatientUpdate,
 )
 from oneepis_api.services.ai.provider import get_ai_provider
-from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.audit import (
+    audit_snapshot,
+    changed_field_snapshots,
+    record_audit_event,
+    record_read_audit_event,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -54,7 +59,7 @@ def _record_patient_read_audit(
     actor_id: str,
     action: str,
 ) -> None:
-    record_audit_event(
+    record_read_audit_event(
         session,
         action=action,
         entity_type="patient",

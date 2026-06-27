@@ -3,15 +3,17 @@ from __future__ import annotations
 import uuid
 from contextvars import ContextVar
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 from typing import Any
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, select
 from sqlalchemy.orm import Session
 
 from oneepis_api.models.audit import AuditEvent
+
+READ_AUDIT_DEDUPE_WINDOW = timedelta(minutes=5)
 
 
 @dataclass(frozen=True)
@@ -69,6 +71,68 @@ def record_audit_event(
             extra_data=extra_data,
         )
     )
+
+
+def record_read_audit_event(
+    session: Session,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: uuid.UUID | None,
+    actor_id: str,
+    metadata: dict[str, Any] | None = None,
+) -> None:
+    existing = _recent_duplicate_read_event(
+        session,
+        action=action,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        actor_id=actor_id,
+    )
+    if existing is None:
+        record_audit_event(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            actor_id=actor_id,
+            metadata=metadata,
+        )
+        return
+
+    extra_data = existing.extra_data.copy()
+    extra_data["deduped_count"] = int(extra_data.get("deduped_count") or 0) + 1
+    context = _audit_request_context.get()
+    if context is not None:
+        extra_data["last_correlation_id"] = context.correlation_id
+    existing.extra_data = extra_data
+
+
+def _recent_duplicate_read_event(
+    session: Session,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: uuid.UUID | None,
+    actor_id: str,
+) -> AuditEvent | None:
+    context = _audit_request_context.get()
+    cutoff = datetime.now(UTC) - READ_AUDIT_DEDUPE_WINDOW
+    statement = (
+        select(AuditEvent)
+        .where(
+            AuditEvent.action == action,
+            AuditEvent.entity_type == entity_type,
+            AuditEvent.entity_id == entity_id,
+            AuditEvent.actor_id == actor_id,
+            AuditEvent.request_method == (context.request_method if context else None),
+            AuditEvent.request_path == (context.request_path if context else None),
+            AuditEvent.created_at >= cutoff,
+        )
+        .order_by(AuditEvent.created_at.desc())
+        .limit(1)
+    )
+    return session.scalar(statement)
 
 
 def audit_snapshot(model: object, fields: list[str] | None = None) -> dict[str, Any]:
