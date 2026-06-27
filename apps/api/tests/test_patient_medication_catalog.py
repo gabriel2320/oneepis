@@ -66,6 +66,10 @@ def test_medication_catalog_validation_and_override_audit(
     assert medication["catalog_item_id"] == str(DEMO_ANALGESIC_ID)
     assert medication["dose_check_snapshot"]["blocking"] is True
     assert medication["dose_override_reason"] == "Decision clinica documentada en demo."
+    assert medication["source"]["source_system"] == "local_curated"
+    assert medication["source"]["source_label"] == "Fixture demo OneEpis; no uso clinico"
+    assert medication["source"]["review_status"] == "reviewed"
+    assert medication["missing_fields"] == []
 
     medication_events = [
         item
@@ -74,6 +78,29 @@ def test_medication_catalog_validation_and_override_audit(
     ]
     assert medication_events[0]["extra_data"]["dose_warning_count"] == 1
     assert medication_events[0]["extra_data"]["dose_override"] is True
+
+
+def test_medication_read_exposes_missing_fields_for_unlinked_manual_medication(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Med", last_name="Faltantes")
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={"name": "Medicamento manual sin pauta"},
+    )
+    assert create_response.status_code == 201
+    medication = create_response.json()
+    assert medication["source"] is None
+    assert medication["missing_fields"] == ["dose", "route", "frequency", "source"]
+
+    list_response = client.get(f"/api/v1/patients/{patient_id}/medications", headers=auth)
+    assert list_response.status_code == 200
+    listed = list_response.json()[0]
+    assert listed["source"] is None
+    assert listed["missing_fields"] == ["dose", "route", "frequency", "source"]
 
 
 def test_medication_drafting_context_readonly_and_no_executable_prescription(
@@ -111,5 +138,7 @@ def test_medication_drafting_context_readonly_and_no_executable_prescription(
     assert context["applies_changes"] is False
     assert "firma ni folio" in context["limitations"][0]
     assert context["active_medications"][0]["name"] == "Analgesico demo 500 mg comprimido"
+    assert context["active_medications"][0]["source"]["source_system"] == "local_curated"
+    assert context["active_medications"][0]["missing_fields"] == []
     assert context["suggested_catalog_items"]
     assert readonly_create.status_code == 403

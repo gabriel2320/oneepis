@@ -15111,6 +15111,23 @@
             "type": "object",
             "title": "Dose Check Snapshot"
           },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MedicationSourceRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "missing_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Fields"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -15131,6 +15148,88 @@
           "updated_at"
         ],
         "title": "MedicationRead"
+      },
+      "MedicationSourceRead": {
+        "properties": {
+          "source_system": {
+            "$ref": "#/components/schemas/MedicationSourceSystem"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Source Label"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 400
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "review_status": {
+            "$ref": "#/components/schemas/MedicationSourceReviewStatus",
+            "default": "draft"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_system",
+          "source_label"
+        ],
+        "title": "MedicationSourceRead"
       },
       "MedicationSourceReference": {
         "properties": {

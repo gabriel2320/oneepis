@@ -5,7 +5,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from oneepis_api.api.deps import MedicationActorDep
 from oneepis_api.models.clinical_record import Medication, RecordStatus
@@ -50,6 +50,7 @@ def list_medications(
     require_patient(session, patient_id)
     statement = (
         select(Medication)
+        .options(selectinload(Medication.catalog_item))
         .where(Medication.patient_id == patient_id)
         .order_by(Medication.created_at.desc())
         .offset(offset)
@@ -105,6 +106,7 @@ def get_medication_drafting_context(
     require_patient(session, patient_id)
     medication_statement = (
         select(Medication)
+        .options(selectinload(Medication.catalog_item))
         .where(Medication.patient_id == patient_id)
         .order_by(Medication.created_at.desc())
         .limit(20)

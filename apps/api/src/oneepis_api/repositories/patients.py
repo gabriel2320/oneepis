@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 
 from sqlalchemy import Select, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
@@ -99,6 +99,7 @@ def get_active_allergies(session: Session, patient_id: uuid.UUID) -> list[Allerg
 def get_active_medications(session: Session, patient_id: uuid.UUID) -> list[Medication]:
     statement = (
         select(Medication)
+        .options(selectinload(Medication.catalog_item))
         .where(Medication.patient_id == patient_id, Medication.status == RecordStatus.ACTIVE)
         .order_by(Medication.started_on.desc().nullslast())
     )

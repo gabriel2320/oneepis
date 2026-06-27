@@ -13,6 +13,10 @@ from oneepis_api.models.clinical_record import (
     EncounterWorkflowKind,
     RecordStatus,
 )
+from oneepis_api.models.medication_catalog import (
+    MedicationSourceReviewStatus,
+    MedicationSourceSystem,
+)
 from oneepis_api.schemas.common import APIModel
 
 
@@ -71,10 +75,23 @@ class MedicationUpdate(APIModel):
     dose_override_reason: str | None = Field(default=None, max_length=280)
 
 
+class MedicationSourceRead(APIModel):
+    source_system: MedicationSourceSystem
+    source_label: str = Field(max_length=160)
+    source_url: str | None = Field(default=None, max_length=400)
+    external_id: str | None = Field(default=None, max_length=120)
+    source_version: str | None = Field(default=None, max_length=80)
+    retrieved_at: datetime | None = None
+    reviewed_at: datetime | None = None
+    review_status: MedicationSourceReviewStatus = MedicationSourceReviewStatus.DRAFT
+
+
 class MedicationRead(MedicationBase):
     id: uuid.UUID
     patient_id: uuid.UUID
     dose_check_snapshot: dict = Field(default_factory=dict)
+    source: MedicationSourceRead | None = None
+    missing_fields: list[str] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
