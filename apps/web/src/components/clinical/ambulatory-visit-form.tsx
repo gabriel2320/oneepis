@@ -1,6 +1,6 @@
 "use client";
 
-import { Save } from "lucide-react";
+import { CheckCircle2, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,18 +18,26 @@ export type AmbulatoryVisitFormState = {
   plan: string;
 };
 
+export type AmbulatoryVisitSaveFeedback =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "saved"; title: string }
+  | { kind: "error"; message: string };
+
 export function AmbulatoryVisitForm({
   formState,
   setFormState,
   disabled,
   submitLabel,
   onSubmit,
+  feedback = { kind: "idle" },
 }: {
   formState: AmbulatoryVisitFormState;
   setFormState: (value: AmbulatoryVisitFormState) => void;
   disabled: boolean;
   submitLabel: string;
   onSubmit: () => void;
+  feedback?: AmbulatoryVisitSaveFeedback;
 }) {
   return (
     <form
@@ -97,14 +105,39 @@ export function AmbulatoryVisitForm({
           />
         </div>
       </details>
-      <Button
-        type="submit"
-        disabled={disabled || !formState.started_at || !formState.reason.trim()}
-      >
-        <Save className="h-4 w-4" />
-        {submitLabel}
-      </Button>
+      <div className="space-y-2">
+        <Button
+          type="submit"
+          disabled={disabled || !formState.started_at || !formState.reason.trim()}
+        >
+          <Save className="h-4 w-4" />
+          {submitLabel}
+        </Button>
+        <SaveFeedbackLine feedback={feedback} />
+      </div>
     </form>
+  );
+}
+
+function SaveFeedbackLine({ feedback }: { feedback: AmbulatoryVisitSaveFeedback }) {
+  if (feedback.kind === "saving") {
+    return <p className="text-sm text-muted-foreground">Guardando borrador...</p>;
+  }
+  if (feedback.kind === "saved") {
+    return (
+      <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+        <CheckCircle2 className="h-4 w-4 text-primary" />
+        Guardado como borrador clinico: {feedback.title}
+      </p>
+    );
+  }
+  if (feedback.kind === "error") {
+    return <p className="text-sm text-destructive">{feedback.message}</p>;
+  }
+  return (
+    <p className="text-xs text-muted-foreground">
+      Al guardar, la atencion queda como borrador clinico; no firma ni emite documento.
+    </p>
   );
 }
 
