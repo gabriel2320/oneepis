@@ -9,10 +9,14 @@ import type { ClinicalEntry } from "@/lib/types";
 
 import { formatDateTime } from "./date-format";
 
-const KIND_LABELS: Record<string, string> = {
+type ActiveKind = ClinicalEntry["kind"] | "all";
+
+const KIND_LABELS: Record<ClinicalEntry["kind"], string> = {
+  intake: "Ingreso",
   progress: "Evolucion",
-  admission: "Ingreso",
-  discharge: "Egreso",
+  discharge_summary: "Resumen de egreso",
+  lab_result: "Laboratorio",
+  prescription: "Prescripcion",
   procedure: "Procedimiento",
   note: "Nota",
 };
@@ -26,8 +30,9 @@ export function ClinicalTimelineFeed({ entries }: { entries: ClinicalEntry[] }) 
     [entries],
   );
   const kinds = useMemo(() => Array.from(new Set(ordered.map((entry) => entry.kind))), [ordered]);
-  const [activeKind, setActiveKind] = useState<string>("all");
-  const visible = activeKind === "all" ? ordered : ordered.filter((entry) => entry.kind === activeKind);
+  const [activeKind, setActiveKind] = useState<ActiveKind>("all");
+  const selectedKind = activeKind === "all" || kinds.includes(activeKind) ? activeKind : "all";
+  const visible = selectedKind === "all" ? ordered : ordered.filter((entry) => entry.kind === selectedKind);
 
   if (ordered.length === 0) {
     return <EmptyState title="Sin evoluciones" description="Crea una evolucion para iniciar la linea clinica." />;
@@ -36,13 +41,13 @@ export function ClinicalTimelineFeed({ entries }: { entries: ClinicalEntry[] }) 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2" aria-label="Filtro por tipo">
-        <FilterChip label="Todas" count={ordered.length} active={activeKind === "all"} onClick={() => setActiveKind("all")} />
+        <FilterChip label="Todas" count={ordered.length} active={selectedKind === "all"} onClick={() => setActiveKind("all")} />
         {kinds.map((kind) => (
           <FilterChip
             key={kind}
             label={kindLabel(kind)}
             count={ordered.filter((entry) => entry.kind === kind).length}
-            active={activeKind === kind}
+            active={selectedKind === kind}
             onClick={() => setActiveKind(kind)}
           />
         ))}
@@ -98,6 +103,6 @@ function FilterChip({
   );
 }
 
-function kindLabel(kind: string) {
-  return KIND_LABELS[kind] ?? kind;
+function kindLabel(kind: ClinicalEntry["kind"]) {
+  return KIND_LABELS[kind];
 }
