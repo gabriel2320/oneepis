@@ -46,9 +46,13 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expectSemanticShell(page, "patient");
   await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
   await expect(page.getByText("Hoja clinica viva")).toBeVisible();
+  await expect(page.getByText("Problemas activos")).toBeVisible();
+  await expect(page.getByText("Medicacion vigente")).toBeVisible();
+  await expect(page.getByText("Ultima atencion")).toBeVisible();
+  await expect(page.getByText("Sin alergias criticas")).toBeVisible();
   await expect(page.getByText("Linea clinica longitudinal")).toBeVisible();
   await expect(page.getByText("Antecedentes clinicos")).toBeVisible();
-  await expect(page.getByText("Problema demo activo")).toBeVisible();
+  await expect(page.getByText("Problema demo activo").first()).toBeVisible();
   await expect(page.getByText("Fuentes actuales", { exact: true })).toBeVisible();
   await expect(page.getByText("Sin escritura", { exact: true })).toBeVisible();
   await expect(page.getByText("Fuentes usadas")).toBeVisible();
