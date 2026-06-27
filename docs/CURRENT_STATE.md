@@ -23,6 +23,11 @@ fuente canonica viva.
 - Ambulatorio profundizado (#102-#106): cierre de consulta sin jerga tecnica,
   contexto longitudinal compacto, feedback de guardado, cabecera de ficha y timeline
   sobrio con fuente visible.
+- Base HIS minima (#107-#109): Vercel git deploys desactivados en PRs;
+  lecturas de ficha/paciente auditadas con `AuditEvent`; auditoria UI distingue
+  lectura y escritura sin rutas nuevas.
+- Logs PHI-safe backend (#110): sanitizador reutilizable y filtro de logging
+  activo al arrancar la API; sin Sentry/OTel ni observabilidad productiva.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -42,8 +47,9 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Preparar base HIS segura: auditoria de accesos de lectura sobre infraestructura
-existente, sin abrir modulos ni rutas nuevas.
+Checks ejecutables del gap auth/sesion (no auth productiva): pruebas y gates que
+protejan el contrato actual de login, CSRF y revocacion sin abrir identidad
+institucional.
 
 Criterio de exito:
 
@@ -83,7 +89,7 @@ CI agrega:
 - Produccion sanitaria: OneEpis no esta listo para uso clinico real ni software
   certificado.
 - Seguridad: faltan secretos formales, cifrado, backups/restore, retencion,
-  auditoria de accesos, logs PHI-safe y control contextual por institucion/equipo.
+  control contextual por institucion/equipo y cobertura PHI-safe en frontend/CI.
 - Identidad: auth local sirve para desarrollo; usuarios persistentes, sesiones
   productivas, revocacion y recuperacion institucional siguen pendientes.
 - Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro.
