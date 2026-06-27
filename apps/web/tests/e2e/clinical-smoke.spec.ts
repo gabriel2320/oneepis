@@ -370,7 +370,13 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByText("Nota clinica libre", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("SOAP detallado (opcional)")).toBeVisible();
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
-  await expect(page.getByText("Control clinico demo")).toBeVisible();
+  await expect(page.getByText("Control clinico demo").first()).toBeVisible();
+  await expect(page.getByText("Contexto longitudinal")).toBeVisible();
+  await expect(page.getByText("Lo esencial para la atencion; la nota libre sigue siendo el centro.")).toBeVisible();
+  await expect(page.getByText("Alergias activas")).toBeVisible();
+  await expect(page.getByText("Problemas activos")).toBeVisible();
+  await expect(page.getByText("Problema demo activo")).toBeVisible();
+  await expect(page.getByText("Medicamento demo")).toBeVisible();
   await expect(page.getByText("Preconsulta ambulatoria")).toBeVisible();
   await page.locator("details").filter({ hasText: "Preconsulta ambulatoria" }).locator("summary").click();
   await expect(page.getByText("Check-in clinico minimo")).toBeVisible();
