@@ -96,6 +96,30 @@ Una card, strip o panel visible solo entra si:
 
 No se agregan paneles cuyo valor principal sea explicar OneEpis como sistema.
 
+## Politica Visual Clinica
+
+OneEpis debe priorizar ficha clinica tradicional, escritura amplia, listas
+escaneables y papel serio. La UI clinica no debe parecer dashboard comercial ni
+mapa narrativo del sistema.
+
+Reglas:
+
+- Escritura clinica: textarea o bloque libre dominante, interlineado amplio,
+  pocos campos obligatorios y estado documental visible.
+- Listas operativas: tabla primero, filtros arriba, filas comodas y acciones al
+  final; no usar cards si se necesita comparar pacientes, camas, citas o
+  eventos de auditoria.
+- Ficha paciente: contexto critico y hallazgos accionables; no metricas
+  decorativas ni explicaciones de modelo.
+- Papel/print: hoja carta sobria, sin controles, con paciente, fecha, fuente,
+  autor/estado cuando existan y footer de desarrollo si corresponde.
+- La proporcion "70% texto libre, 20% contexto, 10% acciones/metadatos" aplica
+  solo a pantallas de escritura, no a listas, censos, rondas ni auditoria.
+
+Una mejora visual debe contestar que accion clinica, seguridad real o
+trazabilidad mejora. Si la respuesta principal es explicar el modelo, ordenar el
+canon o reforzar lenguaje interno, no entra.
+
 ## Semaforo De Cambio
 
 Antes de implementar, clasificar cada pasada:
@@ -136,6 +160,10 @@ Reglas:
 - No se promueve una pantalla por apariencia: debe cerrar un acto clinico real.
 - El orden del producto es `paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento`.
 - Receta valida, firma clinica, folio, despacho, administracion de medicamentos, ordenes ejecutables, agenda productiva e IA externa siguen bloqueadas/futuras hasta cumplir su contrato clinico/legal.
+- El mapa maestro futuro no es backlog ejecutable: urgencia, UCI, enfermeria
+  dedicada, farmacia clinica, laboratorio amplio, imagenologia, pabellon,
+  auditoria global y calidad no se abren como rutas nuevas sin contrato minimo,
+  permisos, auditoria y flujo humano verificable.
 
 Reglas IA por pantalla:
 

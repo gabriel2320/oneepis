@@ -10,6 +10,20 @@ superficie declara su estado real.
 paciente -> episodio -> acto clinico -> documento -> firma/estado -> seguimiento
 ```
 
+Este documento se lee en tres capas:
+
+1. **Rutas reales**: superficies ya registradas en
+   `screen-capabilities.registry.json` y validadas por `check:screens`.
+2. **Mapa maestro futuro**: lugares clinicos posibles, sin autorizacion para
+   crear rutas mientras no exista contrato minimo.
+3. **Secuencia de construccion**: mejoras permitidas sobre superficies
+   existentes antes de abrir modulos nuevos.
+
+El mapa maestro no es backlog directo. Urgencia, UCI, enfermeria dedicada,
+farmacia clinica, laboratorio amplio, imagenologia, pabellon, auditoria global
+y calidad permanecen futuras, bloqueadas o parciales hasta cumplir contrato,
+permisos, auditoria y flujo humano verificable.
+
 Estados permitidos:
 
 - `completa`: tiene flujo humano minimo y, si escribe, API/PostgreSQL/permisos/auditoria/OpenAPI/tests.
@@ -31,6 +45,28 @@ La tabla de rutas reales se genera desde
 `apps/web/src/lib/screen-capabilities.registry.json`. No editarla manualmente:
 usar `npm run generate:screens`. El gate `npm run check:screens` valida que la
 tabla generada, las rutas visibles y el registry no tengan drift.
+
+## Principio visual clinico
+
+OneEpis debe verse como ficha clinica tradicional, sobria y auditable: papel
+digital para escribir, listas escaneables para operar y contexto critico minimo
+al costado. La UI no debe explicar la arquitectura del producto.
+
+Reglas de composicion:
+
+- Pantallas de escritura clinica: texto libre dominante, pocos campos
+  obligatorios, botones al final y estado documental visible.
+- Pantallas de lista: filtros arriba, tabla amplia, filas comodas y acciones al
+  final; no reemplazar censo, agenda, rondas o auditoria por cards densas.
+- Pantallas de ficha: resumen longitudinal, datos criticos visibles y contexto
+  accionable; no dashboard de metricas ni paneles narrativos.
+- Pantallas de papel: hoja carta, blanco/negro, metadata clinica, estado de
+  borrador/no firmado si aplica y sin controles interactivos.
+
+La regla practica es que una pantalla de escritura clinica debe priorizar el
+texto libre; una pantalla operativa debe priorizar escaneo rapido. La proporcion
+"70% texto libre, 20% contexto, 10% acciones/metadatos" aplica a escritura
+clinica, no a listas ni auditoria.
 
 ## Navegacion objetivo
 
@@ -120,6 +156,11 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 Estas superficies pertenecen a la ficha tradicional, pero no deben crearse hasta
 tener contrato minimo y flujo humano verificable.
 
+Una fila futura no autoriza crear ruta App Router. Solo puede pasar a PR de
+implementacion si responde una accion clinica, seguridad real o trazabilidad
+concreta, y si reutiliza primero las entidades existentes antes de proponer un
+modelo nuevo.
+
 | Superficie | Modulo | Momento clinico | Estado | Fuente esperada | Escritura | Permisos | Auditoria | Papel | IA permitida | Condicion de entrada |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Antecedentes medicos/quirurgicos/familiares/sociales | Nucleo paciente | paciente | futura | eventos o entidad dedicada | si | medico/admin/dev | si | no | lectura contextual | contrato minimo y lectura en ficha |
@@ -156,6 +197,11 @@ tener contrato minimo y flujo humano verificable.
 | IA externa | IA clinica | seguimiento | bloqueada | proveedor externo futuro | no | admin/dev futuro | si si se habilita | no | solo con autorizacion | anonimizar payload, preview humano, autorizacion explicita, auditoria y politica PHI |
 
 ## Secuencia de construccion
+
+Durante el ciclo vigente no se abren pantallas clinicas nuevas. La secuencia
+solo puede mejorar superficies existentes: ficha, ambulatorio, hospitalizacion,
+papel, auditoria y seguridad. Si una mejora necesita una ruta nueva, queda fuera
+del ciclo salvo correccion de seguridad o contrato clinico minimo aprobado.
 
 | Bloque | Pantalla inicial | Contrato requerido | Criterio de promocion |
 | --- | --- | --- | --- |
