@@ -220,17 +220,31 @@ export function LatestVitalsTrend({ vitals }: { vitals: VitalSign[] }) {
 }
 
 export function PatientLongitudinalSummary({ record }: { record: PatientRecordSnapshot }) {
+  const summaryItems = [
+    {
+      label: "Estado ficha",
+      value: clinicalStatusLabel(record.patient.clinical_status),
+      detail: careContextLabel(record.patient.current_care_context),
+    },
+    { label: "Antecedentes", value: `${record.active_problems.length}` },
+    { label: "Evoluciones", value: `${record.recent_entries.length}` },
+    { label: "Alergias activas", value: `${record.active_allergies.length}` },
+    { label: "Medicacion activa", value: `${record.active_medications.length}` },
+  ];
+
   return (
-    <div className="grid gap-3 md:grid-cols-5">
-      <MetricCard
-        label="Estado ficha"
-        value={clinicalStatusLabel(record.patient.clinical_status)}
-        detail={careContextLabel(record.patient.current_care_context)}
-      />
-      <MetricCard label="Antecedentes" value={`${record.active_problems.length}`} />
-      <MetricCard label="Evoluciones" value={`${record.recent_entries.length}`} />
-      <MetricCard label="Alergias activas" value={`${record.active_allergies.length}`} />
-      <MetricCard label="Medicacion activa" value={`${record.active_medications.length}`} />
+    <div className="rounded-md border bg-muted/20 px-3 py-2">
+      <dl className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        {summaryItems.map((item) => (
+          <div key={item.label} className="min-w-0">
+            <dt className="text-xs font-semibold uppercase text-muted-foreground">{item.label}</dt>
+            <dd className="truncate text-sm font-medium text-foreground">{item.value}</dd>
+            {item.detail ? (
+              <dd className="truncate text-xs text-muted-foreground">{item.detail}</dd>
+            ) : null}
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
