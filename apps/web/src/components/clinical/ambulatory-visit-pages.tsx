@@ -15,7 +15,8 @@ import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { AmbulatoryClinicalShell } from "@/components/clinical/clinical-domain-shell";
 import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import { AmbulatoryContextSummary } from "@/components/clinical/ambulatory-context-summary";
-import { ClinicalTimeline, EncounterList } from "@/components/clinical/patient-widgets";
+import { ClinicalTimelineFeed } from "@/components/clinical/clinical-timeline-feed";
+import { EncounterList } from "@/components/clinical/patient-widgets";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import {
   createClinicalEncounter,
@@ -198,8 +199,11 @@ function AmbulatoryVisitWorkspace({
               <EncounterList encounters={visitEncounters} />
             ) : null}
           </ClinicalSectionCard>
-          <ClinicalSectionCard title="Evoluciones recientes">
-            <ClinicalTimeline entries={visitEntries} />
+          <ClinicalSectionCard
+            title="Evoluciones recientes"
+            description="Ordenadas por fecha, con fuente visible y filtro por tipo."
+          >
+            <ClinicalTimelineFeed entries={visitEntries} />
           </ClinicalSectionCard>
         </div>
       </div>
