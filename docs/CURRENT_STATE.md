@@ -20,6 +20,9 @@ fuente canonica viva.
   claim de ausencia total de autenticacion.
 - E2E permisos real: `solo_lectura` lee atencion ambulatoria sin escritura;
   `enfermeria` abre preconsulta pero no guarda atencion medica (`DEMO_MODE=false`).
+- Ambulatorio profundizado (#102-#106): cierre de consulta sin jerga tecnica,
+  contexto longitudinal compacto, feedback de guardado, cabecera de ficha y timeline
+  sobrio con fuente visible.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -39,8 +42,8 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Profundizar flujos ambulatorios existentes (cierre de consulta, contexto
-longitudinal) sin rutas nuevas ni sidebar inflado.
+Preparar base HIS segura: auditoria de accesos de lectura sobre infraestructura
+existente, sin abrir modulos ni rutas nuevas.
 
 Criterio de exito:
 
