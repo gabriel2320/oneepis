@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import enum
 import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any
@@ -12,85 +11,27 @@ from oneepis_api.db.base import Base
 from oneepis_api.models.appointment import AppointmentStatus as AppointmentStatus
 from oneepis_api.models.appointment import ClinicalAppointment as ClinicalAppointment
 from oneepis_api.models.base import IdMixin, TimestampMixin
+from oneepis_api.models.clinical_enums import (
+    AllergySeverity,
+    ClinicalEntryKind,
+    ClinicalEntryStatus,
+    ClinicalEventSourceType,
+    ClinicalEventType,
+    EncounterStatus,
+    EncounterType,
+    EncounterWorkflowKind,
+    RecordStatus,
+)
 from oneepis_api.models.medication_catalog import MedicationCatalogItem
 from oneepis_api.models.patient import enum_values
 from oneepis_api.models.vital_sign import VitalSign as VitalSign
+from oneepis_api.services.medication_read_support import (
+    medication_missing_fields,
+    medication_source,
+)
 
 if TYPE_CHECKING:
     from oneepis_api.models.patient import Patient
-
-
-class ClinicalEntryKind(enum.StrEnum):
-    INTAKE = "intake"
-    PROGRESS = "progress"
-    DISCHARGE_SUMMARY = "discharge_summary"
-    LAB_RESULT = "lab_result"
-    PRESCRIPTION = "prescription"
-    PROCEDURE = "procedure"
-    NOTE = "note"
-
-
-class ClinicalEntryStatus(enum.StrEnum):
-    DRAFT = "draft"
-    SIGNED = "signed"
-    AMENDED = "amended"
-
-
-class ClinicalEventType(enum.StrEnum):
-    SYMPTOM = "symptom"
-    VITAL_SIGN = "vital_sign"
-    EXAM_RESULT = "exam_result"
-    DIAGNOSIS = "diagnosis"
-    MEDICATION = "medication"
-    PROCEDURE = "procedure"
-    CLINICAL_NOTE = "clinical_note"
-    CARE_PLAN = "care_plan"
-    ADMINISTRATIVE = "administrative"
-
-
-class ClinicalEventSourceType(enum.StrEnum):
-    MANUAL = "manual"
-    CLINICAL_ENTRY = "clinical_entry"
-    VITAL_SIGN = "vital_sign"
-    IMPORTED_DOCUMENT = "imported_document"
-    AI_DRAFT = "ai_draft"
-
-
-class AllergySeverity(enum.StrEnum):
-    MILD = "mild"
-    MODERATE = "moderate"
-    SEVERE = "severe"
-    UNKNOWN = "unknown"
-
-
-class RecordStatus(enum.StrEnum):
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-    RESOLVED = "resolved"
-    ENTERED_IN_ERROR = "entered_in_error"
-
-
-class EncounterType(enum.StrEnum):
-    AMBULATORY = "ambulatory"
-    HOSPITALIZATION = "hospitalization"
-    EMERGENCY = "emergency"
-    UNKNOWN = "unknown"
-
-
-class EncounterStatus(enum.StrEnum):
-    SCHEDULED = "scheduled"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-
-
-class EncounterWorkflowKind(enum.StrEnum):
-    GENERAL = "general"
-    AMBULATORY_PRECONSULT = "ambulatory_preconsult"
-    AMBULATORY_VISIT = "ambulatory_visit"
-    HOSPITALIZATION_ADMISSION = "hospitalization_admission"
-    HOSPITALIZATION_DAILY = "hospitalization_daily"
-    HOSPITALIZATION_DISCHARGE = "hospitalization_discharge"
 
 
 class ClinicalEntry(Base, IdMixin, TimestampMixin):
@@ -230,46 +171,11 @@ class Medication(Base, IdMixin, TimestampMixin):
 
     @property
     def source(self) -> dict[str, Any] | None:
-        if self.catalog_item is not None:
-            return {
-                "source_system": self.catalog_item.source_system.value,
-                "source_label": self.catalog_item.source_label,
-                "source_url": self.catalog_item.source_url,
-                "external_id": self.catalog_item.external_id,
-                "source_version": self.catalog_item.source_version,
-                "retrieved_at": self.catalog_item.retrieved_at,
-                "reviewed_at": self.catalog_item.reviewed_at,
-                "review_status": self.catalog_item.review_status.value,
-            }
-        source_refs = self.dose_check_snapshot.get("source_refs")
-        if not isinstance(source_refs, list) or not source_refs:
-            return None
-        first_source = source_refs[0]
-        if not isinstance(first_source, dict):
-            return None
-        if not first_source.get("source_system") or not first_source.get("source_label"):
-            return None
-        return {
-            "source_system": first_source["source_system"],
-            "source_label": first_source["source_label"],
-            "source_url": first_source.get("source_url"),
-            "external_id": first_source.get("external_id"),
-            "source_version": first_source.get("source_version"),
-            "retrieved_at": first_source.get("retrieved_at"),
-            "reviewed_at": first_source.get("reviewed_at"),
-            "review_status": first_source.get("review_status") or "draft",
-        }
+        return medication_source(self)
 
     @property
     def missing_fields(self) -> list[str]:
-        missing = [
-            field
-            for field in ("dose", "route", "frequency")
-            if not getattr(self, field)
-        ]
-        if self.source is None:
-            missing.append("source")
-        return missing
+        return medication_missing_fields(self)
 
 
 class ActiveProblem(Base, IdMixin, TimestampMixin):
