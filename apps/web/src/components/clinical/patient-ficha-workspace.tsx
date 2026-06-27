@@ -6,6 +6,7 @@ import { ClinicalWorkspaceLayout } from "@/components/clinical/clinical-workspac
 import { ClinicalRiskPreview } from "@/components/clinical/clinical-risk-preview";
 import { FullTimelinePreview } from "@/components/clinical/full-timeline-preview";
 import { PatientFichaHeader } from "@/components/clinical/patient-ficha-header";
+import { ClinicalOrdersDraftPanel } from "@/components/clinical/clinical-orders-preview";
 import { LabResultsPreview } from "@/components/clinical/lab-results-preview";
 import { PatientAntecedentsPreview } from "@/components/clinical/patient-antecedents-preview";
 import { PatientAiSuggestionsPanel } from "@/components/clinical/patient-ai-suggestions-panel";
@@ -159,6 +160,7 @@ function FichaContextRail({
       </ClinicalSectionCard>
       <ClinicalRiskPreview patientId={patientId} canWrite={canWriteRisks} />
       <LabResultsPreview patientId={patientId} />
+      <ClinicalOrdersDraftPanel patientId={patientId} />
       <PatientAiSuggestionsPanel patientId={patientId} canUseAi={canUseAi} />
     </>
   );

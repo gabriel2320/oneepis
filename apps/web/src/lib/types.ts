@@ -3,6 +3,7 @@ export type * from "./type-contracts/assistant-read";
 export type * from "./type-contracts/appointments";
 export type * from "./type-contracts/clinical-risk";
 export type * from "./type-contracts/auth";
+export type * from "./type-contracts/clinical-order";
 export type * from "./type-contracts/clinical-record";
 export type * from "./type-contracts/hospitalization";
 export type * from "./type-contracts/lab";
