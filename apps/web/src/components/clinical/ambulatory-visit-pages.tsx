@@ -13,7 +13,8 @@ import {
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { AmbulatoryClinicalShell } from "@/components/clinical/clinical-domain-shell";
 import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
-import { ClinicalTimeline, EncounterList, PatientLongitudinalSummary } from "@/components/clinical/patient-widgets";
+import { AmbulatoryContextSummary } from "@/components/clinical/ambulatory-context-summary";
+import { ClinicalTimeline, EncounterList } from "@/components/clinical/patient-widgets";
 import { ErrorState, LoadingRows } from "@/components/clinical/states";
 import {
   createClinicalEncounter,
@@ -175,8 +176,11 @@ function AmbulatoryVisitWorkspace({
         </div>
         <div className="space-y-5">
           <AmbulatoryPreconsultPanel patientId={patientId} />
-          <ClinicalSectionCard title="Contexto longitudinal">
-            <PatientLongitudinalSummary record={record} />
+          <ClinicalSectionCard
+            title="Contexto longitudinal"
+            description="Lo esencial para la atencion; la nota libre sigue siendo el centro."
+          >
+            <AmbulatoryContextSummary record={record} />
           </ClinicalSectionCard>
           <ClinicalSectionCard title="Atenciones previas">
             {encountersQuery.isLoading && !DEMO_MODE ? <LoadingRows rows={3} /> : null}
