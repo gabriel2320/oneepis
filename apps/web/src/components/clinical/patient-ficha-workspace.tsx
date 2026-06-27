@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
-
 import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { ClinicalWorkspaceLayout } from "@/components/clinical/clinical-workspace";
 import { ClinicalRiskPreview } from "@/components/clinical/clinical-risk-preview";
 import { FullTimelinePreview } from "@/components/clinical/full-timeline-preview";
+import { PatientFichaHeader } from "@/components/clinical/patient-ficha-header";
 import { LabResultsPreview } from "@/components/clinical/lab-results-preview";
 import { PatientAntecedentsPreview } from "@/components/clinical/patient-antecedents-preview";
 import { PatientAiSuggestionsPanel } from "@/components/clinical/patient-ai-suggestions-panel";
@@ -19,7 +18,6 @@ import {
   QuickSoapEditor,
   VitalsStrip,
 } from "@/components/clinical/patient-widgets";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   canManageClinicalEntries,
@@ -49,7 +47,7 @@ export function PatientFichaWorkspace({
     <div className="space-y-4">
       <CriticalAlerts record={record} />
       <VitalsStrip vital={record.latest_vitals} />
-      <FichaHeader patientId={patientId} canEditPatient={canEditPatient} />
+      <PatientFichaHeader patientId={patientId} record={record} canEditPatient={canEditPatient} />
       <PatientLongitudinalSummary record={record} />
       <PatientLongitudinalMap record={record} />
       <ClinicalWorkspaceLayout
@@ -136,38 +134,6 @@ function LongitudinalMapItem({
         <Badge variant="outline">{value}</Badge>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
-    </div>
-  );
-}
-
-function FichaHeader({
-  patientId,
-  canEditPatient,
-}: {
-  patientId: string;
-  canEditPatient: boolean;
-}) {
-  return (
-    <div className="flex flex-col gap-3 border-b pb-4 md:flex-row md:items-start md:justify-between">
-      <div className="max-w-2xl">
-        <p className="text-sm font-semibold">Hoja clinica viva</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Lectura longitudinal del paciente: datos criticos arriba, evolucion clinica al centro
-          y apoyo IA como riel contextual.
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2" data-print-hidden="true">
-        {canEditPatient ? (
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/pacientes/${patientId}/estado`}>Editar estado</Link>
-          </Button>
-        ) : (
-          <NoPermissionButton label="Estado bloqueado" />
-        )}
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/print/pacientes/${patientId}/ficha`}>Ver papel</Link>
-        </Button>
-      </div>
     </div>
   );
 }
