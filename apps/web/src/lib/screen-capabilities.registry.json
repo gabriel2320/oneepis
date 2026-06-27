@@ -78,6 +78,19 @@
     "futureComplexity": "mantener lugares fisicos, no arbol de acciones"
   },
   {
+    "routePattern": "/inicio",
+    "module": "Acceso/configuracion",
+    "clinicalMoment": "seguimiento",
+    "status": "completa",
+    "truthSource": "App Router + sections registry",
+    "writePolicy": "none",
+    "permissionPolicy": "sesion local",
+    "auditPolicy": "none",
+    "paperPolicy": "none",
+    "aiProfile": "none",
+    "futureComplexity": "bandeja operativa por rol; no mostrar datos clinicos"
+  },
+  {
     "routePattern": "/mapa",
     "module": "Acceso/configuracion",
     "clinicalMoment": "seguimiento",

@@ -7,6 +7,7 @@ import {
   BedDouble,
   CalendarDays,
   ClipboardList,
+  LayoutList,
   Settings,
   UserRound,
 } from "lucide-react";
@@ -21,6 +22,7 @@ import { DEMO_MODE, setStoredAuthToken } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 
 const navItems = [
+  { href: "/inicio", label: "Inicio", icon: LayoutList },
   { href: "/home", label: "Mapa", icon: ClipboardList },
   { href: "/pacientes", label: "Pacientes", icon: UserRound },
   { href: "/hospitalizacion", label: "Hospitalizacion", icon: BedDouble },

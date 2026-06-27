@@ -98,6 +98,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/login/desbloquear` | Acceso/configuracion | seguimiento | completa | auth local | none | publico/control UI | security_event | none | no | desbloqueo administrativo futuro |
 | `/login/desbloquear/confirmar` | Acceso/configuracion | seguimiento | completa | auth local | none | publico/control UI | security_event | none | no | destino de correo institucional futuro |
 | `/home` | Acceso/configuracion | seguimiento | completa | mapa fisico hospitalario + Screen Capability Registry | none | sesion local | none | none | no | mantener lugares fisicos, no arbol de acciones |
+| `/inicio` | Acceso/configuracion | seguimiento | completa | App Router + sections registry | none | sesion local | none | none | no | bandeja operativa por rol; no mostrar datos clinicos |
 | `/mapa` | Acceso/configuracion | seguimiento | completa | redirect App Router | none | sesion local | none | none | no | alias legacy hacia home |
 | `/configuracion` | Acceso/configuracion | seguimiento | completa | App Router | none | sesion local | none | none | lectura contextual | administracion clinica futura |
 | `/configuracion/apariencia` | Acceso/configuracion | seguimiento | completa | preferencias UI | none | sesion local | none | none | no | tokens visuales futuros |

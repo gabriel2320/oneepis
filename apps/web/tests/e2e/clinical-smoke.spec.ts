@@ -529,6 +529,31 @@ test("root entry redirects to hospital physical home", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Mapa del hospital" })).toBeVisible();
 });
 
+test("operational start renders role actions without clinical data", async ({ page }) => {
+  await page.goto("/inicio");
+  const main = page.getByRole("main");
+
+  await expect(main.getByRole("heading", { name: "Acciones disponibles" })).toBeVisible();
+  await expect(main.getByRole("link", { name: "Ver mapa" })).toHaveAttribute("href", "/home");
+  await expect(main.getByRole("heading", { name: "Nucleo paciente" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Ambulatorio" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Hospitalizacion" })).toBeVisible();
+  await expect(main.getByText("Pacientes", { exact: true })).toBeVisible();
+  await expect(main.getByText("Agenda ambulatoria", { exact: true })).toBeVisible();
+  await expect(main.getByText("Camas", { exact: true })).toBeVisible();
+  await expect(main.getByText("Receta valida", { exact: true })).toBeVisible();
+  await expect(main.getByRole("button", { name: "No disponible" }).first()).toBeDisabled();
+  await expect(main.getByText("Esta pantalla no muestra datos clinicos.")).toBeVisible();
+  await expect(main.getByText("Paciente Demo Alfa")).toHaveCount(0);
+  await expect(main.getByText("Canon", { exact: false })).toHaveCount(0);
+  await expect(main.getByText("dev", { exact: true })).toHaveCount(0);
+
+  const hrefs = await main.locator("a").evaluateAll((links) =>
+    links.map((link) => link.getAttribute("href") ?? ""),
+  );
+  expect(hrefs.some((href) => /\[[^\]]+\]/.test(href))).toBe(false);
+});
+
 test("hospital physical home renders only hospital places without patient data", async ({ page }) => {
   await page.goto("/home");
   const main = page.getByRole("main");
