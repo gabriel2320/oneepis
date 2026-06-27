@@ -34,6 +34,8 @@ fuente canonica viva.
   `draft|cancelled|entered_in_error`; sin firma, ejecucion ni rutas web nuevas.
 - Orden borrador visible en ficha (#113): panel en `/ficha` con leyenda
   borrador/no ejecutable/no firmado y lectura API; sin dashboard ni ruta nueva.
+- Resultados con fuente (#114): cada `LabResultRead` expone bloque `source`
+  (tipo, ref, label, ruta API); ficha muestra fuente declarada sin LIS/RIS/PACS.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -53,8 +55,8 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Resultados con fuente (#114): lectura de laboratorio con origen visible; sin
-LIS/RIS/PACS ni rutas nuevas.
+Medicacion segura (#115): dosis, frecuencia, faltantes y fuente en lectura;
+sin receta, dispensacion ni MAR.
 
 Criterio de exito:
 

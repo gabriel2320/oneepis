@@ -22,17 +22,18 @@ export function LabResultsPreview({ patientId }: { patientId: string }) {
   return (
     <ClinicalSectionCard
       title="Resultados estructurados"
-      description="Lectura reciente de laboratorio; no permite carga masiva ni ordenes."
+      description="Lectura reciente de laboratorio con fuente declarada; no permite carga masiva ni ordenes."
     >
       <div className="mb-3 flex flex-wrap gap-2">
         <Badge variant="safe">Solo lectura</Badge>
         <Badge variant="outline">Fuente API</Badge>
-        <Badge variant="outline">Sin ordenes</Badge>
+        <Badge variant="outline">Fuente declarada</Badge>
+        <Badge variant="outline">Sin LIS/RIS/PACS</Badge>
       </div>
       {DEMO_MODE ? (
         <EmptyState
           title="Laboratorio disponible con API real"
-          description="La ficha demo no simula resultados productivos."
+          description="Cada resultado incluye origen del panel y ruta API; la ficha demo no simula resultados productivos."
         />
       ) : null}
       {labPanelsQuery.isLoading ? <LoadingRows rows={2} /> : null}
@@ -71,7 +72,7 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
         </div>
         <div>
           <p className="font-medium text-foreground">Fuente estructurada</p>
-          <p>Sin reemplazar informe firmado.</p>
+          <p>Cada resultado expone origen del panel y ruta API.</p>
         </div>
       </div>
       {panels.map((panel) => (
@@ -83,7 +84,7 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
                 {formatDateTime(panel.occurred_at)}
               </p>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                Origen: {panel.source_type}
+                Origen panel: {panel.source_type}
                 {panel.source_ref ? ` / ${panel.source_ref}` : ""}
               </p>
             </div>
@@ -115,9 +116,12 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
                       ? "Activo y graficable si la serie lo solicita"
                       : "Activo, no graficable sin valor numerico"}
                 </p>
-                <p className="mt-1 break-all text-[11px] text-muted-foreground">
-                  Fuente: {labResultSourcePath(panel, result.id)}
-                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Badge variant="outline">{result.source.label}</Badge>
+                  <span className="break-all text-[11px] text-muted-foreground">
+                    {result.source.request_path}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -166,8 +170,4 @@ function labFlagVariant(
 
 function labPanelSourcePath(panel: LabPanel) {
   return `/api/v1/patients/${panel.patient_id}/lab-panels/${panel.id}`;
-}
-
-function labResultSourcePath(panel: LabPanel, resultId: string) {
-  return `${labPanelSourcePath(panel)}/results/${resultId}`;
 }

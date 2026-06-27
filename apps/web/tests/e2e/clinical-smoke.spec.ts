@@ -73,7 +73,8 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Riesgos clinicos")).toBeVisible();
   await expect(page.getByText("sin scores automaticos")).toBeVisible();
   await expect(page.getByText("Fuente API", { exact: true })).toBeVisible();
-  await expect(page.getByText("Sin ordenes", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fuente declarada", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sin LIS/RIS/PACS", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ordenes clinicas" })).toBeVisible();
   await expect(page.getByText("Borrador", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("No ejecutable", { exact: true }).first()).toBeVisible();

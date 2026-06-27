@@ -26,6 +26,15 @@ export type LabResultUpdate = {
   notes?: string | null;
 };
 
+export type LabResultSourceRead = {
+  source_type: ClinicalEventSourceType;
+  source_ref?: string | null;
+  panel_id: string;
+  panel_name: string;
+  request_path: string;
+  label: string;
+};
+
 export type LabResultRead = {
   id: string;
   panel_id: string;
@@ -39,6 +48,7 @@ export type LabResultRead = {
   flag: LabResultFlag;
   status: RecordStatus;
   notes?: string | null;
+  source: LabResultSourceRead;
   created_at: string;
   updated_at: string;
 };
