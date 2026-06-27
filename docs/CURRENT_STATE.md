@@ -38,8 +38,11 @@ fuente canonica viva.
   borrador/no ejecutable/no firmado y lectura API; sin dashboard ni ruta nueva.
 - Resultados con fuente (#114): cada `LabResultRead` expone bloque `source`
   (tipo, ref, label, ruta API); ficha muestra fuente declarada sin LIS/RIS/PACS.
-- Medicacion segura: `MedicationRead` expone fuente y faltantes de dosis,
-  via/frecuencia; sigue siendo lectura clinica, no receta, dispensacion ni MAR.
+- Medicacion segura (#120-#122): `MedicationRead` expone fuente y faltantes de
+  dosis/via/frecuencia; la ficha muestra lectura clinica con fuente, faltantes y
+  copy explicito de no receta/no dispensacion/no MAR. El E2E bloquea etiquetas
+  positivas exactas de receta, firma, dispensacion, administracion, MAR y orden
+  ejecutable fuera de contexto bloqueado/futuro.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -59,16 +62,18 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Reducir deuda de `clinical_record.py` antes de mas backend clinico: extraer el
-soporte de medicacion segura/fuente/faltantes sin cambiar API, OpenAPI, UI ni
-comportamiento.
+Auditar ficha anti-dashboard antes de agregar nuevos datos: compactar solo si
+los paneles secundarios compiten con la linea clinica longitudinal. No agregar
+rutas, fuentes, paneles ni claims HIS; la ficha debe seguir centrada en paciente,
+no olvidar, revisar y borradores/no ejecutable.
 
 Criterio de exito:
 
-- `SCREEN_TREE` deja de funcionar como segunda base de datos manual.
-- `CURRENT_STATE` queda bajo 180 lineas y solo contiene estado vigente.
-- Los PRs futuros declaran presupuesto de canon.
-- Los tests protegen contratos clinicos/semanticos, no frases cosmeticas.
+- La linea clinica longitudinal sigue siendo el cuerpo principal de `/ficha`.
+- Medicacion, ordenes, riesgos, labs e IA permanecen como contexto secundario.
+- No aparecen etiquetas positivas de receta, firma, dispensacion,
+  administracion, MAR u orden ejecutable.
+- Si se compacta UI, no se agregan datos nuevos ni rutas nuevas.
 
 Criterio de no-hacer:
 

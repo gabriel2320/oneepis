@@ -46,6 +46,11 @@ clinicas visibles aparece `Canon ambulatorio`, `workflow_kind`,
 `acciones disponibles` o `bandeja operativa`. No bloquear estos terminos en docs
 ni en tests, solo en copy renderizado.
 
+El mismo smoke bloquea etiquetas positivas exactas de receta, firma,
+dispensacion, administracion, MAR y orden ejecutable en rutas clinicas sensibles.
+Los terminos pueden aparecer solo como limite explicito, futuro bloqueado o
+estado no ejecutable.
+
 ## No Negociable
 
 - No usar datos reales ni datos demo realistas.
