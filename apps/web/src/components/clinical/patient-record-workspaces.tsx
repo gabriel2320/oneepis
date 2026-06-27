@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { AuditTimeline } from "@/components/clinical/audit-widgets";
+import { AuditKindLegend, AuditTimeline } from "@/components/clinical/audit-widgets";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { MedicationVademecumPanel } from "@/components/clinical/medication-vademecum-panel";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
@@ -206,6 +206,7 @@ export function AuditWorkspace({ patientId }: { patientId: string }) {
 
   return (
     <ClinicalSectionCard title="Auditoria">
+      <AuditKindLegend />
       {DEMO_MODE ? (
         <EmptyState title="Auditoria no disponible en demo" description="Usa la API real para ver eventos." />
       ) : null}

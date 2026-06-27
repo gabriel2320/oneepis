@@ -6,6 +6,27 @@ import type { AuditEvent } from "@/lib/types";
 
 import { formatDateTime } from "./date-format";
 
+export function auditEventKind(action: string): "lectura" | "escritura" | null {
+  if (action.endsWith(".read") || action.includes(".read.")) {
+    return "lectura";
+  }
+  if (action.includes(".")) {
+    return "escritura";
+  }
+  return null;
+}
+
+export function AuditKindLegend() {
+  return (
+    <div className="mb-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+      <Badge variant="secondary">Lectura</Badge>
+      <span>accesos de ficha o paciente</span>
+      <Badge variant="default">Escritura</Badge>
+      <span>cambios clinicos auditados</span>
+    </div>
+  );
+}
+
 export function AuditTimeline({ events }: { events: AuditEvent[] }) {
   if (events.length === 0) {
     return <EmptyState title="Sin eventos de auditoria" description="Las escrituras quedaran trazadas aqui." />;
@@ -13,10 +34,16 @@ export function AuditTimeline({ events }: { events: AuditEvent[] }) {
 
   return (
     <div className="space-y-2">
-      {events.map((event) => (
+      {events.map((event) => {
+        const kind = auditEventKind(event.action);
+        return (
         <div key={event.id} className="rounded-md border p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold">{event.action}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-semibold">{event.action}</p>
+              {kind === "lectura" ? <Badge variant="secondary">Lectura</Badge> : null}
+              {kind === "escritura" ? <Badge variant="default">Escritura</Badge> : null}
+            </div>
             <Badge variant="outline">{event.actor_id}</Badge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -32,7 +59,8 @@ export function AuditTimeline({ events }: { events: AuditEvent[] }) {
           </div>
           <AuditChangeSummary data={event.extra_data} />
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

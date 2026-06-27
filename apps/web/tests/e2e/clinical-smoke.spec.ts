@@ -104,6 +104,11 @@ test("patient navigation groups clinical areas on desktop", async ({ page }, tes
   await expect(nav.getByRole("link", { name: /AI-Chart/ })).toBeVisible();
   await expect(nav.getByRole("link", { name: /Auditoria/ })).toBeVisible();
 
+  await page.goto(`/pacientes/${demoPatientId}/auditoria`);
+  await expect(page.getByRole("heading", { name: "Auditoria" })).toBeVisible();
+  await expect(page.getByText("Lectura", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Escritura", { exact: true }).first()).toBeVisible();
+
   await page.goto(`/pacientes/${demoHospitalizedPatientId}/ficha`);
   const hospitalNav = page.getByRole("navigation", { name: "Navegacion paciente" });
   await expect(hospitalNav.getByText("Hospitalizado", { exact: true })).toBeVisible();
