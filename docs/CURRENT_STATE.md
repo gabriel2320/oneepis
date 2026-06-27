@@ -24,18 +24,22 @@ fuente canonica viva.
   contexto longitudinal compacto, feedback de guardado, cabecera de ficha y timeline
   sobrio con fuente visible.
 - Base HIS minima (#107-#109): Vercel git deploys desactivados en PRs;
-  lecturas de ficha/paciente auditadas con `AuditEvent`; auditoria UI distingue
-  lectura y escritura sin rutas nuevas.
-- Logs PHI-safe backend (#110): sanitizador reutilizable y filtro de logging
-  activo al arrancar la API; sin Sentry/OTel ni observabilidad productiva.
+  lecturas de ficha/paciente auditadas con `AuditEvent`, dedupe por ventana
+  corta y auditoria UI que distingue lectura/escritura sin rutas nuevas.
+- Logs PHI-safe backend (#110): sanitizador reutilizable para estructuras y
+  strings planos, con filtro de logging activo al arrancar la API; sin
+  Sentry/OTel ni observabilidad productiva.
 - Contrato auth/sesion ejecutable (#111): tests de revocacion en lecturas
   clinicas y gate OpenAPI sobre rutas auth y GET protegidos de paciente.
-- ClinicalOrder borrador backend (#112): modelo, migracion y API con estados
-  `draft|cancelled|entered_in_error`; sin firma, ejecucion ni rutas web nuevas.
+- ClinicalOrder borrador backend (#112): modelo, migracion, API y guards con
+  estados `draft|cancelled|entered_in_error`; sin firma, ejecucion ni rutas web
+  nuevas.
 - Orden borrador visible en ficha (#113): panel en `/ficha` con leyenda
   borrador/no ejecutable/no firmado y lectura API; sin dashboard ni ruta nueva.
 - Resultados con fuente (#114): cada `LabResultRead` expone bloque `source`
   (tipo, ref, label, ruta API); ficha muestra fuente declarada sin LIS/RIS/PACS.
+- Medicacion segura: `MedicationRead` expone fuente y faltantes de dosis,
+  via/frecuencia; sigue siendo lectura clinica, no receta, dispensacion ni MAR.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -55,8 +59,9 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Medicacion segura (#115): dosis, frecuencia, faltantes y fuente en lectura;
-sin receta, dispensacion ni MAR.
+Reducir deuda de `clinical_record.py` antes de mas backend clinico: extraer el
+soporte de medicacion segura/fuente/faltantes sin cambiar API, OpenAPI, UI ni
+comportamiento.
 
 Criterio de exito:
 

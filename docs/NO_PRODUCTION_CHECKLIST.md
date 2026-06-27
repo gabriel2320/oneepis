@@ -1,6 +1,6 @@
 # Checklist Versionado de No Produccion
 
-Fecha: 2026-06-26
+Fecha: 2026-06-27
 
 OneEpis no esta listo para produccion sanitaria. Este checklist convierte los
 pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
@@ -21,8 +21,8 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 | NOPROD-SEC-002 | Cifrado en reposo | pendiente | politica de cifrado para base, backups y almacenamiento documental |
 | NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos |
 | NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental |
-| NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend (#108); falta cobertura operativa completa |
-| NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo (#110); falta frontend/CI y revision operativa |
+| NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con dedupe de lecturas repetidas; falta cobertura operativa completa |
+| NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo para estructuras y strings planos; falta frontend/CI y revision operativa |
 | NOPROD-SEC-007 | Control de acceso contextual | pendiente | institucion, equipo, relacion asistencial o motivo de acceso |
 | NOPROD-SEC-008 | Auth productiva | pendiente | usuarios persistentes, hash, sesiones robustas, recuperacion y revocacion |
 | NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones |

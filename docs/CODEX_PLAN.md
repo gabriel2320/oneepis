@@ -93,5 +93,5 @@ Reglas para nuevos cambios:
 - todo nuevo output debe tener fuente, faltante/limite, accion humana y auditoria
 - propuestas de escritura deben converger a `ClinicalPatch` revisable antes de persistir
 
-Para foco actual, cola activa y limites detallados, usar `docs/CURRENT_STATE.md`
-y `docs/GOVERNANCE.md`. Este archivo no es backlog.
+Para foco actual y limites detallados, usar `docs/CURRENT_STATE.md` y
+`docs/GOVERNANCE.md`. Este archivo no es backlog.
