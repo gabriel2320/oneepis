@@ -378,6 +378,9 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByText("SOAP detallado (opcional)")).toBeVisible();
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo").first()).toBeVisible();
+  await expect(page.getByText("Ordenadas por fecha, con fuente visible y filtro por tipo.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Todas/ })).toBeVisible();
+  await expect(page.getByText("Fuente: profesional.demo").first()).toBeVisible();
   await expect(page.getByText("Contexto longitudinal")).toBeVisible();
   await expect(page.getByText("Lo esencial para la atencion; la nota libre sigue siendo el centro.")).toBeVisible();
   await expect(page.getByText("Alergias activas")).toBeVisible();
