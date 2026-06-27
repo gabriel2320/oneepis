@@ -1,5 +1,64 @@
 from fastapi.testclient import TestClient
 
+from oneepis_api.models.clinical_order import ClinicalOrderKind, ClinicalOrderStatus
+from oneepis_api.schemas.clinical_order import ClinicalOrderCreate
+
+
+def test_clinical_order_status_enum_stays_non_executable() -> None:
+    assert {status.value for status in ClinicalOrderStatus} == {
+        "draft",
+        "cancelled",
+        "entered_in_error",
+    }
+    assert {kind.value for kind in ClinicalOrderKind} == {
+        "lab",
+        "imaging",
+        "nursing",
+        "other",
+    }
+
+
+def test_clinical_order_create_schema_does_not_expose_status() -> None:
+    assert "status" not in ClinicalOrderCreate.model_fields
+
+
+def test_clinical_order_update_rejects_executable_status(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    encounter_id = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "ambulatory",
+            "status": "in_progress",
+            "reason": "Control para guard de orden",
+            "started_at": "2026-06-20T09:00:00Z",
+        },
+    ).json()["id"]
+    order_id = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-orders",
+        headers=auth,
+        json={
+            "encounter_id": encounter_id,
+            "kind": "lab",
+            "ordered_at": "2026-06-20T10:00:00Z",
+            "title": "Hemograma borrador",
+            "order_text": "Solicitar hemograma en borrador.",
+        },
+    ).json()["id"]
+
+    for forbidden_status in ("signed", "active", "executed", "administered", "dispensed"):
+        response = client.patch(
+            f"/api/v1/patients/{patient_id}/clinical-orders/{order_id}",
+            headers=auth,
+            json={"status": forbidden_status},
+        )
+        assert response.status_code == 422, forbidden_status
+
 
 def test_clinical_order_create_list_update_cancel_and_audit(
     client: TestClient,
