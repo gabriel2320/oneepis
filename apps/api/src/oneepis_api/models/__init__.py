@@ -5,6 +5,7 @@ from oneepis_api.models.auth_security import (
     AuthSecurityEvent,
     AuthSession,
 )
+from oneepis_api.models.clinical_order import ClinicalOrder
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
@@ -28,6 +29,7 @@ __all__ = [
     "AuthRecoveryToken",
     "AuthSecurityEvent",
     "AuthSession",
+    "ClinicalOrder",
     "ClinicalEncounter",
     "ClinicalAppointment",
     "ClinicalEvent",

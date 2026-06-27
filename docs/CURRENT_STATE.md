@@ -30,6 +30,8 @@ fuente canonica viva.
   activo al arrancar la API; sin Sentry/OTel ni observabilidad productiva.
 - Contrato auth/sesion ejecutable (#111): tests de revocacion en lecturas
   clinicas y gate OpenAPI sobre rutas auth y GET protegidos de paciente.
+- ClinicalOrder borrador backend (#112): modelo, migracion y API con estados
+  `draft|cancelled|entered_in_error`; sin firma, ejecucion ni rutas web nuevas.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -49,8 +51,8 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-ClinicalOrder draft backend-only: modelo y contrato con estados
-`draft|cancelled|entered_in_error`, sin firma ni ejecucion, sin rutas nuevas.
+Mostrar orden borrador en superficie clinica existente (#113): copy explicito
+de borrador no ejecutable/no firmado, sin rutas nuevas ni dashboard.
 
 Criterio de exito:
 

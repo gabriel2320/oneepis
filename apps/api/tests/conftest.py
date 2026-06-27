@@ -12,6 +12,7 @@ from oneepis_api.db.session import get_session
 from oneepis_api.main import app
 from oneepis_api.models import audit as _audit_models  # noqa: F401
 from oneepis_api.models import auth_security as _auth_security_models  # noqa: F401
+from oneepis_api.models import clinical_order as _clinical_order_models  # noqa: F401
 from oneepis_api.models import clinical_record as _clinical_models  # noqa: F401
 from oneepis_api.models import clinical_risk as _clinical_risk_models  # noqa: F401
 from oneepis_api.models import hospitalization as _hospitalization_models  # noqa: F401

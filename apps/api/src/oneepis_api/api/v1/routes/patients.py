@@ -4,6 +4,7 @@ from oneepis_api.api.v1.routes.patient_ai import router as ai_router
 from oneepis_api.api.v1.routes.patient_allergies import router as allergies_router
 from oneepis_api.api.v1.routes.patient_assistant import router as assistant_router
 from oneepis_api.api.v1.routes.patient_audit import router as audit_router
+from oneepis_api.api.v1.routes.patient_clinical_orders import router as clinical_orders_router
 from oneepis_api.api.v1.routes.patient_clinical_risks import router as clinical_risks_router
 from oneepis_api.api.v1.routes.patient_context import router as context_router
 from oneepis_api.api.v1.routes.patient_core import router as core_router
@@ -30,4 +31,5 @@ router.include_router(problems_router)
 router.include_router(vitals_router)
 router.include_router(lab_panels_router)
 router.include_router(clinical_risks_router)
+router.include_router(clinical_orders_router)
 router.include_router(audit_router)
