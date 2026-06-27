@@ -59,6 +59,21 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Antecedente activo: 1")).toBeVisible();
   await expect(page.getByText("Alergia: 1")).toBeVisible();
   await expect(page.getByText("Medicacion activa: 1")).toBeVisible();
+  const medicationCard = main.getByRole("listitem").filter({ hasText: "Medicamento demo" });
+  await expect(medicationCard).toBeVisible();
+  await expect(medicationCard.getByText("Dosis")).toBeVisible();
+  await expect(medicationCard.getByText("1 comprimido")).toBeVisible();
+  await expect(medicationCard.getByText("Via")).toBeVisible();
+  await expect(medicationCard.getByText("oral")).toBeVisible();
+  await expect(medicationCard.getByText("Frecuencia")).toBeVisible();
+  await expect(medicationCard.getByText("cada 24 horas")).toBeVisible();
+  await expect(medicationCard.getByText("Fuente pendiente")).toBeVisible();
+  await expect(medicationCard.getByText("Faltantes: fuente")).toBeVisible();
+  await expect(
+    medicationCard.getByText("Lectura clínica. No receta. No dispensación. No MAR."),
+  ).toBeVisible();
+  await expect(medicationCard.getByText("Receta valida", { exact: true })).toHaveCount(0);
+  await expect(medicationCard.getByText("MAR activo", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Eventos curados: 0")).toBeVisible();
   await expect(page.getByText("Mapa longitudinal del paciente")).toBeVisible();
   await expect(page.getByText("Contexto operativo")).toBeVisible();
