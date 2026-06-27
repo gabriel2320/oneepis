@@ -24,6 +24,27 @@ def test_patient_read_endpoints_emit_read_audit_events(
     assert {item["actor_id"] for item in read_events} == {"medico@oneepis.local"}
 
 
+def test_patient_read_audit_dedupes_repeated_same_route_reads(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    for _ in range(3):
+        response = client.get(f"/api/v1/patients/{patient_id}/record", headers=auth)
+        assert response.status_code == 200
+
+    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    assert audit_response.status_code == 200
+    record_reads = [
+        item for item in audit_response.json() if item["action"] == "record.read"
+    ]
+    assert len(record_reads) == 1
+    assert record_reads[0]["extra_data"]["deduped_count"] == 2
+
+
 def test_patient_read_audit_skips_missing_patient(
     client: TestClient,
     auth_headers,
