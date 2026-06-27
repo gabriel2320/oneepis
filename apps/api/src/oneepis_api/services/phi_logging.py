@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 REDACTED = "[REDACTED]"
@@ -39,6 +40,21 @@ PHI_SENSITIVE_KEYS = frozenset(
     }
 )
 
+_SENSITIVE_KEY_PATTERN = "|".join(
+    re.escape(key) for key in sorted(PHI_SENSITIVE_KEYS, key=len, reverse=True)
+)
+_DYNAMIC_SECRET_KEY_PATTERN = r"[a-zA-Z0-9_]*(?:_token|_password)"
+_FLAT_QUOTED_FIELD_RE = re.compile(
+    rf"(?P<prefix>['\"]?(?:{_SENSITIVE_KEY_PATTERN}|{_DYNAMIC_SECRET_KEY_PATTERN})['\"]?\s*[:=]\s*)"
+    r"(?P<quote>['\"])(?P<value>.*?)(?P=quote)",
+    re.IGNORECASE,
+)
+_FLAT_BARE_FIELD_RE = re.compile(
+    rf"(?P<prefix>['\"]?(?:{_SENSITIVE_KEY_PATTERN}|{_DYNAMIC_SECRET_KEY_PATTERN})['\"]?\s*[:=]\s*)"
+    r"(?P<value>[^,;\s}'\"]+)",
+    re.IGNORECASE,
+)
+
 
 def sanitize_for_log(value: Any) -> Any:
     if isinstance(value, dict):
@@ -46,6 +62,8 @@ def sanitize_for_log(value: Any) -> Any:
             key: REDACTED if _is_sensitive_key(key) else sanitize_for_log(nested)
             for key, nested in value.items()
         }
+    if isinstance(value, str):
+        return _sanitize_flat_text(value)
     if isinstance(value, list):
         return [sanitize_for_log(item) for item in value]
     if isinstance(value, tuple):
@@ -60,11 +78,24 @@ def _is_sensitive_key(key: str) -> bool:
     return normalized.endswith("_token") or normalized.endswith("_password")
 
 
+def _sanitize_flat_text(value: str) -> str:
+    value = _FLAT_QUOTED_FIELD_RE.sub(_redact_quoted_field, value)
+    return _FLAT_BARE_FIELD_RE.sub(
+        lambda match: f"{match.group('prefix')}{REDACTED}",
+        value,
+    )
+
+
+def _redact_quoted_field(match: re.Match[str]) -> str:
+    quote = match.group("quote")
+    return f"{match.group('prefix')}{quote}{REDACTED}{quote}"
+
+
 class PhiSafeLoggingFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        if isinstance(record.msg, dict):
+        if isinstance(record.msg, (dict, str)):
             record.msg = sanitize_for_log(record.msg)
-        elif record.args:
+        if record.args:
             if isinstance(record.args, dict):
                 record.args = sanitize_for_log(record.args)
             elif isinstance(record.args, tuple):
