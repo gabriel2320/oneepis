@@ -24,6 +24,15 @@ export type RecordStatus = "active" | "inactive" | "resolved" | "entered_in_erro
 export type AllergySeverity = "mild" | "moderate" | "severe" | "unknown";
 export type EncounterType = "ambulatory" | "hospitalization" | "emergency" | "unknown";
 export type EncounterStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
+export type MedicationReadSourceSystem =
+  | "local_curated"
+  | "fda_openfda_label"
+  | "fda_drugsfda"
+  | "fda_enforcement"
+  | "fda_faers"
+  | "isp_anamed";
+export type MedicationReadSourceReviewStatus = "draft" | "reviewed" | "deprecated";
+export type MedicationMissingField = "dose" | "route" | "frequency" | "source";
 export type EncounterWorkflowKind =
   | "general"
   | "ambulatory_preconsult"
@@ -166,6 +175,17 @@ export type MedicationCreate = {
   dose_override_reason?: string | null;
 };
 
+export type MedicationSourceRead = {
+  source_system: MedicationReadSourceSystem;
+  source_label: string;
+  source_url?: string | null;
+  external_id?: string | null;
+  source_version?: string | null;
+  retrieved_at?: string | null;
+  reviewed_at?: string | null;
+  review_status: MedicationReadSourceReviewStatus;
+};
+
 export type MedicationRead = {
   id: string;
   patient_id: string;
@@ -179,6 +199,8 @@ export type MedicationRead = {
   ended_on?: string | null;
   dose_check_snapshot: Record<string, unknown>;
   dose_override_reason?: string | null;
+  source?: MedicationSourceRead | null;
+  missing_fields: MedicationMissingField[];
   created_at: string;
   updated_at: string;
 };

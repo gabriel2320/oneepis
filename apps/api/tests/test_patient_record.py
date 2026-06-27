@@ -115,6 +115,8 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     assert snapshot["latest_vitals"]["heart_rate_bpm"] == 78
     assert snapshot["active_allergies"][0]["substance"] == "Penicilina"
     assert snapshot["active_medications"][0]["name"] == "Paracetamol"
+    assert snapshot["active_medications"][0]["source"] is None
+    assert snapshot["active_medications"][0]["missing_fields"] == ["source"]
     assert snapshot["recent_entries"][0]["title"] == "Evolucion SOAP"
     assert snapshot["recent_entries"][0]["encounter_id"] == encounter_id
 

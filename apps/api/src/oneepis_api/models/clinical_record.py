@@ -228,6 +228,49 @@ class Medication(Base, IdMixin, TimestampMixin):
     patient: Mapped[Patient] = relationship(back_populates="medications")
     catalog_item: Mapped[MedicationCatalogItem | None] = relationship()
 
+    @property
+    def source(self) -> dict[str, Any] | None:
+        if self.catalog_item is not None:
+            return {
+                "source_system": self.catalog_item.source_system.value,
+                "source_label": self.catalog_item.source_label,
+                "source_url": self.catalog_item.source_url,
+                "external_id": self.catalog_item.external_id,
+                "source_version": self.catalog_item.source_version,
+                "retrieved_at": self.catalog_item.retrieved_at,
+                "reviewed_at": self.catalog_item.reviewed_at,
+                "review_status": self.catalog_item.review_status.value,
+            }
+        source_refs = self.dose_check_snapshot.get("source_refs")
+        if not isinstance(source_refs, list) or not source_refs:
+            return None
+        first_source = source_refs[0]
+        if not isinstance(first_source, dict):
+            return None
+        if not first_source.get("source_system") or not first_source.get("source_label"):
+            return None
+        return {
+            "source_system": first_source["source_system"],
+            "source_label": first_source["source_label"],
+            "source_url": first_source.get("source_url"),
+            "external_id": first_source.get("external_id"),
+            "source_version": first_source.get("source_version"),
+            "retrieved_at": first_source.get("retrieved_at"),
+            "reviewed_at": first_source.get("reviewed_at"),
+            "review_status": first_source.get("review_status") or "draft",
+        }
+
+    @property
+    def missing_fields(self) -> list[str]:
+        missing = [
+            field
+            for field in ("dose", "route", "frequency")
+            if not getattr(self, field)
+        ]
+        if self.source is None:
+            missing.append("source")
+        return missing
+
 
 class ActiveProblem(Base, IdMixin, TimestampMixin):
     __tablename__ = "active_problems"
