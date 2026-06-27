@@ -290,6 +290,89 @@ paciente mantiene identidad longitudinal; los episodios separan contexto
 asistencial; los actos clinicos producen documentos, ordenes o resultados; la
 auditoria cruza todo.
 
+### Dimensionamiento del arbol completo
+
+Este conteo dimensiona el HIS completo para planificacion. No representa rutas
+implementadas ni autoriza crear pantallas vacias. Cada pantalla real sigue
+entrando por PR pequeno, fuente de verdad, permisos, estados y gates.
+
+Resumen numerico recomendado:
+
+```text
+Dominios hospitalarios:                    34
+Pantallas/subpantallas principales:       388
+Interacciones funcionales minimas:        855
+Conexiones minimas de navegacion:         422
+Conexiones bidireccionales minimas:       844
+Variantes reutilizables de estado UI:   2.328
+Interacciones UX operativas minimas:    1.699
+```
+
+Las 855 interacciones funcionales estiman acciones como crear, editar, validar,
+firmar, imprimir, buscar, filtrar, asignar, trasladar, dar alta, cancelar,
+auditar, exportar, ejecutar, bloquear, revisar o conectar datos clinicos. No
+incluyen microinteracciones visuales como hover, foco, tabs internos,
+tooltips, acordeones o animaciones.
+
+Las 422 conexiones minimas son estructurales:
+
+```text
+34 accesos a dominios principales
++ 388 accesos a pantallas/subpantallas
+= 422 conexiones minimas
+```
+
+Si cada conexion debe funcionar en ida y vuelta, el minimo navegacional sube a
+844 interacciones. Breadcrumbs, botones volver, enlaces cruzados entre modulos
+y accesos contextuales desde paciente, episodio, cama, orden o documento se
+diseñan dentro de cada PR, no en el conteo base.
+
+Cada pantalla clinica debe resolver seis variantes transversales reutilizables:
+loading, error, empty, permiso insuficiente, solo lectura y accion bloqueada.
+Para 388 pantallas, eso equivale a 2.328 variantes de estado UI. No son
+pantallas nuevas.
+
+| Nº | Modulo | Pantallas | Interacciones minimas |
+| -: | --- | --: | --: |
+| 1 | Acceso y sesion | 8 | 12 |
+| 2 | Inicio operativo por rol | 10 | 12 |
+| 3 | Pacientes / indice maestro | 10 | 18 |
+| 4 | Admision, traslado y alta | 12 | 22 |
+| 5 | Urgencias | 16 | 32 |
+| 6 | Consulta externa / ambulatorio | 11 | 22 |
+| 7 | Hospitalizacion | 16 | 34 |
+| 8 | UCI / cuidados criticos | 13 | 32 |
+| 9 | Enfermeria | 15 | 34 |
+| 10 | Ficha medica | 19 | 38 |
+| 11 | Ordenes clinicas / CPOE | 15 | 35 |
+| 12 | Farmacia | 13 | 30 |
+| 13 | Laboratorio / LIS | 14 | 32 |
+| 14 | Imagenologia / RIS-PACS | 12 | 28 |
+| 15 | Pabellon / cirugia | 15 | 34 |
+| 16 | Anestesia | 9 | 22 |
+| 17 | Procedimientos | 8 | 22 |
+| 18 | Maternidad y neonatologia | 15 | 34 |
+| 19 | Banco de sangre | 9 | 24 |
+| 20 | Rehabilitacion | 7 | 18 |
+| 21 | Nutricion | 8 | 18 |
+| 22 | Calidad y seguridad clinica | 11 | 24 |
+| 23 | Documentos clinicos institucionales | 11 | 28 |
+| 24 | Agenda y recursos | 11 | 26 |
+| 25 | Censo hospitalario y camas | 9 | 22 |
+| 26 | Facturacion y cuenta paciente | 10 | 26 |
+| 27 | Inventario clinico e insumos | 11 | 26 |
+| 28 | Equipamiento biomedico | 8 | 18 |
+| 29 | Personal, turnos y roles | 10 | 24 |
+| 30 | Administracion institucional | 12 | 24 |
+| 31 | Auditoria y cumplimiento | 11 | 24 |
+| 32 | Integraciones | 14 | 26 |
+| 33 | Portal paciente y externos | 8 | 18 |
+| 34 | IA hospitalaria secundaria | 7 | 16 |
+|  | **Total** | **388** | **855** |
+
+Estos numeros no cambian `apps/web/src/lib/screen-capabilities.registry.json`.
+El registry solo crece cuando existe una ruta visible real bajo App Router.
+
 ### Programa de PRs front/back
 
 Cada PR del arbol HIS debe cerrar una accion verificable. No se mergea una
