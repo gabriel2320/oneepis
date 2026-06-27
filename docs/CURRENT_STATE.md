@@ -1,6 +1,6 @@
 # Current State
 
-Fecha: 2026-06-26
+Fecha: 2026-06-27
 
 Este documento es estado operativo vigente, no historial. El historial
 cronologico vive en `docs/ROADMAP.md`; los reportes fechados son snapshots y no
@@ -9,8 +9,8 @@ fuente canonica viva.
 ## Estado Real Hoy
 
 - OneEpis es una ficha clinica longitudinal con entrada por login limpio,
-  `/home` como mapa fisico del hospital y mundos operativos separados para
-  ambulatorio y hospitalizacion.
+  `/inicio` como bandeja operativa sin datos clinicos, `/home` como mapa fisico
+  del hospital y mundos operativos separados para ambulatorio y hospitalizacion.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -31,7 +31,7 @@ fuente canonica viva.
 ## Proximo Objetivo Unico
 
 Reducir canon manual y mejorar confiabilidad de flujos existentes. No abrir
-pantallas nuevas durante este ciclo.
+pantallas clinicas nuevas durante este ciclo.
 
 Criterio de exito:
 
@@ -99,4 +99,4 @@ El checklist versionado de no-produccion vive en
 - Una pantalla completa no autoriza claims legales: si hay borrador, guardrail o
   flujo minimo, debe declararse `completa/en expansion gobernada`.
 - La proxima mejora debe atravesar un paciente ficticio por un flujo real antes
-  que agregar mapa, copy o canon narrativo.
+  que agregar mapa, copy, dominios nuevos o canon narrativo.
