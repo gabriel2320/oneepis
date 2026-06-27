@@ -43,10 +43,13 @@ test.describe("print routes", () => {
     await expect(page.getByText("No emitir como receta clinica")).toBeVisible();
     await expect(page.getByText("Documento bloqueado: no valido para prescribir")).toBeVisible();
     await expect(page.getByText("Requisitos no cumplidos")).toBeVisible();
-    await expect(page.getByText("Firma profesional habilitada.")).toBeVisible();
-    await expect(page.getByText("Folio institucional verificable.")).toBeVisible();
-    await expect(page.getByText("Actor prescriptor y permisos de receta.")).toBeVisible();
-    await expect(page.getByText("Fecha clinica de emision.")).toBeVisible();
+    await expect(page.getByText("Falta firma profesional habilitada.")).toBeVisible();
+    await expect(page.getByText("Falta folio institucional verificable.")).toBeVisible();
+    await expect(page.getByText("Falta actor prescriptor con permisos de receta.")).toBeVisible();
+    await expect(page.getByText("Falta fecha clinica de emision.")).toBeVisible();
+    await expect(page.getByText("Falta politica de prescripcion activa.")).toBeVisible();
+    await expect(page.getByText("Firma profesional habilitada.", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Folio institucional verificable.", { exact: true })).toHaveCount(0);
 
     await page.goto(
       `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/hoja-diaria/${demoDailySheetId}`,
