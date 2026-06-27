@@ -164,6 +164,15 @@ Reglas:
   dedicada, farmacia clinica, laboratorio amplio, imagenologia, pabellon,
   auditoria global y calidad no se abren como rutas nuevas sin contrato minimo,
   permisos, auditoria y flujo humano verificable.
+- El macro arbol HIS no autoriza crear pantallas vacias. Cada dominio entra por
+  ciclos de PR con una accion principal, fuente de verdad, permisos, estados y
+  gates proporcionales; facturacion, administracion e integraciones quedan
+  separadas de la ficha clinica.
+- Los ciclos de PR del HIS viven en `docs/SCREEN_TREE.md`. Un PR de pantalla
+  debe implementar una accion verificable front/back, no una coleccion de
+  rutas. Si el backend, permisos, auditoria o fuente de datos no existen, la
+  UI solo puede quedar como estado preparado/bloqueado y no puede simular
+  produccion.
 
 Reglas IA por pantalla:
 

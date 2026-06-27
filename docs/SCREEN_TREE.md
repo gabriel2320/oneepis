@@ -203,6 +203,162 @@ solo puede mejorar superficies existentes: ficha, ambulatorio, hospitalizacion,
 papel, auditoria y seguridad. Si una mejora necesita una ruta nueva, queda fuera
 del ciclo salvo correccion de seguridad o contrato clinico minimo aprobado.
 
+## Programa macro HIS
+
+El arbol HIS completo existe para ordenar el producto hospitalario, no para
+crear cientos de pantallas vacias. La unidad de avance es un PR pequeno con una
+accion principal y una fuente de verdad clara.
+
+Dominios macro:
+
+1. Acceso y sesion.
+2. Inicio operativo por rol.
+3. Pacientes / indice maestro.
+4. Admision, traslado y alta.
+5. Urgencias.
+6. Consulta externa / ambulatorio.
+7. Hospitalizacion.
+8. UCI / cuidados criticos.
+9. Enfermeria.
+10. Ficha medica longitudinal.
+11. Ordenes clinicas / CPOE.
+12. Farmacia y medicacion.
+13. Laboratorio / LIS.
+14. Imagenologia / RIS-PACS.
+15. Pabellon / cirugia.
+16. Anestesia.
+17. Procedimientos.
+18. Maternidad y neonatologia.
+19. Banco de sangre.
+20. Rehabilitacion.
+21. Nutricion.
+22. Calidad y seguridad clinica.
+23. Documentos clinicos institucionales.
+24. Agenda y recursos.
+25. Censo hospitalario y camas.
+26. Facturacion y convenios.
+27. Inventario clinico e insumos.
+28. Equipamiento biomedico.
+29. Personal, turnos y roles.
+30. Administracion institucional.
+31. Auditoria y cumplimiento.
+32. Integraciones.
+33. Portal paciente y externos.
+34. IA hospitalaria secundaria.
+
+Orden de ciclos:
+
+| Ciclo | Dominio | Objetivo | Regla de entrada |
+| --- | --- | --- | --- |
+| 0 | Macro HIS | Taxonomia, nombres de rutas y visibilidad | docs/registry; sin rutas nuevas |
+| 1 | Entrada | login -> home/mapa | sin datos clinicos antes de sesion |
+| 2 | Pacientes/MPI minimo | buscar, crear y abrir paciente | sin fusion/duplicados avanzados |
+| 3 | Ficha longitudinal | secciones reales conectadas | no duplicar rutas bajo `/ficha/*` |
+| 4 | Ambulatorio | agenda -> resumen -> atencion -> cierre | sin receta ni orden ejecutable |
+| 5 | Hospitalizacion | camas -> rondas -> documentos borrador | sin firma, alta legal ni MAR |
+| 6 | Documentos/papel | indice y print por fuente real | sin fallback ni firma falsa |
+| 7 | Seguridad/auditoria | accesos, logs PHI-safe y riesgos | trazabilidad antes de dashboard |
+| 8 | Enfermeria | bandeja, signos y nota futura | sin MAR hasta orden firmada |
+| 9 | Ordenes/farmacia/MAR | CPOE y circuito medicamento | contrato legal/clinico primero |
+| 10 | Laboratorio/imagenologia | lectura sobria antes de LIS/RIS amplio | sin PACS ni equipos simulados |
+| 11 | Dominios clinicos mayores | urgencia, UCI, pabellon y afines | contrato por dominio completo |
+| 12 | Administracion/integraciones | facturacion, inventario, personal y portal | separado de ficha clinica |
+
+Definicion de terminado por PR:
+
+- declara accion principal: entrar, buscar, leer, registrar, validar, imprimir,
+  auditar o bloquear
+- toca una superficie o conexion clinica, no un dominio entero
+- declara rutas, fuente de datos, permisos y auditoria si corresponde
+- incluye estados loading/error/empty/permission/read-only
+- actualiza registry/`SCREEN_TREE` solo si agrega o cambia ruta visible
+- corre gates proporcionales (`check:screens`, `check:web`, `check:e2e`,
+  `check:api`, `check:contract` o `check`)
+- no mezcla informacion tecnica/programatica con informacion clinica visible
+
+Dominios no visibles hasta contrato:
+
+- urgencias, UCI, pabellon, anestesia, procedimientos, maternidad,
+  neonatologia, banco de sangre, rehabilitacion y nutricion
+- facturacion, inventario, equipamiento, personal, integraciones y portal
+- CPOE, farmacia ejecutiva, MAR, firma, folio, receta valida, consentimientos y
+  adjuntos productivos
+
+La relacion del macro arbol es: el hospital organiza lugares y procesos; el
+paciente mantiene identidad longitudinal; los episodios separan contexto
+asistencial; los actos clinicos producen documentos, ordenes o resultados; la
+auditoria cruza todo.
+
+### Programa de PRs front/back
+
+Cada PR del arbol HIS debe cerrar una accion verificable. No se mergea una
+pantalla por existir visualmente: debe leer, registrar, validar, auditar,
+imprimir, bloquear o continuar un flujo real.
+
+Contrato obligatorio de cada PR:
+
+- accion: una sola accion principal del flujo hospitalario
+- rutas: ruta visible, ruta de retorno y lugar en navegacion
+- front: shell, breadcrumb, estados loading/error/empty/permission/read-only y
+  componentes sobrios
+- back: endpoint o reutilizacion explicita, permisos, auditoria y OpenAPI si
+  hay escritura o lectura sensible nueva
+- datos: fuente de verdad, sin fallback demo ni primer registro implicito
+- papel: print solo si hay documento fuente real; si no, declarar sin papel
+- gates: `check:screens` para rutas, `check:web`, `check:api` si toca backend y
+  `check:e2e` si cambia flujo visible
+
+| PR | Accion | Front minimo | Back minimo | Gates |
+| --- | --- | --- | --- | --- |
+| 0.1 | fijar taxonomia macro HIS | docs/registry sin UI nueva | no aplica | `check:screens` |
+| 0.2 | fijar contrato por pantalla | plantilla de contrato en Screen Tree/registry | no aplica | `check:screens` |
+| 1.1 | entrar al sistema | `/login` con errores y recuperacion claros | auth existente/security event | `check:web`, `check:e2e` |
+| 1.2 | elegir lugar de trabajo | `/home` como mapa hospitalario sobrio | capacidades/rutas existentes | `check:screens`, `check:web`, `check:e2e` |
+| 2.1 | buscar paciente | `/pacientes` tabla/busqueda | `GET patients` existente o adapter tipado | `check:web`, `check:api`, `check:e2e` |
+| 2.2 | crear paciente minimo | `/pacientes/nuevo` administrativo | `POST patients`, permisos y auditoria | `check:web`, `check:api`, `check:e2e` |
+| 2.3 | abrir contexto paciente | header/identidad/episodios basicos | lectura paciente + accesos auditables si aplica | `check:web`, `check:api` |
+| 3.1 | navegar ficha longitudinal | shell, sidebar, breadcrumb y active state | no nuevo modelo | `check:screens`, `check:web`, `check:e2e` |
+| 3.2 | leer resumen accionable | ficha/resumen sin canon visible | record snapshot + access audit | `check:web`, `check:api`, `check:e2e` |
+| 3.3 | leer/mantener alergias | lista/form simple | alergias existentes, permisos y auditoria | `check:web`, `check:api`, `check:e2e` |
+| 3.4 | leer/mantener problemas | lista/form simple | problemas existentes, permisos y auditoria | `check:web`, `check:api`, `check:e2e` |
+| 3.5 | leer/mantener medicacion | activa/suspendida, sin receta | medicacion existente, validacion local | `check:web`, `check:api`, `check:e2e` |
+| 3.6 | registrar signos vitales | lectura + nuevo control | vitals existentes, rol enfermeria/medico | `check:web`, `check:api`, `check:e2e` |
+| 3.7 | crear evolucion | lista/detalle/nueva nota | clinical entries, auditoria y print futuro | `check:web`, `check:api`, `check:e2e` |
+| 3.8 | leer documentos | indice documental por fuentes reales | no fallback a documento ajeno | `check:web`, `check:e2e` |
+| 3.9 | auditar ficha | auditoria por paciente | lectura accesos/escrituras separadas | `check:web`, `check:api`, `check:e2e` |
+| 4.1 | operar agenda ambulatoria | agenda diaria tabla | appointments, estados y auditoria | `check:web`, `check:api`, `check:e2e` |
+| 4.2 | leer resumen ambulatorio | resumen antes de consulta | record + citas + encuentros | `check:web`, `check:api`, `check:e2e` |
+| 4.3 | registrar preconsulta | panel dentro de atencion | cita/encuentro/signos/evento existentes | `check:web`, `check:api`, `check:e2e` |
+| 4.4 | escribir atencion | nota/plan texto libre | entrada SOAP, permisos y auditoria | `check:web`, `check:api`, `check:e2e` |
+| 4.5 | cerrar atencion no firmada | cierre explicito, sin receta/orden | encounter status y audit event | `check:web`, `check:api`, `check:e2e` |
+| 5.1 | ver censo hospitalario | camas/servicios tabla | camas/ingresos existentes | `check:web`, `check:api`, `check:e2e` |
+| 5.2 | gestionar cama minima | crear/editar cama | bed endpoint, permisos admin/medico | `check:web`, `check:api`, `check:e2e` |
+| 5.3 | pasar ronda | ronda imprimible | read model existente o consulta compuesta | `check:web`, `check:e2e` |
+| 5.4 | registrar ingreso | hoja tipo papel | `ClinicalEntry(intake)` + auditoria | `check:web`, `check:api`, `check:e2e` |
+| 5.5 | escribir hoja diaria | texto libre + plan | daily sheet + auditoria + print | `check:web`, `check:api`, `check:e2e` |
+| 5.6 | escribir indicaciones borrador | aviso no ejecutable | indication draft + auditoria | `check:web`, `check:api`, `check:e2e` |
+| 5.7 | escribir epicrisis borrador | documento no firmado | `ClinicalEntry(discharge_summary)` | `check:web`, `check:api`, `check:e2e` |
+| 6.1 | endurecer papel | print por ID estricto | lectura fuente especifica | `check:web`, `check:e2e` |
+| 6.2 | listar documentos clinicos | bandeja por paciente | fuentes documentales existentes | `check:web`, `check:e2e` |
+| 7.1 | auditar accesos | sin UI nueva inicialmente | access audit separado de writes | `check:api`, `check:e2e` |
+| 7.2 | proteger logs PHI-safe | no visible | filtro/redaccion logs | `check:api` |
+| 7.3 | mostrar riesgos accionables | ficha/atencion/hospitalizacion | `ClinicalRisk` con fuente y accion humana | `check:web`, `check:api`, `check:e2e` |
+| 8.1 | abrir bandeja enfermeria | pacientes asignados/turno | contrato de asignacion o lectura existente | `check:screens`, `check:web`, `check:api` |
+| 8.2 | registrar nota enfermeria | texto libre por turno | nursing note + permisos + auditoria | `check:web`, `check:api`, `check:e2e` |
+| 8.3 | entregar turno | resumen/pending handoff | handoff o evento clinico dedicado | `check:web`, `check:api`, `check:e2e` |
+| 9.0 | contratar CPOE/Farmacia/MAR | sin UI ejecutiva | modelos/estados/permisos/auditoria | `check:api` |
+| 9.1 | crear orden borrador | no ejecutable | order draft + audit | `check:web`, `check:api`, `check:e2e` |
+| 9.2 | validar farmacia | bandeja validacion | pharmacy validation + audit | `check:web`, `check:api`, `check:e2e` |
+| 9.3 | administrar MAR | solo con orden valida | MAR, doble chequeo y auditoria | `check:web`, `check:api`, `check:e2e` |
+| 10.1 | leer laboratorio paciente | tabla sobria | `lab_panels`/`lab_results` | `check:web`, `check:api`, `check:e2e` |
+| 10.2 | notificar resultado critico | alerta/fuente/ack | critical result event + audit | `check:web`, `check:api`, `check:e2e` |
+| 10.3 | leer imagenologia textual | informes sin PACS | document/report source | `check:web`, `check:api`, `check:e2e` |
+| 11.x | abrir dominio mayor | bandeja -> episodio -> acto -> documento | contrato dedicado por dominio | gates completos |
+| 12.x | abrir admin/integracion | separado de ficha clinica | permisos administrativos y auditoria | gates proporcionales |
+
+Orden duro: no entrar al PR siguiente de un subflujo si el anterior deja ruta
+suelta, accion falsa, dato demo invisible, permiso ambiguo o auditoria faltante.
+
 | Bloque | Pantalla inicial | Contrato requerido | Criterio de promocion |
 | --- | --- | --- | --- |
 | Nucleo paciente faltante | antecedentes dentro de ficha existente | reusar eventos/problemas/alergias/medicacion antes de entidad dedicada | antecedentes visibles en ficha como lectura minima, con faltantes declarados y sin duplicar eventos |
