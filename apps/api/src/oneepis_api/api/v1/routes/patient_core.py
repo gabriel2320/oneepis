@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import APIRouter, status
 
-from oneepis_api.api.deps import AiAccessDep, PatientActorDep
+from oneepis_api.api.deps import AiAccessDep, PatientActorDep, PatientReadActorDep
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.ai import PatientAiSuggestionRequest, PatientAiSuggestionsResponse
@@ -30,6 +30,39 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
+
+
+def _build_patient_record_snapshot(
+    session: SessionDep,
+    patient_id: uuid.UUID,
+) -> PatientRecordSnapshot:
+    patient = require_patient(session, patient_id)
+    return PatientRecordSnapshot(
+        patient=patient,
+        latest_vitals=patient_repo.get_latest_vitals(session, patient_id),
+        active_allergies=patient_repo.get_active_allergies(session, patient_id),
+        active_medications=patient_repo.get_active_medications(session, patient_id),
+        active_problems=patient_repo.get_active_problems(session, patient_id),
+        recent_entries=patient_repo.get_recent_entries(session, patient_id),
+    )
+
+
+def _record_patient_read_audit(
+    session: SessionDep,
+    *,
+    patient_id: uuid.UUID,
+    actor_id: str,
+    action: str,
+) -> None:
+    record_audit_event(
+        session,
+        action=action,
+        entity_type="patient",
+        entity_id=patient_id,
+        actor_id=actor_id,
+    )
+    session.commit()
+
 
 @router.get("", response_model=list[PatientRead])
 def list_patients(
@@ -66,8 +99,19 @@ def create_patient(
 
 
 @router.get("/{patient_id}", response_model=PatientRead)
-def get_patient(patient_id: uuid.UUID, session: SessionDep) -> Patient:
-    return require_patient(session, patient_id)
+def get_patient(
+    patient_id: uuid.UUID,
+    session: SessionDep,
+    actor: PatientReadActorDep,
+) -> Patient:
+    patient = require_patient(session, patient_id)
+    _record_patient_read_audit(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="patient.read",
+    )
+    return patient
 
 
 @router.patch("/{patient_id}", response_model=PatientRead)
@@ -108,16 +152,16 @@ def update_patient(
 def get_patient_record(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> PatientRecordSnapshot:
-    patient = require_patient(session, patient_id)
-    return PatientRecordSnapshot(
-        patient=patient,
-        latest_vitals=patient_repo.get_latest_vitals(session, patient_id),
-        active_allergies=patient_repo.get_active_allergies(session, patient_id),
-        active_medications=patient_repo.get_active_medications(session, patient_id),
-        active_problems=patient_repo.get_active_problems(session, patient_id),
-        recent_entries=patient_repo.get_recent_entries(session, patient_id),
+    snapshot = _build_patient_record_snapshot(session, patient_id)
+    _record_patient_read_audit(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="record.read",
     )
+    return snapshot
 
 
 @router.post("/{patient_id}/ai/suggestions", response_model=PatientAiSuggestionsResponse)
@@ -128,6 +172,6 @@ def create_patient_ai_suggestions(
     settings: SettingsDep,
     _user: AiAccessDep,
 ) -> PatientAiSuggestionsResponse:
-    snapshot = get_patient_record(patient_id, session)
+    snapshot = _build_patient_record_snapshot(session, patient_id)
     provider = get_ai_provider(settings)
     return provider.create_patient_suggestions(str(patient_id), snapshot, payload)
