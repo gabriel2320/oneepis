@@ -60,6 +60,140 @@ Para cada ruta visible, seguir este orden antes de agregar comportamiento:
    - Bloqueo si esta futura/bloqueada.
    - E2E solo para flujos principales.
 
+## PR-000 Auditoria HIS Inicial
+
+Esta seccion archiva el prompt maestro como protocolo operativo compacto para
+agentes IA. No crea pantallas nuevas ni autoriza rutas. El objetivo de PR-000
+es auditar el estado real antes de continuar ciclos de construccion.
+
+### Protocolo de ciclo PR
+
+Cada ciclo de PR debe seguir este orden:
+
+1. Auditar repo, rutas, registry, contratos API, permisos, auditoria, estados y
+   uso de datos demo.
+2. Planificar un subarbol pequeno: maximo un dominio y una accion principal.
+3. Implementar rutas, navegacion, datos, permisos, estados y metadata solo si
+   existe fuente de verdad o bloqueo explicito.
+4. Validar con gates proporcionales; no declarar gate como pasado si no corrio.
+5. Documentar `PR_PLAN`, `PR_SUMMARY`, riesgos, deuda y proximo PR.
+6. Revisar como auditor clinico: rechazar pantallas huerfanas, datos falsos,
+   dashboards decorativos, acciones legales falsas, falta de permisos o falta
+   de auditoria.
+7. Cerrar dejando el arbol mas conectado que antes.
+
+Plantilla obligatoria antes de codificar:
+
+```text
+PR_PLAN:
+- branch:
+- domain:
+- goal:
+- screens:
+- routes:
+- components:
+- api/hooks:
+- permissions:
+- audit:
+- tests:
+- outOfScope:
+```
+
+Plantilla obligatoria al cerrar:
+
+```text
+PR_SUMMARY:
+- files changed:
+- routes connected:
+- states added:
+- permissions handled:
+- gates run:
+- failures:
+- risks:
+- next PR:
+```
+
+### AUDIT_REPORT
+
+- stack detected: Next.js App Router + React/TypeScript + Tailwind/shadcn UI;
+  FastAPI + SQLAlchemy/Alembic + PostgreSQL; OpenAPI export; Ollama/local rules
+  como IA opcional y secundaria.
+- route system: App Router bajo `apps/web/src/app`; 57 `page.tsx` visibles.
+- registry: 57 rutas registradas en
+  `apps/web/src/lib/screen-capabilities.registry.json`; tabla real generada en
+  `docs/SCREEN_TREE.md`.
+- existing domains: Acceso/configuracion, Nucleo paciente, Episodios,
+  Ambulatorio, Hospitalizacion, Medicacion/vademecum, Ordenes/resultados,
+  Documentos/papel, Seguridad/auditoria e IA clinica.
+- missing domains: ADT productivo, Urgencias, UCI, Enfermeria dedicada,
+  CPOE ejecutable, Farmacia ejecutiva, LIS amplio, RIS/PACS, Pabellon,
+  Anestesia, Procedimientos, Maternidad/neonatologia, Banco de sangre,
+  Rehabilitacion, Nutricion, Calidad global, Agenda/recursos amplia, Censo
+  global, Facturacion, Inventario, Equipamiento, Personal/turnos,
+  Administracion institucional, Integraciones y Portal paciente.
+- existing screens: login/recuperacion/desbloqueo, `/inicio`, `/home`, mapa
+  legacy, configuracion, pacientes, ficha, alergias, problemas, medicacion,
+  signos, eventos, encuentros, evoluciones, documentos, auditoria paciente,
+  ambulatorio, agenda, resumen/atencion, hospitalizacion, camas, rondas,
+  ingreso, hoja diaria, indicaciones, epicrisis, AI-Chart/IA y print routes.
+- orphan screens: NOT_FOUND por guard actual; `check:screens` valida que toda
+  ruta visible tenga registry y tabla generada.
+- duplicated components: UNKNOWN; existen shells y workspaces por dominio, pero
+  no se ejecuto auditoria de duplicacion semantica componente por componente.
+- existing clinical components: `PatientClinicalShell`,
+  `DomainClinicalShell`, `AmbulatoryClinicalShell`, `HospitalClinicalShell`,
+  `ClinicalWorkspaceLayout`, `ClinicalSectionCard`, estados clinicos,
+  widgets de auditoria, papel e indicadores de capacidad.
+- missing foundation components: `HospitalShell`, `HospitalTopbar`,
+  `EpisodeContextBar`, `ClinicalBreadcrumb` global y `AuditMetadataFooter`
+  como abstracciones transversales explicitas. Existen equivalentes parciales
+  en `AppShell`, shells de paciente/dominio y layouts de papel.
+- API readiness: pacientes, auth, encuentros, entradas, eventos, alergias,
+  problemas, medicacion, signos, citas, camas, hojas diarias, indicaciones,
+  riesgos, laboratorio minimo, auditoria e IA contextual tienen endpoints o
+  servicios. ADT, urgencias, UCI, CPOE ejecutable, farmacia ejecutiva, MAR,
+  LIS/RIS amplio, pabellon, facturacion e integraciones quedan NOT_FOUND como
+  producto.
+- permission readiness: RBAC minimo existe en backend y frontend; ABAC por
+  institucion/sede/equipo queda futuro.
+- audit readiness: escritura clinica y varias acciones IA registran eventos;
+  auditoria de accesos existe de forma minima y debe endurecerse separando
+  lecturas sensibles de escrituras clinicas.
+- demo data risks: fixtures demo existen bajo `DEMO_MODE`; riesgo vivo es evitar
+  fallback invisible a primer paciente, primer documento u orden. Los PRs deben
+  mantener demo visible y bloqueado para escrituras reales.
+- visual canon risks: riesgo de convertir `/inicio`, ficha o home en dashboard;
+  riesgo de abrir dominios futuros con UI productiva falsa; riesgo de reponer
+  copy de arquitectura visible.
+- blockers: firma, receta valida, orden ejecutable, MAR, consentimientos,
+  adjuntos productivos, auth productiva, ABAC contextual, backups, cifrado,
+  logs PHI-safe e interoperabilidad real.
+- safe next step: reforzar flujos existentes antes de abrir nuevos dominios:
+  pacientes/MPI minimo, contexto paciente, estados transversales, auditoria de
+  accesos y flujo ambulatorio/hospitalizacion ya existentes.
+
+### Primeros 10 PRs recomendados
+
+1. PR-000: auditoria HIS inicial y protocolo compacto para agentes; sin UI.
+2. PR-001: endurecer `/inicio` como bandeja por rol con acciones existentes,
+   sin datos clinicos ni roles tecnicos visibles.
+3. PR-002: mejorar `/pacientes` como indice maestro minimo: busqueda, empty,
+   error, permisos y seleccion de ficha.
+4. PR-003: abrir contexto paciente mas explicito: identidad, alertas y
+   episodios existentes, sin fusion ni duplicados productivos.
+5. PR-004: reforzar ficha longitudinal: continuidad accionable, metadata,
+   fuentes y no-dashboard.
+6. PR-005: consolidar estados transversales reutilizables en pantallas
+   clinicas existentes.
+7. PR-006: endurecer auditoria de accesos y separar lectura sensible de
+   escritura clinica.
+8. PR-007: ambulatorio: agenda -> resumen -> atencion -> cierre no firmado,
+   sin receta ni orden ejecutable.
+9. PR-008: hospitalizacion: censo/cama -> ronda -> documentos borrador, sin
+   firma, alta legal ni MAR.
+10. PR-009: documentos/papel: print por ID estricto, sin fallback, metadata y
+    estado documental visible.
+
 ## Secuencia de PR vigente
 
 1. Reconciliar documentos canonicos con el estado real.
