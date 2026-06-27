@@ -14,6 +14,12 @@ fuente canonica viva.
 - Ciclo correctivo UX aplicado (#98): login sobrio, home mapa fisico estricto
   (servicios parciales visibles sin atajo generico a `/pacientes`), consulta con
   nota libre dominante y guard E2E de copy tecnico en rutas visibles.
+- Preconsulta lateral compacta (#99): panel colapsado por defecto en atencion
+  ambulatoria; la nota libre sigue siendo el registro principal.
+- `SECURITY.md` alineado (#100): auth local de desarrollo y RBAC minimo, sin
+  claim de ausencia total de autenticacion.
+- E2E permisos real: `solo_lectura` lee atencion ambulatoria sin escritura;
+  `enfermeria` abre preconsulta pero no guarda atencion medica (`DEMO_MODE=false`).
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -33,8 +39,8 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Profundizar consulta ambulatoria: preconsulta lateral compacta sin competir con
-la nota libre. No abrir pantallas nuevas durante este ciclo.
+Profundizar flujos ambulatorios existentes (cierre de consulta, contexto
+longitudinal) sin rutas nuevas ni sidebar inflado.
 
 Criterio de exito:
 
