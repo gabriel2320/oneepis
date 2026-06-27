@@ -55,6 +55,8 @@ async function expectCleanLogin(page: Page) {
   await expect(page.getByRole("link", { name: /Pacientes|Consulta|Hospitalizacion/ })).toHaveCount(0);
   await expect(page.getByText("medico@oneepis.local")).toHaveCount(0);
   await expect(page.getByText("Seleccionar rol")).toHaveCount(0);
+  await expect(page.getByText("Ficha clinica", { exact: true })).toBeVisible();
+  await expect(page.getByText(/inteligente|Ollama|IA/)).toHaveCount(0);
 }
 
 async function expectHospitalMapOnly(page: Page) {
@@ -67,6 +69,7 @@ async function expectHospitalMapOnly(page: Page) {
   await expect(main.getByRole("heading", { name: "Unidad de cuidados intensivos" })).toBeVisible();
   await expect(main.getByRole("button", { name: "Futuro" }).first()).toBeDisabled();
   await expect(main.getByRole("button", { name: "Bloqueado" })).toBeDisabled();
+  await expect(main.getByText("Seleccionar paciente")).toHaveCount(0);
   await expectNoClinicalPayload(main);
   await expectNoActionCards(main);
 }
@@ -74,7 +77,7 @@ async function expectHospitalMapOnly(page: Page) {
 async function openHospitalPlace(page: Page, title: string) {
   const card = page.getByRole("article").filter({ hasText: title });
   await expect(card).toBeVisible();
-  await card.getByRole("link", { name: /Entrar|Seleccionar paciente/ }).click();
+  await card.getByRole("link", { name: "Entrar" }).click();
 }
 
 async function expectAmbulatoryEntry(page: Page) {
@@ -93,7 +96,8 @@ async function expectAmbulatoryWorkspace(page: Page) {
   await expectSemanticShell(page, "ambulatory");
   await expect(page.getByRole("navigation", { name: "Navegacion ambulatoria" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
-  await expect(main.getByText("Canon ambulatorio")).toBeVisible();
+  await expect(main.getByText("Canon ambulatorio")).toHaveCount(0);
+  await expect(main.getByText("Nota clinica libre", { exact: true }).first()).toBeVisible();
   await expect(main.getByText("Preconsulta ambulatoria")).toBeVisible();
   await expect(main.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(main.getByText("Ingreso medico hospitalario")).toHaveCount(0);
@@ -164,6 +168,6 @@ async function expectNoClinicalPayload(locator: Locator) {
 
 async function expectNoInternalTerms(locator: Locator) {
   await expect(locator).not.toContainText(
-    /\bworkflow_kind\b|ClinicalEncounter|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente/,
+    /\bworkflow_kind\b|ClinicalEncounter|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente|Canon ambulatorio|\bOllama\b|acciones disponibles|bandeja operativa|medico\/admin\/dev/i,
   );
 }

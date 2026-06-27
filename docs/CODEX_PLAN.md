@@ -23,6 +23,29 @@ docs minimas
 sin datos reales
 ```
 
+## Ciclo Correctivo Activo
+
+Foco: limpiar UX clinica y frenar inflacion, no abrir HIS macro.
+
+Congelamiento: sin rutas nuevas, sin `/inicio`, sin dashboard, sin bandeja de
+acciones, sin macro HIS en UI, sin IA nueva. Docs-only solo por seguridad, claim
+falso, setup roto o permiso contradictorio.
+
+Presupuesto por PR: 1 pantalla, 1 comportamiento, <=4 archivos, <=1 test, <=1 doc
+(solo si cambia estado real), <=300 additions, 0 rutas nuevas, 0 docs nuevos,
+0 dependencias nuevas.
+
+Paquete de contexto por PR (ahorro de tokens): cargar solo (1) Estado Real +
+Proximo Objetivo de `CURRENT_STATE.md`; (2) Anti-Canonitis + Congelamiento de
+`GOVERNANCE.md`; (3) el archivo de pantalla tocado; (4) el E2E relacionado;
+(5) el diff actual. No cargar todo el repo ni el historial de PRs.
+
+Guard de copy: `apps/web/tests/e2e/clinical-smoke.spec.ts` falla si en rutas
+clinicas visibles aparece `Canon ambulatorio`, `workflow_kind`,
+`ClinicalEncounter`, `Ollama`, `medico/admin/dev`, `dashboard`,
+`acciones disponibles` o `bandeja operativa`. No bloquear estos terminos en docs
+ni en tests, solo en copy renderizado.
+
 ## No Negociable
 
 - No usar datos reales ni datos demo realistas.

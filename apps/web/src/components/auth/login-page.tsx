@@ -37,7 +37,7 @@ export function LoginPage() {
           </span>
           <span>
             <span className="block text-sm font-semibold">OneEpis</span>
-            <span className="block text-xs text-muted-foreground">Ficha medica inteligente</span>
+            <span className="block text-xs text-muted-foreground">Ficha clinica</span>
           </span>
         </div>
 
