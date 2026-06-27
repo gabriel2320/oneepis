@@ -28,6 +28,34 @@ const VISIBLE_CLINICAL_ROUTES = [
   "/hospitalizacion",
 ];
 
+const PRESCRIPTION_MAR_BOUNDARY_ROUTES = [
+  ...VISIBLE_CLINICAL_ROUTES,
+  `/pacientes/${demoPatientId}/medicacion`,
+  `/consulta/pacientes/${demoPatientId}/resumen`,
+  `/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicaciones`,
+  `/print/pacientes/${demoPatientId}/receta`,
+];
+
+const FORBIDDEN_POSITIVE_PRESCRIPTION_MAR_COPY = [
+  "Receta valida",
+  "Receta activa",
+  "Receta emitida",
+  "Receta habilitada",
+  "Firma valida",
+  "Firmado",
+  "Firmada",
+  "Dispensacion activa",
+  "Dispensación activa",
+  "Dispensada",
+  "Administracion activa",
+  "Administración activa",
+  "Administrada",
+  "MAR activo",
+  "Orden ejecutable",
+  "Orden activa",
+  "Ejecutable",
+];
+
 test("patients index renders clinical work queue", async ({ page }) => {
   await page.goto("/pacientes");
 
@@ -492,6 +520,9 @@ test("patient documents render paper index and blocked future documents", async 
   await expect(page.getByText("Control clinico demo")).toBeVisible();
   await expect(page.getByText("Ingreso administrativo demo")).toBeVisible();
   await expect(page.getByText("Receta valida")).toBeVisible();
+  await expect(
+    page.locator("div").filter({ hasText: "Receta valida" }).filter({ hasText: "Bloqueado" }).first(),
+  ).toBeVisible();
   await expect(page.getByText("Requiere firma, folio, actor, fecha clinica y permisos.")).toBeVisible();
   await expect(page.getByText("Adjuntos externos", { exact: true })).toBeVisible();
   await expect(
@@ -593,6 +624,17 @@ test("visible clinical routes hide technical and canon copy", async ({ page }) =
     const main = page.getByRole("main");
     await expect(main).toBeVisible();
     await expect(main).not.toContainText(FORBIDDEN_CLINICAL_COPY);
+  }
+});
+
+test("clinical routes do not expose positive prescription or execution labels", async ({ page }) => {
+  for (const route of PRESCRIPTION_MAR_BOUNDARY_ROUTES) {
+    await page.goto(route);
+    const surface = page.locator("body");
+    await expect(surface).toBeVisible();
+    for (const forbiddenCopy of FORBIDDEN_POSITIVE_PRESCRIPTION_MAR_COPY) {
+      await expect(surface.getByText(forbiddenCopy, { exact: true })).toHaveCount(0);
+    }
   }
 });
 
