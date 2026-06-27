@@ -13,7 +13,7 @@ async function expectSemanticShell(page: Page, workspace: "patient" | "ambulator
 }
 
 async function expectNoInternalTerms(locator: Locator) {
-  await expect(locator).not.toContainText(/\bworkflow_kind\b|ClinicalEncounter|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente|Si Ollama esta apagado|aunque Ollama no este disponible/);
+  await expect(locator).not.toContainText(/\bworkflow_kind\b|ClinicalEncounter|\bCanon\b|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente|Si Ollama esta apagado|aunque Ollama no este disponible/);
 }
 
 test("patients index renders clinical work queue", async ({ page }) => {
@@ -44,11 +44,11 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Alergia: 1")).toBeVisible();
   await expect(page.getByText("Medicacion activa: 1")).toBeVisible();
   await expect(page.getByText("Eventos curados: 0")).toBeVisible();
-  await expect(page.getByText("Mapa longitudinal del paciente")).toBeVisible();
-  await expect(page.getByText("Contexto operativo")).toBeVisible();
-  await expect(page.getByText("Actos con episodio")).toBeVisible();
-  await expect(page.getByText("Datos longitudinales", { exact: true })).toBeVisible();
-  await expect(page.getByText("El paciente es unico; los episodios separan el contexto")).toBeVisible();
+  await expect(page.getByText("Continuidad clinica")).toBeVisible();
+  await expect(page.getByText("Considerar antes de medicacion o indicaciones.")).toBeVisible();
+  await expect(page.getByText("Reconciliar antes de cambiar tratamiento.")).toBeVisible();
+  await expect(page.getByText("Mantener contexto antes de documentar nueva evolucion.")).toBeVisible();
+  await expect(page.getByText("Consultar antes de emitir nuevos documentos.")).toBeVisible();
   await expect(page.getByText("Faltantes declarados")).toBeVisible();
   await expect(page.getByText("Linea de tiempo avanzada")).toBeVisible();
   await expect(page.getByText("Fuentes visibles")).toBeVisible();
@@ -183,6 +183,7 @@ test("hospitalization home renders compact operational board", async ({ page }) 
   await expect(page.getByText("Paciente Demo Beta")).toBeVisible();
   await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
   await expect(page.getByText("Ingreso sin cama demo")).toBeVisible();
+  await expect(page.getByText("Canon")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Administrar camas" })).toBeVisible();
   await expect(page.getByText("Administracion de camas")).not.toBeVisible();
   await expect(main.getByText("Atencion ambulatoria")).toHaveCount(0);
@@ -230,6 +231,7 @@ test("hospital admission renders governed intake draft workspace", async ({ page
   await expectSemanticShell(page, "hospital");
   await expect(page.getByRole("heading", { name: "Ingreso medico hospitalario" })).toBeVisible();
   await expect(page.getByText("Borrador de ingreso")).toBeVisible();
+  await expect(page.getByText("Canon")).toHaveCount(0);
   await expect(page.getByLabel("Hospitalizacion activa")).toContainText("Hospitalizacion demo");
   await expect(page.getByText("Sin ingreso medico registrado")).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar ingreso" })).toBeDisabled();
@@ -295,9 +297,11 @@ test("hospital indications render governed draft workspace", async ({ page }) =>
   await expect(page.getByText("Borrador de indicacion demo")).toBeVisible();
   await expect(page.getByText("Borrador hospitalario; no sustituye firma")).toBeVisible();
   await expect(page.getByText("Ejecucion bloqueada")).toBeVisible();
+  await expect(page.getByText("Sin MAR operativo")).toBeVisible();
   await expect(
     page.getByText("Requiere orden firmada, doble chequeo, MAR activo, registro de administracion y auditoria de ejecucion."),
   ).toBeVisible();
+  await expect(page.getByText("No reemplaza receta valida, despacho ni administracion real de medicamentos.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Imprimir", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Cerrar borrador" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Guardar borrador" })).toBeDisabled();
@@ -354,11 +358,8 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
 
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
   await expect(page.getByText("Atencion clinica ambulatoria con evolucion vinculada.")).toBeVisible();
-  await expect(page.getByText("Canon ambulatorio")).toBeVisible();
-  await expect(page.getByText("Preconsulta minima")).toBeVisible();
-  await expect(page.getByText("Encuentro ambulatorio")).toBeVisible();
-  await expect(page.getByText("Borrador SOAP")).toBeVisible();
-  await expect(page.getByText("Lectura longitudinal")).toBeVisible();
+  await expectSemanticShell(page, "ambulatory");
+  await expect(page.getByText("Canon")).toHaveCount(0);
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
   await expect(page.getByText("Preconsulta ambulatoria")).toBeVisible();

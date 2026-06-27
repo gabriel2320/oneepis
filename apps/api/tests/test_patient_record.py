@@ -124,6 +124,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     actions = {item["action"] for item in audit_events}
     assert {
         "patient.created",
+        "patient_access.record.read",
         "encounter.created",
         "clinical_entry.created",
         "allergy.created",
@@ -132,6 +133,15 @@ def test_patient_record_flow_writes_snapshot_and_audit(
         "vital_sign.created",
     }.issubset(actions)
     assert {item["actor_id"] for item in audit_events} == {"medico@oneepis.local"}
+    record_read = next(
+        item for item in audit_events if item["action"] == "patient_access.record.read"
+    )
+    assert record_read["entity_type"] == "patient_access"
+    assert record_read["entity_id"] == patient_id
+    assert record_read["request_method"] == "GET"
+    assert record_read["request_path"] == f"/api/v1/patients/{patient_id}/record"
+    assert "before" not in record_read["extra_data"]
+    assert "after" not in record_read["extra_data"]
 
 
 def test_child_resources_return_404_for_wrong_patient(

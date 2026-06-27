@@ -27,7 +27,6 @@ import {
   canManagePatient,
   canUseClinicalAi,
 } from "@/lib/permissions";
-import { careContextLabel } from "@/lib/patient-display";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 import { NoPermissionButton } from "./patient-page-shared";
@@ -51,7 +50,7 @@ export function PatientFichaWorkspace({
       <VitalsStrip vital={record.latest_vitals} />
       <FichaHeader patientId={patientId} canEditPatient={canEditPatient} />
       <PatientLongitudinalSummary record={record} />
-      <PatientLongitudinalMap record={record} />
+      <PatientContinuityFindings record={record} />
       <ClinicalWorkspaceLayout
         aside={
           <FichaContextRail
@@ -82,45 +81,73 @@ export function PatientFichaWorkspace({
   );
 }
 
-function PatientLongitudinalMap({ record }: { record: PatientRecordSnapshot }) {
-  const linkedEntries = record.recent_entries.filter((entry) => entry.encounter_id).length;
-  const unlinkedEntries = record.recent_entries.length - linkedEntries;
-  const longitudinalItems =
-    record.active_problems.length +
-    record.active_allergies.length +
-    record.active_medications.length;
+function PatientContinuityFindings({ record }: { record: PatientRecordSnapshot }) {
+  const unlinkedEntries = record.recent_entries.filter((entry) => !entry.encounter_id).length;
+  const signedEntries = record.recent_entries.filter((entry) => entry.status === "signed").length;
+  const findings = [
+    unlinkedEntries > 0
+      ? {
+          label: "Actos sin episodio",
+          value: `${unlinkedEntries}`,
+          detail: "Revisar si corresponden a contexto ambulatorio u hospitalario.",
+        }
+      : null,
+    record.patient.current_care_context === "hospitalized"
+      ? {
+          label: "Hospitalizacion activa",
+          value: "si",
+          detail: "Revisar indicaciones, evolucion diaria y documentos pendientes.",
+        }
+      : null,
+    record.active_allergies.length > 0
+      ? {
+          label: "Alergias activas",
+          value: `${record.active_allergies.length}`,
+          detail: "Considerar antes de medicacion o indicaciones.",
+        }
+      : null,
+    record.active_medications.length > 0
+      ? {
+          label: "Medicacion activa",
+          value: `${record.active_medications.length}`,
+          detail: "Reconciliar antes de cambiar tratamiento.",
+        }
+      : null,
+    record.active_problems.length > 0
+      ? {
+          label: "Problemas activos",
+          value: `${record.active_problems.length}`,
+          detail: "Mantener contexto antes de documentar nueva evolucion.",
+        }
+      : null,
+    signedEntries > 0
+      ? {
+          label: "Documentos firmados",
+          value: `${signedEntries}`,
+          detail: "Consultar antes de emitir nuevos documentos.",
+        }
+      : null,
+  ].filter((finding): finding is { label: string; value: string; detail: string } => Boolean(finding));
+
+  if (findings.length === 0) {
+    return null;
+  }
 
   return (
     <ClinicalSectionCard
-      title="Mapa longitudinal del paciente"
-      description="El paciente es unico; los episodios separan el contexto y la ficha reconcilia antecedentes."
+      title="Continuidad clinica"
+      description="Hallazgos que requieren revision longitudinal."
     >
       <div className="grid gap-3 md:grid-cols-3">
-        <LongitudinalMapItem
-          label="Contexto operativo"
-          value={careContextLabel(record.patient.current_care_context)}
-          detail="Orienta el lugar de trabajo sin duplicar ficha."
-        />
-        <LongitudinalMapItem
-          label="Actos con episodio"
-          value={`${linkedEntries}`}
-          detail={
-            unlinkedEntries > 0
-              ? `${unlinkedEntries} acto longitudinal sin episodio.`
-              : "Evoluciones recientes vinculadas a contexto clinico."
-          }
-        />
-        <LongitudinalMapItem
-          label="Datos longitudinales"
-          value={`${longitudinalItems}`}
-          detail="Problemas, alergias y medicacion activa como contexto comun."
-        />
+        {findings.map((finding) => (
+          <ContinuityFindingItem key={finding.label} {...finding} />
+        ))}
       </div>
     </ClinicalSectionCard>
   );
 }
 
-function LongitudinalMapItem({
+function ContinuityFindingItem({
   label,
   value,
   detail,

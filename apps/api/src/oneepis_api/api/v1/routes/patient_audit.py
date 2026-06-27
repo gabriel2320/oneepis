@@ -26,7 +26,10 @@ def list_patient_audit_events(
     matched = [
         event
         for event in events
-        if (event.entity_type == "patient" and event.entity_id == patient_id)
+        if (
+            event.entity_type in {"patient", "patient_access"}
+            and event.entity_id == patient_id
+        )
         or str(event.extra_data.get("patient_id")) == patient_id_text
     ]
     return matched[:limit]

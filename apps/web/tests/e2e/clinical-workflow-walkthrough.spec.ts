@@ -93,7 +93,7 @@ async function expectAmbulatoryWorkspace(page: Page) {
   await expectSemanticShell(page, "ambulatory");
   await expect(page.getByRole("navigation", { name: "Navegacion ambulatoria" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
-  await expect(main.getByText("Canon ambulatorio")).toBeVisible();
+  await expect(main.getByText("Canon")).toHaveCount(0);
   await expect(main.getByText("Preconsulta ambulatoria")).toBeVisible();
   await expect(main.getByText("No emite diagnostico, receta, orden ni firma.")).toBeVisible();
   await expect(main.getByText("Ingreso medico hospitalario")).toHaveCount(0);
@@ -107,6 +107,7 @@ async function expectHospitalEntry(page: Page) {
   await expect(page.getByRole("navigation", { name: "Navegacion hospitalizacion" })).toBeVisible();
   await expect(main.getByText("Paciente Demo Beta")).toBeVisible();
   await expect(main.getByText("Medicina / 301 / Cama A")).toBeVisible();
+  await expect(main.getByText("Canon")).toHaveCount(0);
   await expect(main.getByText("Atencion ambulatoria")).toHaveCount(0);
   await expect(main.getByText("Preconsulta ambulatoria")).toHaveCount(0);
   await expectNoInternalTerms(main);
@@ -118,6 +119,7 @@ async function expectHospitalWorkspace(page: Page) {
   await expect(page.getByRole("navigation", { name: "Navegacion hospitalaria" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ingreso medico hospitalario" })).toBeVisible();
   await expect(main.getByText("Borrador de ingreso")).toBeVisible();
+  await expect(main.getByText("Canon")).toHaveCount(0);
   await expect(main.getByText("Atencion ambulatoria")).toHaveCount(0);
   await expect(main.getByText("Preconsulta ambulatoria")).toHaveCount(0);
   await expectNoInternalTerms(main);
@@ -127,8 +129,8 @@ async function expectPatientRecord(page: Page, workspace: "patient") {
   const main = page.getByRole("main");
   await expectSemanticShell(page, workspace);
   await expect(main.getByText("Hoja clinica viva")).toBeVisible();
-  await expect(main.getByText("Mapa longitudinal del paciente")).toBeVisible();
-  await expect(main.getByText("El paciente es unico; los episodios separan el contexto")).toBeVisible();
+  await expect(main.getByText("Continuidad clinica")).toBeVisible();
+  await expect(main.getByText("Canon")).toHaveCount(0);
   await expect(main.getByText("Linea clinica longitudinal")).toBeVisible();
   await expect(main.getByText("Antecedentes clinicos")).toBeVisible();
   await expect(main.getByText("Fuentes usadas")).toBeVisible();
@@ -164,6 +166,6 @@ async function expectNoClinicalPayload(locator: Locator) {
 
 async function expectNoInternalTerms(locator: Locator) {
   await expect(locator).not.toContainText(
-    /\bworkflow_kind\b|ClinicalEncounter|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente/,
+    /\bworkflow_kind\b|ClinicalEncounter|\bCanon\b|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente/,
   );
 }

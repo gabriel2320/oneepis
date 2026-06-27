@@ -55,7 +55,23 @@ def test_patient_context_derives_active_hospitalization_without_writing(
     assert payload["recent_ambulatory_encounters"][0]["id"] == ambulatory_response.json()["id"]
     assert payload["active_problems"][0]["label"] == "Hipertension arterial"
     assert payload["recent_labs"][0]["label"] == "Perfil renal contexto"
-    assert audit_events(client, auth, patient_id) == before_audit
+    after_audit = audit_events(client, auth, patient_id)
+    context_read = next(
+        item for item in after_audit if item["action"] == "patient_access.context.read"
+    )
+    assert context_read["entity_type"] == "patient_access"
+    assert context_read["entity_id"] == patient_id
+    assert context_read["request_method"] == "GET"
+    assert context_read["request_path"] == f"/api/v1/patients/{patient_id}/context"
+    assert "before" not in context_read["extra_data"]
+    assert "after" not in context_read["extra_data"]
+    after_write_actions = {
+        item["action"]
+        for item in after_audit
+        if item["action"] != "patient_access.context.read"
+    }
+    before_write_actions = {item["action"] for item in before_audit}
+    assert after_write_actions == before_write_actions
 
 
 def test_patient_context_allows_readonly_user(

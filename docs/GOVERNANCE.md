@@ -81,6 +81,21 @@ Reglas:
 - Docs-only no entra por reconciliacion cosmetica, historial de PR, copy no
   riesgoso ni roadmap decorativo.
 
+## Politica Anti-Canon UI
+
+La UI clinica no debe mostrar canon interno, arquitectura del producto ni
+terminos de mantenedor como "canon", "registry", "workflow_kind" o nombres de
+modelos.
+
+Una card, strip o panel visible solo entra si:
+
+- muestra estado clinico accionable,
+- previene dano clinico/legal,
+- aclara una accion bloqueada de alto riesgo,
+- o expone fuente/faltante/limite necesario para decidir.
+
+No se agregan paneles cuyo valor principal sea explicar OneEpis como sistema.
+
 ## Semaforo De Cambio
 
 Antes de implementar, clasificar cada pasada:

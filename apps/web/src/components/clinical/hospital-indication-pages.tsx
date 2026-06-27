@@ -137,9 +137,13 @@ function HospitalIndicationWorkspace({ patientId }: { patientId: string }) {
             <span className="rounded-md bg-warning/15 px-2 py-1 text-xs font-medium text-warning-foreground">
               No ejecutable
             </span>
+            <span className="rounded-md bg-warning/15 px-2 py-1 text-xs font-medium text-warning-foreground">
+              Sin MAR operativo
+            </span>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
             Requiere orden firmada, doble chequeo, MAR activo, registro de administracion y auditoria de ejecucion.
+            No reemplaza receta valida, despacho ni administracion real de medicamentos.
           </p>
         </div>
       </ClinicalSectionCard>

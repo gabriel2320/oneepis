@@ -124,44 +124,46 @@ function HospitalAdmissionWorkspace({
   });
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
-      <ClinicalSectionCard title="Ingresos registrados">
-        <AdmissionEntryList patientId={patientId} entries={admissionEntries} />
-      </ClinicalSectionCard>
-      <ClinicalSectionCard
-        title="Borrador de ingreso"
-        description="No equivale a firma ni documento legal; se imprime como desarrollo."
-      >
-        {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar ingresos reales." /> : null}
-        {!DEMO_MODE && !userLoading && !canWrite ? (
-          <ErrorState description="Tu perfil no tiene permiso para crear ingreso medico hospitalario." />
-        ) : null}
-        {encountersQuery.isError && !DEMO_MODE ? (
-          <ErrorState
-            description="No se pudieron cargar ingresos hospitalarios."
-            onRetry={() => encountersQuery.refetch()}
+    <div className="space-y-5">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
+        <ClinicalSectionCard title="Ingresos registrados">
+          <AdmissionEntryList patientId={patientId} entries={admissionEntries} />
+        </ClinicalSectionCard>
+        <ClinicalSectionCard
+          title="Borrador de ingreso"
+          description="No equivale a firma ni documento legal; se imprime como desarrollo."
+        >
+          {DEMO_MODE ? <ErrorState description="El modo demo no permite guardar ingresos reales." /> : null}
+          {!DEMO_MODE && !userLoading && !canWrite ? (
+            <ErrorState description="Tu perfil no tiene permiso para crear ingreso medico hospitalario." />
+          ) : null}
+          {encountersQuery.isError && !DEMO_MODE ? (
+            <ErrorState
+              description="No se pudieron cargar ingresos hospitalarios."
+              onRetry={() => encountersQuery.refetch()}
+            />
+          ) : null}
+          {hospitalEncounters.length === 0 ? (
+            <EmptyState
+              title="Sin hospitalizacion activa"
+              description="Crea o abre un encuentro hospitalario antes de registrar ingreso medico."
+            />
+          ) : null}
+          <AdmissionForm
+            formState={{ ...formState, encounter_id: selectedEncounterId }}
+            setFormState={setFormState}
+            encounters={hospitalEncounters}
+            disabled={mutation.isPending || DEMO_MODE || !canWrite || hospitalEncounters.length === 0}
+            submitLabel={mutation.isPending ? "Guardando..." : "Guardar ingreso"}
+            onSubmit={() => mutation.mutate({ ...formState, encounter_id: selectedEncounterId })}
           />
-        ) : null}
-        {hospitalEncounters.length === 0 ? (
-          <EmptyState
-            title="Sin hospitalizacion activa"
-            description="Crea o abre un encuentro hospitalario antes de registrar ingreso medico."
-          />
-        ) : null}
-        <AdmissionForm
-          formState={{ ...formState, encounter_id: selectedEncounterId }}
-          setFormState={setFormState}
-          encounters={hospitalEncounters}
-          disabled={mutation.isPending || DEMO_MODE || !canWrite || hospitalEncounters.length === 0}
-          submitLabel={mutation.isPending ? "Guardando..." : "Guardar ingreso"}
-          onSubmit={() => mutation.mutate({ ...formState, encounter_id: selectedEncounterId })}
-        />
-        {mutation.isError ? (
-          <p className="mt-3 text-sm text-destructive">
-            No se pudo guardar. Verifica que el encuentro pertenezca al paciente.
-          </p>
-        ) : null}
-      </ClinicalSectionCard>
+          {mutation.isError ? (
+            <p className="mt-3 text-sm text-destructive">
+              No se pudo guardar. Verifica que el encuentro pertenezca al paciente.
+            </p>
+          ) : null}
+        </ClinicalSectionCard>
+      </div>
     </div>
   );
 }

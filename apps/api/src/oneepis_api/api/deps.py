@@ -224,6 +224,11 @@ def get_clinical_risk_write_actor(user: ClinicalRiskWriteAccessDep) -> str:
     return user.actor_id
 
 
+def get_patient_read_actor(user: ReadAccessDep) -> str:
+    return user.actor_id
+
+
+PatientReadActorDep = Annotated[str, Depends(get_patient_read_actor)]
 PatientActorDep = Annotated[str, Depends(get_patient_write_actor)]
 ClinicalEntryActorDep = Annotated[str, Depends(get_clinical_entry_write_actor)]
 ClinicalEventActorDep = Annotated[str, Depends(get_clinical_event_write_actor)]

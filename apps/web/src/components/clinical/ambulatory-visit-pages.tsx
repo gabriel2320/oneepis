@@ -137,7 +137,6 @@ function AmbulatoryVisitWorkspace({
 
   return (
     <div className="space-y-5">
-      <AmbulatoryFlowGuardrails />
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
         <div className="space-y-5">
           <ClinicalSectionCard
@@ -196,43 +195,6 @@ function AmbulatoryVisitWorkspace({
           </ClinicalSectionCard>
         </div>
       </div>
-    </div>
-  );
-}
-
-function AmbulatoryFlowGuardrails() {
-  return (
-    <ClinicalSectionCard
-      title="Canon ambulatorio"
-      description="La consulta trabaja en su contexto propio y vuelve a la ficha longitudinal comun."
-    >
-      <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-4">
-        <AmbulatoryCanonItem
-          label="Preconsulta minima"
-          value="Check-in clinico autorizado; no diagnostica ni firma."
-        />
-        <AmbulatoryCanonItem
-          label="Encuentro ambulatorio"
-          value="Se documenta como atencion de consulta, no como hospitalizacion."
-        />
-        <AmbulatoryCanonItem
-          label="Borrador SOAP"
-          value="La evolucion queda revisable y no emite receta u orden."
-        />
-        <AmbulatoryCanonItem
-          label="Lectura longitudinal"
-          value="Antecedentes y tratamientos se reconcilian en la ficha unica."
-        />
-      </div>
-    </ClinicalSectionCard>
-  );
-}
-
-function AmbulatoryCanonItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border bg-muted/20 p-3">
-      <p className="font-medium text-foreground">{label}</p>
-      <p className="mt-1">{value}</p>
     </div>
   );
 }
