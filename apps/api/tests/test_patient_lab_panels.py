@@ -1,6 +1,49 @@
 from fastapi.testclient import TestClient
 from patient_ai_helpers import audit_events, create_patient
 
+from oneepis_api.models.clinical_record import ClinicalEventSourceType
+
+
+def test_lab_panel_source_type_stays_with_internal_sources_only() -> None:
+    assert {item.value for item in ClinicalEventSourceType} == {
+        "manual",
+        "clinical_entry",
+        "vital_sign",
+        "imported_document",
+        "ai_draft",
+    }
+
+
+def test_lab_panel_rejects_external_lab_system_sources(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Lab", last_name="Source")
+    panel = _create_lab_panel(client, auth, patient_id)
+
+    for source_type in ("lis", "ris", "pacs"):
+        create_response = client.post(
+            f"/api/v1/patients/{patient_id}/lab-panels",
+            headers=auth,
+            json={
+                **_lab_panel_payload(panel_name=f"Panel {source_type.upper()}"),
+                "source_type": source_type,
+                "source_ref": f"{source_type}:external-system",
+            },
+        )
+        patch_response = client.patch(
+            f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}",
+            headers=auth,
+            json={
+                "source_type": source_type,
+                "source_ref": f"{source_type}:external-system",
+            },
+        )
+
+        assert create_response.status_code == 422
+        assert patch_response.status_code == 422
+
 
 def test_lab_panel_create_read_patch_and_audit(
     client: TestClient,
