@@ -372,6 +372,7 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
   await expect(page.getByText("Preconsulta ambulatoria")).toBeVisible();
+  await page.locator("details").filter({ hasText: "Preconsulta ambulatoria" }).locator("summary").click();
   await expect(page.getByText("Check-in clinico minimo")).toBeVisible();
   await expect(page.getByLabel("Cita para preconsulta")).toContainText(
     "Control ambulatorio demo",
