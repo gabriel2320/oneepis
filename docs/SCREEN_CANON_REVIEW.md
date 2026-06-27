@@ -176,9 +176,11 @@ PR_SUMMARY:
 
 1. PR-000: auditoria HIS inicial y protocolo compacto para agentes; sin UI.
 2. PR-001: endurecer `/inicio` como bandeja por rol con acciones existentes,
-   sin datos clinicos ni roles tecnicos visibles.
+   sin datos clinicos ni roles tecnicos visibles. En esta rama ya existe una
+   primera version y solo deberia recibir hardening, no nuevos dominios.
 3. PR-002: mejorar `/pacientes` como indice maestro minimo: busqueda, empty,
-   error, permisos y seleccion de ficha.
+   error, permisos y seleccion de ficha. Es el siguiente PR funcional
+   recomendado antes de abrir urgencia, UCI, farmacia, MAR o portal.
 4. PR-003: abrir contexto paciente mas explicito: identidad, alertas y
    episodios existentes, sin fusion ni duplicados productivos.
 5. PR-004: reforzar ficha longitudinal: continuidad accionable, metadata,

@@ -247,23 +247,65 @@ Dominios macro:
 33. Portal paciente y externos.
 34. IA hospitalaria secundaria.
 
-Orden de ciclos:
+Orden de construccion:
+
+El orden de construccion no sigue la lista de 34 dominios como si fuera una
+cola de pantallas. Sigue dependencias clinicas y administrativas. El numero 388
+dimensiona el hospital completo, pero no es una meta de productividad. La meta
+es completar flujos trazables: identificar paciente, abrir contexto, registrar
+acto, producir documento/estado, auditar y volver al seguimiento.
+
+Trenes de ejecucion:
+
+| Tren | Dominio conductor | Incluye | Criterio de salida |
+| --- | --- | --- | --- |
+| A | Nucleo clinico | acceso, inicio, pacientes/MPI, ficha, episodios, documentos y auditoria | un paciente se puede buscar, abrir, leer, documentar, imprimir si aplica y auditar |
+| B | Ambulatorio | agenda, preconsulta, atencion, evolucion, cierre no firmado y seguimiento | una consulta puede avanzar sin receta, firma u orden ejecutable falsa |
+| C | Hospitalizacion | camas, ronda, ingreso, hoja diaria, indicaciones borrador y epicrisis | un paciente hospitalizado tiene contexto, documentos borrador, papel y auditoria |
+| D | Ejecucion clinica | ordenes, farmacia, laboratorio, imagenologia, enfermeria y MAR | solo avanza cuando existen contratos de orden, validacion, ejecucion y trazabilidad |
+| E | HIS extendido | urgencia, UCI, pabellon, anestesia, banco de sangre, maternidad, administracion, integraciones y portal | entra por contrato dedicado; no por visibilidad de menu |
+
+Escalera de madurez por dominio:
+
+```text
+futura -> preparada -> lectura minima -> escritura borrador -> documento/papel -> auditoria completa -> ejecucion real
+```
+
+Reglas de dependencia:
+
+- MAR no entra antes de orden ejecutable valida, validacion farmacia, doble
+  chequeo, permisos y auditoria.
+- Farmacia ejecutiva no entra antes de CPOE; puede existir lectura/validacion
+  preparada si no dispensa.
+- Laboratorio e imagenologia empiezan como lectura con fuente; LIS/RIS/PACS
+  completo queda bloqueado hasta contrato de muestra, validacion y publicacion.
+- UCI se apoya en hospitalizacion; no se abre como dashboard critico sin cama,
+  episodio, soporte, hoja diaria y auditoria.
+- Pabellon/anestesia no entran antes de agenda quirurgica, consentimiento,
+  documento, firma/estado y trazabilidad.
+- Facturacion, inventario, personal e integraciones nunca contaminan la ficha
+  clinica; viven en dominios institucionales separados.
+- Portal paciente no entra antes de publicacion documental, permisos,
+  auditoria de accesos y politica de exposicion.
+
+Orden de ciclos recomendado:
 
 | Ciclo | Dominio | Objetivo | Regla de entrada |
 | --- | --- | --- | --- |
 | 0 | Macro HIS | Taxonomia, nombres de rutas y visibilidad | docs/registry; sin rutas nuevas |
-| 1 | Entrada | login -> home/mapa | sin datos clinicos antes de sesion |
+| 1 | Entrada | login -> inicio -> home/mapa | sin datos clinicos antes de sesion |
 | 2 | Pacientes/MPI minimo | buscar, crear y abrir paciente | sin fusion/duplicados avanzados |
-| 3 | Ficha longitudinal | secciones reales conectadas | no duplicar rutas bajo `/ficha/*` |
-| 4 | Ambulatorio | agenda -> resumen -> atencion -> cierre | sin receta ni orden ejecutable |
-| 5 | Hospitalizacion | camas -> rondas -> documentos borrador | sin firma, alta legal ni MAR |
-| 6 | Documentos/papel | indice y print por fuente real | sin fallback ni firma falsa |
-| 7 | Seguridad/auditoria | accesos, logs PHI-safe y riesgos | trazabilidad antes de dashboard |
-| 8 | Enfermeria | bandeja, signos y nota futura | sin MAR hasta orden firmada |
-| 9 | Ordenes/farmacia/MAR | CPOE y circuito medicamento | contrato legal/clinico primero |
-| 10 | Laboratorio/imagenologia | lectura sobria antes de LIS/RIS amplio | sin PACS ni equipos simulados |
-| 11 | Dominios clinicos mayores | urgencia, UCI, pabellon y afines | contrato por dominio completo |
-| 12 | Administracion/integraciones | facturacion, inventario, personal y portal | separado de ficha clinica |
+| 3 | Contexto paciente | identidad, alertas criticas y episodios | sin duplicar la ficha longitudinal |
+| 4 | Ficha longitudinal | resumen, continuidad accionable y fuentes | no duplicar rutas bajo `/ficha/*` |
+| 5 | Estados transversales | loading/error/empty/permission/read-only/blocked | reutilizables antes de abrir dominios |
+| 6 | Seguridad/documentos/papel | accesos, logs PHI-safe, indice y print por fuente real | sin fallback ni firma falsa |
+| 7 | Ambulatorio | agenda -> resumen -> atencion -> cierre | sin receta ni orden ejecutable |
+| 8 | Hospitalizacion | camas -> rondas -> documentos borrador | sin firma, alta legal ni MAR |
+| 9 | Enfermeria minima | bandeja, signos, nota y entrega futura | sin MAR hasta orden ejecutable valida |
+| 10 | Ordenes/lab/imagen lectura | orden borrador y resultados con fuente | sin ejecucion ni PACS simulado |
+| 11 | Farmacia/MAR ejecucion | circuito medicamento completo | CPOE, validacion, doble chequeo y auditoria |
+| 12 | Dominios clinicos mayores | urgencia, UCI, pabellon y afines | contrato por dominio completo |
+| 13 | Administracion/integraciones | facturacion, inventario, personal y portal | separado de ficha clinica |
 
 Definicion de terminado por PR:
 
@@ -293,8 +335,10 @@ auditoria cruza todo.
 ### Dimensionamiento del arbol completo
 
 Este conteo dimensiona el HIS completo para planificacion. No representa rutas
-implementadas ni autoriza crear pantallas vacias. Cada pantalla real sigue
-entrando por PR pequeno, fuente de verdad, permisos, estados y gates.
+implementadas, no mide avance de producto y no autoriza crear pantallas vacias.
+Cada pantalla real sigue entrando por PR pequeno, fuente de verdad, permisos,
+estados y gates. Un dominio puede estar correctamente diferido aunque aparezca
+en el conteo macro.
 
 Resumen numerico recomendado:
 

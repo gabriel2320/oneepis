@@ -168,6 +168,11 @@ Reglas:
   ciclos de PR con una accion principal, fuente de verdad, permisos, estados y
   gates proporcionales; facturacion, administracion e integraciones quedan
   separadas de la ficha clinica.
+- El conteo macro de 388 pantallas es dimensionamiento, no KPI de entrega. Un
+  dominio solo se promueve por madurez verificable:
+  `futura -> preparada -> lectura minima -> escritura borrador -> documento/papel -> auditoria completa -> ejecucion real`.
+  La ejecucion real exige contrato clinico/legal, permisos, auditoria y fuente
+  backend; no se habilita por existir una pantalla.
 - Los ciclos de PR del HIS viven en `docs/SCREEN_TREE.md`. Un PR de pantalla
   debe implementar una accion verificable front/back, no una coleccion de
   rutas. Si el backend, permisos, auditoria o fuente de datos no existen, la
