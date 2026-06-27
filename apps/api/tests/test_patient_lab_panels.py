@@ -58,6 +58,36 @@ def test_lab_panel_create_read_patch_and_audit(
     assert list_response.json()[0]["id"] == panel["id"]
     assert result_response.status_code == 200
     assert result_response.json()["name"] == "Creatinina"
+    source = result_response.json()["source"]
+    assert source["source_type"] == "manual"
+    assert source["panel_name"] == "Perfil renal"
+    assert source["label"] == "Registro manual"
+    assert source["request_path"].endswith(f"/results/{panel['results'][0]['id']}")
+
+    panel_with_source = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "encounter_id": encounter["id"],
+            "occurred_at": "2026-06-20T11:00:00Z",
+            "panel_name": "Perfil lipido",
+            "source_type": "clinical_entry",
+            "source_ref": "entry:demo-001",
+            "results": [
+                {
+                    "name": "Colesterol total",
+                    "value": "180",
+                    "numeric_value": "180",
+                    "unit": "mg/dL",
+                },
+            ],
+        },
+    )
+    assert panel_with_source.status_code == 201
+    sourced_result = panel_with_source.json()["results"][0]["source"]
+    assert sourced_result["source_type"] == "clinical_entry"
+    assert sourced_result["source_ref"] == "entry:demo-001"
+    assert sourced_result["label"] == "Nota clinica (entry:demo-001)"
 
     panel_patch = client.patch(
         f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}",

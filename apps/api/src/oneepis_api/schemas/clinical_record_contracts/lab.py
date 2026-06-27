@@ -42,10 +42,20 @@ class LabResultUpdate(APIModel):
     notes: str | None = Field(default=None, max_length=240)
 
 
+class LabResultSourceRead(APIModel):
+    source_type: ClinicalEventSourceType
+    source_ref: str | None = None
+    panel_id: uuid.UUID
+    panel_name: str
+    request_path: str = Field(min_length=1, max_length=240)
+    label: str = Field(min_length=1, max_length=200)
+
+
 class LabResultRead(LabResultBase):
     id: uuid.UUID
     panel_id: uuid.UUID
     patient_id: uuid.UUID
+    source: LabResultSourceRead
     created_at: datetime
     updated_at: datetime
 

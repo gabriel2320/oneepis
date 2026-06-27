@@ -82,6 +82,7 @@ from oneepis_api.schemas.clinical_record_contracts.lab import (
     LabResultBase,
     LabResultCreate,
     LabResultRead,
+    LabResultSourceRead,
     LabResultUpdate,
 )
 from oneepis_api.schemas.clinical_record_contracts.longitudinal import (
@@ -209,6 +210,7 @@ __all__ = [
     "LabResultBase",
     "LabResultCreate",
     "LabResultRead",
+    "LabResultSourceRead",
     "LabResultUpdate",
     "MedicationBase",
     "MedicationCatalogItemRead",

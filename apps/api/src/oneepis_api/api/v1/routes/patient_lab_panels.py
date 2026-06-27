@@ -16,6 +16,7 @@ from oneepis_api.schemas.clinical_record import (
     LabResultUpdate,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.lab_result_source import serialize_lab_panel, serialize_lab_result
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -47,7 +48,7 @@ def list_lab_panels(
         .offset(offset)
         .limit(limit)
     )
-    return list(session.scalars(statement))
+    return [serialize_lab_panel(panel) for panel in session.scalars(statement)]
 
 
 @router.post(
@@ -82,7 +83,7 @@ def create_lab_panel(
     )
     session.commit()
     session.refresh(panel)
-    return panel
+    return serialize_lab_panel(panel)
 
 
 @router.get("/{patient_id}/lab-panels/{panel_id}", response_model=LabPanelRead)
@@ -90,9 +91,9 @@ def get_lab_panel(
     patient_id: uuid.UUID,
     panel_id: uuid.UUID,
     session: SessionDep,
-) -> LabPanel:
+) -> LabPanelRead:
     require_patient(session, patient_id)
-    return _require_lab_panel(session, patient_id, panel_id)
+    return serialize_lab_panel(_require_lab_panel(session, patient_id, panel_id))
 
 
 @router.patch("/{patient_id}/lab-panels/{panel_id}", response_model=LabPanelRead)
@@ -127,7 +128,7 @@ def update_lab_panel(
     )
     session.commit()
     session.refresh(panel)
-    return panel
+    return serialize_lab_panel(panel)
 
 
 @router.get(
@@ -139,10 +140,11 @@ def get_lab_result(
     panel_id: uuid.UUID,
     result_id: uuid.UUID,
     session: SessionDep,
-) -> LabResult:
+) -> LabResultRead:
     require_patient(session, patient_id)
-    _require_lab_panel(session, patient_id, panel_id)
-    return _require_lab_result(session, patient_id, panel_id, result_id)
+    panel = _require_lab_panel(session, patient_id, panel_id)
+    result = _require_lab_result(session, patient_id, panel_id, result_id)
+    return serialize_lab_result(panel, result)
 
 
 @router.patch(
@@ -185,7 +187,8 @@ def update_lab_result(
     )
     session.commit()
     session.refresh(result)
-    return result
+    panel = _require_lab_panel(session, patient_id, panel_id)
+    return serialize_lab_result(panel, result)
 
 
 def _require_lab_panel(
