@@ -31,11 +31,11 @@ export function PrescriptionA5Sheet({ record }: { record: PatientRecordSnapshot 
         <section className="print-section rounded-md border border-dashed p-4">
           <h2 className="text-sm font-semibold">Requisitos no cumplidos</h2>
           <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-            <li>Firma profesional habilitada.</li>
-            <li>Folio institucional verificable.</li>
-            <li>Actor prescriptor y permisos de receta.</li>
-            <li>Fecha clinica de emision.</li>
-            <li>Politica de prescripcion activa.</li>
+            <li>Falta firma profesional habilitada.</li>
+            <li>Falta folio institucional verificable.</li>
+            <li>Falta actor prescriptor con permisos de receta.</li>
+            <li>Falta fecha clinica de emision.</li>
+            <li>Falta politica de prescripcion activa.</li>
           </ul>
         </section>
         <section className="print-section min-h-32 border-t pt-4">
