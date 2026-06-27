@@ -9,6 +9,7 @@ import { AmbulatoryPreconsultPanel } from "@/components/clinical/ambulatory-prec
 import {
   AmbulatoryVisitForm,
   type AmbulatoryVisitFormState,
+  type AmbulatoryVisitSaveFeedback,
 } from "@/components/clinical/ambulatory-visit-form";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { AmbulatoryClinicalShell } from "@/components/clinical/clinical-domain-shell";
@@ -136,6 +137,18 @@ function AmbulatoryVisitWorkspace({
     },
   });
 
+  const visitSaveFeedback: AmbulatoryVisitSaveFeedback = mutation.isPending
+    ? { kind: "saving" }
+    : mutation.isError
+      ? {
+          kind: "error",
+          message:
+            "No se pudo guardar la atencion. Revisa tu conexion y permisos, e intenta de nuevo.",
+        }
+      : savedEntry
+        ? { kind: "saved", title: savedEntry.title }
+        : { kind: "idle" };
+
   return (
     <div className="space-y-5">
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
@@ -156,17 +169,8 @@ function AmbulatoryVisitWorkspace({
               disabled={mutation.isPending || DEMO_MODE || !canWrite}
               submitLabel={mutation.isPending ? "Guardando..." : "Guardar atencion"}
               onSubmit={() => mutation.mutate(formState)}
+              feedback={visitSaveFeedback}
             />
-            {mutation.isError ? (
-              <p className="mt-3 text-sm text-destructive">
-                No se pudo guardar la atencion. Revisa API y permisos.
-              </p>
-            ) : null}
-            {savedEntry ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                Borrador SOAP vinculado: {savedEntry.title}
-              </p>
-            ) : null}
           </ClinicalSectionCard>
           <AmbulatoryClosePanel
             patientId={patientId}
