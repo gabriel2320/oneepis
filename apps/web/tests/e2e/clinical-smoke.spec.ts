@@ -16,6 +16,18 @@ async function expectNoInternalTerms(locator: Locator) {
   await expect(locator).not.toContainText(/\bworkflow_kind\b|ClinicalEncounter|requiere admin, medico|rol admin|medico, admin|Ollama activo|Ollama pendiente|Si Ollama esta apagado|aunque Ollama no este disponible/);
 }
 
+const FORBIDDEN_CLINICAL_COPY =
+  /Canon ambulatorio|workflow_kind|ClinicalEncounter|\bOllama\b|\bdashboard\b|acciones disponibles|bandeja operativa|medico\/admin\/dev/i;
+
+const VISIBLE_CLINICAL_ROUTES = [
+  "/login",
+  "/home",
+  "/pacientes",
+  `/pacientes/${demoPatientId}/ficha`,
+  `/consulta/pacientes/${demoPatientId}/atencion`,
+  "/hospitalizacion",
+];
+
 test("patients index renders clinical work queue", async ({ page }) => {
   await page.goto("/pacientes");
 
@@ -354,11 +366,9 @@ test("ambulatory visit renders linked encounter workspace", async ({ page }) => 
 
   await expect(page.getByRole("heading", { name: "Atencion ambulatoria" })).toBeVisible();
   await expect(page.getByText("Atencion clinica ambulatoria con evolucion vinculada.")).toBeVisible();
-  await expect(page.getByText("Canon ambulatorio")).toBeVisible();
-  await expect(page.getByText("Preconsulta minima")).toBeVisible();
-  await expect(page.getByText("Encuentro ambulatorio")).toBeVisible();
-  await expect(page.getByText("Borrador SOAP")).toBeVisible();
-  await expect(page.getByText("Lectura longitudinal")).toBeVisible();
+  await expect(page.getByText("Canon ambulatorio")).toHaveCount(0);
+  await expect(page.getByText("Nota clinica libre")).toBeVisible();
+  await expect(page.getByText("SOAP detallado (opcional)")).toBeVisible();
   await expect(page.getByText("Encuentro demo").first()).toBeVisible();
   await expect(page.getByText("Control clinico demo")).toBeVisible();
   await expect(page.getByText("Preconsulta ambulatoria")).toBeVisible();
@@ -498,6 +508,8 @@ test("login route renders local auth form", async ({ page }) => {
   await expect(page.getByText("perfil", { exact: false })).toHaveCount(0);
   await expect(page.getByText("Seleccionar rol", { exact: false })).toHaveCount(0);
   await expect(page.getByText("Roles disponibles", { exact: false })).toHaveCount(0);
+  await expect(page.getByText("Ficha clinica", { exact: true })).toBeVisible();
+  await expect(page.getByText(/inteligente|Ollama|IA/)).toHaveCount(0);
 });
 
 test("recovery and unlock routes render generic request forms", async ({ page }) => {
@@ -515,6 +527,15 @@ test("recovery and unlock routes render generic request forms", async ({ page })
   await expect(page.getByRole("heading", { name: "Confirmar desbloqueo" })).toBeVisible();
   await expect(page.getByText("El enlace de desbloqueo no esta disponible")).toBeVisible();
   await expect(page.getByRole("link", { name: /Pacientes|Consulta|Hospitalizacion/ })).toHaveCount(0);
+});
+
+test("visible clinical routes hide technical and canon copy", async ({ page }) => {
+  for (const route of VISIBLE_CLINICAL_ROUTES) {
+    await page.goto(route);
+    const main = page.getByRole("main");
+    await expect(main).toBeVisible();
+    await expect(main).not.toContainText(FORBIDDEN_CLINICAL_COPY);
+  }
 });
 
 test("legacy sections map redirects to hospital physical home", async ({ page }) => {
@@ -563,9 +584,13 @@ test("hospital physical home renders only hospital places without patient data",
   await expect(main.getByText("Actividad reciente")).toHaveCount(0);
   await expect(main.getByText("Estadisticas")).toHaveCount(0);
   await expect(main.getByText("Paciente Demo Alfa")).not.toBeVisible();
+  await expect(main.getByRole("heading", { name: "Enfermeria" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "Archivo clinico" })).toBeVisible();
+  await expect(main.getByText("Seleccionar paciente")).toHaveCount(0);
 
   const hrefs = await main.locator("a").evaluateAll((links) =>
     links.map((link) => link.getAttribute("href") ?? ""),
   );
   expect(hrefs.some((href) => /\[[^\]]+\]/.test(href))).toBe(false);
+  expect(hrefs.some((href) => href === "/pacientes")).toBe(false);
 });

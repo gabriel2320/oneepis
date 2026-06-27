@@ -63,30 +63,40 @@ export function AmbulatoryVisitForm({
           }
         />
       </Field>
-      <SoapField
-        label="Subjetivo"
-        value={formState.subjective}
-        disabled={disabled}
-        onChange={(value) => setFormState({ ...formState, subjective: value })}
-      />
-      <SoapField
-        label="Objetivo"
-        value={formState.objective}
-        disabled={disabled}
-        onChange={(value) => setFormState({ ...formState, objective: value })}
-      />
-      <SoapField
-        label="Analisis"
-        value={formState.assessment}
-        disabled={disabled}
-        onChange={(value) => setFormState({ ...formState, assessment: value })}
-      />
-      <SoapField
-        label="Plan"
-        value={formState.plan}
-        disabled={disabled}
-        onChange={(value) => setFormState({ ...formState, plan: value })}
-      />
+      <Field label="Nota clinica libre">
+        <Textarea
+          className="min-h-48 leading-6"
+          placeholder="Escribe la atencion en lenguaje clinico libre."
+          disabled={disabled}
+          value={formState.subjective}
+          onChange={(event) => setFormState({ ...formState, subjective: event.target.value })}
+        />
+      </Field>
+      <details className="rounded-md border bg-muted/20 p-3">
+        <summary className="cursor-pointer text-sm font-medium text-foreground">
+          SOAP detallado (opcional)
+        </summary>
+        <div className="mt-3 space-y-4">
+          <SoapField
+            label="Objetivo"
+            value={formState.objective}
+            disabled={disabled}
+            onChange={(value) => setFormState({ ...formState, objective: value })}
+          />
+          <SoapField
+            label="Analisis"
+            value={formState.assessment}
+            disabled={disabled}
+            onChange={(value) => setFormState({ ...formState, assessment: value })}
+          />
+          <SoapField
+            label="Plan"
+            value={formState.plan}
+            disabled={disabled}
+            onChange={(value) => setFormState({ ...formState, plan: value })}
+          />
+        </div>
+      </details>
       <Button
         type="submit"
         disabled={disabled || !formState.started_at || !formState.reason.trim()}
