@@ -12,9 +12,11 @@ from oneepis_api.services.audit import (
     clear_audit_request_context,
     set_audit_request_context,
 )
+from oneepis_api.services.phi_logging import configure_phi_safe_logging
 
 
 def create_app() -> FastAPI:
+    configure_phi_safe_logging()
     settings = get_settings()
     app = FastAPI(
         title="OneEpis Clinical API",
