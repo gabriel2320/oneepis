@@ -33,7 +33,8 @@ If private contact is not available, open a public issue with only a high-level 
 
 Current status:
 
-- no production authentication or authorization
+- local development authentication and minimal RBAC only; no production-grade
+  identity, session lifecycle, institutional authorization, or ABAC contextual
 - no encryption-at-rest design completed
 - no production backup or retention policy
 - no legal/compliance review
