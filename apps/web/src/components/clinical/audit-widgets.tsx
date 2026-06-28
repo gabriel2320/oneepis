@@ -1,10 +1,16 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 import { EmptyState } from "@/components/clinical/states";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { AuditEvent } from "@/lib/types";
 
 import { formatDateTime } from "./date-format";
+
+type AuditKind = "lectura" | "escritura";
+type AuditFilter = "todos" | AuditKind;
 
 export function auditEventKind(action: string): "lectura" | "escritura" | null {
   if (action.endsWith(".read") || action.includes(".read.")) {
@@ -18,9 +24,9 @@ export function auditEventKind(action: string): "lectura" | "escritura" | null {
 
 export function AuditKindLegend() {
   return (
-    <div className="mb-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+    <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       <Badge variant="secondary">Lectura</Badge>
-      <span>accesos de ficha o paciente</span>
+      <span>acceso a ficha o paciente</span>
       <Badge variant="default">Escritura</Badge>
       <span>cambios clinicos auditados</span>
     </div>
@@ -28,39 +34,121 @@ export function AuditKindLegend() {
 }
 
 export function AuditTimeline({ events }: { events: AuditEvent[] }) {
+  const [activeFilter, setActiveFilter] = useState<AuditFilter>("todos");
+  const { counts, filteredEvents } = useMemo(() => {
+    const nextCounts = { todos: events.length, lectura: 0, escritura: 0 };
+    for (const event of events) {
+      const kind = auditEventKind(event.action);
+      if (kind) {
+        nextCounts[kind] += 1;
+      }
+    }
+    return {
+      counts: nextCounts,
+      filteredEvents:
+        activeFilter === "todos"
+          ? events
+          : events.filter((event) => auditEventKind(event.action) === activeFilter),
+    };
+  }, [activeFilter, events]);
+
   if (events.length === 0) {
-    return <EmptyState title="Sin eventos de auditoria" description="Las escrituras quedaran trazadas aqui." />;
+    return (
+      <EmptyState
+        title="Sin eventos de auditoria"
+        description="Cuando la API entregue eventos, se mostraran lecturas y escrituras con actor y ruta."
+      />
+    );
   }
 
   return (
-    <div className="space-y-2">
-      {events.map((event) => {
+    <div className="space-y-3">
+      <AuditSummary counts={counts} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+      {filteredEvents.length === 0 ? (
+        <EmptyState title="Sin eventos para este filtro" description="Cambia el filtro para revisar otros eventos." />
+      ) : null}
+      {filteredEvents.map((event) => {
         const kind = auditEventKind(event.action);
         return (
-        <div key={event.id} className="rounded-md border p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold">{event.action}</p>
-              {kind === "lectura" ? <Badge variant="secondary">Lectura</Badge> : null}
-              {kind === "escritura" ? <Badge variant="default">Escritura</Badge> : null}
+          <div key={event.id} className="rounded-md border p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <p className="break-all text-sm font-semibold">{event.action}</p>
+                {kind === "lectura" ? <Badge variant="secondary">Lectura</Badge> : null}
+                {kind === "escritura" ? <Badge variant="default">Escritura</Badge> : null}
+                {!kind ? <Badge variant="outline">Evento de auditoria</Badge> : null}
+              </div>
+              <Badge variant="outline">Actor: {event.actor_id}</Badge>
             </div>
-            <Badge variant="outline">{event.actor_id}</Badge>
+            <dl className="mt-2 grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+              <AuditMeta label="Entidad" value={event.entity_type} />
+              <AuditMeta label="Fecha" value={formatDateTime(event.created_at)} />
+              {event.request_method && event.request_path ? (
+                <AuditMeta label="Ruta" value={`${event.request_method} ${event.request_path}`} />
+              ) : null}
+              {event.correlation_id ? <AuditMeta label="Correlacion" value={event.correlation_id} /> : null}
+            </dl>
+            <AuditChangeSummary data={event.extra_data} />
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {event.entity_type} - {formatDateTime(event.created_at)}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            {event.correlation_id ? <Badge variant="outline">{event.correlation_id}</Badge> : null}
-            {event.request_method && event.request_path ? (
-              <span>
-                {event.request_method} {event.request_path}
-              </span>
-            ) : null}
-          </div>
-          <AuditChangeSummary data={event.extra_data} />
-        </div>
         );
       })}
+    </div>
+  );
+}
+
+function AuditSummary({
+  counts,
+  activeFilter,
+  onFilterChange,
+}: {
+  counts: Record<AuditFilter, number>;
+  activeFilter: AuditFilter;
+  onFilterChange: (filter: AuditFilter) => void;
+}) {
+  const filters: { value: AuditFilter; label: string }[] = [
+    { value: "todos", label: "Todos" },
+    { value: "lectura", label: "Lecturas" },
+    { value: "escritura", label: "Escrituras" },
+  ];
+
+  return (
+    <div className="flex flex-col gap-3 rounded-md border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap gap-2 text-xs">
+        <AuditCount label="Total" value={counts.todos} />
+        <AuditCount label="Lecturas" value={counts.lectura} />
+        <AuditCount label="Escrituras" value={counts.escritura} />
+      </div>
+      <div className="flex flex-wrap gap-2" aria-label="Filtro de eventos de auditoria">
+        {filters.map((filter) => (
+          <Button
+            key={filter.value}
+            type="button"
+            size="sm"
+            variant={activeFilter === filter.value ? "default" : "outline"}
+            aria-pressed={activeFilter === filter.value}
+            onClick={() => onFilterChange(filter.value)}
+          >
+            {filter.label} {counts[filter.value]}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AuditCount({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="rounded-md border bg-background px-2 py-1 font-medium text-foreground">
+      {label}: {value}
+    </span>
+  );
+}
+
+function AuditMeta({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <dt className="font-medium text-foreground">{label}</dt>
+      <dd className="break-all">{value}</dd>
     </div>
   );
 }
