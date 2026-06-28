@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/clinical/states";
 import { Badge } from "@/components/ui/badge";
 import type { Medication, MedicationMissingField } from "@/lib/types";
 
-const MEDICATION_SAFE_READ_COPY = "Lectura clínica. No receta. No dispensación. No MAR.";
+const MEDICATION_SAFE_READ_COPY = "Lectura clinica. No receta. No dispensacion. No MAR.";
 
 const MEDICATION_MISSING_FIELD_LABELS: Record<MedicationMissingField, string> = {
   dose: "dosis",
@@ -22,6 +22,9 @@ export function MedicationList({ medications }: { medications: Medication[] }) {
 
   return (
     <div className="space-y-2" role="list" aria-label="Medicacion segura de lectura">
+      <p className="rounded-md border border-dashed bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
+        {MEDICATION_SAFE_READ_COPY}
+      </p>
       {medications.map((medication) => {
         const missingFields = medication.missing_fields ?? [];
         const missingLabels = missingFields.map((field) => MEDICATION_MISSING_FIELD_LABELS[field]);
@@ -59,9 +62,6 @@ export function MedicationList({ medications }: { medications: Medication[] }) {
                   : "Sin faltantes declarados"}
               </Badge>
             </div>
-            <p className="mt-3 rounded-md border border-dashed bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
-              {MEDICATION_SAFE_READ_COPY}
-            </p>
           </article>
         );
       })}

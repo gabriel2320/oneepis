@@ -49,8 +49,6 @@ export function PatientFichaWorkspace({
       <CriticalAlerts record={record} />
       <VitalsStrip vital={record.latest_vitals} />
       <PatientFichaHeader patientId={patientId} record={record} canEditPatient={canEditPatient} />
-      <PatientLongitudinalSummary record={record} />
-      <PatientLongitudinalMap record={record} />
       <ClinicalWorkspaceLayout
         aside={
           <FichaContextRail
@@ -77,6 +75,8 @@ export function PatientFichaWorkspace({
         <PatientAntecedentsPreview patientId={patientId} record={record} />
         <FullTimelinePreview patientId={patientId} />
       </ClinicalWorkspaceLayout>
+      <PatientLongitudinalSummary record={record} />
+      <PatientLongitudinalMap record={record} />
     </div>
   );
 }

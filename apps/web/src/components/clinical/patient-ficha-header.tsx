@@ -1,11 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { careContextLabel, clinicalStatusLabel } from "@/lib/patient-display";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 import { formatDateTime } from "./date-format";
@@ -20,31 +18,34 @@ export function PatientFichaHeader({
   record: PatientRecordSnapshot;
   canEditPatient: boolean;
 }) {
-  const patient = record.patient;
-  const fullName = [patient.first_name, patient.last_name].filter(Boolean).join(" ");
   const severeAllergies = record.active_allergies.filter((item) => item.severity === "severe");
   const lastEntry = record.recent_entries[0] ?? null;
+  const incompleteMedicationCount = record.active_medications.filter(
+    (item) => (item.missing_fields ?? []).length > 0,
+  ).length;
 
   return (
     <div className="rounded-md border bg-card p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 space-y-1">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Hoja clinica viva</p>
-          <p className="text-lg font-semibold text-foreground">{fullName}</p>
-          <p className="text-xs text-muted-foreground">
-            {patient.clinical_identifier ?? "Sin identificador"} · {sexLabel(patient.sex_at_birth)} ·
-            Nacimiento {patient.birth_date}
+          <p className="text-sm text-muted-foreground">
+            Conteos para revisar sin duplicar las listas clinicas del rail.
           </p>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Badge variant="outline">{clinicalStatusLabel(patient.clinical_status)}</Badge>
-            <Badge variant="outline">{careContextLabel(patient.current_care_context)}</Badge>
+          <div className="flex flex-wrap items-center gap-2 pt-2">
+            <FichaHeaderChip label="Problemas" value={`${record.active_problems.length}`} />
             {severeAllergies.length > 0 ? (
               <Badge variant="warning">
-                Alergias criticas: {severeAllergies.map((item) => item.substance).join(", ")}
+                Alergias {record.active_allergies.length} / {severeAllergies.length} criticas
               </Badge>
             ) : (
-              <Badge variant="outline">Sin alergias criticas</Badge>
+              <FichaHeaderChip label="Alergias" value={`${record.active_allergies.length}`} />
             )}
+            <FichaHeaderChip
+              label="Medicamentos"
+              value={`${record.active_medications.length} / ${incompleteMedicationCount} incompletos`}
+            />
+            <FichaHeaderChip label="Evoluciones" value={`${record.recent_entries.length}`} />
           </div>
         </div>
         <div className="flex flex-wrap gap-2" data-print-hidden="true">
@@ -60,40 +61,18 @@ export function PatientFichaHeader({
           </Button>
         </div>
       </div>
-      <dl className="mt-3 grid gap-3 border-t pt-3 sm:grid-cols-3">
-        <HeaderFact label="Problemas activos">
-          {record.active_problems.length === 0
-            ? "Sin antecedentes activos"
-            : record.active_problems.map((item) => item.title).join(", ")}
-        </HeaderFact>
-        <HeaderFact label="Medicacion vigente">
-          {record.active_medications.length === 0
-            ? "Sin medicacion activa"
-            : record.active_medications.map((item) => item.name).join(", ")}
-        </HeaderFact>
-        <HeaderFact label="Ultima atencion">
-          {lastEntry ? `${lastEntry.title} · ${formatDateTime(lastEntry.occurred_at)}` : "Sin registros"}
-        </HeaderFact>
-      </dl>
+      <p className="mt-3 border-t pt-3 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Ultima atencion: </span>
+        {lastEntry ? `${lastEntry.title} - ${formatDateTime(lastEntry.occurred_at)}` : "Sin registros"}
+      </p>
     </div>
   );
 }
 
-function HeaderFact({ label, children }: { label: string; children: ReactNode }) {
+function FichaHeaderChip({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-sm text-foreground">{children}</dd>
-    </div>
+    <Badge variant="outline">
+      {label} {value}
+    </Badge>
   );
-}
-
-function sexLabel(sex: string) {
-  const labels: Record<string, string> = {
-    male: "Masculino",
-    female: "Femenino",
-    intersex: "Intersexual",
-    unknown: "Sexo sin dato",
-  };
-  return labels[sex] ?? "Sexo sin dato";
 }
