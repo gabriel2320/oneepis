@@ -6,6 +6,7 @@ const args = [
   playwrightCli,
   "test",
   "tests/e2e/assistant-read-real.spec.ts",
+  "tests/e2e/audit-events-real.spec.ts",
   "tests/e2e/medication-vademecum-real.spec.ts",
   "tests/e2e/clinical-permissions-real.spec.ts",
   "--project=chromium",

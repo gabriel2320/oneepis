@@ -1,6 +1,6 @@
 # Current State
 
-Fecha: 2026-06-27
+Fecha: 2026-06-28
 
 Este documento es estado operativo vigente, no historial. El historial
 cronologico vive en `docs/ROADMAP.md`; los reportes fechados son snapshots y no
@@ -26,6 +26,9 @@ fuente canonica viva.
 - Base HIS minima (#107-#109): Vercel git deploys desactivados en PRs;
   lecturas de ficha/paciente auditadas con `AuditEvent`, dedupe por ventana
   corta y auditoria UI que distingue lectura/escritura sin rutas nuevas.
+- Auditoria de paciente reforzada (Dev-126): `/pacientes/[patientId]/auditoria`
+  resume total, lecturas y escrituras, filtra localmente y mantiene actor, ruta
+  y `correlation_id` visibles sin endpoint ni contrato nuevo.
 - Logs PHI-safe backend (#110): sanitizador reutilizable para estructuras y
   strings planos, con filtro de logging activo al arrancar la API; sin
   Sentry/OTel ni observabilidad productiva.
@@ -43,6 +46,8 @@ fuente canonica viva.
   copy explicito de no receta/no dispensacion/no MAR. El E2E bloquea etiquetas
   positivas exactas de receta, firma, dispensacion, administracion, MAR y orden
   ejecutable fuera de contexto bloqueado/futuro.
+- Ficha anti-dashboard compactada (#124): el resumen superior quedo como strip
+  clinico sobrio; la linea clinica longitudinal sigue siendo el cuerpo principal.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -62,18 +67,19 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Auditar ficha anti-dashboard antes de agregar nuevos datos: compactar solo si
-los paneles secundarios compiten con la linea clinica longitudinal. No agregar
-rutas, fuentes, paneles ni claims HIS; la ficha debe seguir centrada en paciente,
-no olvidar, revisar y borradores/no ejecutable.
+Walkthrough minimo de ficha solo si consolida assertions existentes: recorrer
+un paciente ficticio por identidad, linea clinica, medicacion segura, fuente de
+laboratorio, orden borrador y auditoria. No agregar datos, rutas ni paneles.
 
 Criterio de exito:
 
-- La linea clinica longitudinal sigue siendo el cuerpo principal de `/ficha`.
-- Medicacion, ordenes, riesgos, labs e IA permanecen como contexto secundario.
+- Una prueba o gate reemplaza fragilidad dispersa por un flujo humano unico.
+- La ficha sigue centrada en paciente, no olvidar, revisar y borradores/no
+  ejecutable.
+- Auditoria distingue acceso/lectura/escritura sin claim de logs seguros ni
+  cumplimiento legal completo.
 - No aparecen etiquetas positivas de receta, firma, dispensacion,
   administracion, MAR u orden ejecutable.
-- Si se compacta UI, no se agregan datos nuevos ni rutas nuevas.
 
 Criterio de no-hacer:
 
