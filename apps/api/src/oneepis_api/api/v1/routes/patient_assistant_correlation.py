@@ -34,7 +34,10 @@ def correlate_assistant_read_layer(
     vitals = list(
         session.scalars(
             select(VitalSign)
-            .where(VitalSign.patient_id == patient_id)
+            .where(
+                VitalSign.patient_id == patient_id,
+                VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+            )
             .order_by(VitalSign.measured_at.desc())
             .limit(query_limit)
         )

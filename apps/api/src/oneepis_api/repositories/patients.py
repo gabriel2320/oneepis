@@ -86,7 +86,10 @@ def get_diagnosis_events(session: Session, patient_id: uuid.UUID) -> list[Clinic
 def get_latest_vitals(session: Session, patient_id: uuid.UUID) -> VitalSign | None:
     statement = (
         select(VitalSign)
-        .where(VitalSign.patient_id == patient_id)
+        .where(
+            VitalSign.patient_id == patient_id,
+            VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+        )
         .order_by(VitalSign.measured_at.desc())
         .limit(1)
     )
@@ -98,7 +101,10 @@ def get_recent_vitals(
 ) -> list[VitalSign]:
     statement = (
         select(VitalSign)
-        .where(VitalSign.patient_id == patient_id)
+        .where(
+            VitalSign.patient_id == patient_id,
+            VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+        )
         .order_by(VitalSign.measured_at.desc())
         .limit(limit)
     )

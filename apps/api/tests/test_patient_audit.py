@@ -1,4 +1,11 @@
+import uuid
+
 from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from oneepis_api.db.session import get_session
+from oneepis_api.main import app
+from oneepis_api.models.clinical_record import RecordStatus, VitalSign
 
 
 def test_audit_events_include_correlation_and_before_after(
@@ -131,6 +138,17 @@ def test_vital_sign_audit_uses_structural_allowlist(
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
+    blocked_create = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-20T11:00:00Z",
+            "status": "entered_in_error",
+            "heart_rate_bpm": 70,
+        },
+    )
+    assert blocked_create.status_code == 422
+
     create_response = client.post(
         f"/api/v1/patients/{patient_id}/vital-signs",
         headers=auth,
@@ -145,7 +163,14 @@ def test_vital_sign_audit_uses_structural_allowlist(
         },
     )
     assert create_response.status_code == 201
+    assert create_response.json()["status"] == "active"
     vital_id = create_response.json()["id"]
+    blocked_patch = client.patch(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
+        headers=auth,
+        json={"status": "entered_in_error"},
+    )
+    assert blocked_patch.status_code == 422
 
     update_response = client.patch(
         f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
@@ -163,15 +188,58 @@ def test_vital_sign_audit_uses_structural_allowlist(
         headers=auth,
     )
     assert delete_response.status_code == 204
+    assert _vital_sign_status(vital_id) == RecordStatus.ENTERED_IN_ERROR
+
+    list_response = client.get(f"/api/v1/patients/{patient_id}/vital-signs", headers=auth)
+    detail_response = client.get(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
+        headers=auth,
+    )
+    record_response = client.get(f"/api/v1/patients/{patient_id}/record", headers=auth)
+    assistant_timeline_response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/timeline",
+        headers=auth,
+    )
+    assistant_search_response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/search?q=clinica",
+        headers=auth,
+    )
+    assistant_chart_response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=auth,
+        json={"series": ["heart_rate_bpm"]},
+    )
+    second_delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
+        headers=auth,
+    )
+
+    assert list_response.status_code == 200
+    assert list_response.json() == []
+    assert detail_response.status_code == 404
+    assert record_response.status_code == 200
+    assert record_response.json()["latest_vitals"] is None
+    assert assistant_timeline_response.status_code == 200
+    assert all(
+        item["item_id"] != vital_id for item in assistant_timeline_response.json()["items"]
+    )
+    assert assistant_search_response.status_code == 200
+    assert assistant_search_response.json()["results"] == []
+    assert assistant_chart_response.status_code == 200
+    assert assistant_chart_response.json()["series"] == []
+    assert second_delete_response.status_code == 404
 
     events = audit_events_for_patient(patient_id)
     created = next(item for item in events if item["action"] == "vital_sign.created")
     updated = next(item for item in events if item["action"] == "vital_sign.updated")
-    deleted = next(item for item in events if item["action"] == "vital_sign.deleted")
+    entered_in_error = next(
+        item for item in events if item["action"] == "vital_sign.entered_in_error"
+    )
     created_after = created["extra_data"]["after"]
     assert created_after["patient_id"] == patient_id
     assert created_after["measured_at"].startswith("2026-06-20T12:00:00")
-    assert set(created_after) == {"patient_id", "measured_at"}
+    assert created_after["status"] == "active"
+    assert set(created_after) == {"patient_id", "measured_at", "status"}
     assert updated["extra_data"]["fields"] == [
         "heart_rate_bpm",
         "notes",
@@ -179,14 +247,27 @@ def test_vital_sign_audit_uses_structural_allowlist(
     ]
     assert updated["extra_data"]["before"] == {}
     assert updated["extra_data"]["after"] == {}
-    deleted_before = deleted["extra_data"]["before"]
-    assert deleted_before["patient_id"] == patient_id
-    assert deleted_before["measured_at"].startswith("2026-06-20T12:00:00")
-    assert set(deleted_before) == {"patient_id", "measured_at"}
-    audit_text = str([created["extra_data"], updated["extra_data"], deleted["extra_data"]])
+    assert entered_in_error["extra_data"]["before"] == {"status": "active"}
+    assert entered_in_error["extra_data"]["after"] == {"status": "entered_in_error"}
+    assert entered_in_error["extra_data"]["reason_code"] == "entered_in_error"
+    audit_text = str(
+        [created["extra_data"], updated["extra_data"], entered_in_error["extra_data"]]
+    )
     assert "temperature_c" not in audit_text
     assert "systolic_bp" not in audit_text
     assert "diastolic_bp" not in audit_text
     assert "heart_rate_bpm" in audit_text
     assert "oxygen_saturation_pct" in audit_text
     assert "Nota clinica" not in audit_text
+
+
+def _vital_sign_status(vital_id: str) -> RecordStatus:
+    override_session = app.dependency_overrides[get_session]
+    session_iterator = override_session()
+    session = next(session_iterator)
+    try:
+        vital = session.scalar(select(VitalSign).where(VitalSign.id == uuid.UUID(vital_id)))
+        assert vital is not None
+        return vital.status
+    finally:
+        session_iterator.close()

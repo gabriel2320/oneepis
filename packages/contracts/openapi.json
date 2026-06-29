@@ -16650,6 +16650,10 @@
             "format": "date-time",
             "title": "Measured At"
           },
+          "status": {
+            "$ref": "#/components/schemas/RecordStatus",
+            "default": "active"
+          },
           "temperature_c": {
             "anyOf": [
               {
@@ -16759,6 +16763,10 @@
             "type": "string",
             "format": "date-time",
             "title": "Measured At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RecordStatus",
+            "default": "active"
           },
           "temperature_c": {
             "anyOf": [
@@ -16892,6 +16900,16 @@
               }
             ],
             "title": "Measured At"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "temperature_c": {
             "anyOf": [

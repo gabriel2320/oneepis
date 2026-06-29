@@ -165,7 +165,11 @@ def _search_vitals(session, patient_id: uuid.UUID, pattern: str, limit: int):
     return list(
         session.scalars(
             select(VitalSign)
-            .where(VitalSign.patient_id == patient_id, match_columns(pattern, VitalSign.notes))
+            .where(
+                VitalSign.patient_id == patient_id,
+                VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+                match_columns(pattern, VitalSign.notes),
+            )
             .order_by(VitalSign.measured_at.desc())
             .limit(limit)
         )
