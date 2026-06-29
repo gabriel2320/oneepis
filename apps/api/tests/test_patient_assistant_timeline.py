@@ -140,10 +140,23 @@ def test_assistant_timeline_reads_historical_diagnoses_as_context_without_writin
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient(client, auth, first_name="Assistant", last_name="Historico")
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso con antecedente historico",
+            "started_at": "2026-06-20T08:00:00Z",
+        },
+    )
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
     diagnosis_response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-events",
         headers=auth,
         json={
+            "encounter_id": encounter_id,
             "event_type": "diagnosis",
             "occurred_at": "2023-04-10T09:00:00Z",
             "summary": "Neumonia resuelta en control previo",
@@ -180,6 +193,10 @@ def test_assistant_timeline_reads_historical_diagnoses_as_context_without_writin
         "Historia clinica previa: No equivale a problema activo actual. (CIE-10: J18.9)"
     )
     assert historical_item["source_path"].endswith("/clinical-events/" + event_id)
+    assert historical_item["encounter_id"] == encounter_id
+    assert historical_item["encounter_type"] == "hospitalization"
+    assert historical_item["encounter_status"] == "in_progress"
+    assert historical_item["scope"] == "hospitalization"
     assert all(item["source_label"] != "historical_diagnoses" for item in payload["items"])
     assert [item["item_id"] for item in payload["items"]].count(event_id) == 1
     after_audit = audit_events(client, auth, patient_id)
