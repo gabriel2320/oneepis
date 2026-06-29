@@ -16,6 +16,7 @@ from oneepis_api.models.clinical_record import (
     VitalSign,
 )
 from oneepis_api.schemas.clinical_record import AssistantTimelineItem, AssistantTimelineResponse
+from oneepis_api.schemas.patient import HistoricalDiagnosisRead
 
 from .patient_assistant_common import (
     clinical_event_source_path,
@@ -26,6 +27,7 @@ from .patient_assistant_common import (
     vital_summary,
 )
 from .patient_assistant_lab_timeline import fetch_lab_results_for_timeline, lab_timeline_items
+from .patient_historical_diagnoses import historical_diagnoses_from_events
 from .patient_shared import LimitQuery, SessionDep, require_patient
 
 router = APIRouter()
@@ -77,10 +79,14 @@ def get_assistant_timeline(
         )
     )
     lab_results = fetch_lab_results_for_timeline(session, patient_id, query_limit)
+    historical_diagnoses = historical_diagnoses_from_events(events)
+    historical_event_ids = {diagnosis.source_event_id for diagnosis in historical_diagnoses}
+    timeline_events = [event for event in events if event.id not in historical_event_ids]
     items = [
         *_encounter_items(patient_id, encounters),
         *_entry_items(patient_id, entries),
-        *_event_items(patient_id, events),
+        *_event_items(patient_id, timeline_events),
+        *_historical_diagnosis_items(patient_id, historical_diagnoses),
         *_vital_items(patient_id, vitals),
         *_medication_items(patient_id, medications),
         *_problem_items(patient_id, problems),
@@ -184,6 +190,24 @@ def _event_items(patient_id: uuid.UUID, events: list[ClinicalEvent]) -> list[Ass
     ]
 
 
+def _historical_diagnosis_items(
+    patient_id: uuid.UUID,
+    diagnoses: list[HistoricalDiagnosisRead],
+) -> list[AssistantTimelineItem]:
+    return [
+        AssistantTimelineItem(
+            item_type="clinical_event",
+            item_id=diagnosis.source_event_id,
+            occurred_at=diagnosis.occurred_at,
+            label=diagnosis.title,
+            summary=_historical_diagnosis_summary(diagnosis),
+            source_label="historical_diagnoses",
+            source_path=clinical_event_source_path(patient_id, diagnosis.source_event_id),
+        )
+        for diagnosis in diagnoses
+    ]
+
+
 def _vital_items(patient_id: uuid.UUID, vitals: list[VitalSign]) -> list[AssistantTimelineItem]:
     return [
         AssistantTimelineItem(
@@ -248,6 +272,11 @@ def _allergy_items(patient_id: uuid.UUID, allergies: list[Allergy]) -> list[Assi
         )
         for allergy in allergies
     ]
+
+
+def _historical_diagnosis_summary(diagnosis: HistoricalDiagnosisRead) -> str:
+    code = f" ({diagnosis.code_system or 'Codigo'}: {diagnosis.code})" if diagnosis.code else ""
+    return truncate(f"{diagnosis.source_label}: {diagnosis.limit}{code}")
 
 
 def _missing_data(
