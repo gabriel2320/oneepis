@@ -93,6 +93,7 @@ export const demoScenarioRecords: PatientRecordSnapshot[] = [
         updated_at: "2026-06-22T08:20:00Z",
       },
     ],
+    historical_diagnoses: [],
     recent_entries: [
       {
         id: "54444444-4444-4444-8444-444444444444",
@@ -177,6 +178,7 @@ export const demoScenarioRecords: PatientRecordSnapshot[] = [
         updated_at: "2026-06-23T13:15:00Z",
       },
     ],
+    historical_diagnoses: [],
     recent_entries: [
       {
         id: "55555555-5555-4555-8555-555555555555",
@@ -242,6 +244,7 @@ export const demoScenarioRecords: PatientRecordSnapshot[] = [
         updated_at: "2026-06-24T10:00:00Z",
       },
     ],
+    historical_diagnoses: [],
     recent_entries: [
       {
         id: "56666666-6666-4666-8666-666666666666",

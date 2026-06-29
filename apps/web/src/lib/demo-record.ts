@@ -84,6 +84,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
         updated_at: "2026-06-20T10:10:00Z",
       },
     ],
+    historical_diagnoses: [],
     recent_entries: [
       {
         id: "51111111-1111-4111-8111-111111111111",
@@ -139,6 +140,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
     active_allergies: [],
     active_medications: [],
     active_problems: [],
+    historical_diagnoses: [],
     recent_entries: [
       {
         id: "62222222-2222-4222-8222-222222222222",
@@ -177,6 +179,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
     active_allergies: [],
     active_medications: [],
     active_problems: [],
+    historical_diagnoses: [],
     recent_entries: [],
   },
   ...demoScenarioRecords,
