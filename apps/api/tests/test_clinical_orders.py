@@ -64,6 +64,7 @@ def test_clinical_order_create_list_update_cancel_and_audit(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -130,9 +131,7 @@ def test_clinical_order_create_list_update_cancel_and_audit(
     )
     assert locked_update_response.status_code == 409
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
-    events = audit_response.json()
+    events = audit_events_for_patient(patient_id)
     assert any(item["action"] == "clinical_order.created" for item in events)
     cancel_event = next(
         item

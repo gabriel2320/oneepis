@@ -48,6 +48,7 @@ def test_patient_read_audit_dedupes_repeated_same_route_reads(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -68,8 +69,14 @@ def test_patient_read_audit_dedupes_repeated_same_route_reads(
     assert record_reads[0]["correlation_id"] == "dedupe-read-001"
     assert record_reads[0]["request_method"] == "GET"
     assert record_reads[0]["request_path"] == f"/api/v1/patients/{patient_id}/record"
-    assert record_reads[0]["extra_data"]["deduped_count"] == 2
-    assert record_reads[0]["extra_data"]["last_correlation_id"] == "dedupe-read-003"
+    assert "extra_data" not in record_reads[0]
+    raw_record_reads = [
+        item
+        for item in audit_events_for_patient(patient_id)
+        if item["action"] == "record.read"
+    ]
+    assert raw_record_reads[0]["extra_data"]["deduped_count"] == 2
+    assert raw_record_reads[0]["extra_data"]["last_correlation_id"] == "dedupe-read-003"
 
 
 def test_patient_audit_events_filter_by_patient_before_limit(

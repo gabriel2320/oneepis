@@ -5,6 +5,7 @@ def test_hospital_bed_assignment_enriches_board_and_audit(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -48,12 +49,10 @@ def test_hospital_bed_assignment_enriches_board_and_audit(
     assert board_payload[0]["bed"]["id"] == bed_payload["id"]
     assert board_payload[0]["bed"]["room"] == "301"
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
     assert any(
         event["action"] == "hospital_bed.created"
         and event["extra_data"]["encounter_id"] == encounter_id
-        for event in audit_response.json()
+        for event in audit_events_for_patient(patient_id)
     )
 
 
@@ -107,6 +106,7 @@ def test_hospital_bed_can_be_assigned_released_and_reassigned(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     first_patient_id = create_patient_for_permissions(client, auth)
@@ -191,16 +191,11 @@ def test_hospital_bed_can_be_assigned_released_and_reassigned(
     assert release_response.status_code == 200
     assert release_response.json()["encounter_id"] is None
 
-    first_audit_response = client.get(
-        f"/api/v1/patients/{first_patient_id}/audit-events",
-        headers=auth,
-    )
-    assert first_audit_response.status_code == 200
     assert any(
         event["action"] == "hospital_bed.updated"
         and event["extra_data"]["encounter_id"] == first_encounter_id
         and event["extra_data"]["after"]["encounter_id"] is None
-        for event in first_audit_response.json()
+        for event in audit_events_for_patient(first_patient_id)
     )
 
     reassignment_response = client.patch(

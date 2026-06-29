@@ -18,3 +18,15 @@ class AuditEventRead(APIModel):
     request_path: str | None = None
     extra_data: dict[str, Any]
     created_at: datetime
+
+
+class AuditEventPublicRead(APIModel):
+    id: uuid.UUID
+    action: str
+    entity_type: str
+    entity_id: uuid.UUID | None
+    actor_id: str
+    correlation_id: str | None = None
+    request_method: str | None = None
+    request_path: str | None = None
+    created_at: datetime

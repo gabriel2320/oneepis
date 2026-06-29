@@ -155,7 +155,6 @@ const auditEvents = [
     correlation_id: "corr-patient-1",
     request_method: "GET",
     request_path: `/api/v1/patients/${patientId}`,
-    extra_data: {},
     created_at: "2026-06-20T10:15:00Z",
   },
   {
@@ -167,7 +166,6 @@ const auditEvents = [
     correlation_id: "corr-read-1",
     request_method: "GET",
     request_path: `/api/v1/patients/${patientId}/record`,
-    extra_data: {},
     created_at: "2026-06-20T10:18:00Z",
   },
   {
@@ -179,11 +177,6 @@ const auditEvents = [
     correlation_id: "corr-write-1",
     request_method: "POST",
     request_path: `/api/v1/patients/${patientId}/clinical-entries`,
-    extra_data: {
-      after: {
-        status: "draft",
-      },
-    },
     created_at: "2026-06-20T10:20:00Z",
   },
   {
@@ -195,14 +188,6 @@ const auditEvents = [
     correlation_id: "corr-write-2",
     request_method: "PATCH",
     request_path: `/api/v1/patients/${patientId}`,
-    extra_data: {
-      before: {
-        current_care_context: "unknown",
-      },
-      after: {
-        current_care_context: "ambulatory",
-      },
-    },
     created_at: "2026-06-20T10:25:00Z",
   },
 ];

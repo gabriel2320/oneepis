@@ -6488,7 +6488,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/AuditEventRead"
+                    "$ref": "#/components/schemas/AuditEventPublicRead"
                   },
                   "title": "Response List Patient Audit Events Api V1 Patients  Patient Id  Audit Events Get"
                 }
@@ -9418,7 +9418,7 @@
         ],
         "title": "AssistantTimelineResponse"
       },
-      "AuditEventRead": {
+      "AuditEventPublicRead": {
         "properties": {
           "id": {
             "type": "string",
@@ -9482,11 +9482,6 @@
             ],
             "title": "Request Path"
           },
-          "extra_data": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Extra Data"
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -9500,10 +9495,9 @@
           "entity_type",
           "entity_id",
           "actor_id",
-          "extra_data",
           "created_at"
         ],
-        "title": "AuditEventRead"
+        "title": "AuditEventPublicRead"
       },
       "AuthRequestAccepted": {
         "properties": {

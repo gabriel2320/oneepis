@@ -88,7 +88,6 @@ export function AuditTimeline({ events }: { events: AuditEvent[] }) {
               ) : null}
               {event.correlation_id ? <AuditMeta label="Correlacion" value={event.correlation_id} /> : null}
             </dl>
-            <AuditChangeSummary data={event.extra_data} />
           </div>
         );
       })}
@@ -151,24 +150,4 @@ function AuditMeta({ label, value }: { label: string; value: string }) {
       <dd className="break-all">{value}</dd>
     </div>
   );
-}
-
-function AuditChangeSummary({ data }: { data: Record<string, unknown> }) {
-  const before = isRecord(data.before) ? data.before : null;
-  const after = isRecord(data.after) ? data.after : null;
-
-  if (!before && !after) {
-    return null;
-  }
-
-  return (
-    <div className="mt-2 rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">
-      {before ? <p>Antes: {JSON.stringify(before)}</p> : null}
-      {after ? <p>Despues: {JSON.stringify(after)}</p> : null}
-    </div>
-  );
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

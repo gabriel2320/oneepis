@@ -5,6 +5,7 @@ def test_audit_events_include_correlation_and_before_after(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -20,10 +21,18 @@ def test_audit_events_include_correlation_and_before_after(
 
     audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
     assert audit_response.status_code == 200
-    patient_update = next(
+    public_patient_update = next(
         item for item in audit_response.json() if item["action"] == "patient.updated"
     )
 
+    assert "extra_data" not in public_patient_update
+    assert public_patient_update["correlation_id"] == "corr-test-001"
+    assert public_patient_update["request_method"] == "PATCH"
+    assert public_patient_update["request_path"] == f"/api/v1/patients/{patient_id}"
+
+    patient_update = next(
+        item for item in audit_events_for_patient(patient_id) if item["action"] == "patient.updated"
+    )
     assert patient_update["correlation_id"] == "corr-test-001"
     assert patient_update["request_method"] == "PATCH"
     assert patient_update["request_path"] == f"/api/v1/patients/{patient_id}"
@@ -35,6 +44,7 @@ def test_patient_status_and_problem_update_are_audited(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -72,10 +82,10 @@ def test_patient_status_and_problem_update_are_audited(
     assert list_response.status_code == 200
     assert list_response.json() == []
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
     problem_update = next(
-        item for item in audit_response.json() if item["action"] == "problem.updated"
+        item
+        for item in audit_events_for_patient(patient_id)
+        if item["action"] == "problem.updated"
     )
     assert problem_update["extra_data"]["before"] == {
         "status": "active",

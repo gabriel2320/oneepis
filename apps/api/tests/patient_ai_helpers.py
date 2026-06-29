@@ -1,4 +1,11 @@
+import uuid
+
 from fastapi.testclient import TestClient
+from sqlalchemy import or_, select
+
+from oneepis_api.db.session import get_session
+from oneepis_api.main import app
+from oneepis_api.models.audit import AuditEvent
 
 
 def create_patient(
@@ -165,12 +172,38 @@ def create_lab_panel(
 
 
 def audit_events(client: TestClient, auth: dict[str, str], patient_id: str) -> list[dict]:
-    response = client.get(
-        f"/api/v1/patients/{patient_id}/audit-events",
-        headers=auth,
-    )
-    assert response.status_code == 200
-    return response.json()
+    override_session = app.dependency_overrides[get_session]
+    session_iterator = override_session()
+    session = next(session_iterator)
+    try:
+        patient_uuid = uuid.UUID(patient_id)
+        statement = (
+            select(AuditEvent)
+            .where(
+                or_(
+                    AuditEvent.entity_id == patient_uuid,
+                    AuditEvent.extra_data["patient_id"].as_string() == patient_id,
+                )
+            )
+            .order_by(AuditEvent.created_at.desc())
+        )
+        return [
+            {
+                "id": str(event.id),
+                "action": event.action,
+                "entity_type": event.entity_type,
+                "entity_id": str(event.entity_id) if event.entity_id else None,
+                "actor_id": event.actor_id,
+                "correlation_id": event.correlation_id,
+                "request_method": event.request_method,
+                "request_path": event.request_path,
+                "extra_data": event.extra_data,
+                "created_at": event.created_at.isoformat(),
+            }
+            for event in session.scalars(statement).all()
+        ]
+    finally:
+        session_iterator.close()
 
 
 def first_event_proposal_from_entry(
