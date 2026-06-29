@@ -34,6 +34,13 @@ router = APIRouter(
 )
 SessionDep = Annotated[Session, Depends(get_session)]
 LimitQuery = Annotated[int, Query(ge=1, le=100)]
+HOSPITAL_INDICATION_AUDIT_FIELDS = [
+    "created_by",
+    "encounter_id",
+    "indicated_at",
+    "patient_id",
+    "status",
+]
 
 
 @router.get("/patients/{patient_id}/indications", response_model=list[HospitalIndicationRead])
@@ -79,7 +86,7 @@ def create_hospital_indication(
         entity_id=indication.id,
         actor_id=actor,
         metadata=_indication_audit_metadata(indication),
-        after=audit_snapshot(indication),
+        after=audit_snapshot(indication, HOSPITAL_INDICATION_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(indication)
@@ -100,13 +107,18 @@ def update_hospital_indication(
     indication = _require_indication(session, patient_id, indication_id)
     _validate_indication_editable(indication)
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(indication, fields)
+    audit_fields = _indication_audit_fields(fields)
+    before = audit_snapshot(indication, audit_fields) if audit_fields else {}
     changed_fields = apply_update(indication, payload)
-    before_changed, after_changed = changed_field_snapshots(
-        before=before,
-        after_model=indication,
-        fields=changed_fields,
-    )
+    audit_changed_fields = _indication_audit_fields(changed_fields)
+    if audit_changed_fields:
+        before_changed, after_changed = changed_field_snapshots(
+            before=before,
+            after_model=indication,
+            fields=audit_changed_fields,
+        )
+    else:
+        before_changed, after_changed = {}, {}
     record_audit_event(
         session,
         action="hospital_indication.updated",
@@ -180,3 +192,7 @@ def _indication_audit_metadata(
     if fields is not None:
         metadata["fields"] = fields
     return metadata
+
+
+def _indication_audit_fields(fields: list[str]) -> list[str]:
+    return [field for field in fields if field in HOSPITAL_INDICATION_AUDIT_FIELDS]

@@ -71,7 +71,23 @@ def test_hospital_indication_create_list_update_close_and_audit(
     assert locked_update_response.status_code == 409
 
     events = audit_events_for_patient(patient_id)
-    assert any(item["action"] == "hospital_indication.created" for item in events)
+    create_event = next(item for item in events if item["action"] == "hospital_indication.created")
+    assert create_event["extra_data"]["after"]["status"] == "draft"
+    assert create_event["extra_data"]["after"]["encounter_id"] == encounter_id
+    assert "title" not in create_event["extra_data"]["after"]
+    assert "indication_text" not in create_event["extra_data"]["after"]
+    assert "rationale" not in create_event["extra_data"]["after"]
+    assert "safety_notes" not in create_event["extra_data"]["after"]
+    assert "Mantener observacion clinica" not in str(create_event["extra_data"])
+    title_event = next(
+        item
+        for item in events
+        if item["action"] == "hospital_indication.updated"
+        and item["extra_data"].get("fields") == ["title"]
+    )
+    assert title_event["extra_data"]["before"] == {}
+    assert title_event["extra_data"]["after"] == {}
+    assert "Indicacion actualizada" not in str(title_event["extra_data"])
     close_event = next(
         item
         for item in events
