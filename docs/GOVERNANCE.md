@@ -226,7 +226,9 @@ evitables que no deben repetirse:
 
 - El job `security-report` entrega senales de secretos, dependencias y analisis estatico sin mezclar politica clinica con producto.
 - Gitleaks es bloqueo duro: un secreto real, token, llave privada, muestra PHI o identificador clinico debe detener el PR y tratarse como incidente.
-- Dependency review, CodeQL, OSV npm advisory check y `pip-audit` quedan en modo reporte hasta que cada senal tenga politica de bloqueo y manejo de falsos positivos.
+- OSV npm advisory check bloquea hallazgos `high`/`critical` sin waiver explicito.
+- Dependency review, CodeQL y `pip-audit` quedan en modo reporte hasta que cada senal tenga politica de bloqueo y manejo de falsos positivos.
+- Frontend no puede usar `console.*` en `apps/web/src`; el guard PHI-safe falla antes de build para evitar logs clinicos en browser/CI.
 - El toolchain oficial es Node 22, npm 11.13.0 y Python 3.12.x; `npm run check:toolchain` debe fallar si local o CI se salen de esa matriz.
 - pnpm no es package manager activo. Cualquier migracion a pnpm debe ir en PR dedicado con lockfile, bootstrap, CI, docs y auditoria de dependencias actualizados en conjunto.
 - La alerta moderada `GHSA-qx2v-qp2m-jg93` de PostCSS anidado en `next@16.2.9` queda como waiver explicito mientras no exista parche estable de Next; no ejecutar `npm audit fix --force` si propone degradar o saltar a canary.

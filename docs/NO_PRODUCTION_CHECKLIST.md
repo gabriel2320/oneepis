@@ -10,8 +10,8 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 - Repositorio publico de desarrollo temprano.
 - Sin datos reales, PHI, secretos, dumps ni logs clinicos.
 - Gitleaks bloquea secretos/PHI en CI.
-- Dependency review, CodeQL, OSV npm advisory check y `pip-audit` son
-  report-only hasta politica explicita de bloqueo.
+- OSV npm advisory check bloquea hallazgos high/critical; dependency review,
+  CodeQL y `pip-audit` siguen report-only hasta politica explicita.
 
 ## Gates antes de produccion sanitaria
 
@@ -22,7 +22,7 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 | NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos |
 | NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental |
 | NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con dedupe de lecturas repetidas; falta cobertura operativa completa |
-| NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo para estructuras y strings planos; falta frontend/CI y revision operativa |
+| NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo y guard frontend/CI bloquea `console.*` en `apps/web/src`; falta observabilidad productiva formal |
 | NOPROD-SEC-007 | Control de acceso contextual | pendiente | institucion, equipo, relacion asistencial o motivo de acceso |
 | NOPROD-SEC-008 | Auth productiva | pendiente | usuarios persistentes, hash, sesiones robustas, recuperacion y revocacion |
 | NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones |

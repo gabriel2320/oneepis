@@ -141,9 +141,8 @@ jobs:
       - name: CodeQL analyze report
         uses: github/codeql-action/analyze@v3
         continue-on-error: true
-      - name: OSV npm advisory report
+      - name: OSV npm advisory high+ gate
         run: npm run check:npm-advisories
-        continue-on-error: true
       - name: pip-audit report
         run: |
           python -m pip install pip-audit
