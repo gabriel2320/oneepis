@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import PatientReadActorDep, VitalSignActorDep
-from oneepis_api.models.clinical_record import VitalSign
+from oneepis_api.models.clinical_record import RecordStatus, VitalSign
 from oneepis_api.schemas.clinical_record import VitalSignCreate, VitalSignRead, VitalSignUpdate
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 
@@ -22,7 +22,7 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
-VITAL_SIGN_AUDIT_FIELDS = ["patient_id", "measured_at"]
+VITAL_SIGN_AUDIT_FIELDS = ["patient_id", "measured_at", "status"]
 
 
 @router.get("/{patient_id}/vital-signs", response_model=list[VitalSignRead])
@@ -42,7 +42,10 @@ def list_vital_signs(
     )
     statement = (
         select(VitalSign)
-        .where(VitalSign.patient_id == patient_id)
+        .where(
+            VitalSign.patient_id == patient_id,
+            VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
+        )
         .order_by(VitalSign.measured_at.desc())
         .offset(offset)
         .limit(limit)
@@ -63,6 +66,7 @@ def create_vital_sign(
 ) -> VitalSign:
     require_patient(session, patient_id)
     vital = VitalSign(patient_id=patient_id, **payload.model_dump())
+    _reject_entered_in_error_status(vital.status)
     session.add(vital)
     session.flush()
     record_audit_event(
@@ -94,6 +98,8 @@ def get_vital_sign(
         patient_id,
         "Vital sign not found",
     )
+    if _vital_sign_is_hidden(vital):
+        raise _vital_sign_not_found()
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
@@ -119,6 +125,9 @@ def update_vital_sign(
         patient_id,
         "Vital sign not found",
     )
+    if _vital_sign_is_hidden(vital):
+        raise _vital_sign_not_found()
+    _reject_entered_in_error_status(payload.status)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
     audit_fields = _vital_sign_audit_fields(update_fields)
     before = audit_snapshot(vital, audit_fields) if audit_fields else {}
@@ -162,22 +171,41 @@ def delete_vital_sign(
         patient_id,
         "Vital sign not found",
     )
+    if _vital_sign_is_hidden(vital):
+        raise _vital_sign_not_found()
     record_audit_event(
         session,
-        action="vital_sign.deleted",
+        action="vital_sign.entered_in_error",
         entity_type="vital_sign",
         entity_id=vital.id,
         actor_id=actor,
-        metadata=_vital_sign_audit_metadata(vital),
-        before=audit_snapshot(vital, VITAL_SIGN_AUDIT_FIELDS),
+        metadata={**_vital_sign_audit_metadata(vital), "reason_code": "entered_in_error"},
+        before=audit_snapshot(vital, ["status"]),
+        after={"status": RecordStatus.ENTERED_IN_ERROR.value},
     )
-    session.delete(vital)
+    vital.status = RecordStatus.ENTERED_IN_ERROR
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 def _vital_sign_audit_fields(fields: list[str]) -> list[str]:
     return [field for field in fields if field in VITAL_SIGN_AUDIT_FIELDS]
+
+
+def _vital_sign_is_hidden(vital: VitalSign) -> bool:
+    return vital.status == RecordStatus.ENTERED_IN_ERROR
+
+
+def _reject_entered_in_error_status(status_value: RecordStatus | None) -> None:
+    if status_value == RecordStatus.ENTERED_IN_ERROR:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Use DELETE to mark a vital sign as entered in error",
+        )
+
+
+def _vital_sign_not_found() -> HTTPException:
+    return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vital sign not found")
 
 
 def _vital_sign_audit_metadata(

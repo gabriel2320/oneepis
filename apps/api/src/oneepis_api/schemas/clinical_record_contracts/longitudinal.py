@@ -162,6 +162,7 @@ class ClinicalEncounterRead(ClinicalEncounterBase):
 
 class VitalSignBase(APIModel):
     measured_at: datetime
+    status: RecordStatus = RecordStatus.ACTIVE
     temperature_c: Decimal | None = None
     systolic_bp: int | None = Field(default=None, ge=40, le=300)
     diastolic_bp: int | None = Field(default=None, ge=20, le=200)
@@ -177,6 +178,7 @@ class VitalSignCreate(VitalSignBase):
 
 class VitalSignUpdate(APIModel):
     measured_at: datetime | None = None
+    status: RecordStatus | None = None
     temperature_c: Decimal | None = None
     systolic_bp: int | None = Field(default=None, ge=40, le=300)
     diastolic_bp: int | None = Field(default=None, ge=20, le=200)
