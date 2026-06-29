@@ -44,6 +44,26 @@ class MedicationDoseRuleRead(MedicationSourceReference):
     updated_at: datetime
 
 
+class MedicationClinicalUse(APIModel):
+    indication: str = Field(max_length=200)
+    population: str | None = Field(default=None, max_length=80)
+    notes: str | None = Field(default=None, max_length=280)
+
+
+class MedicationInteractionAlert(APIModel):
+    substance: str = Field(max_length=160)
+    effect: str = Field(max_length=280)
+    recommendation: str | None = Field(default=None, max_length=280)
+    severity: MedicationDoseSeverity = MedicationDoseSeverity.WARNING
+
+
+class MedicationSafetyAlert(APIModel):
+    title: str = Field(max_length=160)
+    description: str = Field(max_length=320)
+    action: str | None = Field(default=None, max_length=280)
+    severity: MedicationDoseSeverity = MedicationDoseSeverity.WARNING
+
+
 class MedicationCatalogItemRead(MedicationSourceReference):
     id: uuid.UUID
     display_name: str = Field(max_length=160)
@@ -53,6 +73,11 @@ class MedicationCatalogItemRead(MedicationSourceReference):
     route: str | None = Field(default=None, max_length=80)
     status: MedicationCatalogStatus = MedicationCatalogStatus.AVAILABLE
     tags: list[str] = Field(default_factory=list)
+    clinical_uses: list[MedicationClinicalUse] = Field(default_factory=list)
+    administration_routes: list[str] = Field(default_factory=list)
+    interaction_alerts: list[MedicationInteractionAlert] = Field(default_factory=list)
+    safety_alerts: list[MedicationSafetyAlert] = Field(default_factory=list)
+    monitoring_notes: list[str] = Field(default_factory=list)
     dose_rules: list[MedicationDoseRuleRead] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime

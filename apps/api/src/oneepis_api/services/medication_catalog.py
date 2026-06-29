@@ -31,10 +31,49 @@ DEMO_ANALGESIC_RULE_ID = uuid.UUID("10000000-0000-4000-8000-000000000201")
 DEMO_CARDIO_ID = uuid.UUID("10000000-0000-4000-8000-000000000102")
 DEMO_CARDIO_RULE_ID = uuid.UUID("10000000-0000-4000-8000-000000000202")
 DEMO_SOURCE_LABEL = "Fixture demo OneEpis; no uso clinico"
+DEMO_ANALGESIC_DETAILS = {
+    "clinical_uses": [
+        {
+            "indication": "Dolor o fiebre demo",
+            "population": "adult_general_demo",
+            "notes": "Ejemplo no clinico para validar contrato y UI.",
+        }
+    ],
+    "administration_routes": ["oral"],
+    "interaction_alerts": [
+        {
+            "substance": "interaccion-demo",
+            "effect": "Ejemplo informativo; no evalua interacciones reales.",
+            "recommendation": "Requiere revision humana y fuente curada antes de uso clinico.",
+            "severity": MedicationDoseSeverity.WARNING.value,
+        }
+    ],
+    "safety_alerts": [
+        {
+            "title": "Alerta demo",
+            "description": "No usar como recomendacion clinica real.",
+            "action": "Mantener solo para desarrollo y pruebas.",
+            "severity": MedicationDoseSeverity.INFO.value,
+        }
+    ],
+    "monitoring_notes": ["Confirmar alergias, comorbilidades y fuente local antes de indicar."],
+}
+DEMO_CARDIO_DETAILS = {
+    **DEMO_ANALGESIC_DETAILS,
+    "clinical_uses": [
+        {
+            "indication": "Uso cardiovascular demo",
+            "population": "adult_general_demo",
+            "notes": "Ejemplo no clinico para validar busqueda y alertas.",
+        }
+    ],
+    "monitoring_notes": ["Verificar presion arterial y contexto clinico en regla revisada."],
+}
 
 
 def ensure_demo_medication_catalog(session: Session) -> None:
     if session.get(MedicationCatalogItem, DEMO_ANALGESIC_ID) is not None:
+        _ensure_demo_details(session)
         return
 
     analgesic = MedicationCatalogItem(
@@ -46,6 +85,7 @@ def ensure_demo_medication_catalog(session: Session) -> None:
         route="oral",
         status=MedicationCatalogStatus.AVAILABLE,
         tags=["dolor", "fiebre", "demo"],
+        **DEMO_ANALGESIC_DETAILS,
         source_system=MedicationSourceSystem.LOCAL_CURATED,
         source_label=DEMO_SOURCE_LABEL,
         curated_by="oneepis.demo",
@@ -77,6 +117,7 @@ def ensure_demo_medication_catalog(session: Session) -> None:
         route="oral",
         status=MedicationCatalogStatus.AVAILABLE,
         tags=["presion", "cardio", "demo"],
+        **DEMO_CARDIO_DETAILS,
         source_system=MedicationSourceSystem.LOCAL_CURATED,
         source_label=DEMO_SOURCE_LABEL,
         curated_by="oneepis.demo",
@@ -101,6 +142,19 @@ def ensure_demo_medication_catalog(session: Session) -> None:
     ]
     session.add_all([analgesic, cardio])
     session.flush()
+
+
+def _ensure_demo_details(session: Session) -> None:
+    for item_id, details in (
+        (DEMO_ANALGESIC_ID, DEMO_ANALGESIC_DETAILS),
+        (DEMO_CARDIO_ID, DEMO_CARDIO_DETAILS),
+    ):
+        item = session.get(MedicationCatalogItem, item_id)
+        if item is None:
+            continue
+        for field, value in details.items():
+            if not getattr(item, field):
+                setattr(item, field, value)
 
 
 def list_catalog_items(

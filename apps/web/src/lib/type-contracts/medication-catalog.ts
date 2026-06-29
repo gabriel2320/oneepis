@@ -46,6 +46,26 @@ export type MedicationDoseRuleRead = {
   updated_at: string;
 };
 
+export type MedicationClinicalUse = {
+  indication: string;
+  population?: string | null;
+  notes?: string | null;
+};
+
+export type MedicationInteractionAlert = {
+  substance: string;
+  effect: string;
+  recommendation?: string | null;
+  severity: MedicationDoseSeverity;
+};
+
+export type MedicationSafetyAlert = {
+  title: string;
+  description: string;
+  action?: string | null;
+  severity: MedicationDoseSeverity;
+};
+
 export type MedicationCatalogItemRead = {
   id: string;
   source_system: MedicationSourceSystem;
@@ -63,6 +83,11 @@ export type MedicationCatalogItemRead = {
   route?: string | null;
   status: MedicationCatalogStatus;
   tags: string[];
+  clinical_uses: MedicationClinicalUse[];
+  administration_routes: string[];
+  interaction_alerts: MedicationInteractionAlert[];
+  safety_alerts: MedicationSafetyAlert[];
+  monitoring_notes: string[];
   dose_rules: MedicationDoseRuleRead[];
   created_at: string;
   updated_at: string;

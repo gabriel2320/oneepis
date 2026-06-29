@@ -4,6 +4,7 @@ import enum
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -58,6 +59,15 @@ class MedicationCatalogItem(Base, IdMixin, TimestampMixin):
         nullable=False,
     )
     tags: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    clinical_uses: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list, nullable=False)
+    administration_routes: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    interaction_alerts: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=False,
+    )
+    safety_alerts: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list, nullable=False)
+    monitoring_notes: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     source_system: Mapped[MedicationSourceSystem] = mapped_column(
         Enum(
             MedicationSourceSystem,

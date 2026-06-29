@@ -18,6 +18,11 @@ def test_medication_catalog_validation_and_override_audit(
     assert demo_item["source_system"] == "local_curated"
     assert demo_item["source_label"] == "Fixture demo OneEpis; no uso clinico"
     assert demo_item["dose_rules"][0]["review_status"] == "reviewed"
+    assert demo_item["clinical_uses"][0]["indication"] == "Dolor o fiebre demo"
+    assert demo_item["administration_routes"] == ["oral"]
+    assert demo_item["interaction_alerts"][0]["substance"] == "interaccion-demo"
+    assert demo_item["safety_alerts"][0]["title"] == "Alerta demo"
+    assert demo_item["monitoring_notes"]
 
     validation_response = client.post(
         f"/api/v1/patients/{patient_id}/medications/validate-draft",
