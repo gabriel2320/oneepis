@@ -30,7 +30,7 @@ Cada documento debe incluir:
 - fecha de emision
 - folio demo
 - pagina
-- texto: `Documento de desarrollo / no uso clinico real.`
+- texto: `Documento de desarrollo / no PHI / no uso clinico real.`
 
 ## Indicaciones y Receta
 

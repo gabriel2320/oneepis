@@ -10,8 +10,10 @@ from oneepis_api.schemas.clinical_record import ClinicalReviewItem
 from oneepis_api.schemas.patient import PatientRecordSnapshot
 from oneepis_api.services.clinical_intent_text import payload_text as _payload_text
 from oneepis_api.services.clinical_problem_context import event_matches_any_problem
+from oneepis_api.services.medication_catalog_farmaco import farmaco_evidence_for_catalog_item_id
 
 ReviewDecisionMetadata = dict[str, object]
+FARMACO_REVIEW_TAGS = {"renal", "hepatica", "embarazo", "lactancia", "interaccion"}
 
 
 def build_review_items(
@@ -43,6 +45,9 @@ def build_review_items(
                     suggested_action="Completar frecuencia o confirmar que no aplica.",
                 )
             )
+        farmaco_review = _farmaco_txt_review_item(medication)
+        if farmaco_review is not None:
+            items.append(farmaco_review)
 
     compared_med_events = [
         event
@@ -113,6 +118,39 @@ def medication_payload_has_minimum(payload: dict[str, object]) -> bool:
         _payload_text(payload.get("name")) is not None
         or _payload_text(payload.get("medication")) is not None
     )
+
+
+def _farmaco_txt_review_item(medication: object) -> ClinicalReviewItem | None:
+    evidence = farmaco_evidence_for_catalog_item_id(getattr(medication, "catalog_item_id", None))
+    if not evidence or evidence.get("decision") != "accepted":
+        return None
+    tags = sorted(FARMACO_REVIEW_TAGS.intersection(set(evidence.get("evidence_tags") or [])))
+    if not tags:
+        return None
+    pages = _review_pages(evidence.get("pages"))
+    return ClinicalReviewItem(
+        item_type="unstructured_medication_event",
+        label=f"{medication.name}: revisar evidencia TXT Farmaco",
+        detail=(
+            "Ficha Farmaco draft con evidencia contextual pendiente de curacion humana; "
+            f"temas: {', '.join(tags)}; {pages}. "
+            "No se convirtio en alerta clinica, uso ni monitoreo automatico."
+        ),
+        source_type="medication",
+        source_id=medication.id,
+        suggested_action=(
+            "Revisar fuente TXT antes de convertirla en alerta, uso o monitoreo curado."
+        ),
+    )
+
+
+def _review_pages(value: object) -> str:
+    if not isinstance(value, list) or not value:
+        return "paginas sin detalle"
+    pages = [str(item) for item in value[:6]]
+    if len(value) > 6:
+        pages.append("...")
+    return f"paginas: {', '.join(pages)}"
 
 
 def _review_decision_map(

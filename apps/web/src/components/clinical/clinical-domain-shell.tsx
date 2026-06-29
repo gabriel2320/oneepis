@@ -18,6 +18,7 @@ import type { ReactNode } from "react";
 
 import { SessionButton } from "@/components/auth/session-button";
 import { ClinicalSessionFooter } from "@/components/clinical/clinical-workspace";
+import { NoProductionSeal } from "@/components/clinical/no-production-seal";
 import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -250,6 +251,7 @@ function DomainClinicalShell({
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <NoProductionSeal />
                 <SessionButton compact />
                 <Badge variant={aiStatus.data?.available ? "safe" : "outline"}>
                   {aiStatus.data?.available ? "IA disponible" : "IA no disponible"}

@@ -326,7 +326,7 @@ Permisos futuros minimos:
 Papel obligatorio:
 
 - Todo papel de indicacion o receta debe mostrar estado (`draft`, `closed` o `signed` futuro).
-- Todo papel no firmado debe decir `Documento de desarrollo / no uso clinico real.`
+- Todo papel no firmado debe decir `Documento de desarrollo / no PHI / no uso clinico real.`
 - El papel no puede ocultar que una indicacion es borrador.
 - Si no hay folio, actor, fecha clinica y permisos claros, no se imprime como documento clinico valido.
 

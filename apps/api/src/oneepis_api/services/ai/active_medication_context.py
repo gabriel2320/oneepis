@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from typing import Any
 
+from oneepis_api.models.medication_catalog import MedicationSourceReviewStatus
 from oneepis_api.schemas.ai import ClinicalAiSuggestion
 from oneepis_api.schemas.clinical_record import MedicationRead
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.medication_catalog_farmaco import farmaco_evidence_for_catalog_item_id
 
 READONLY_NOTE = "Lectura contextual solamente; no propone receta, dosis ni orden ejecutable."
+FARMACO_CONTEXT_TAGS = {"renal", "hepatica", "embarazo", "lactancia", "interaccion"}
 
 
 def active_medication_suggestions(
@@ -17,12 +20,20 @@ def active_medication_suggestions(
         missing = [str(item) for item in medication.missing_fields]
         limitations = _dose_limitations(medication.dose_check_snapshot)
         source_label = medication.source.source_label if medication.source else "Fuente pendiente"
-        title_state = "incompleta" if missing else "con fuente"
+        draft_note = _draft_source_note(medication)
+        farmaco_note = _farmaco_txt_note(medication)
+        title_state = (
+            "requiere curacion" if draft_note else "incompleta" if missing else "con fuente"
+        )
         detail_parts = [
             _medication_summary(medication),
             f"Fuente: {source_label}.",
             READONLY_NOTE,
         ]
+        if draft_note:
+            detail_parts.append(draft_note)
+        if farmaco_note:
+            detail_parts.append(farmaco_note)
         if missing:
             detail_parts.append(f"Faltantes: {', '.join(missing)}.")
         if limitations:
@@ -31,9 +42,17 @@ def active_medication_suggestions(
             ClinicalAiSuggestion(
                 title=f"Medicacion activa {title_state}: {medication.name}",
                 detail=" ".join(detail_parts),
-                severity="warning" if missing or limitations else "info",
+                severity=_medication_context_severity(
+                    missing=missing,
+                    limitations=limitations,
+                    draft_note=draft_note,
+                    farmaco_note=farmaco_note,
+                    medication=medication,
+                ),
                 source="local_rules",
-                action_label="Revisar medicacion activa",
+                action_label=(
+                    "Revisar fuente Farmaco" if farmaco_note else "Revisar medicacion activa"
+                ),
             )
         )
     return suggestions[:5]
@@ -64,6 +83,52 @@ def _dose_limitations(snapshot: dict[str, Any]) -> list[str]:
     if not isinstance(limitations, list):
         return []
     return [str(item) for item in limitations if isinstance(item, str)]
+
+
+def _draft_source_note(medication: MedicationRead) -> str | None:
+    if medication.source is None:
+        return None
+    if medication.source.review_status != MedicationSourceReviewStatus.DRAFT:
+        return None
+    return "Ficha de catalogo draft: requiere curacion humana antes de uso clinico."
+
+
+def _farmaco_txt_note(medication: MedicationRead) -> str | None:
+    evidence = farmaco_evidence_for_catalog_item_id(medication.catalog_item_id)
+    if not evidence or evidence.get("decision") != "accepted":
+        return None
+    pages = _short_list(evidence.get("pages"), "paginas")
+    tags = _short_list(evidence.get("evidence_tags"), "temas")
+    return (
+        f"Evidencia TXT Farmaco pendiente de curacion humana ({pages}; {tags}); "
+        "no genera uso, alerta ni dosis automatica."
+    )
+
+
+def _medication_context_severity(
+    *,
+    missing: list[str],
+    limitations: list[str],
+    draft_note: str | None,
+    farmaco_note: str | None,
+    medication: MedicationRead,
+) -> str:
+    if missing or limitations or draft_note:
+        return "warning"
+    evidence = farmaco_evidence_for_catalog_item_id(medication.catalog_item_id)
+    if farmaco_note and evidence:
+        if FARMACO_CONTEXT_TAGS.intersection(set(evidence.get("evidence_tags") or [])):
+            return "warning"
+    return "info"
+
+
+def _short_list(value: object, label: str) -> str:
+    if not isinstance(value, list) or not value:
+        return f"{label} sin detalle"
+    items = [str(item) for item in value[:4]]
+    if len(value) > 4:
+        items.append("...")
+    return f"{label}: {', '.join(items)}"
 
 
 def _unique_suggestions(items: list[ClinicalAiSuggestion]) -> list[ClinicalAiSuggestion]:

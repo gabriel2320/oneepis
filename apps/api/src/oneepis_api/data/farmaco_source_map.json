@@ -1,0 +1,2575 @@
+{
+  "source": {
+    "label": "Farmaco TXT local derivado",
+    "source_version": "farmaco-txt-derived-v1",
+    "sha256": "2086110a15b137f133ca9338ebc4fd612dab6aabb1fe6adc2acad32363a28856",
+    "source_file_hint": "Farmaco - copia.txt (archivo local de origen; no versionado)",
+    "derivation": "estructura_paginas_capitulos_sin_texto_largo",
+    "line_count": 53677,
+    "page_marker_count": 461,
+    "chapter_count": 71,
+    "index_start_line": 49189
+  },
+  "page_markers": [
+    {
+      "line": 5,
+      "page": "i"
+    },
+    {
+      "line": 7,
+      "page": "iii"
+    },
+    {
+      "line": 589,
+      "page": "iv"
+    },
+    {
+      "line": 612,
+      "page": "v"
+    },
+    {
+      "line": 620,
+      "page": "xi"
+    },
+    {
+      "line": 994,
+      "page": "xvii"
+    },
+    {
+      "line": 1010,
+      "page": "1"
+    },
+    {
+      "line": 1032,
+      "page": "2"
+    },
+    {
+      "line": 1051,
+      "page": "3"
+    },
+    {
+      "line": 1075,
+      "page": "5"
+    },
+    {
+      "line": 1090,
+      "page": "6"
+    },
+    {
+      "line": 1114,
+      "page": "7"
+    },
+    {
+      "line": 1135,
+      "page": "8"
+    },
+    {
+      "line": 1165,
+      "page": "9"
+    },
+    {
+      "line": 1238,
+      "page": "12"
+    },
+    {
+      "line": 1253,
+      "page": "13"
+    },
+    {
+      "line": 1344,
+      "page": "16"
+    },
+    {
+      "line": 1400,
+      "page": "20"
+    },
+    {
+      "line": 1427,
+      "page": "22"
+    },
+    {
+      "line": 1436,
+      "page": "23"
+    },
+    {
+      "line": 1449,
+      "page": "24"
+    },
+    {
+      "line": 1671,
+      "page": "27"
+    },
+    {
+      "line": 1714,
+      "page": "30"
+    },
+    {
+      "line": 1865,
+      "page": "39"
+    },
+    {
+      "line": 1890,
+      "page": "40"
+    },
+    {
+      "line": 1929,
+      "page": "45"
+    },
+    {
+      "line": 2151,
+      "page": "49"
+    },
+    {
+      "line": 2179,
+      "page": "51"
+    },
+    {
+      "line": 2696,
+      "page": "61"
+    },
+    {
+      "line": 2735,
+      "page": "64"
+    },
+    {
+      "line": 2843,
+      "page": "68"
+    },
+    {
+      "line": 2886,
+      "page": "69"
+    },
+    {
+      "line": 2910,
+      "page": "70"
+    },
+    {
+      "line": 2911,
+      "page": "71"
+    },
+    {
+      "line": 3136,
+      "page": "72"
+    },
+    {
+      "line": 3147,
+      "page": "73"
+    },
+    {
+      "line": 3277,
+      "page": "75"
+    },
+    {
+      "line": 3324,
+      "page": "76"
+    },
+    {
+      "line": 3417,
+      "page": "79"
+    },
+    {
+      "line": 3418,
+      "page": "80"
+    },
+    {
+      "line": 3454,
+      "page": "81"
+    },
+    {
+      "line": 3528,
+      "page": "82"
+    },
+    {
+      "line": 3696,
+      "page": "88"
+    },
+    {
+      "line": 3790,
+      "page": "92"
+    },
+    {
+      "line": 3826,
+      "page": "93"
+    },
+    {
+      "line": 3857,
+      "page": "95"
+    },
+    {
+      "line": 3881,
+      "page": "96"
+    },
+    {
+      "line": 3926,
+      "page": "97"
+    },
+    {
+      "line": 3966,
+      "page": "98"
+    },
+    {
+      "line": 3991,
+      "page": "99"
+    },
+    {
+      "line": 3999,
+      "page": "100"
+    },
+    {
+      "line": 4018,
+      "page": "101"
+    },
+    {
+      "line": 4033,
+      "page": "103"
+    },
+    {
+      "line": 4058,
+      "page": "105"
+    },
+    {
+      "line": 4128,
+      "page": "107"
+    },
+    {
+      "line": 4342,
+      "page": "111"
+    },
+    {
+      "line": 4493,
+      "page": "112"
+    },
+    {
+      "line": 4560,
+      "page": "114"
+    },
+    {
+      "line": 4635,
+      "page": "117"
+    },
+    {
+      "line": 4660,
+      "page": "118"
+    },
+    {
+      "line": 4670,
+      "page": "119"
+    },
+    {
+      "line": 4717,
+      "page": "120"
+    },
+    {
+      "line": 4751,
+      "page": "121"
+    },
+    {
+      "line": 4756,
+      "page": "122"
+    },
+    {
+      "line": 4926,
+      "page": "126"
+    },
+    {
+      "line": 5007,
+      "page": "127"
+    },
+    {
+      "line": 5142,
+      "page": "133"
+    },
+    {
+      "line": 5412,
+      "page": "139"
+    },
+    {
+      "line": 5429,
+      "page": "140"
+    },
+    {
+      "line": 5487,
+      "page": "143"
+    },
+    {
+      "line": 5600,
+      "page": "146"
+    },
+    {
+      "line": 6165,
+      "page": "157"
+    },
+    {
+      "line": 6166,
+      "page": "158"
+    },
+    {
+      "line": 6219,
+      "page": "159"
+    },
+    {
+      "line": 6220,
+      "page": "160"
+    },
+    {
+      "line": 6505,
+      "page": "163"
+    },
+    {
+      "line": 6526,
+      "page": "164"
+    },
+    {
+      "line": 6735,
+      "page": "165"
+    },
+    {
+      "line": 7318,
+      "page": "170"
+    },
+    {
+      "line": 7319,
+      "page": "171"
+    },
+    {
+      "line": 7320,
+      "page": "172"
+    },
+    {
+      "line": 8063,
+      "page": "182"
+    },
+    {
+      "line": 8289,
+      "page": "188"
+    },
+    {
+      "line": 8567,
+      "page": "195"
+    },
+    {
+      "line": 8688,
+      "page": "199"
+    },
+    {
+      "line": 8702,
+      "page": "200"
+    },
+    {
+      "line": 8931,
+      "page": "211"
+    },
+    {
+      "line": 8979,
+      "page": "212"
+    },
+    {
+      "line": 8980,
+      "page": "213"
+    },
+    {
+      "line": 9006,
+      "page": "214"
+    },
+    {
+      "line": 9049,
+      "page": "216"
+    },
+    {
+      "line": 9168,
+      "page": "222"
+    },
+    {
+      "line": 9216,
+      "page": "223"
+    },
+    {
+      "line": 9226,
+      "page": "224"
+    },
+    {
+      "line": 9499,
+      "page": "228"
+    },
+    {
+      "line": 9533,
+      "page": "229"
+    },
+    {
+      "line": 9562,
+      "page": "230"
+    },
+    {
+      "line": 9888,
+      "page": "239"
+    },
+    {
+      "line": 10096,
+      "page": "245"
+    },
+    {
+      "line": 10174,
+      "page": "248"
+    },
+    {
+      "line": 10302,
+      "page": "251"
+    },
+    {
+      "line": 10323,
+      "page": "253"
+    },
+    {
+      "line": 10353,
+      "page": "255"
+    },
+    {
+      "line": 10363,
+      "page": "256"
+    },
+    {
+      "line": 10648,
+      "page": "264"
+    },
+    {
+      "line": 10854,
+      "page": "269"
+    },
+    {
+      "line": 10880,
+      "page": "270"
+    },
+    {
+      "line": 10913,
+      "page": "271"
+    },
+    {
+      "line": 11131,
+      "page": "275"
+    },
+    {
+      "line": 11686,
+      "page": "285"
+    },
+    {
+      "line": 11708,
+      "page": "286"
+    },
+    {
+      "line": 11737,
+      "page": "287"
+    },
+    {
+      "line": 11792,
+      "page": "288"
+    },
+    {
+      "line": 11827,
+      "page": "290"
+    },
+    {
+      "line": 11892,
+      "page": "291"
+    },
+    {
+      "line": 12007,
+      "page": "294"
+    },
+    {
+      "line": 12069,
+      "page": "295"
+    },
+    {
+      "line": 12091,
+      "page": "296"
+    },
+    {
+      "line": 12168,
+      "page": "299"
+    },
+    {
+      "line": 12184,
+      "page": "300"
+    },
+    {
+      "line": 12264,
+      "page": "302"
+    },
+    {
+      "line": 12289,
+      "page": "303"
+    },
+    {
+      "line": 12369,
+      "page": "304"
+    },
+    {
+      "line": 12447,
+      "page": "305"
+    },
+    {
+      "line": 12459,
+      "page": "306"
+    },
+    {
+      "line": 12644,
+      "page": "308"
+    },
+    {
+      "line": 12645,
+      "page": "309"
+    },
+    {
+      "line": 12722,
+      "page": "310"
+    },
+    {
+      "line": 12755,
+      "page": "311"
+    },
+    {
+      "line": 12763,
+      "page": "312"
+    },
+    {
+      "line": 12788,
+      "page": "313"
+    },
+    {
+      "line": 12902,
+      "page": "317"
+    },
+    {
+      "line": 12903,
+      "page": "318"
+    },
+    {
+      "line": 12933,
+      "page": "319"
+    },
+    {
+      "line": 13092,
+      "page": "320"
+    },
+    {
+      "line": 13116,
+      "page": "321"
+    },
+    {
+      "line": 13153,
+      "page": "322"
+    },
+    {
+      "line": 13401,
+      "page": "324"
+    },
+    {
+      "line": 13402,
+      "page": "325"
+    },
+    {
+      "line": 13403,
+      "page": "326"
+    },
+    {
+      "line": 13425,
+      "page": "327"
+    },
+    {
+      "line": 13532,
+      "page": "329"
+    },
+    {
+      "line": 13655,
+      "page": "332"
+    },
+    {
+      "line": 13770,
+      "page": "334"
+    },
+    {
+      "line": 13793,
+      "page": "335"
+    },
+    {
+      "line": 13988,
+      "page": "339"
+    },
+    {
+      "line": 14221,
+      "page": "346"
+    },
+    {
+      "line": 14392,
+      "page": "349"
+    },
+    {
+      "line": 14567,
+      "page": "353"
+    },
+    {
+      "line": 14645,
+      "page": "355"
+    },
+    {
+      "line": 14710,
+      "page": "357"
+    },
+    {
+      "line": 14766,
+      "page": "360"
+    },
+    {
+      "line": 14788,
+      "page": "361"
+    },
+    {
+      "line": 14813,
+      "page": "363"
+    },
+    {
+      "line": 14980,
+      "page": "365"
+    },
+    {
+      "line": 15120,
+      "page": "371"
+    },
+    {
+      "line": 15653,
+      "page": "382"
+    },
+    {
+      "line": 15675,
+      "page": "383"
+    },
+    {
+      "line": 15838,
+      "page": "388"
+    },
+    {
+      "line": 15893,
+      "page": "390"
+    },
+    {
+      "line": 15934,
+      "page": "392"
+    },
+    {
+      "line": 16122,
+      "page": "399"
+    },
+    {
+      "line": 16336,
+      "page": "404"
+    },
+    {
+      "line": 16505,
+      "page": "406"
+    },
+    {
+      "line": 16596,
+      "page": "410"
+    },
+    {
+      "line": 16626,
+      "page": "411"
+    },
+    {
+      "line": 17009,
+      "page": "422"
+    },
+    {
+      "line": 17030,
+      "page": "423"
+    },
+    {
+      "line": 17134,
+      "page": "425"
+    },
+    {
+      "line": 17147,
+      "page": "426"
+    },
+    {
+      "line": 17314,
+      "page": "434"
+    },
+    {
+      "line": 17734,
+      "page": "449"
+    },
+    {
+      "line": 17807,
+      "page": "450"
+    },
+    {
+      "line": 17808,
+      "page": "451"
+    },
+    {
+      "line": 17934,
+      "page": "453"
+    },
+    {
+      "line": 18041,
+      "page": "455"
+    },
+    {
+      "line": 18062,
+      "page": "456"
+    },
+    {
+      "line": 18269,
+      "page": "457"
+    },
+    {
+      "line": 18270,
+      "page": "458"
+    },
+    {
+      "line": 18527,
+      "page": "459"
+    },
+    {
+      "line": 18528,
+      "page": "460"
+    },
+    {
+      "line": 18556,
+      "page": "463"
+    },
+    {
+      "line": 18575,
+      "page": "464"
+    },
+    {
+      "line": 18753,
+      "page": "469"
+    },
+    {
+      "line": 18781,
+      "page": "470"
+    },
+    {
+      "line": 18885,
+      "page": "475"
+    },
+    {
+      "line": 19022,
+      "page": "478"
+    },
+    {
+      "line": 19093,
+      "page": "481"
+    },
+    {
+      "line": 19319,
+      "page": "482"
+    },
+    {
+      "line": 19320,
+      "page": "483"
+    },
+    {
+      "line": 19344,
+      "page": "484"
+    },
+    {
+      "line": 19382,
+      "page": "485"
+    },
+    {
+      "line": 19547,
+      "page": "488"
+    },
+    {
+      "line": 19566,
+      "page": "489"
+    },
+    {
+      "line": 19777,
+      "page": "493"
+    },
+    {
+      "line": 19831,
+      "page": "495"
+    },
+    {
+      "line": 19997,
+      "page": "498"
+    },
+    {
+      "line": 20071,
+      "page": "499"
+    },
+    {
+      "line": 20074,
+      "page": "500"
+    },
+    {
+      "line": 21906,
+      "page": "518"
+    },
+    {
+      "line": 22007,
+      "page": "521"
+    },
+    {
+      "line": 22109,
+      "page": "526"
+    },
+    {
+      "line": 22183,
+      "page": "527"
+    },
+    {
+      "line": 22207,
+      "page": "528"
+    },
+    {
+      "line": 22247,
+      "page": "530"
+    },
+    {
+      "line": 22483,
+      "page": "533"
+    },
+    {
+      "line": 22484,
+      "page": "534"
+    },
+    {
+      "line": 22704,
+      "page": "542"
+    },
+    {
+      "line": 22719,
+      "page": "543"
+    },
+    {
+      "line": 22807,
+      "page": "545"
+    },
+    {
+      "line": 22839,
+      "page": "547"
+    },
+    {
+      "line": 23295,
+      "page": "553"
+    },
+    {
+      "line": 23326,
+      "page": "555"
+    },
+    {
+      "line": 23580,
+      "page": "556"
+    },
+    {
+      "line": 23581,
+      "page": "557"
+    },
+    {
+      "line": 23713,
+      "page": "562"
+    },
+    {
+      "line": 23738,
+      "page": "563"
+    },
+    {
+      "line": 23751,
+      "page": "564"
+    },
+    {
+      "line": 23997,
+      "page": "566"
+    },
+    {
+      "line": 24181,
+      "page": "569"
+    },
+    {
+      "line": 24295,
+      "page": "571"
+    },
+    {
+      "line": 24296,
+      "page": "572"
+    },
+    {
+      "line": 24345,
+      "page": "573"
+    },
+    {
+      "line": 24449,
+      "page": "576"
+    },
+    {
+      "line": 24492,
+      "page": "578"
+    },
+    {
+      "line": 24521,
+      "page": "580"
+    },
+    {
+      "line": 24734,
+      "page": "590"
+    },
+    {
+      "line": 24803,
+      "page": "592"
+    },
+    {
+      "line": 24820,
+      "page": "593"
+    },
+    {
+      "line": 24876,
+      "page": "595"
+    },
+    {
+      "line": 25001,
+      "page": "599"
+    },
+    {
+      "line": 25042,
+      "page": "601"
+    },
+    {
+      "line": 25113,
+      "page": "602"
+    },
+    {
+      "line": 25167,
+      "page": "605"
+    },
+    {
+      "line": 25454,
+      "page": "615"
+    },
+    {
+      "line": 25462,
+      "page": "616"
+    },
+    {
+      "line": 25497,
+      "page": "618"
+    },
+    {
+      "line": 25643,
+      "page": "623"
+    },
+    {
+      "line": 25935,
+      "page": "631"
+    },
+    {
+      "line": 26156,
+      "page": "632"
+    },
+    {
+      "line": 26171,
+      "page": "633"
+    },
+    {
+      "line": 26172,
+      "page": "634"
+    },
+    {
+      "line": 26180,
+      "page": "635"
+    },
+    {
+      "line": 26214,
+      "page": "637"
+    },
+    {
+      "line": 26299,
+      "page": "640"
+    },
+    {
+      "line": 26387,
+      "page": "644"
+    },
+    {
+      "line": 26440,
+      "page": "646"
+    },
+    {
+      "line": 26476,
+      "page": "647"
+    },
+    {
+      "line": 26627,
+      "page": "651"
+    },
+    {
+      "line": 26858,
+      "page": "653"
+    },
+    {
+      "line": 26985,
+      "page": "654"
+    },
+    {
+      "line": 26986,
+      "page": "655"
+    },
+    {
+      "line": 27011,
+      "page": "657"
+    },
+    {
+      "line": 27107,
+      "page": "658"
+    },
+    {
+      "line": 27156,
+      "page": "660"
+    },
+    {
+      "line": 27232,
+      "page": "663"
+    },
+    {
+      "line": 27292,
+      "page": "664"
+    },
+    {
+      "line": 27578,
+      "page": "668"
+    },
+    {
+      "line": 27590,
+      "page": "670"
+    },
+    {
+      "line": 27615,
+      "page": "672"
+    },
+    {
+      "line": 27633,
+      "page": "673"
+    },
+    {
+      "line": 27696,
+      "page": "677"
+    },
+    {
+      "line": 27780,
+      "page": "678"
+    },
+    {
+      "line": 27832,
+      "page": "681"
+    },
+    {
+      "line": 27949,
+      "page": "684"
+    },
+    {
+      "line": 28034,
+      "page": "687"
+    },
+    {
+      "line": 28122,
+      "page": "689"
+    },
+    {
+      "line": 28146,
+      "page": "690"
+    },
+    {
+      "line": 28312,
+      "page": "695"
+    },
+    {
+      "line": 28317,
+      "page": "696"
+    },
+    {
+      "line": 28379,
+      "page": "697"
+    },
+    {
+      "line": 28400,
+      "page": "698"
+    },
+    {
+      "line": 28741,
+      "page": "706"
+    },
+    {
+      "line": 28822,
+      "page": "709"
+    },
+    {
+      "line": 28839,
+      "page": "710"
+    },
+    {
+      "line": 28894,
+      "page": "712"
+    },
+    {
+      "line": 29055,
+      "page": "719"
+    },
+    {
+      "line": 29060,
+      "page": "720"
+    },
+    {
+      "line": 29078,
+      "page": "721"
+    },
+    {
+      "line": 29227,
+      "page": "728"
+    },
+    {
+      "line": 29398,
+      "page": "730"
+    },
+    {
+      "line": 29600,
+      "page": "736"
+    },
+    {
+      "line": 29720,
+      "page": "738"
+    },
+    {
+      "line": 29757,
+      "page": "739"
+    },
+    {
+      "line": 29814,
+      "page": "741"
+    },
+    {
+      "line": 29870,
+      "page": "742"
+    },
+    {
+      "line": 29997,
+      "page": "746"
+    },
+    {
+      "line": 30139,
+      "page": "750"
+    },
+    {
+      "line": 30239,
+      "page": "754"
+    },
+    {
+      "line": 30245,
+      "page": "755"
+    },
+    {
+      "line": 30263,
+      "page": "756"
+    },
+    {
+      "line": 30351,
+      "page": "759"
+    },
+    {
+      "line": 30357,
+      "page": "760"
+    },
+    {
+      "line": 30378,
+      "page": "761"
+    },
+    {
+      "line": 30394,
+      "page": "762"
+    },
+    {
+      "line": 30602,
+      "page": "768"
+    },
+    {
+      "line": 30829,
+      "page": "775"
+    },
+    {
+      "line": 30901,
+      "page": "776"
+    },
+    {
+      "line": 31011,
+      "page": "779"
+    },
+    {
+      "line": 31182,
+      "page": "784"
+    },
+    {
+      "line": 31275,
+      "page": "785"
+    },
+    {
+      "line": 31293,
+      "page": "786"
+    },
+    {
+      "line": 31383,
+      "page": "789"
+    },
+    {
+      "line": 31420,
+      "page": "791"
+    },
+    {
+      "line": 31444,
+      "page": "792"
+    },
+    {
+      "line": 31515,
+      "page": "794"
+    },
+    {
+      "line": 31567,
+      "page": "795"
+    },
+    {
+      "line": 31589,
+      "page": "796"
+    },
+    {
+      "line": 31799,
+      "page": "804"
+    },
+    {
+      "line": 31892,
+      "page": "807"
+    },
+    {
+      "line": 31925,
+      "page": "808"
+    },
+    {
+      "line": 31973,
+      "page": "809"
+    },
+    {
+      "line": 31986,
+      "page": "810"
+    },
+    {
+      "line": 32169,
+      "page": "816"
+    },
+    {
+      "line": 32194,
+      "page": "817"
+    },
+    {
+      "line": 32356,
+      "page": "823"
+    },
+    {
+      "line": 32406,
+      "page": "824"
+    },
+    {
+      "line": 32418,
+      "page": "825"
+    },
+    {
+      "line": 32461,
+      "page": "826"
+    },
+    {
+      "line": 32598,
+      "page": "829"
+    },
+    {
+      "line": 32700,
+      "page": "833"
+    },
+    {
+      "line": 32816,
+      "page": "836"
+    },
+    {
+      "line": 32900,
+      "page": "838"
+    },
+    {
+      "line": 32937,
+      "page": "839"
+    },
+    {
+      "line": 32986,
+      "page": "840"
+    },
+    {
+      "line": 33016,
+      "page": "841"
+    },
+    {
+      "line": 33032,
+      "page": "843"
+    },
+    {
+      "line": 33081,
+      "page": "845"
+    },
+    {
+      "line": 33202,
+      "page": "849"
+    },
+    {
+      "line": 33210,
+      "page": "850"
+    },
+    {
+      "line": 33532,
+      "page": "857"
+    },
+    {
+      "line": 33554,
+      "page": "858"
+    },
+    {
+      "line": 33711,
+      "page": "860"
+    },
+    {
+      "line": 33832,
+      "page": "863"
+    },
+    {
+      "line": 34233,
+      "page": "874"
+    },
+    {
+      "line": 34346,
+      "page": "878"
+    },
+    {
+      "line": 34402,
+      "page": "881"
+    },
+    {
+      "line": 34462,
+      "page": "882"
+    },
+    {
+      "line": 34560,
+      "page": "886"
+    },
+    {
+      "line": 34631,
+      "page": "888"
+    },
+    {
+      "line": 34678,
+      "page": "891"
+    },
+    {
+      "line": 34683,
+      "page": "892"
+    },
+    {
+      "line": 34952,
+      "page": "899"
+    },
+    {
+      "line": 35003,
+      "page": "901"
+    },
+    {
+      "line": 35162,
+      "page": "906"
+    },
+    {
+      "line": 35264,
+      "page": "909"
+    },
+    {
+      "line": 35425,
+      "page": "912"
+    },
+    {
+      "line": 35699,
+      "page": "917"
+    },
+    {
+      "line": 35809,
+      "page": "919"
+    },
+    {
+      "line": 35929,
+      "page": "922"
+    },
+    {
+      "line": 35982,
+      "page": "926"
+    },
+    {
+      "line": 36071,
+      "page": "928"
+    },
+    {
+      "line": 36225,
+      "page": "934"
+    },
+    {
+      "line": 36422,
+      "page": "939"
+    },
+    {
+      "line": 36460,
+      "page": "941"
+    },
+    {
+      "line": 36572,
+      "page": "945"
+    },
+    {
+      "line": 36599,
+      "page": "946"
+    },
+    {
+      "line": 36610,
+      "page": "947"
+    },
+    {
+      "line": 36678,
+      "page": "949"
+    },
+    {
+      "line": 36736,
+      "page": "951"
+    },
+    {
+      "line": 36823,
+      "page": "953"
+    },
+    {
+      "line": 36864,
+      "page": "954"
+    },
+    {
+      "line": 36904,
+      "page": "955"
+    },
+    {
+      "line": 36909,
+      "page": "956"
+    },
+    {
+      "line": 37036,
+      "page": "958"
+    },
+    {
+      "line": 37105,
+      "page": "959"
+    },
+    {
+      "line": 37165,
+      "page": "963"
+    },
+    {
+      "line": 37269,
+      "page": "966"
+    },
+    {
+      "line": 37296,
+      "page": "967"
+    },
+    {
+      "line": 37334,
+      "page": "968"
+    },
+    {
+      "line": 37435,
+      "page": "973"
+    },
+    {
+      "line": 37531,
+      "page": "977"
+    },
+    {
+      "line": 37599,
+      "page": "979"
+    },
+    {
+      "line": 37637,
+      "page": "981"
+    },
+    {
+      "line": 37841,
+      "page": "985"
+    },
+    {
+      "line": 37882,
+      "page": "987"
+    },
+    {
+      "line": 37909,
+      "page": "988"
+    },
+    {
+      "line": 37965,
+      "page": "991"
+    },
+    {
+      "line": 37985,
+      "page": "992"
+    },
+    {
+      "line": 38014,
+      "page": "993"
+    },
+    {
+      "line": 38239,
+      "page": "999"
+    },
+    {
+      "line": 38259,
+      "page": "1000"
+    },
+    {
+      "line": 38363,
+      "page": "1003"
+    },
+    {
+      "line": 38377,
+      "page": "1004"
+    },
+    {
+      "line": 38399,
+      "page": "1005"
+    },
+    {
+      "line": 38536,
+      "page": "1006"
+    },
+    {
+      "line": 38599,
+      "page": "1009"
+    },
+    {
+      "line": 39548,
+      "page": "1018"
+    },
+    {
+      "line": 39578,
+      "page": "1020"
+    },
+    {
+      "line": 39579,
+      "page": "1021"
+    },
+    {
+      "line": 39580,
+      "page": "1022"
+    },
+    {
+      "line": 39746,
+      "page": "1023"
+    },
+    {
+      "line": 39842,
+      "page": "1025"
+    },
+    {
+      "line": 39997,
+      "page": "1027"
+    },
+    {
+      "line": 39998,
+      "page": "1028"
+    },
+    {
+      "line": 40005,
+      "page": "1029"
+    },
+    {
+      "line": 40029,
+      "page": "1032"
+    },
+    {
+      "line": 41111,
+      "page": "1037"
+    },
+    {
+      "line": 41112,
+      "page": "1038"
+    },
+    {
+      "line": 41124,
+      "page": "1039"
+    },
+    {
+      "line": 41132,
+      "page": "1040"
+    },
+    {
+      "line": 41285,
+      "page": "1044"
+    },
+    {
+      "line": 41320,
+      "page": "1045"
+    },
+    {
+      "line": 41641,
+      "page": "1052"
+    },
+    {
+      "line": 41715,
+      "page": "1054"
+    },
+    {
+      "line": 41768,
+      "page": "1055"
+    },
+    {
+      "line": 41840,
+      "page": "1057"
+    },
+    {
+      "line": 42021,
+      "page": "1059"
+    },
+    {
+      "line": 42332,
+      "page": "1069"
+    },
+    {
+      "line": 42660,
+      "page": "1072"
+    },
+    {
+      "line": 42798,
+      "page": "1077"
+    },
+    {
+      "line": 42959,
+      "page": "1078"
+    },
+    {
+      "line": 43048,
+      "page": "1081"
+    },
+    {
+      "line": 43280,
+      "page": "1086"
+    },
+    {
+      "line": 43390,
+      "page": "1089"
+    },
+    {
+      "line": 44195,
+      "page": "1098"
+    },
+    {
+      "line": 44232,
+      "page": "1099"
+    },
+    {
+      "line": 44319,
+      "page": "1101"
+    },
+    {
+      "line": 44368,
+      "page": "1103"
+    },
+    {
+      "line": 44470,
+      "page": "1106"
+    },
+    {
+      "line": 44651,
+      "page": "1111"
+    },
+    {
+      "line": 44926,
+      "page": "1118"
+    },
+    {
+      "line": 45171,
+      "page": "1122"
+    },
+    {
+      "line": 45189,
+      "page": "1123"
+    },
+    {
+      "line": 45263,
+      "page": "1124"
+    },
+    {
+      "line": 45343,
+      "page": "1125"
+    },
+    {
+      "line": 45588,
+      "page": "1134"
+    },
+    {
+      "line": 45664,
+      "page": "1135"
+    },
+    {
+      "line": 45934,
+      "page": "1140"
+    },
+    {
+      "line": 45989,
+      "page": "1142"
+    },
+    {
+      "line": 46284,
+      "page": "1149"
+    },
+    {
+      "line": 46373,
+      "page": "1152"
+    },
+    {
+      "line": 46711,
+      "page": "1156"
+    },
+    {
+      "line": 46729,
+      "page": "1159"
+    },
+    {
+      "line": 46757,
+      "page": "1160"
+    },
+    {
+      "line": 46830,
+      "page": "1161"
+    },
+    {
+      "line": 47064,
+      "page": "1165"
+    },
+    {
+      "line": 47097,
+      "page": "1166"
+    },
+    {
+      "line": 47169,
+      "page": "1167"
+    },
+    {
+      "line": 47205,
+      "page": "1169"
+    },
+    {
+      "line": 47233,
+      "page": "1170"
+    },
+    {
+      "line": 47327,
+      "page": "1172"
+    },
+    {
+      "line": 47603,
+      "page": "1178"
+    },
+    {
+      "line": 47668,
+      "page": "1180"
+    },
+    {
+      "line": 47740,
+      "page": "1181"
+    },
+    {
+      "line": 47907,
+      "page": "1185"
+    },
+    {
+      "line": 47958,
+      "page": "1186"
+    },
+    {
+      "line": 48008,
+      "page": "1187"
+    },
+    {
+      "line": 48116,
+      "page": "1189"
+    },
+    {
+      "line": 48119,
+      "page": "1190"
+    },
+    {
+      "line": 48202,
+      "page": "1192"
+    },
+    {
+      "line": 48373,
+      "page": "1197"
+    },
+    {
+      "line": 48378,
+      "page": "1198"
+    },
+    {
+      "line": 48451,
+      "page": "1201"
+    },
+    {
+      "line": 48550,
+      "page": "1205"
+    },
+    {
+      "line": 48624,
+      "page": "1207"
+    },
+    {
+      "line": 48847,
+      "page": "1214"
+    },
+    {
+      "line": 48848,
+      "page": "1215"
+    },
+    {
+      "line": 49061,
+      "page": "1218"
+    },
+    {
+      "line": 49118,
+      "page": "1220"
+    },
+    {
+      "line": 49187,
+      "page": "1221"
+    }
+  ],
+  "chapters": [
+    {
+      "number": 1,
+      "title": "Farmacolog\u00eda: concepto y objetivos",
+      "toc_line": 40
+    },
+    {
+      "number": 2,
+      "title": "Acciones de los f\u00e1rmacos I. Interacciones entre f\u00e1rmaco y receptor",
+      "toc_line": 48
+    },
+    {
+      "number": 3,
+      "title": "Acciones de los f\u00e1rmacos II. Dianas y mecanismos moleculares",
+      "toc_line": 52
+    },
+    {
+      "number": 4,
+      "title": "Farmacocin\u00e9tica: absorci\u00f3n, distribuci\u00f3n y eliminaci\u00f3n de los f\u00e1rmacos",
+      "toc_line": 59
+    },
+    {
+      "number": 5,
+      "title": "Metabolismo de los f\u00e1rmacos",
+      "toc_line": 66
+    },
+    {
+      "number": 6,
+      "title": "Farmacocin\u00e9tica cl\u00ednica, individualizaci\u00f3n del tratamiento y monitorizaci\u00f3n de f\u00e1rmacos",
+      "toc_line": 69
+    },
+    {
+      "number": 7,
+      "title": "Reacciones adversas a los medicamentos. Farmacovigilancia",
+      "toc_line": 73
+    },
+    {
+      "number": 8,
+      "title": "Variabilidad en la respuesta a los f\u00e1rmacos: factores gen\u00e9ticos, ambientales y fisiol\u00f3gicos",
+      "toc_line": 76
+    },
+    {
+      "number": 9,
+      "title": "Influencia de los factores patol\u00f3gicos sobre la respuesta a los f\u00e1rmacos y efectos iatrog\u00e9nicos",
+      "toc_line": 89
+    },
+    {
+      "number": 10,
+      "title": "Interacciones de f\u00e1rmacos y sus implicaciones cl\u00ednicas",
+      "toc_line": 96
+    },
+    {
+      "number": 11,
+      "title": "Desarrollo y autorizaci\u00f3n de medicamentos. Informaci\u00f3n sobre medicamentos. Prescripci\u00f3n m\u00e9dica y cumplimiento terap\u00e9utico",
+      "toc_line": 99
+    },
+    {
+      "number": 12,
+      "title": "Ensayos cl\u00ednicos. Farmacoepidemiolog\u00eda. Farmacoeconom\u00eda",
+      "toc_line": 103
+    },
+    {
+      "number": 13,
+      "title": "Farmacolog\u00eda general del sistema nervioso aut\u00f3nomo",
+      "toc_line": 109
+    },
+    {
+      "number": 14,
+      "title": "Transmisi\u00f3n colin\u00e9rgica. F\u00e1rmacos agonistas colin\u00e9rgicos",
+      "toc_line": 112
+    },
+    {
+      "number": 15,
+      "title": "F\u00e1rmacos antagonistas colin\u00e9rgicos muscar\u00ednicos",
+      "toc_line": 119
+    },
+    {
+      "number": 16,
+      "title": "Transmisi\u00f3n catecolamin\u00e9rgica. F\u00e1rmacos agonistas catecolamin\u00e9rgicos",
+      "toc_line": 124
+    },
+    {
+      "number": 17,
+      "title": "F\u00e1rmacos que modifican la actividad simp\u00e1tica",
+      "toc_line": 133
+    },
+    {
+      "number": 18,
+      "title": "F\u00e1rmacos bloqueantes de la placa motriz y bloqueantes ganglionares",
+      "toc_line": 137
+    },
+    {
+      "number": 19,
+      "title": "Anest\u00e9sicos locales",
+      "toc_line": 143
+    },
+    {
+      "number": 20,
+      "title": "Mediadores celulares I. Histamina y 5-hidroxitriptamina. Farmacolog\u00eda de la migra\u00f1a",
+      "toc_line": 147
+    },
+    {
+      "number": 21,
+      "title": "Mediadores celulares II. Eicosanoides, \u00f3xido n\u00edtrico y factor activador de plaquetas",
+      "toc_line": 165
+    },
+    {
+      "number": 22,
+      "title": "Mediadores celulares III. Angiotensinas, cininas, citocinas y otros mediadores pept\u00eddicos",
+      "toc_line": 169
+    },
+    {
+      "number": 23,
+      "title": "F\u00e1rmacos analg\u00e9sicos antipir\u00e9ticos y antiinflamatorios no esteroideos. Antiartr\u00edticos",
+      "toc_line": 175
+    },
+    {
+      "number": 24,
+      "title": "Farmacolog\u00eda de la respuesta inmunitaria",
+      "toc_line": 189
+    },
+    {
+      "number": 25,
+      "title": "Neurotransmisi\u00f3n en el sistema nervioso central",
+      "toc_line": 198
+    },
+    {
+      "number": 26,
+      "title": "F\u00e1rmacos analg\u00e9sicos opioides",
+      "toc_line": 205
+    },
+    {
+      "number": 27,
+      "title": "F\u00e1rmacos ansiol\u00edticos y sedantes. Farmacolog\u00eda de los trastornos del sue\u00f1o",
+      "toc_line": 213
+    },
+    {
+      "number": 28,
+      "title": "F\u00e1rmacos anest\u00e9sicos generales",
+      "toc_line": 223
+    },
+    {
+      "number": 29,
+      "title": "F\u00e1rmacos antiepil\u00e9pticos y anticonvulsivantes",
+      "toc_line": 227
+    },
+    {
+      "number": 30,
+      "title": "Farmacolog\u00eda de los movimientos anormales. F\u00e1rmacos antiesp\u00e1sticos",
+      "toc_line": 232
+    },
+    {
+      "number": 31,
+      "title": "F\u00e1rmacos antipsic\u00f3ticos",
+      "toc_line": 240
+    },
+    {
+      "number": 32,
+      "title": "Farmacolog\u00eda de la depresi\u00f3n y el trastorno bipolar",
+      "toc_line": 246
+    },
+    {
+      "number": 33,
+      "title": "Trastornos adictivos. Farmacodependencias",
+      "toc_line": 254
+    },
+    {
+      "number": 34,
+      "title": "Farmacolog\u00eda de las demencias y las conductas anormales",
+      "toc_line": 257
+    },
+    {
+      "number": 35,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca I. Gluc\u00f3sidos digit\u00e1licos y otros inotr\u00f3picos",
+      "toc_line": 262
+    },
+    {
+      "number": 36,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca II. F\u00e1rmacos diur\u00e9ticos, vasodilatadores e inhibidores neurohumorales",
+      "toc_line": 270
+    },
+    {
+      "number": 37,
+      "title": "F\u00e1rmacos antiarr\u00edtmicos",
+      "toc_line": 279
+    },
+    {
+      "number": 38,
+      "title": "Farmacolog\u00eda de la hipertensi\u00f3n arterial y la insuficiencia vascular perif\u00e9rica",
+      "toc_line": 287
+    },
+    {
+      "number": 39,
+      "title": "F\u00e1rmacos antianginosos",
+      "toc_line": 301
+    },
+    {
+      "number": 40,
+      "title": "F\u00e1rmacos antiasm\u00e1ticos y broncodilatadores",
+      "toc_line": 309
+    },
+    {
+      "number": 41,
+      "title": "F\u00e1rmacos antitus\u00edgenos y mucoactivos. Distr\u00e9s respiratorio. Fibrosis qu\u00edstica. Estimulantes de la respiraci\u00f3n",
+      "toc_line": 318
+    },
+    {
+      "number": 42,
+      "title": "Farmacolog\u00eda de la motilidad gastrointestinal",
+      "toc_line": 325
+    },
+    {
+      "number": 43,
+      "title": "Farmacolog\u00eda de la secreci\u00f3n gastrointestinal y de la ulceraci\u00f3n mucosa digestiva",
+      "toc_line": 341
+    },
+    {
+      "number": 44,
+      "title": "Farmacolog\u00eda de la hemostasia, la coagulaci\u00f3n y la fibrin\u00f3lisis",
+      "toc_line": 357
+    },
+    {
+      "number": 45,
+      "title": "F\u00e1rmacos antian\u00e9micos y factores de crecimiento hemopoy\u00e9tico",
+      "toc_line": 369
+    },
+    {
+      "number": 46,
+      "title": "F\u00e1rmacos diur\u00e9ticos",
+      "toc_line": 373
+    },
+    {
+      "number": 47,
+      "title": "Hormonas hipotal\u00e1micas y adenohipofisarias",
+      "toc_line": 383
+    },
+    {
+      "number": 48,
+      "title": "Hormonas neurohipofisarias. F\u00e1rmacos antidiur\u00e9ticos y acuar\u00e9ticos. Farmacolog\u00eda uterina",
+      "toc_line": 397
+    },
+    {
+      "number": 49,
+      "title": "Hormonas sexuales: estr\u00f3genos, gest\u00e1genos, andr\u00f3genos y anticonceptivos hormonales",
+      "toc_line": 405
+    },
+    {
+      "number": 50,
+      "title": "Esteroides corticales y antiinflamatorios esteroideos",
+      "toc_line": 418
+    },
+    {
+      "number": 51,
+      "title": "Hormonas tiroideas y f\u00e1rmacos antitiroideos",
+      "toc_line": 422
+    },
+    {
+      "number": 52,
+      "title": "Insulina y f\u00e1rmacos antidiab\u00e9ticos. Glucag\u00f3n",
+      "toc_line": 427
+    },
+    {
+      "number": 53,
+      "title": "F\u00e1rmacos hipolipoproteinemiantes. Control de la obesidad",
+      "toc_line": 439
+    },
+    {
+      "number": 54,
+      "title": "Farmacolog\u00eda del calcio y el f\u00f3sforo, y de su regulaci\u00f3n",
+      "toc_line": 452
+    },
+    {
+      "number": 55,
+      "title": "F\u00e1rmacos hipouricemiantes y antigotosos",
+      "toc_line": 460
+    },
+    {
+      "number": 56,
+      "title": "Vitaminas liposolubles e hidrosolubles",
+      "toc_line": 466
+    },
+    {
+      "number": 57,
+      "title": "Quimioterapia citot\u00f3xica",
+      "toc_line": 480
+    },
+    {
+      "number": 58,
+      "title": "Terapias antineopl\u00e1sicas dirigidas",
+      "toc_line": 491
+    },
+    {
+      "number": 59,
+      "title": "Farmacolog\u00eda de las enfermedades infecciosas: principios generales, selecci\u00f3n y asociaciones de antibi\u00f3ticos",
+      "toc_line": 499
+    },
+    {
+      "number": 60,
+      "title": "Antibi\u00f3ticos \u03b2-lact\u00e1micos",
+      "toc_line": 505
+    },
+    {
+      "number": 61,
+      "title": "Antibi\u00f3ticos aminogluc\u00f3sidos",
+      "toc_line": 508
+    },
+    {
+      "number": 62,
+      "title": "Antibi\u00f3ticos glucop\u00e9ptidos. Oxazolidinonas. Estreptograminas",
+      "toc_line": 510
+    },
+    {
+      "number": 63,
+      "title": "Macr\u00f3lidos. Cet\u00f3lidos. Lincosamidas. Tetraciclinas. Cloranfenicol. Otros antibi\u00f3ticos",
+      "toc_line": 515
+    },
+    {
+      "number": 64,
+      "title": "Quinolonas. Sulfamidas. Trimetoprima. Cotrimoxazol. Nitrofuranto\u00edna. Antis\u00e9pticos",
+      "toc_line": 522
+    },
+    {
+      "number": 65,
+      "title": "Farmacolog\u00eda de las infecciones por micobacterias",
+      "toc_line": 529
+    },
+    {
+      "number": 66,
+      "title": "F\u00e1rmacos antif\u00fangicos",
+      "toc_line": 534
+    },
+    {
+      "number": 67,
+      "title": "Farmacolog\u00eda de las infecciones por virus, no VIH",
+      "toc_line": 541
+    },
+    {
+      "number": 68,
+      "title": "Farmacolog\u00eda de las infecciones por virus, VIH",
+      "toc_line": 550
+    },
+    {
+      "number": 69,
+      "title": "F\u00e1rmacos antiparasitarios: protozoos, helmintos y ectopar\u00e1sitos",
+      "toc_line": 555
+    },
+    {
+      "number": 70,
+      "title": "Metales: toxicolog\u00eda y ant\u00eddotos",
+      "toc_line": 576
+    },
+    {
+      "number": 71,
+      "title": "Terapia celular. Terapia g\u00e9nica",
+      "toc_line": 579
+    }
+  ],
+  "chapter_starts": [
+    {
+      "number": 1,
+      "title": "Farmacolog\u00eda: concepto y objetivos",
+      "toc_line": 40
+    },
+    {
+      "number": 2,
+      "title": "Acciones de los f\u00e1rmacos I. Interacciones entre f\u00e1rmaco y receptor",
+      "toc_line": 48
+    },
+    {
+      "number": 3,
+      "title": "Acciones de los f\u00e1rmacos II. Dianas y mecanismos moleculares",
+      "toc_line": 52
+    },
+    {
+      "number": 4,
+      "title": "Farmacocin\u00e9tica: absorci\u00f3n, distribuci\u00f3n y eliminaci\u00f3n de los f\u00e1rmacos",
+      "toc_line": 59
+    },
+    {
+      "number": 5,
+      "title": "Metabolismo de los f\u00e1rmacos",
+      "toc_line": 66
+    },
+    {
+      "number": 6,
+      "title": "Farmacocin\u00e9tica cl\u00ednica, individualizaci\u00f3n del tratamiento y monitorizaci\u00f3n de f\u00e1rmacos",
+      "toc_line": 69
+    },
+    {
+      "number": 7,
+      "title": "Reacciones adversas a los medicamentos. Farmacovigilancia",
+      "toc_line": 73
+    },
+    {
+      "number": 8,
+      "title": "Variabilidad en la respuesta a los f\u00e1rmacos: factores gen\u00e9ticos, ambientales y fisiol\u00f3gicos",
+      "toc_line": 76
+    },
+    {
+      "number": 9,
+      "title": "Influencia de los factores patol\u00f3gicos sobre la respuesta a los f\u00e1rmacos y efectos iatrog\u00e9nicos",
+      "toc_line": 89
+    },
+    {
+      "number": 10,
+      "title": "Interacciones de f\u00e1rmacos y sus implicaciones cl\u00ednicas",
+      "toc_line": 96
+    },
+    {
+      "number": 11,
+      "title": "Desarrollo y autorizaci\u00f3n de medicamentos. Informaci\u00f3n sobre medicamentos. Prescripci\u00f3n m\u00e9dica y cumplimiento terap\u00e9utico",
+      "toc_line": 99
+    },
+    {
+      "number": 12,
+      "title": "Ensayos cl\u00ednicos. Farmacoepidemiolog\u00eda. Farmacoeconom\u00eda",
+      "toc_line": 103
+    },
+    {
+      "number": 13,
+      "title": "Farmacolog\u00eda general del sistema nervioso aut\u00f3nomo",
+      "toc_line": 109
+    },
+    {
+      "number": 14,
+      "title": "Transmisi\u00f3n colin\u00e9rgica. F\u00e1rmacos agonistas colin\u00e9rgicos",
+      "toc_line": 112
+    },
+    {
+      "number": 15,
+      "title": "F\u00e1rmacos antagonistas colin\u00e9rgicos muscar\u00ednicos",
+      "toc_line": 119
+    },
+    {
+      "number": 16,
+      "title": "Transmisi\u00f3n catecolamin\u00e9rgica. F\u00e1rmacos agonistas catecolamin\u00e9rgicos",
+      "toc_line": 124
+    },
+    {
+      "number": 17,
+      "title": "F\u00e1rmacos que modifican la actividad simp\u00e1tica",
+      "toc_line": 133
+    },
+    {
+      "number": 18,
+      "title": "F\u00e1rmacos bloqueantes de la placa motriz y bloqueantes ganglionares",
+      "toc_line": 137
+    },
+    {
+      "number": 19,
+      "title": "Anest\u00e9sicos locales",
+      "toc_line": 143
+    },
+    {
+      "number": 20,
+      "title": "Mediadores celulares I. Histamina y 5-hidroxitriptamina. Farmacolog\u00eda de la migra\u00f1a",
+      "toc_line": 147
+    },
+    {
+      "number": 21,
+      "title": "Mediadores celulares II. Eicosanoides, \u00f3xido n\u00edtrico y factor activador de plaquetas",
+      "toc_line": 165
+    },
+    {
+      "number": 22,
+      "title": "Mediadores celulares III. Angiotensinas, cininas, citocinas y otros mediadores pept\u00eddicos",
+      "toc_line": 169
+    },
+    {
+      "number": 23,
+      "title": "F\u00e1rmacos analg\u00e9sicos antipir\u00e9ticos y antiinflamatorios no esteroideos. Antiartr\u00edticos",
+      "toc_line": 175
+    },
+    {
+      "number": 24,
+      "title": "Farmacolog\u00eda de la respuesta inmunitaria",
+      "toc_line": 189
+    },
+    {
+      "number": 25,
+      "title": "Neurotransmisi\u00f3n en el sistema nervioso central",
+      "toc_line": 198
+    },
+    {
+      "number": 26,
+      "title": "F\u00e1rmacos analg\u00e9sicos opioides",
+      "toc_line": 205
+    },
+    {
+      "number": 27,
+      "title": "F\u00e1rmacos ansiol\u00edticos y sedantes. Farmacolog\u00eda de los trastornos del sue\u00f1o",
+      "toc_line": 213
+    },
+    {
+      "number": 28,
+      "title": "F\u00e1rmacos anest\u00e9sicos generales",
+      "toc_line": 223
+    },
+    {
+      "number": 29,
+      "title": "F\u00e1rmacos antiepil\u00e9pticos y anticonvulsivantes",
+      "toc_line": 227
+    },
+    {
+      "number": 30,
+      "title": "Farmacolog\u00eda de los movimientos anormales. F\u00e1rmacos antiesp\u00e1sticos",
+      "toc_line": 232
+    },
+    {
+      "number": 31,
+      "title": "F\u00e1rmacos antipsic\u00f3ticos",
+      "toc_line": 240
+    },
+    {
+      "number": 32,
+      "title": "Farmacolog\u00eda de la depresi\u00f3n y el trastorno bipolar",
+      "toc_line": 246
+    },
+    {
+      "number": 33,
+      "title": "Trastornos adictivos. Farmacodependencias",
+      "toc_line": 254
+    },
+    {
+      "number": 34,
+      "title": "Farmacolog\u00eda de las demencias y las conductas anormales",
+      "toc_line": 257
+    },
+    {
+      "number": 35,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca I. Gluc\u00f3sidos digit\u00e1licos y otros inotr\u00f3picos",
+      "toc_line": 262
+    },
+    {
+      "number": 36,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca II. F\u00e1rmacos diur\u00e9ticos, vasodilatadores e inhibidores neurohumorales",
+      "toc_line": 270
+    },
+    {
+      "number": 37,
+      "title": "F\u00e1rmacos antiarr\u00edtmicos",
+      "toc_line": 279
+    },
+    {
+      "number": 38,
+      "title": "Farmacolog\u00eda de la hipertensi\u00f3n arterial y la insuficiencia vascular perif\u00e9rica",
+      "toc_line": 287
+    },
+    {
+      "number": 39,
+      "title": "F\u00e1rmacos antianginosos",
+      "toc_line": 301
+    },
+    {
+      "number": 40,
+      "title": "F\u00e1rmacos antiasm\u00e1ticos y broncodilatadores",
+      "toc_line": 309
+    },
+    {
+      "number": 41,
+      "title": "F\u00e1rmacos antitus\u00edgenos y mucoactivos. Distr\u00e9s respiratorio. Fibrosis qu\u00edstica. Estimulantes de la respiraci\u00f3n",
+      "toc_line": 318
+    },
+    {
+      "number": 42,
+      "title": "Farmacolog\u00eda de la motilidad gastrointestinal",
+      "toc_line": 325
+    },
+    {
+      "number": 43,
+      "title": "Farmacolog\u00eda de la secreci\u00f3n gastrointestinal y de la ulceraci\u00f3n mucosa digestiva",
+      "toc_line": 341
+    },
+    {
+      "number": 44,
+      "title": "Farmacolog\u00eda de la hemostasia, la coagulaci\u00f3n y la fibrin\u00f3lisis",
+      "toc_line": 357
+    },
+    {
+      "number": 45,
+      "title": "F\u00e1rmacos antian\u00e9micos y factores de crecimiento hemopoy\u00e9tico",
+      "toc_line": 369
+    },
+    {
+      "number": 46,
+      "title": "F\u00e1rmacos diur\u00e9ticos",
+      "toc_line": 373
+    },
+    {
+      "number": 47,
+      "title": "Hormonas hipotal\u00e1micas y adenohipofisarias",
+      "toc_line": 383
+    },
+    {
+      "number": 48,
+      "title": "Hormonas neurohipofisarias. F\u00e1rmacos antidiur\u00e9ticos y acuar\u00e9ticos. Farmacolog\u00eda uterina",
+      "toc_line": 397
+    },
+    {
+      "number": 49,
+      "title": "Hormonas sexuales: estr\u00f3genos, gest\u00e1genos, andr\u00f3genos y anticonceptivos hormonales",
+      "toc_line": 405
+    },
+    {
+      "number": 50,
+      "title": "Esteroides corticales y antiinflamatorios esteroideos",
+      "toc_line": 418
+    },
+    {
+      "number": 51,
+      "title": "Hormonas tiroideas y f\u00e1rmacos antitiroideos",
+      "toc_line": 422
+    },
+    {
+      "number": 52,
+      "title": "Insulina y f\u00e1rmacos antidiab\u00e9ticos. Glucag\u00f3n",
+      "toc_line": 427
+    },
+    {
+      "number": 53,
+      "title": "F\u00e1rmacos hipolipoproteinemiantes. Control de la obesidad",
+      "toc_line": 439
+    },
+    {
+      "number": 54,
+      "title": "Farmacolog\u00eda del calcio y el f\u00f3sforo, y de su regulaci\u00f3n",
+      "toc_line": 452
+    },
+    {
+      "number": 55,
+      "title": "F\u00e1rmacos hipouricemiantes y antigotosos",
+      "toc_line": 460
+    },
+    {
+      "number": 56,
+      "title": "Vitaminas liposolubles e hidrosolubles",
+      "toc_line": 466
+    },
+    {
+      "number": 57,
+      "title": "Quimioterapia citot\u00f3xica",
+      "toc_line": 480
+    },
+    {
+      "number": 58,
+      "title": "Terapias antineopl\u00e1sicas dirigidas",
+      "toc_line": 491
+    },
+    {
+      "number": 59,
+      "title": "Farmacolog\u00eda de las enfermedades infecciosas: principios generales, selecci\u00f3n y asociaciones de antibi\u00f3ticos",
+      "toc_line": 499
+    },
+    {
+      "number": 60,
+      "title": "Antibi\u00f3ticos \u03b2-lact\u00e1micos",
+      "toc_line": 505
+    },
+    {
+      "number": 61,
+      "title": "Antibi\u00f3ticos aminogluc\u00f3sidos",
+      "toc_line": 508
+    },
+    {
+      "number": 62,
+      "title": "Antibi\u00f3ticos glucop\u00e9ptidos. Oxazolidinonas. Estreptograminas",
+      "toc_line": 510
+    },
+    {
+      "number": 63,
+      "title": "Macr\u00f3lidos. Cet\u00f3lidos. Lincosamidas. Tetraciclinas. Cloranfenicol. Otros antibi\u00f3ticos",
+      "toc_line": 515
+    },
+    {
+      "number": 64,
+      "title": "Quinolonas. Sulfamidas. Trimetoprima. Cotrimoxazol. Nitrofuranto\u00edna. Antis\u00e9pticos",
+      "toc_line": 522
+    },
+    {
+      "number": 65,
+      "title": "Farmacolog\u00eda de las infecciones por micobacterias",
+      "toc_line": 529
+    },
+    {
+      "number": 66,
+      "title": "F\u00e1rmacos antif\u00fangicos",
+      "toc_line": 534
+    },
+    {
+      "number": 67,
+      "title": "Farmacolog\u00eda de las infecciones por virus, no VIH",
+      "toc_line": 541
+    },
+    {
+      "number": 68,
+      "title": "Farmacolog\u00eda de las infecciones por virus, VIH",
+      "toc_line": 550
+    },
+    {
+      "number": 69,
+      "title": "F\u00e1rmacos antiparasitarios: protozoos, helmintos y ectopar\u00e1sitos",
+      "toc_line": 555
+    },
+    {
+      "number": 70,
+      "title": "Metales: toxicolog\u00eda y ant\u00eddotos",
+      "toc_line": 576
+    },
+    {
+      "number": 71,
+      "title": "Terapia celular. Terapia g\u00e9nica",
+      "toc_line": 579
+    }
+  ],
+  "heading_count": 1000,
+  "heading_markers_sample": []
+}

@@ -13,6 +13,7 @@ import {
 
 import { SessionButton } from "@/components/auth/session-button";
 import { useCurrentUser } from "@/components/auth/use-current-user";
+import { NoProductionSeal } from "@/components/clinical/no-production-seal";
 import { EmptyState } from "@/components/clinical/states";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
@@ -136,9 +137,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
+        <div className="mt-2">
+          <NoProductionSeal />
+        </div>
       </header>
 
-      <main className="lg:pl-64">{children}</main>
+      <main className="lg:pl-64">
+        <div className="hidden border-b bg-warning/10 px-4 py-2 lg:block" data-print-hidden="true">
+          <div className="mx-auto max-w-7xl">
+            <NoProductionSeal />
+          </div>
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

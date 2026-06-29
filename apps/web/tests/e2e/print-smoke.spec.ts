@@ -5,6 +5,7 @@ const demoEntryId = "51111111-1111-4111-8111-111111111111";
 const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
 const demoDailySheetId = "a2222222-2222-4222-8222-222222222222";
 const demoHospitalIndicationId = "b2222222-2222-4222-8222-222222222222";
+const PRINT_NO_PRODUCTION_FOOTER = "Documento de desarrollo / no PHI / no uso clinico real.";
 
 test.describe("print routes", () => {
   test.beforeEach(({}, testInfo) => {
@@ -27,7 +28,7 @@ test.describe("print routes", () => {
     await expect(page.getByText("Diagnostico historico demo")).toBeVisible();
     await expect(page.getByText("Fuente: Evento curado demo / Codigo: DX-H001")).toBeVisible();
     await expect(page.getByText("Lectura historica demo; no es problema activo.")).toBeVisible();
-    await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+    await expect(page.getByText(PRINT_NO_PRODUCTION_FOOTER)).toBeVisible();
 
     await page.goto(`/print/pacientes/${demoPatientId}/resumen`);
     await expect(page.getByRole("heading", { name: "Resumen", exact: true })).toBeVisible();
@@ -61,7 +62,7 @@ test.describe("print routes", () => {
     await expect(page.getByRole("heading", { name: "Evolucion diaria hospitalaria" })).toBeVisible();
     await expect(page.getByText(`Fuente: evolucion diaria ${demoDailySheetId}`)).toBeVisible();
     await expect(page.getByText("Hoja diaria demo para validar flujo hospitalizado")).toBeVisible();
-    await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+    await expect(page.getByText(PRINT_NO_PRODUCTION_FOOTER)).toBeVisible();
 
     await page.goto(
       `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicacion/${demoHospitalIndicationId}`,
@@ -70,7 +71,7 @@ test.describe("print routes", () => {
     await expect(page.getByText(`Fuente: indicacion hospitalaria ${demoHospitalIndicationId}`)).toBeVisible();
     await expect(page.getByText("Borrador no firmado")).toBeVisible();
     await expect(page.getByText("Borrador de indicacion demo")).toBeVisible();
-    await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+    await expect(page.getByText(PRINT_NO_PRODUCTION_FOOTER)).toBeVisible();
 
     await page.goto(
       `/print/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicacion/00000000-0000-4000-8000-000000000000`,
@@ -84,6 +85,6 @@ test.describe("print routes", () => {
     await expect(page.getByText("Medicina / 301 / Cama A")).toBeVisible();
     await expect(page.getByText("Ultima evolucion diaria 2026-06-20 - Borrador")).toBeVisible();
     await expect(page.getByText("Sin evolucion diaria para este ingreso")).toBeVisible();
-    await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+    await expect(page.getByText(PRINT_NO_PRODUCTION_FOOTER)).toBeVisible();
   });
 });
