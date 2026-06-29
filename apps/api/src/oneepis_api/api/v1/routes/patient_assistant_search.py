@@ -12,6 +12,7 @@ from oneepis_api.models.clinical_record import (
     Allergy,
     ClinicalEncounter,
     ClinicalEntry,
+    ClinicalEntryStatus,
     ClinicalEvent,
     Medication,
     RecordStatus,
@@ -130,6 +131,7 @@ def _search_entries(session, patient_id: uuid.UUID, pattern: str, limit: int):
             select(ClinicalEntry)
             .where(
                 ClinicalEntry.patient_id == patient_id,
+                ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
                 match_columns(
                     pattern,
                     ClinicalEntry.title,

@@ -11,6 +11,7 @@ from oneepis_api.models.clinical_record import (
     Allergy,
     ClinicalEncounter,
     ClinicalEntry,
+    ClinicalEntryStatus,
     ClinicalEvent,
     Medication,
     RecordStatus,
@@ -140,11 +141,11 @@ def get_assistant_timeline(
 
 
 def _recent(session, model, patient_id: uuid.UUID, order_column, limit: int):
+    statement = select(model).where(model.patient_id == patient_id)
+    if model is ClinicalEntry:
+        statement = statement.where(ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR)
     return list(
         session.scalars(
-            select(model)
-            .where(model.patient_id == patient_id)
-            .order_by(order_column.desc())
-            .limit(limit)
+            statement.order_by(order_column.desc()).limit(limit)
         )
     )

@@ -9,6 +9,7 @@ from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
     ClinicalEntry,
+    ClinicalEntryStatus,
     ClinicalEvent,
     ClinicalEventType,
     Medication,
@@ -48,7 +49,10 @@ def get_recent_entries(
 ) -> list[ClinicalEntry]:
     statement = (
         select(ClinicalEntry)
-        .where(ClinicalEntry.patient_id == patient_id)
+        .where(
+            ClinicalEntry.patient_id == patient_id,
+            ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+        )
         .order_by(ClinicalEntry.occurred_at.desc())
         .limit(limit)
     )

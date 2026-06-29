@@ -17,6 +17,7 @@ class ClinicalEntryStatus(enum.StrEnum):
     DRAFT = "draft"
     SIGNED = "signed"
     AMENDED = "amended"
+    ENTERED_IN_ERROR = "entered_in_error"
 
 
 class ClinicalEventType(enum.StrEnum):

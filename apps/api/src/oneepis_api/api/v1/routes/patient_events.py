@@ -8,6 +8,7 @@ from sqlalchemy import select
 from oneepis_api.api.deps import ClinicalEventActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import (
     ClinicalEntry,
+    ClinicalEntryStatus,
     ClinicalEvent,
     ClinicalEventSourceType,
     ClinicalEventType,
@@ -273,7 +274,10 @@ def get_clinical_timeline(
         entries=list(
             session.scalars(
                 select(ClinicalEntry)
-                .where(ClinicalEntry.patient_id == patient_id)
+                .where(
+                    ClinicalEntry.patient_id == patient_id,
+                    ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+                )
                 .order_by(ClinicalEntry.occurred_at.desc())
                 .limit(limit)
             )

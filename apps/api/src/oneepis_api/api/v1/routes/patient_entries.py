@@ -53,6 +53,18 @@ def clinical_entry_audit_fields(fields: list[str]) -> list[str]:
     return [field for field in fields if field in allowed_fields]
 
 
+def _clinical_entry_is_hidden(entry: ClinicalEntry) -> bool:
+    return entry.status == ClinicalEntryStatus.ENTERED_IN_ERROR
+
+
+def _reject_entered_in_error_status(status_value: ClinicalEntryStatus | None) -> None:
+    if status_value == ClinicalEntryStatus.ENTERED_IN_ERROR:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Use DELETE to mark a clinical entry as entered in error",
+        )
+
+
 @router.get("/{patient_id}/clinical-entries", response_model=list[ClinicalEntryRead])
 def list_clinical_entries(
     patient_id: uuid.UUID,
@@ -70,7 +82,10 @@ def list_clinical_entries(
     )
     statement = (
         select(ClinicalEntry)
-        .where(ClinicalEntry.patient_id == patient_id)
+        .where(
+            ClinicalEntry.patient_id == patient_id,
+            ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+        )
         .order_by(ClinicalEntry.occurred_at.desc())
         .offset(offset)
         .limit(limit)
@@ -93,6 +108,11 @@ def get_clinical_entry(
         patient_id,
         "Clinical entry not found",
     )
+    if _clinical_entry_is_hidden(entry):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Clinical entry not found",
+        )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
@@ -115,6 +135,7 @@ def create_clinical_entry(
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
     entry_data = payload.model_dump()
+    _reject_entered_in_error_status(payload.status)
     validate_entry_encounter(session, patient_id, payload.kind, payload.encounter_id)
     entry_data["created_by"] = actor
     entry = ClinicalEntry(patient_id=patient_id, **entry_data)
@@ -150,6 +171,12 @@ def update_clinical_entry(
         patient_id,
         "Clinical entry not found",
     )
+    if _clinical_entry_is_hidden(entry):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Clinical entry not found",
+        )
+    _reject_entered_in_error_status(payload.status)
     if "encounter_id" in payload.model_dump(exclude_unset=True):
         validate_entry_encounter(session, patient_id, entry.kind, payload.encounter_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
@@ -191,22 +218,28 @@ def delete_draft_clinical_entry(
         patient_id,
         "Clinical entry not found",
     )
+    if _clinical_entry_is_hidden(entry):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Clinical entry not found",
+        )
     if entry.status != ClinicalEntryStatus.DRAFT:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Only draft clinical entries can be deleted",
         )
-    before = audit_snapshot(entry, CLINICAL_ENTRY_AUDIT_FIELDS)
+    before = audit_snapshot(entry, ["status"])
     record_audit_event(
         session,
-        action="clinical_entry.deleted",
+        action="clinical_entry.entered_in_error",
         entity_type="clinical_entry",
         entity_id=entry.id,
         actor_id=actor,
-        metadata={"patient_id": str(patient_id), "status": entry.status.value},
+        metadata={"patient_id": str(patient_id), "reason_code": "entered_in_error"},
         before=before,
+        after={"status": ClinicalEntryStatus.ENTERED_IN_ERROR.value},
     )
-    session.delete(entry)
+    entry.status = ClinicalEntryStatus.ENTERED_IN_ERROR
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
