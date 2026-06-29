@@ -113,19 +113,7 @@ def test_patient_clinical_entries_events_and_timeline_emit_read_audit(
         )
         assert response.status_code == 200
 
-    audit_response = client.get(
-        f"/api/v1/patients/{patient_id}/audit-events",
-        headers=audit_auth,
-    )
-    assert audit_response.status_code == 200
-    audit_events = audit_response.json()
-    for action, path, correlation_id in reads:
-        read_event = next(item for item in audit_events if item["action"] == action)
-        assert read_event["actor_id"] == "medico@oneepis.local"
-        assert read_event["correlation_id"] == correlation_id
-        assert read_event["request_method"] == "GET"
-        assert read_event["request_path"] == path
-        assert "extra_data" not in read_event
+    _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
 
 
 def test_patient_vitals_risks_and_orders_emit_read_audit(
@@ -218,19 +206,7 @@ def test_patient_vitals_risks_and_orders_emit_read_audit(
         )
         assert response.status_code == 200
 
-    audit_response = client.get(
-        f"/api/v1/patients/{patient_id}/audit-events",
-        headers=audit_auth,
-    )
-    assert audit_response.status_code == 200
-    audit_events = audit_response.json()
-    for action, path, correlation_id in reads:
-        read_event = next(item for item in audit_events if item["action"] == action)
-        assert read_event["actor_id"] == "medico@oneepis.local"
-        assert read_event["correlation_id"] == correlation_id
-        assert read_event["request_method"] == "GET"
-        assert read_event["request_path"] == path
-        assert "extra_data" not in read_event
+    _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
 
 
 def test_patient_medications_allergies_and_problems_emit_read_audit(
@@ -319,19 +295,114 @@ def test_patient_medications_allergies_and_problems_emit_read_audit(
         )
         assert response.status_code == 200
 
-    audit_response = client.get(
-        f"/api/v1/patients/{patient_id}/audit-events",
-        headers=audit_auth,
+    _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
+
+
+def test_patient_labs_encounters_and_hospital_drafts_emit_read_audit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    encounter_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso para lecturas auditadas",
+            "started_at": "2026-06-20T07:00:00Z",
+        },
     )
-    assert audit_response.status_code == 200
-    audit_events = audit_response.json()
-    for action, path, correlation_id in reads:
-        read_event = next(item for item in audit_events if item["action"] == action)
-        assert read_event["actor_id"] == "medico@oneepis.local"
-        assert read_event["correlation_id"] == correlation_id
-        assert read_event["request_method"] == "GET"
-        assert read_event["request_path"] == path
-        assert "extra_data" not in read_event
+    assert encounter_response.status_code == 201
+    encounter_id = encounter_response.json()["id"]
+    panel_response = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "occurred_at": "2026-06-20T09:00:00Z",
+            "panel_name": "Panel para lectura auditada",
+            "results": [
+                {
+                    "code": "hb",
+                    "name": "Hemoglobina",
+                    "value": "13.4",
+                    "numeric_value": "13.4",
+                    "unit": "g/dL",
+                }
+            ],
+        },
+    )
+    assert panel_response.status_code == 201
+    panel = panel_response.json()
+    daily_sheet_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": "2026-06-20",
+            "clinical_summary": "Borrador hospitalario para lectura auditada.",
+        },
+    )
+    assert daily_sheet_response.status_code == 201
+    indication_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications",
+        headers=auth,
+        json={
+            "indicated_at": "2026-06-20T10:00:00Z",
+            "title": "Indicacion draft auditada",
+            "indication_text": "Borrador no ejecutable.",
+        },
+    )
+    assert indication_response.status_code == 201
+    reads = [
+        (
+            "lab_panels.read",
+            f"/api/v1/patients/{patient_id}/lab-panels",
+            "read-lab-panels-001",
+        ),
+        (
+            "lab_panel.read",
+            f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}",
+            "read-lab-panel-001",
+        ),
+        (
+            "lab_result.read",
+            f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}/results/"
+            f"{panel['results'][0]['id']}",
+            "read-lab-result-001",
+        ),
+        (
+            "encounters.read",
+            f"/api/v1/patients/{patient_id}/encounters",
+            "read-encounters-001",
+        ),
+        (
+            "encounter.read",
+            f"/api/v1/patients/{patient_id}/encounters/{encounter_id}",
+            "read-encounter-001",
+        ),
+        (
+            "hospital_daily_sheets.read",
+            f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+            "read-hospital-daily-sheets-001",
+        ),
+        (
+            "hospital_indications.read",
+            f"/api/v1/hospitalization/patients/{patient_id}/indications",
+            "read-hospital-indications-001",
+        ),
+    ]
+
+    for _, path, correlation_id in reads:
+        response = client.get(
+            path,
+            headers={**auth, "X-OneEpis-Correlation-ID": correlation_id},
+        )
+        assert response.status_code == 200
+
+    _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
 
 
 def test_patient_audit_events_require_audit_read_access(
@@ -497,6 +568,27 @@ def test_audit_events_list_does_not_emit_record_read(
     )
     assert audit_response.status_code == 200
     assert all(item["action"] != "record.read" for item in audit_response.json())
+
+
+def _assert_public_read_audit_events(
+    client: TestClient,
+    audit_auth: dict[str, str],
+    patient_id: str,
+    reads: list[tuple[str, str, str]],
+) -> None:
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
+    assert audit_response.status_code == 200
+    audit_events = audit_response.json()
+    for action, path, correlation_id in reads:
+        read_event = next(item for item in audit_events if item["action"] == action)
+        assert read_event["actor_id"] == "medico@oneepis.local"
+        assert read_event["correlation_id"] == correlation_id
+        assert read_event["request_method"] == "GET"
+        assert read_event["request_path"] == path
+        assert "extra_data" not in read_event
 
     audit_response = client.get(
         f"/api/v1/patients/{patient_id}/audit-events",

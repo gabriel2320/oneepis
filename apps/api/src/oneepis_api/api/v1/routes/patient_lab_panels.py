@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from oneepis_api.api.deps import LabResultActorDep
+from oneepis_api.api.deps import LabResultActorDep, PatientReadActorDep
 from oneepis_api.models.lab import LabPanel, LabResult
 from oneepis_api.schemas.clinical_record import (
     LabPanelCreate,
@@ -24,6 +24,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
     validate_encounter_for_patient,
@@ -36,10 +37,17 @@ router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 def list_lab_panels(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[LabPanel]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="lab_panels.read",
+    )
     statement = (
         select(LabPanel)
         .options(selectinload(LabPanel.results))
@@ -91,9 +99,17 @@ def get_lab_panel(
     patient_id: uuid.UUID,
     panel_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> LabPanelRead:
     require_patient(session, patient_id)
-    return serialize_lab_panel(_require_lab_panel(session, patient_id, panel_id))
+    panel = _require_lab_panel(session, patient_id, panel_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="lab_panel.read",
+    )
+    return serialize_lab_panel(panel)
 
 
 @router.patch("/{patient_id}/lab-panels/{panel_id}", response_model=LabPanelRead)
@@ -140,10 +156,17 @@ def get_lab_result(
     panel_id: uuid.UUID,
     result_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> LabResultRead:
     require_patient(session, patient_id)
     panel = _require_lab_panel(session, patient_id, panel_id)
     result = _require_lab_result(session, patient_id, panel_id, result_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="lab_result.read",
+    )
     return serialize_lab_result(panel, result)
 
 

@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import CurrentUserDep, EncounterActorDep
+from oneepis_api.api.deps import CurrentUserDep, EncounterActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
     EncounterStatus,
@@ -26,6 +26,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
 )
@@ -36,10 +37,17 @@ router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 def list_clinical_encounters(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalEncounter]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="encounters.read",
+    )
     statement = (
         select(ClinicalEncounter)
         .where(ClinicalEncounter.patient_id == patient_id)
@@ -113,15 +121,23 @@ def get_clinical_encounter(
     patient_id: uuid.UUID,
     encounter_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> ClinicalEncounter:
     require_patient(session, patient_id)
-    return require_patient_child(
+    encounter = require_patient_child(
         session,
         ClinicalEncounter,
         encounter_id,
         patient_id,
         "Encounter not found",
     )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="encounter.read",
+    )
+    return encounter
 
 
 @router.patch("/{patient_id}/encounters/{encounter_id}", response_model=ClinicalEncounterRead)
