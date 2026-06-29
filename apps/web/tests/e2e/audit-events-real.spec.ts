@@ -21,32 +21,40 @@ test("patient audit events expose local read/write filters and trace metadata", 
   const main = page.getByRole("main");
 
   await expect(main.getByRole("heading", { name: "Auditoria", exact: true })).toBeVisible();
-  await expect(main.getByText("Total: 3")).toBeVisible();
-  await expect(main.getByText("Lecturas: 1")).toBeVisible();
+  await expect(main.getByText("Total: 4")).toBeVisible();
+  await expect(main.getByText("Lecturas: 2")).toBeVisible();
   await expect(main.getByText("Escrituras: 2")).toBeVisible();
 
-  await expect(main.getByText("patient.record.read")).toBeVisible();
+  await expect(main.getByText("patient.read")).toBeVisible();
+  await expect(main.getByText("record.read")).toBeVisible();
   await expect(main.getByText("clinical_entry.create")).toBeVisible();
   await expect(main.getByText("patient.update")).toBeVisible();
   await expect(main.getByText("Actor: e2e-medico").first()).toBeVisible();
+  await expect(main.getByText(`GET /api/v1/patients/${patientId}`, { exact: true })).toBeVisible();
   await expect(main.getByText(`GET /api/v1/patients/${patientId}/record`)).toBeVisible();
+  await expect(main.getByText("corr-patient-1")).toBeVisible();
   await expect(main.getByText("corr-read-1")).toBeVisible();
 
-  await main.getByRole("button", { name: "Lecturas 1" }).click();
-  await expect(main.getByText("patient.record.read")).toBeVisible();
+  await main.getByRole("button", { name: "Lecturas 2" }).click();
+  await expect(main.getByText("patient.read")).toBeVisible();
+  await expect(main.getByText("record.read")).toBeVisible();
   await expect(main.getByText("clinical_entry.create")).toHaveCount(0);
+  await expect(main.getByText(`GET /api/v1/patients/${patientId}`, { exact: true })).toBeVisible();
   await expect(main.getByText(`GET /api/v1/patients/${patientId}/record`)).toBeVisible();
+  await expect(main.getByText("corr-patient-1")).toBeVisible();
   await expect(main.getByText("corr-read-1")).toBeVisible();
 
   await main.getByRole("button", { name: "Escrituras 2" }).click();
   await expect(main.getByText("clinical_entry.create")).toBeVisible();
   await expect(main.getByText("patient.update")).toBeVisible();
-  await expect(main.getByText("patient.record.read")).toHaveCount(0);
+  await expect(main.getByText("patient.read")).toHaveCount(0);
+  await expect(main.getByText("record.read")).toHaveCount(0);
   await expect(main.getByText(`POST /api/v1/patients/${patientId}/clinical-entries`)).toBeVisible();
   await expect(main.getByText("corr-write-1")).toBeVisible();
 
-  await main.getByRole("button", { name: "Todos 3" }).click();
-  await expect(main.getByText("patient.record.read")).toBeVisible();
+  await main.getByRole("button", { name: "Todos 4" }).click();
+  await expect(main.getByText("patient.read")).toBeVisible();
+  await expect(main.getByText("record.read")).toBeVisible();
   await expect(main.getByText("clinical_entry.create")).toBeVisible();
 
   await expect(main).not.toContainText(
@@ -140,7 +148,19 @@ const aiStatus = {
 const auditEvents = [
   {
     id: "10000000-0000-4000-8000-000000000001",
-    action: "patient.record.read",
+    action: "patient.read",
+    entity_type: "Patient",
+    entity_id: patientId,
+    actor_id: "e2e-medico",
+    correlation_id: "corr-patient-1",
+    request_method: "GET",
+    request_path: `/api/v1/patients/${patientId}`,
+    extra_data: {},
+    created_at: "2026-06-20T10:15:00Z",
+  },
+  {
+    id: "10000000-0000-4000-8000-000000000002",
+    action: "record.read",
     entity_type: "Patient",
     entity_id: patientId,
     actor_id: "e2e-medico",
@@ -148,10 +168,10 @@ const auditEvents = [
     request_method: "GET",
     request_path: `/api/v1/patients/${patientId}/record`,
     extra_data: {},
-    created_at: "2026-06-20T10:15:00Z",
+    created_at: "2026-06-20T10:18:00Z",
   },
   {
-    id: "10000000-0000-4000-8000-000000000002",
+    id: "10000000-0000-4000-8000-000000000003",
     action: "clinical_entry.create",
     entity_type: "ClinicalEntry",
     entity_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
@@ -167,7 +187,7 @@ const auditEvents = [
     created_at: "2026-06-20T10:20:00Z",
   },
   {
-    id: "10000000-0000-4000-8000-000000000003",
+    id: "10000000-0000-4000-8000-000000000004",
     action: "patient.update",
     entity_type: "Patient",
     entity_id: patientId,

@@ -29,6 +29,9 @@ fuente canonica viva.
 - Auditoria de paciente reforzada (Dev-126): `/pacientes/[patientId]/auditoria`
   resume total, lecturas y escrituras, filtra localmente y mantiene actor, ruta
   y `correlation_id` visibles sin endpoint ni contrato nuevo.
+- Cobertura de auditoria de accesos (Dev-129): lecturas de paciente/ficha
+  prueban actor, metodo, ruta, `correlation_id` y dedupe con ultima correlacion;
+  el E2E real valida filtros lectura/escritura sin claim de logs seguros.
 - Logs PHI-safe backend (#110): sanitizador reutilizable para estructuras y
   strings planos, con filtro de logging activo al arrancar la API; sin
   Sentry/OTel ni observabilidad productiva.
@@ -54,6 +57,9 @@ fuente canonica viva.
 - Ficha jerarquizada (Dev-127): la linea clinica sube como primer cuerpo real,
   el mapa longitudinal queda secundario, el header interno usa conteos y el rail
   oculta rutas/API y detalle tecnico primario en `<details>` nativo.
+- Walkthrough clinico unico (Dev-128): el spec canonico atraviesa login, mapa
+  hospitalario, consulta ambulatoria, ficha, documentos/papel, auditoria demo,
+  hospitalizacion, indicaciones borrador y ficha hospitalizada sin rutas nuevas.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -73,16 +79,17 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Evaluar rail clinico colapsable solo si la ficha sigue sobrecargada tras Dev-127.
-No agregar `Command`, `Sheet`, `Data Table`, filtros multiples, rutas ni paneles
-nuevos antes de medir que el reordenamiento no fue suficiente.
+Evaluar un unico modulo clinico nuevo dentro de la ficha existente. Candidatos
+permitidos: diagnosticos historicos separados de problemas activos, o
+antecedentes estructurados dentro de la ficha existente.
 
 Criterio de exito:
 
-- La linea clinica longitudinal sigue antes que mapa/resumen/contexto secundario.
-- El rail no compite con la linea clinica ni expone rutas tecnicas como texto
-  primario.
-- Auditoria distingue acceso/lectura/escritura sin claim de logs seguros.
+- El modulo elegido mejora lectura clinica longitudinal sin crear rutas nuevas.
+- Solo se evalua e implementa un modulo; el otro queda diferido.
+- El walkthrough clinico unico sigue cubriendo el flujo sin fragmentarse.
+- No hay claim de logs seguros, auditoria completa, cumplimiento legal ni
+  observabilidad productiva PHI-safe.
 - No aparecen etiquetas positivas de receta, firma, dispensacion,
   administracion, MAR u orden ejecutable.
 
