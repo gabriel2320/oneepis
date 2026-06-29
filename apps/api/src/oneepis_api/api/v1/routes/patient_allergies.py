@@ -23,6 +23,20 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
+
+ALLERGY_AUDIT_FIELDS = [
+    "patient_id",
+    "recorded_at",
+    "severity",
+    "status",
+]
+
+
+def allergy_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(ALLERGY_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
+
 @router.get("/{patient_id}/allergies", response_model=list[AllergyRead])
 def list_allergies(
     patient_id: uuid.UUID,
@@ -70,7 +84,7 @@ def create_allergy(
         entity_id=allergy.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "severity": allergy.severity.value},
-        after=audit_snapshot(allergy),
+        after=audit_snapshot(allergy, ALLERGY_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(allergy)
@@ -106,12 +120,13 @@ def update_allergy(
     require_patient(session, patient_id)
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(allergy, update_fields)
+    before = audit_snapshot(allergy, allergy_audit_fields(update_fields))
     fields = apply_update(allergy, payload)
+    audit_fields = allergy_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=allergy,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
