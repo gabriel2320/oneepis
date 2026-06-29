@@ -1856,8 +1856,720 @@
       "page": "1221"
     }
   ],
-  "chapters": [],
-  "chapter_starts": [],
+  "chapters": [
+    {
+      "number": 1,
+      "title": "Farmacolog\u00eda: concepto y objetivos",
+      "toc_line": 40
+    },
+    {
+      "number": 2,
+      "title": "Acciones de los f\u00e1rmacos I. Interacciones entre f\u00e1rmaco y receptor",
+      "toc_line": 48
+    },
+    {
+      "number": 3,
+      "title": "Acciones de los f\u00e1rmacos II. Dianas y mecanismos moleculares",
+      "toc_line": 52
+    },
+    {
+      "number": 4,
+      "title": "Farmacocin\u00e9tica: absorci\u00f3n, distribuci\u00f3n y eliminaci\u00f3n de los f\u00e1rmacos",
+      "toc_line": 59
+    },
+    {
+      "number": 5,
+      "title": "Metabolismo de los f\u00e1rmacos",
+      "toc_line": 66
+    },
+    {
+      "number": 6,
+      "title": "Farmacocin\u00e9tica cl\u00ednica, individualizaci\u00f3n del tratamiento y monitorizaci\u00f3n de f\u00e1rmacos",
+      "toc_line": 69
+    },
+    {
+      "number": 7,
+      "title": "Reacciones adversas a los medicamentos. Farmacovigilancia",
+      "toc_line": 73
+    },
+    {
+      "number": 8,
+      "title": "Variabilidad en la respuesta a los f\u00e1rmacos: factores gen\u00e9ticos, ambientales y fisiol\u00f3gicos",
+      "toc_line": 76
+    },
+    {
+      "number": 9,
+      "title": "Influencia de los factores patol\u00f3gicos sobre la respuesta a los f\u00e1rmacos y efectos iatrog\u00e9nicos",
+      "toc_line": 89
+    },
+    {
+      "number": 10,
+      "title": "Interacciones de f\u00e1rmacos y sus implicaciones cl\u00ednicas",
+      "toc_line": 96
+    },
+    {
+      "number": 11,
+      "title": "Desarrollo y autorizaci\u00f3n de medicamentos. Informaci\u00f3n sobre medicamentos. Prescripci\u00f3n m\u00e9dica y cumplimiento terap\u00e9utico",
+      "toc_line": 99
+    },
+    {
+      "number": 12,
+      "title": "Ensayos cl\u00ednicos. Farmacoepidemiolog\u00eda. Farmacoeconom\u00eda",
+      "toc_line": 103
+    },
+    {
+      "number": 13,
+      "title": "Farmacolog\u00eda general del sistema nervioso aut\u00f3nomo",
+      "toc_line": 109
+    },
+    {
+      "number": 14,
+      "title": "Transmisi\u00f3n colin\u00e9rgica. F\u00e1rmacos agonistas colin\u00e9rgicos",
+      "toc_line": 112
+    },
+    {
+      "number": 15,
+      "title": "F\u00e1rmacos antagonistas colin\u00e9rgicos muscar\u00ednicos",
+      "toc_line": 119
+    },
+    {
+      "number": 16,
+      "title": "Transmisi\u00f3n catecolamin\u00e9rgica. F\u00e1rmacos agonistas catecolamin\u00e9rgicos",
+      "toc_line": 124
+    },
+    {
+      "number": 17,
+      "title": "F\u00e1rmacos que modifican la actividad simp\u00e1tica",
+      "toc_line": 133
+    },
+    {
+      "number": 18,
+      "title": "F\u00e1rmacos bloqueantes de la placa motriz y bloqueantes ganglionares",
+      "toc_line": 137
+    },
+    {
+      "number": 19,
+      "title": "Anest\u00e9sicos locales",
+      "toc_line": 143
+    },
+    {
+      "number": 20,
+      "title": "Mediadores celulares I. Histamina y 5-hidroxitriptamina. Farmacolog\u00eda de la migra\u00f1a",
+      "toc_line": 147
+    },
+    {
+      "number": 21,
+      "title": "Mediadores celulares II. Eicosanoides, \u00f3xido n\u00edtrico y factor activador de plaquetas",
+      "toc_line": 165
+    },
+    {
+      "number": 22,
+      "title": "Mediadores celulares III. Angiotensinas, cininas, citocinas y otros mediadores pept\u00eddicos",
+      "toc_line": 169
+    },
+    {
+      "number": 23,
+      "title": "F\u00e1rmacos analg\u00e9sicos antipir\u00e9ticos y antiinflamatorios no esteroideos. Antiartr\u00edticos",
+      "toc_line": 175
+    },
+    {
+      "number": 24,
+      "title": "Farmacolog\u00eda de la respuesta inmunitaria",
+      "toc_line": 189
+    },
+    {
+      "number": 25,
+      "title": "Neurotransmisi\u00f3n en el sistema nervioso central",
+      "toc_line": 198
+    },
+    {
+      "number": 26,
+      "title": "F\u00e1rmacos analg\u00e9sicos opioides",
+      "toc_line": 205
+    },
+    {
+      "number": 27,
+      "title": "F\u00e1rmacos ansiol\u00edticos y sedantes. Farmacolog\u00eda de los trastornos del sue\u00f1o",
+      "toc_line": 213
+    },
+    {
+      "number": 28,
+      "title": "F\u00e1rmacos anest\u00e9sicos generales",
+      "toc_line": 223
+    },
+    {
+      "number": 29,
+      "title": "F\u00e1rmacos antiepil\u00e9pticos y anticonvulsivantes",
+      "toc_line": 227
+    },
+    {
+      "number": 30,
+      "title": "Farmacolog\u00eda de los movimientos anormales. F\u00e1rmacos antiesp\u00e1sticos",
+      "toc_line": 232
+    },
+    {
+      "number": 31,
+      "title": "F\u00e1rmacos antipsic\u00f3ticos",
+      "toc_line": 240
+    },
+    {
+      "number": 32,
+      "title": "Farmacolog\u00eda de la depresi\u00f3n y el trastorno bipolar",
+      "toc_line": 246
+    },
+    {
+      "number": 33,
+      "title": "Trastornos adictivos. Farmacodependencias",
+      "toc_line": 254
+    },
+    {
+      "number": 34,
+      "title": "Farmacolog\u00eda de las demencias y las conductas anormales",
+      "toc_line": 257
+    },
+    {
+      "number": 35,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca I. Gluc\u00f3sidos digit\u00e1licos y otros inotr\u00f3picos",
+      "toc_line": 262
+    },
+    {
+      "number": 36,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca II. F\u00e1rmacos diur\u00e9ticos, vasodilatadores e inhibidores neurohumorales",
+      "toc_line": 270
+    },
+    {
+      "number": 37,
+      "title": "F\u00e1rmacos antiarr\u00edtmicos",
+      "toc_line": 279
+    },
+    {
+      "number": 38,
+      "title": "Farmacolog\u00eda de la hipertensi\u00f3n arterial y la insuficiencia vascular perif\u00e9rica",
+      "toc_line": 287
+    },
+    {
+      "number": 39,
+      "title": "F\u00e1rmacos antianginosos",
+      "toc_line": 301
+    },
+    {
+      "number": 40,
+      "title": "F\u00e1rmacos antiasm\u00e1ticos y broncodilatadores",
+      "toc_line": 309
+    },
+    {
+      "number": 41,
+      "title": "F\u00e1rmacos antitus\u00edgenos y mucoactivos. Distr\u00e9s respiratorio. Fibrosis qu\u00edstica. Estimulantes de la respiraci\u00f3n",
+      "toc_line": 318
+    },
+    {
+      "number": 42,
+      "title": "Farmacolog\u00eda de la motilidad gastrointestinal",
+      "toc_line": 325
+    },
+    {
+      "number": 43,
+      "title": "Farmacolog\u00eda de la secreci\u00f3n gastrointestinal y de la ulceraci\u00f3n mucosa digestiva",
+      "toc_line": 341
+    },
+    {
+      "number": 44,
+      "title": "Farmacolog\u00eda de la hemostasia, la coagulaci\u00f3n y la fibrin\u00f3lisis",
+      "toc_line": 357
+    },
+    {
+      "number": 45,
+      "title": "F\u00e1rmacos antian\u00e9micos y factores de crecimiento hemopoy\u00e9tico",
+      "toc_line": 369
+    },
+    {
+      "number": 46,
+      "title": "F\u00e1rmacos diur\u00e9ticos",
+      "toc_line": 373
+    },
+    {
+      "number": 47,
+      "title": "Hormonas hipotal\u00e1micas y adenohipofisarias",
+      "toc_line": 383
+    },
+    {
+      "number": 48,
+      "title": "Hormonas neurohipofisarias. F\u00e1rmacos antidiur\u00e9ticos y acuar\u00e9ticos. Farmacolog\u00eda uterina",
+      "toc_line": 397
+    },
+    {
+      "number": 49,
+      "title": "Hormonas sexuales: estr\u00f3genos, gest\u00e1genos, andr\u00f3genos y anticonceptivos hormonales",
+      "toc_line": 405
+    },
+    {
+      "number": 50,
+      "title": "Esteroides corticales y antiinflamatorios esteroideos",
+      "toc_line": 418
+    },
+    {
+      "number": 51,
+      "title": "Hormonas tiroideas y f\u00e1rmacos antitiroideos",
+      "toc_line": 422
+    },
+    {
+      "number": 52,
+      "title": "Insulina y f\u00e1rmacos antidiab\u00e9ticos. Glucag\u00f3n",
+      "toc_line": 427
+    },
+    {
+      "number": 53,
+      "title": "F\u00e1rmacos hipolipoproteinemiantes. Control de la obesidad",
+      "toc_line": 439
+    },
+    {
+      "number": 54,
+      "title": "Farmacolog\u00eda del calcio y el f\u00f3sforo, y de su regulaci\u00f3n",
+      "toc_line": 452
+    },
+    {
+      "number": 55,
+      "title": "F\u00e1rmacos hipouricemiantes y antigotosos",
+      "toc_line": 460
+    },
+    {
+      "number": 56,
+      "title": "Vitaminas liposolubles e hidrosolubles",
+      "toc_line": 466
+    },
+    {
+      "number": 57,
+      "title": "Quimioterapia citot\u00f3xica",
+      "toc_line": 480
+    },
+    {
+      "number": 58,
+      "title": "Terapias antineopl\u00e1sicas dirigidas",
+      "toc_line": 491
+    },
+    {
+      "number": 59,
+      "title": "Farmacolog\u00eda de las enfermedades infecciosas: principios generales, selecci\u00f3n y asociaciones de antibi\u00f3ticos",
+      "toc_line": 499
+    },
+    {
+      "number": 60,
+      "title": "Antibi\u00f3ticos \u03b2-lact\u00e1micos",
+      "toc_line": 505
+    },
+    {
+      "number": 61,
+      "title": "Antibi\u00f3ticos aminogluc\u00f3sidos",
+      "toc_line": 508
+    },
+    {
+      "number": 62,
+      "title": "Antibi\u00f3ticos glucop\u00e9ptidos. Oxazolidinonas. Estreptograminas",
+      "toc_line": 510
+    },
+    {
+      "number": 63,
+      "title": "Macr\u00f3lidos. Cet\u00f3lidos. Lincosamidas. Tetraciclinas. Cloranfenicol. Otros antibi\u00f3ticos",
+      "toc_line": 515
+    },
+    {
+      "number": 64,
+      "title": "Quinolonas. Sulfamidas. Trimetoprima. Cotrimoxazol. Nitrofuranto\u00edna. Antis\u00e9pticos",
+      "toc_line": 522
+    },
+    {
+      "number": 65,
+      "title": "Farmacolog\u00eda de las infecciones por micobacterias",
+      "toc_line": 529
+    },
+    {
+      "number": 66,
+      "title": "F\u00e1rmacos antif\u00fangicos",
+      "toc_line": 534
+    },
+    {
+      "number": 67,
+      "title": "Farmacolog\u00eda de las infecciones por virus, no VIH",
+      "toc_line": 541
+    },
+    {
+      "number": 68,
+      "title": "Farmacolog\u00eda de las infecciones por virus, VIH",
+      "toc_line": 550
+    },
+    {
+      "number": 69,
+      "title": "F\u00e1rmacos antiparasitarios: protozoos, helmintos y ectopar\u00e1sitos",
+      "toc_line": 555
+    },
+    {
+      "number": 70,
+      "title": "Metales: toxicolog\u00eda y ant\u00eddotos",
+      "toc_line": 576
+    },
+    {
+      "number": 71,
+      "title": "Terapia celular. Terapia g\u00e9nica",
+      "toc_line": 579
+    }
+  ],
+  "chapter_starts": [
+    {
+      "number": 1,
+      "title": "Farmacolog\u00eda: concepto y objetivos",
+      "toc_line": 40
+    },
+    {
+      "number": 2,
+      "title": "Acciones de los f\u00e1rmacos I. Interacciones entre f\u00e1rmaco y receptor",
+      "toc_line": 48
+    },
+    {
+      "number": 3,
+      "title": "Acciones de los f\u00e1rmacos II. Dianas y mecanismos moleculares",
+      "toc_line": 52
+    },
+    {
+      "number": 4,
+      "title": "Farmacocin\u00e9tica: absorci\u00f3n, distribuci\u00f3n y eliminaci\u00f3n de los f\u00e1rmacos",
+      "toc_line": 59
+    },
+    {
+      "number": 5,
+      "title": "Metabolismo de los f\u00e1rmacos",
+      "toc_line": 66
+    },
+    {
+      "number": 6,
+      "title": "Farmacocin\u00e9tica cl\u00ednica, individualizaci\u00f3n del tratamiento y monitorizaci\u00f3n de f\u00e1rmacos",
+      "toc_line": 69
+    },
+    {
+      "number": 7,
+      "title": "Reacciones adversas a los medicamentos. Farmacovigilancia",
+      "toc_line": 73
+    },
+    {
+      "number": 8,
+      "title": "Variabilidad en la respuesta a los f\u00e1rmacos: factores gen\u00e9ticos, ambientales y fisiol\u00f3gicos",
+      "toc_line": 76
+    },
+    {
+      "number": 9,
+      "title": "Influencia de los factores patol\u00f3gicos sobre la respuesta a los f\u00e1rmacos y efectos iatrog\u00e9nicos",
+      "toc_line": 89
+    },
+    {
+      "number": 10,
+      "title": "Interacciones de f\u00e1rmacos y sus implicaciones cl\u00ednicas",
+      "toc_line": 96
+    },
+    {
+      "number": 11,
+      "title": "Desarrollo y autorizaci\u00f3n de medicamentos. Informaci\u00f3n sobre medicamentos. Prescripci\u00f3n m\u00e9dica y cumplimiento terap\u00e9utico",
+      "toc_line": 99
+    },
+    {
+      "number": 12,
+      "title": "Ensayos cl\u00ednicos. Farmacoepidemiolog\u00eda. Farmacoeconom\u00eda",
+      "toc_line": 103
+    },
+    {
+      "number": 13,
+      "title": "Farmacolog\u00eda general del sistema nervioso aut\u00f3nomo",
+      "toc_line": 109
+    },
+    {
+      "number": 14,
+      "title": "Transmisi\u00f3n colin\u00e9rgica. F\u00e1rmacos agonistas colin\u00e9rgicos",
+      "toc_line": 112
+    },
+    {
+      "number": 15,
+      "title": "F\u00e1rmacos antagonistas colin\u00e9rgicos muscar\u00ednicos",
+      "toc_line": 119
+    },
+    {
+      "number": 16,
+      "title": "Transmisi\u00f3n catecolamin\u00e9rgica. F\u00e1rmacos agonistas catecolamin\u00e9rgicos",
+      "toc_line": 124
+    },
+    {
+      "number": 17,
+      "title": "F\u00e1rmacos que modifican la actividad simp\u00e1tica",
+      "toc_line": 133
+    },
+    {
+      "number": 18,
+      "title": "F\u00e1rmacos bloqueantes de la placa motriz y bloqueantes ganglionares",
+      "toc_line": 137
+    },
+    {
+      "number": 19,
+      "title": "Anest\u00e9sicos locales",
+      "toc_line": 143
+    },
+    {
+      "number": 20,
+      "title": "Mediadores celulares I. Histamina y 5-hidroxitriptamina. Farmacolog\u00eda de la migra\u00f1a",
+      "toc_line": 147
+    },
+    {
+      "number": 21,
+      "title": "Mediadores celulares II. Eicosanoides, \u00f3xido n\u00edtrico y factor activador de plaquetas",
+      "toc_line": 165
+    },
+    {
+      "number": 22,
+      "title": "Mediadores celulares III. Angiotensinas, cininas, citocinas y otros mediadores pept\u00eddicos",
+      "toc_line": 169
+    },
+    {
+      "number": 23,
+      "title": "F\u00e1rmacos analg\u00e9sicos antipir\u00e9ticos y antiinflamatorios no esteroideos. Antiartr\u00edticos",
+      "toc_line": 175
+    },
+    {
+      "number": 24,
+      "title": "Farmacolog\u00eda de la respuesta inmunitaria",
+      "toc_line": 189
+    },
+    {
+      "number": 25,
+      "title": "Neurotransmisi\u00f3n en el sistema nervioso central",
+      "toc_line": 198
+    },
+    {
+      "number": 26,
+      "title": "F\u00e1rmacos analg\u00e9sicos opioides",
+      "toc_line": 205
+    },
+    {
+      "number": 27,
+      "title": "F\u00e1rmacos ansiol\u00edticos y sedantes. Farmacolog\u00eda de los trastornos del sue\u00f1o",
+      "toc_line": 213
+    },
+    {
+      "number": 28,
+      "title": "F\u00e1rmacos anest\u00e9sicos generales",
+      "toc_line": 223
+    },
+    {
+      "number": 29,
+      "title": "F\u00e1rmacos antiepil\u00e9pticos y anticonvulsivantes",
+      "toc_line": 227
+    },
+    {
+      "number": 30,
+      "title": "Farmacolog\u00eda de los movimientos anormales. F\u00e1rmacos antiesp\u00e1sticos",
+      "toc_line": 232
+    },
+    {
+      "number": 31,
+      "title": "F\u00e1rmacos antipsic\u00f3ticos",
+      "toc_line": 240
+    },
+    {
+      "number": 32,
+      "title": "Farmacolog\u00eda de la depresi\u00f3n y el trastorno bipolar",
+      "toc_line": 246
+    },
+    {
+      "number": 33,
+      "title": "Trastornos adictivos. Farmacodependencias",
+      "toc_line": 254
+    },
+    {
+      "number": 34,
+      "title": "Farmacolog\u00eda de las demencias y las conductas anormales",
+      "toc_line": 257
+    },
+    {
+      "number": 35,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca I. Gluc\u00f3sidos digit\u00e1licos y otros inotr\u00f3picos",
+      "toc_line": 262
+    },
+    {
+      "number": 36,
+      "title": "Farmacolog\u00eda de la insuficiencia card\u00edaca II. F\u00e1rmacos diur\u00e9ticos, vasodilatadores e inhibidores neurohumorales",
+      "toc_line": 270
+    },
+    {
+      "number": 37,
+      "title": "F\u00e1rmacos antiarr\u00edtmicos",
+      "toc_line": 279
+    },
+    {
+      "number": 38,
+      "title": "Farmacolog\u00eda de la hipertensi\u00f3n arterial y la insuficiencia vascular perif\u00e9rica",
+      "toc_line": 287
+    },
+    {
+      "number": 39,
+      "title": "F\u00e1rmacos antianginosos",
+      "toc_line": 301
+    },
+    {
+      "number": 40,
+      "title": "F\u00e1rmacos antiasm\u00e1ticos y broncodilatadores",
+      "toc_line": 309
+    },
+    {
+      "number": 41,
+      "title": "F\u00e1rmacos antitus\u00edgenos y mucoactivos. Distr\u00e9s respiratorio. Fibrosis qu\u00edstica. Estimulantes de la respiraci\u00f3n",
+      "toc_line": 318
+    },
+    {
+      "number": 42,
+      "title": "Farmacolog\u00eda de la motilidad gastrointestinal",
+      "toc_line": 325
+    },
+    {
+      "number": 43,
+      "title": "Farmacolog\u00eda de la secreci\u00f3n gastrointestinal y de la ulceraci\u00f3n mucosa digestiva",
+      "toc_line": 341
+    },
+    {
+      "number": 44,
+      "title": "Farmacolog\u00eda de la hemostasia, la coagulaci\u00f3n y la fibrin\u00f3lisis",
+      "toc_line": 357
+    },
+    {
+      "number": 45,
+      "title": "F\u00e1rmacos antian\u00e9micos y factores de crecimiento hemopoy\u00e9tico",
+      "toc_line": 369
+    },
+    {
+      "number": 46,
+      "title": "F\u00e1rmacos diur\u00e9ticos",
+      "toc_line": 373
+    },
+    {
+      "number": 47,
+      "title": "Hormonas hipotal\u00e1micas y adenohipofisarias",
+      "toc_line": 383
+    },
+    {
+      "number": 48,
+      "title": "Hormonas neurohipofisarias. F\u00e1rmacos antidiur\u00e9ticos y acuar\u00e9ticos. Farmacolog\u00eda uterina",
+      "toc_line": 397
+    },
+    {
+      "number": 49,
+      "title": "Hormonas sexuales: estr\u00f3genos, gest\u00e1genos, andr\u00f3genos y anticonceptivos hormonales",
+      "toc_line": 405
+    },
+    {
+      "number": 50,
+      "title": "Esteroides corticales y antiinflamatorios esteroideos",
+      "toc_line": 418
+    },
+    {
+      "number": 51,
+      "title": "Hormonas tiroideas y f\u00e1rmacos antitiroideos",
+      "toc_line": 422
+    },
+    {
+      "number": 52,
+      "title": "Insulina y f\u00e1rmacos antidiab\u00e9ticos. Glucag\u00f3n",
+      "toc_line": 427
+    },
+    {
+      "number": 53,
+      "title": "F\u00e1rmacos hipolipoproteinemiantes. Control de la obesidad",
+      "toc_line": 439
+    },
+    {
+      "number": 54,
+      "title": "Farmacolog\u00eda del calcio y el f\u00f3sforo, y de su regulaci\u00f3n",
+      "toc_line": 452
+    },
+    {
+      "number": 55,
+      "title": "F\u00e1rmacos hipouricemiantes y antigotosos",
+      "toc_line": 460
+    },
+    {
+      "number": 56,
+      "title": "Vitaminas liposolubles e hidrosolubles",
+      "toc_line": 466
+    },
+    {
+      "number": 57,
+      "title": "Quimioterapia citot\u00f3xica",
+      "toc_line": 480
+    },
+    {
+      "number": 58,
+      "title": "Terapias antineopl\u00e1sicas dirigidas",
+      "toc_line": 491
+    },
+    {
+      "number": 59,
+      "title": "Farmacolog\u00eda de las enfermedades infecciosas: principios generales, selecci\u00f3n y asociaciones de antibi\u00f3ticos",
+      "toc_line": 499
+    },
+    {
+      "number": 60,
+      "title": "Antibi\u00f3ticos \u03b2-lact\u00e1micos",
+      "toc_line": 505
+    },
+    {
+      "number": 61,
+      "title": "Antibi\u00f3ticos aminogluc\u00f3sidos",
+      "toc_line": 508
+    },
+    {
+      "number": 62,
+      "title": "Antibi\u00f3ticos glucop\u00e9ptidos. Oxazolidinonas. Estreptograminas",
+      "toc_line": 510
+    },
+    {
+      "number": 63,
+      "title": "Macr\u00f3lidos. Cet\u00f3lidos. Lincosamidas. Tetraciclinas. Cloranfenicol. Otros antibi\u00f3ticos",
+      "toc_line": 515
+    },
+    {
+      "number": 64,
+      "title": "Quinolonas. Sulfamidas. Trimetoprima. Cotrimoxazol. Nitrofuranto\u00edna. Antis\u00e9pticos",
+      "toc_line": 522
+    },
+    {
+      "number": 65,
+      "title": "Farmacolog\u00eda de las infecciones por micobacterias",
+      "toc_line": 529
+    },
+    {
+      "number": 66,
+      "title": "F\u00e1rmacos antif\u00fangicos",
+      "toc_line": 534
+    },
+    {
+      "number": 67,
+      "title": "Farmacolog\u00eda de las infecciones por virus, no VIH",
+      "toc_line": 541
+    },
+    {
+      "number": 68,
+      "title": "Farmacolog\u00eda de las infecciones por virus, VIH",
+      "toc_line": 550
+    },
+    {
+      "number": 69,
+      "title": "F\u00e1rmacos antiparasitarios: protozoos, helmintos y ectopar\u00e1sitos",
+      "toc_line": 555
+    },
+    {
+      "number": 70,
+      "title": "Metales: toxicolog\u00eda y ant\u00eddotos",
+      "toc_line": 576
+    },
+    {
+      "number": 71,
+      "title": "Terapia celular. Terapia g\u00e9nica",
+      "toc_line": 579
+    }
+  ],
   "heading_count": 1000,
   "heading_markers_sample": []
 }
