@@ -28,6 +28,19 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
+CLINICAL_ORDER_AUDIT_FIELDS = [
+    "created_by",
+    "encounter_id",
+    "kind",
+    "ordered_at",
+    "patient_id",
+    "status",
+]
+
+
+def clinical_order_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(CLINICAL_ORDER_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
 
 
 @router.get("/{patient_id}/clinical-orders", response_model=list[ClinicalOrderRead])
@@ -77,7 +90,7 @@ def create_clinical_order(
         entity_id=order.id,
         actor_id=actor,
         metadata=_clinical_order_audit_metadata(order),
-        after=audit_snapshot(order),
+        after=audit_snapshot(order, CLINICAL_ORDER_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(order)
@@ -98,12 +111,13 @@ def update_clinical_order(
     order = _require_clinical_order(session, patient_id, order_id)
     _validate_clinical_order_editable(order, payload)
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(order, fields)
+    before = audit_snapshot(order, clinical_order_audit_fields(fields))
     changed_fields = apply_update(order, payload)
+    audit_fields = clinical_order_audit_fields(changed_fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=order,
-        fields=changed_fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,

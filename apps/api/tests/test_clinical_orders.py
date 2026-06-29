@@ -111,7 +111,11 @@ def test_clinical_order_create_list_update_cancel_and_audit(
     update_response = client.patch(
         f"/api/v1/patients/{patient_id}/clinical-orders/{created['id']}",
         headers=auth,
-        json={"title": "Hemograma y perfil bioquimico"},
+        json={
+            "title": "Hemograma y perfil bioquimico",
+            "order_text": "Solicitar hemograma y perfil bioquimico en borrador.",
+            "rationale": "Cambio narrativo de seguimiento ambulatorio.",
+        },
     )
     assert update_response.status_code == 200
     assert update_response.json()["title"] == "Hemograma y perfil bioquimico"
@@ -132,15 +136,38 @@ def test_clinical_order_create_list_update_cancel_and_audit(
     assert locked_update_response.status_code == 409
 
     events = audit_events_for_patient(patient_id)
-    assert any(item["action"] == "clinical_order.created" for item in events)
+    created_event = next(item for item in events if item["action"] == "clinical_order.created")
+    content_event = next(
+        item
+        for item in events
+        if item["action"] == "clinical_order.updated"
+        and item["extra_data"]["fields"] == ["order_text", "rationale", "title"]
+    )
     cancel_event = next(
         item
         for item in events
         if item["action"] == "clinical_order.updated"
         and item["extra_data"]["after"].get("status") == "cancelled"
     )
+    assert "title" not in created_event["extra_data"]["after"]
+    assert "order_text" not in created_event["extra_data"]["after"]
+    assert "rationale" not in created_event["extra_data"]["after"]
+    assert content_event["extra_data"]["before"] == {}
+    assert content_event["extra_data"]["after"] == {}
     assert cancel_event["extra_data"]["patient_id"] == patient_id
     assert cancel_event["extra_data"]["encounter_id"] == encounter_id
+    assert cancel_event["extra_data"]["before"] == {"status": "draft"}
+    assert cancel_event["extra_data"]["after"] == {"status": "cancelled"}
+    audit_payload = str(
+        [
+            created_event["extra_data"],
+            content_event["extra_data"],
+            cancel_event["extra_data"],
+        ]
+    )
+    assert "Hemograma completo" not in audit_payload
+    assert "Solicitar hemograma" not in audit_payload
+    assert "Seguimiento ambulatorio" not in audit_payload
 
 
 def test_clinical_order_requires_patient_encounter(
