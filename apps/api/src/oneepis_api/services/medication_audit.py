@@ -11,6 +11,7 @@ MEDICATION_CREATE_AUDIT_FIELDS = [
     "patient_id",
     "route",
     "started_on",
+    "ended_on",
     "status",
 ]
 

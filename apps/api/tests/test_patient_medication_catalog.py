@@ -80,12 +80,14 @@ def test_medication_catalog_validation_and_override_audit(
             "dose": "1500 mg",
             "route": "oral",
             "frequency": "cada 8 horas",
+            "ended_on": "2026-06-30",
             "dose_override_reason": "Decision clinica documentada en demo.",
         },
     )
     assert override_create.status_code == 201
     medication = override_create.json()
     assert medication["catalog_item_id"] == str(DEMO_ANALGESIC_ID)
+    assert medication["ended_on"] == "2026-06-30"
     assert medication["dose_check_snapshot"]["blocking"] is True
     assert medication["dose_override_reason"] == "Decision clinica documentada en demo."
     assert medication["source"]["source_system"] == "local_curated"
@@ -109,6 +111,7 @@ def test_medication_catalog_validation_and_override_audit(
     assert metadata["dose_source_count"] >= 1
     assert "Decision clinica documentada en demo." not in str(metadata)
     assert "dose_override_reason" not in metadata["after"]
+    assert metadata["after"]["ended_on"] == "2026-06-30"
     assert metadata["after"]["dose_check_snapshot"]["blocking"] is True
 
 
