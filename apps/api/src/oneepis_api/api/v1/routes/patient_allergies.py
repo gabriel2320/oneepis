@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import AllergyActorDep
+from oneepis_api.api.deps import AllergyActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import Allergy, RecordStatus
 from oneepis_api.schemas.clinical_record import AllergyCreate, AllergyRead, AllergyUpdate
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
@@ -16,6 +16,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
 )
@@ -26,10 +27,17 @@ router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 def list_allergies(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[Allergy]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="allergies.read",
+    )
     statement = (
         select(Allergy)
         .where(Allergy.patient_id == patient_id)
@@ -74,9 +82,17 @@ def get_allergy(
     patient_id: uuid.UUID,
     allergy_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> Allergy:
     require_patient(session, patient_id)
-    return require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
+    allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="allergy.read",
+    )
+    return allergy
 
 
 @router.patch("/{patient_id}/allergies/{allergy_id}", response_model=AllergyRead)

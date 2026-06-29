@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ProblemActorDep
+from oneepis_api.api.deps import PatientReadActorDep, ProblemActorDep
 from oneepis_api.models.clinical_record import ActiveProblem, RecordStatus
 from oneepis_api.schemas.clinical_record import (
     ActiveProblemCreate,
@@ -20,6 +20,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
 )
@@ -30,10 +31,17 @@ router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 def list_active_problems(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ActiveProblem]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="problems.read",
+    )
     statement = (
         select(ActiveProblem)
         .where(
@@ -81,15 +89,23 @@ def get_active_problem(
     patient_id: uuid.UUID,
     problem_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> ActiveProblem:
     require_patient(session, patient_id)
-    return require_patient_child(
+    problem = require_patient_child(
         session,
         ActiveProblem,
         problem_id,
         patient_id,
         "Problem not found",
     )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="problem.read",
+    )
+    return problem
 
 
 @router.patch("/{patient_id}/problems/{problem_id}", response_model=ActiveProblemRead)
