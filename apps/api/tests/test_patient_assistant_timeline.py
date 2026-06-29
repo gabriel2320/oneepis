@@ -134,6 +134,57 @@ def test_assistant_timeline_reads_longitudinal_sources_without_writing(
     assert after_audit == before_audit
 
 
+def test_assistant_timeline_reads_historical_diagnoses_as_context_without_writing(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Assistant", last_name="Historico")
+    diagnosis_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2023-04-10T09:00:00Z",
+            "summary": "Neumonia resuelta en control previo",
+            "payload": {
+                "code_system": "CIE-10",
+                "code": "J18.9",
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica previa",
+                    "limit": "No equivale a problema activo actual.",
+                },
+            },
+        },
+    )
+    assert diagnosis_response.status_code == 201
+    event_id = diagnosis_response.json()["id"]
+    before_audit = audit_events(client, auth, patient_id)
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/timeline?limit=10",
+        headers=auth,
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["applies_changes"] is False
+    historical_item = next(
+        item for item in payload["items"] if item["source_label"] == "historical_diagnoses"
+    )
+    assert historical_item["item_type"] == "clinical_event"
+    assert historical_item["item_id"] == event_id
+    assert historical_item["label"] == "Neumonia resuelta en control previo"
+    assert historical_item["summary"] == (
+        "Historia clinica previa: No equivale a problema activo actual. (CIE-10: J18.9)"
+    )
+    assert historical_item["source_path"].endswith("/clinical-events/" + event_id)
+    assert [item["item_id"] for item in payload["items"]].count(event_id) == 1
+    after_audit = audit_events(client, auth, patient_id)
+    assert after_audit == before_audit
+
+
 def test_assistant_timeline_exposes_encounter_metadata(
     client: TestClient,
     auth_headers,
