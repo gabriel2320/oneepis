@@ -311,6 +311,104 @@ def test_curated_antecedent_event_rejects_invalid_payload(
     assert "requires category, source_label and limit" in missing_limit.json()["detail"]
 
 
+def test_curated_antecedent_category_must_match_event_type(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Antecedente",
+            "last_name": "Tipo",
+            "birth_date": "1984-02-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+
+    valid_diagnosis = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Diagnostico historico curado",
+            "payload": {
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica",
+                    "limit": "No equivale a problema activo actual.",
+                },
+            },
+        },
+    )
+    invalid_diagnosis_type = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "symptom",
+            "occurred_at": "2026-06-22T10:10:00Z",
+            "summary": "Diagnostico historico con tipo incorrecto",
+            "payload": {
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica",
+                    "limit": "Debe registrarse como diagnostico.",
+                },
+            },
+        },
+    )
+    valid_procedure = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "procedure",
+            "occurred_at": "2026-06-22T10:15:00Z",
+            "summary": "Procedimiento previo curado",
+            "payload": {
+                "antecedent": {
+                    "category": "procedimiento",
+                    "source_label": "Historia quirurgica",
+                    "limit": "No equivale a indicacion ejecutable.",
+                },
+            },
+        },
+    )
+    invalid_procedure_type = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:20:00Z",
+            "summary": "Procedimiento con tipo incorrecto",
+            "payload": {
+                "antecedent": {
+                    "category": "procedimiento",
+                    "source_label": "Historia quirurgica",
+                    "limit": "Debe registrarse como procedimiento.",
+                },
+            },
+        },
+    )
+
+    assert valid_diagnosis.status_code == 201
+    assert invalid_diagnosis_type.status_code == 422
+    assert "requires event_type diagnosis" in invalid_diagnosis_type.json()["detail"]
+    assert valid_procedure.status_code == 201
+    assert invalid_procedure_type.status_code == 422
+    assert "requires event_type procedure" in invalid_procedure_type.json()["detail"]
+
+    incompatible_update = client.patch(
+        f"/api/v1/patients/{patient['id']}/clinical-events/{valid_diagnosis.json()['id']}",
+        headers=auth,
+        json={"event_type": "symptom"},
+    )
+
+    assert incompatible_update.status_code == 422
+    assert "requires event_type diagnosis" in incompatible_update.json()["detail"]
+
+
 def test_curated_antecedent_update_rejects_invalid_payload(
     client: TestClient,
     auth_headers,

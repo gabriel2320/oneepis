@@ -6,7 +6,12 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import ClinicalEventActorDep
-from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, ClinicalEventSourceType
+from oneepis_api.models.clinical_record import (
+    ClinicalEntry,
+    ClinicalEvent,
+    ClinicalEventSourceType,
+    ClinicalEventType,
+)
 from oneepis_api.schemas.clinical_record import (
     ClinicalEventCreate,
     ClinicalEventRead,
@@ -34,6 +39,12 @@ CURATED_ANTECEDENT_CATEGORIES = {
     "familiar_social",
     "plan_longitudinal",
 }
+CURATED_ANTECEDENT_EVENT_TYPES = {
+    "diagnostico_historico": ClinicalEventType.DIAGNOSIS,
+    "procedimiento": ClinicalEventType.PROCEDURE,
+    "familiar_social": ClinicalEventType.CLINICAL_NOTE,
+    "plan_longitudinal": ClinicalEventType.CARE_PLAN,
+}
 
 
 def validate_clinical_event_source(
@@ -48,7 +59,10 @@ def validate_clinical_event_source(
     )
 
 
-def validate_curated_antecedent_payload(payload: dict) -> None:
+def validate_curated_antecedent_payload(
+    payload: dict,
+    event_type: ClinicalEventType,
+) -> None:
     if "antecedent" not in payload:
         return
     antecedent = payload["antecedent"]
@@ -71,6 +85,15 @@ def validate_curated_antecedent_payload(payload: dict) -> None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="payload.antecedent.category is not allowed",
+        )
+    expected_event_type = CURATED_ANTECEDENT_EVENT_TYPES[category]
+    if event_type != expected_event_type:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=(
+                "payload.antecedent.category requires event_type "
+                f"{expected_event_type.value}"
+            ),
         )
 
 
@@ -106,7 +129,7 @@ def create_clinical_event(
     require_patient(session, patient_id)
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     validate_clinical_event_source(payload.source_type, payload.source_ref)
-    validate_curated_antecedent_payload(payload.payload)
+    validate_curated_antecedent_payload(payload.payload, payload.event_type)
     event_data = payload.model_dump()
     event_data["created_by"] = actor
     event = ClinicalEvent(patient_id=patient_id, **event_data)
@@ -165,8 +188,11 @@ def update_clinical_event(
         payload_data.get("source_type", event.source_type),
         payload_data.get("source_ref", event.source_ref),
     )
+    final_event_type = payload_data.get("event_type", event.event_type)
     if "payload" in payload_data and payload_data["payload"] is not None:
-        validate_curated_antecedent_payload(payload_data["payload"])
+        validate_curated_antecedent_payload(payload_data["payload"], final_event_type)
+    elif "event_type" in payload_data:
+        validate_curated_antecedent_payload(event.payload, final_event_type)
     update_fields = sorted(payload_data.keys())
     before = audit_snapshot(event, update_fields)
     fields = apply_update(event, payload)
