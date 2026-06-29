@@ -37,6 +37,16 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
+PATIENT_AUDIT_FIELDS = [
+    "clinical_status",
+    "current_care_context",
+]
+
+
+def patient_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(PATIENT_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
 
 def _build_patient_record_snapshot(
     session: SessionDep,
@@ -100,7 +110,7 @@ def create_patient(
         entity_type="patient",
         entity_id=patient.id,
         actor_id=actor,
-        after=audit_snapshot(patient),
+        after=audit_snapshot(patient, PATIENT_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(patient)
@@ -134,12 +144,13 @@ def update_patient(
     validate_development_patient_data(settings, payload)
     patient = require_patient(session, patient_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(patient, update_fields)
+    before = audit_snapshot(patient, patient_audit_fields(update_fields))
     fields = apply_update(patient, payload)
+    audit_fields = patient_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=patient,
-        fields=fields,
+        fields=audit_fields,
     )
 
     record_audit_event(
