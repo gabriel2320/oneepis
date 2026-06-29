@@ -38,6 +38,7 @@ def summarize_patient_response(
     recent_vitals: list[object],
     lab_results: list[object],
     review_items: list[ClinicalReviewItem],
+    active_risks: list[object] | None = None,
 ) -> ClinicalIntentResponse:
     patient = snapshot.patient
     lines = [
@@ -45,14 +46,19 @@ def summarize_patient_response(
         f"Estado: {patient.clinical_status}; contexto: {patient.current_care_context}.",
         "Problemas activos: "
         f"{_join_titles([problem.title for problem in snapshot.active_problems])}.",
+        "Diagnosticos historicos: "
+        f"{_join_titles([diagnosis.title for diagnosis in snapshot.historical_diagnoses])}.",
+        "Alergias activas: "
+        f"{_join_titles([allergy.substance for allergy in snapshot.active_allergies])}.",
         f"Medicacion activa: {_join_titles([med.name for med in snapshot.active_medications])}.",
+        f"Riesgos activos: {_join_titles([_risk_label(risk) for risk in active_risks or []])}.",
         f"Eventos recientes: {_join_titles([event.summary for event in events[:5]])}.",
     ]
     return ClinicalIntentResponse(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer="\n".join(lines),
-        **_context_payload(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results, active_risks=active_risks),
         certainty="moderate" if events or snapshot.recent_entries else "low",
         change_set=change_set(snapshot, events, recent_vitals),
         review_items=review_items,
@@ -75,6 +81,7 @@ def daily_changes_response(
     recent_vitals: list[object],
     lab_results: list[object],
     review_items: list[ClinicalReviewItem],
+    active_risks: list[object] | None = None,
 ) -> ClinicalIntentResponse:
     latest_entry = snapshot.recent_entries[0] if snapshot.recent_entries else None
     event_lines = [f"- {event.summary}" for event in events[:8]]
@@ -87,7 +94,7 @@ def daily_changes_response(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer=answer,
-        **_context_payload(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results, active_risks=active_risks),
         certainty="moderate" if event_lines else "low",
         change_set=change_set(snapshot, events, recent_vitals),
         review_items=review_items,
@@ -108,6 +115,7 @@ def active_problems_response(
     recent_vitals: list[object],
     lab_results: list[object],
     review_items: list[ClinicalReviewItem],
+    active_risks: list[object] | None = None,
 ) -> ClinicalIntentResponse:
     if snapshot.active_problems:
         answer = "\n".join(
@@ -123,7 +131,13 @@ def active_problems_response(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer=answer,
-        **_context_payload(snapshot, [], lab_results, missing_data=missing),
+        **_context_payload(
+            snapshot,
+            [],
+            lab_results,
+            missing_data=missing,
+            active_risks=active_risks,
+        ),
         certainty="high" if snapshot.active_problems else "low",
         change_set=change_set(snapshot, [], recent_vitals),
         review_items=review_items,
@@ -145,6 +159,7 @@ def timeline_response(
     recent_vitals: list[object],
     lab_results: list[object],
     review_items: list[ClinicalReviewItem],
+    active_risks: list[object] | None = None,
 ) -> ClinicalIntentResponse:
     items = [f"- {event.occurred_at.isoformat()}: {event.summary}" for event in events[:10]]
     items.extend(
@@ -154,7 +169,7 @@ def timeline_response(
         intent_type=payload.intent_type,
         mode=payload.mode,
         clinical_answer="\n".join(items) if items else "No hay timeline suficiente.",
-        **_context_payload(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results, active_risks=active_risks),
         certainty="moderate" if items else "low",
         change_set=change_set(snapshot, events, recent_vitals),
         review_items=review_items,
@@ -171,6 +186,7 @@ def draft_soap_intent_response(
     recent_vitals: list[object],
     lab_results: list[object],
     review_items: list[ClinicalReviewItem],
+    active_risks: list[object] | None = None,
 ) -> ClinicalIntentResponse:
     subjective = _join_titles([event.summary for event in events[:5]])
     objective = "Sin signos vitales recientes."
@@ -198,7 +214,7 @@ def draft_soap_intent_response(
         intent_type=payload.intent_type,
         mode="draft",
         clinical_answer=answer,
-        **_context_payload(snapshot, events, lab_results),
+        **_context_payload(snapshot, events, lab_results, active_risks=active_risks),
         certainty="moderate" if events else "low",
         change_set=change_set(snapshot, events, recent_vitals),
         review_items=review_items,
@@ -222,8 +238,11 @@ def show_sources_response(
     recent_vitals: list[object],
     lab_results: list[object],
     review_items: list[ClinicalReviewItem],
+    active_risks: list[object] | None = None,
 ) -> ClinicalIntentResponse:
-    context_payload = _context_payload(snapshot, events, lab_results, missing_data=[])
+    context_payload = _context_payload(
+        snapshot, events, lab_results, missing_data=[], active_risks=active_risks
+    )
     sources = context_payload["sources"]
     return ClinicalIntentResponse(
         intent_type=payload.intent_type,
@@ -235,6 +254,16 @@ def show_sources_response(
         review_items=review_items,
         proposed_actions=[_action("none", "Sin accion", "Lectura solamente.")],
     )
+
+
+def _risk_label(risk: object) -> str:
+    risk_type = getattr(
+        getattr(risk, "risk_type", "riesgo"),
+        "value",
+        getattr(risk, "risk_type", "riesgo"),
+    )
+    reason = getattr(risk, "reason", None)
+    return f"Riesgo {risk_type}: {reason}" if reason else f"Riesgo {risk_type}"
 
 
 def change_set(

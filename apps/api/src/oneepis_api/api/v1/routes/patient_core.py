@@ -21,8 +21,8 @@ from oneepis_api.services.audit import (
     record_audit_event,
     record_read_audit_event,
 )
+from oneepis_api.services.historical_diagnoses import historical_diagnoses_from_events
 
-from .patient_historical_diagnoses import historical_diagnoses_from_events
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,

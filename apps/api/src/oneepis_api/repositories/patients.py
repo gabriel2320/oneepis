@@ -15,6 +15,7 @@ from oneepis_api.models.clinical_record import (
     RecordStatus,
     VitalSign,
 )
+from oneepis_api.models.clinical_risk import ClinicalRisk
 from oneepis_api.models.patient import Patient
 
 
@@ -124,5 +125,14 @@ def get_active_problems(session: Session, patient_id: uuid.UUID) -> list[ActiveP
         select(ActiveProblem)
         .where(ActiveProblem.patient_id == patient_id, ActiveProblem.status == RecordStatus.ACTIVE)
         .order_by(ActiveProblem.created_at.desc())
+    )
+    return list(session.scalars(statement))
+
+
+def get_active_risks(session: Session, patient_id: uuid.UUID) -> list[ClinicalRisk]:
+    statement = (
+        select(ClinicalRisk)
+        .where(ClinicalRisk.patient_id == patient_id, ClinicalRisk.status == RecordStatus.ACTIVE)
+        .order_by(ClinicalRisk.created_at.desc())
     )
     return list(session.scalars(statement))

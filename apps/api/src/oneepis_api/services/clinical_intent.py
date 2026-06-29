@@ -40,6 +40,7 @@ from oneepis_api.services.clinical_intent_router import (
     route_clinical_intent as _route_clinical_intent,
 )
 from oneepis_api.services.clinical_lab_context import fetch_context_lab_results
+from oneepis_api.services.historical_diagnoses import historical_diagnoses_from_events
 
 
 def route_clinical_intent(payload: ClinicalIntentRouteRequest) -> ClinicalIntentRouteResponse:
@@ -55,12 +56,15 @@ def resolve_clinical_intent(
     if patient is None:
         raise ValueError("Patient not found")
 
+    diagnosis_events = patient_repo.get_diagnosis_events(session, patient_id)
+    active_risks = patient_repo.get_active_risks(session, patient_id)
     snapshot = PatientRecordSnapshot(
         patient=patient,
         latest_vitals=patient_repo.get_latest_vitals(session, patient_id),
         active_allergies=patient_repo.get_active_allergies(session, patient_id),
         active_medications=patient_repo.get_active_medications(session, patient_id),
         active_problems=patient_repo.get_active_problems(session, patient_id),
+        historical_diagnoses=historical_diagnoses_from_events(diagnosis_events),
         recent_entries=patient_repo.get_recent_entries(session, patient_id),
     )
     events = patient_repo.get_recent_events(session, patient_id, limit=payload.max_events)
@@ -72,24 +76,59 @@ def resolve_clinical_intent(
 
     if payload.intent_type == "summarize_patient":
         return _summarize_patient_response(
-            payload, snapshot, events, recent_vitals, lab_results, review_items
+            payload,
+            snapshot,
+            events,
+            recent_vitals,
+            lab_results,
+            review_items,
+            active_risks,
         )
     if payload.intent_type == "daily_changes":
         return _daily_changes_response(
-            payload, snapshot, events, recent_vitals, lab_results, review_items
+            payload,
+            snapshot,
+            events,
+            recent_vitals,
+            lab_results,
+            review_items,
+            active_risks,
         )
     if payload.intent_type == "active_problems":
         return _active_problems_response(
-            payload, snapshot, recent_vitals, lab_results, review_items
+            payload,
+            snapshot,
+            recent_vitals,
+            lab_results,
+            review_items,
+            active_risks,
         )
     if payload.intent_type == "timeline":
         return _timeline_response(
-            payload, snapshot, events, recent_vitals, lab_results, review_items
+            payload,
+            snapshot,
+            events,
+            recent_vitals,
+            lab_results,
+            review_items,
+            active_risks,
         )
     if payload.intent_type == "draft_soap":
         return _draft_soap_intent_response(
-            payload, snapshot, events, recent_vitals, lab_results, review_items
+            payload,
+            snapshot,
+            events,
+            recent_vitals,
+            lab_results,
+            review_items,
+            active_risks,
         )
     return _show_sources_response(
-        payload, snapshot, events, recent_vitals, lab_results, review_items
+        payload,
+        snapshot,
+        events,
+        recent_vitals,
+        lab_results,
+        review_items,
+        active_risks,
     )

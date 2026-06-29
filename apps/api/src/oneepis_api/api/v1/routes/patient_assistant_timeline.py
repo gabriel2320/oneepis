@@ -17,6 +17,7 @@ from oneepis_api.models.clinical_record import (
 )
 from oneepis_api.schemas.clinical_record import AssistantTimelineItem, AssistantTimelineResponse
 from oneepis_api.schemas.patient import HistoricalDiagnosisRead
+from oneepis_api.services.historical_diagnoses import historical_diagnoses_from_events
 
 from .patient_assistant_common import (
     clinical_event_source_path,
@@ -27,7 +28,6 @@ from .patient_assistant_common import (
     vital_summary,
 )
 from .patient_assistant_lab_timeline import fetch_lab_results_for_timeline, lab_timeline_items
-from .patient_historical_diagnoses import historical_diagnoses_from_events
 from .patient_shared import LimitQuery, SessionDep, require_patient
 
 router = APIRouter()

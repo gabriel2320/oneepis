@@ -60,6 +60,7 @@ def clinical_sources(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     lab_results: list[object] | None = None,
+    active_risks: list[object] | None = None,
 ) -> list[ClinicalIntentSource]:
     sources = [
         ClinicalIntentSource(
@@ -76,6 +77,46 @@ def clinical_sources(
             label=entry.title,
         )
         for entry in snapshot.recent_entries[:5]
+    )
+    sources.extend(
+        ClinicalIntentSource(
+            source_type="active_problem",
+            source_id=problem.id,
+            label=problem.title,
+        )
+        for problem in snapshot.active_problems[:8]
+    )
+    sources.extend(
+        ClinicalIntentSource(
+            source_type="historical_diagnosis",
+            source_id=diagnosis.source_event_id,
+            label=diagnosis.title,
+        )
+        for diagnosis in snapshot.historical_diagnoses[:8]
+    )
+    sources.extend(
+        ClinicalIntentSource(
+            source_type="allergy",
+            source_id=allergy.id,
+            label=allergy.substance,
+        )
+        for allergy in snapshot.active_allergies[:8]
+    )
+    sources.extend(
+        ClinicalIntentSource(
+            source_type="medication",
+            source_id=medication.id,
+            label=medication.name,
+        )
+        for medication in snapshot.active_medications[:8]
+    )
+    sources.extend(
+        ClinicalIntentSource(
+            source_type="clinical_risk",
+            source_id=getattr(risk, "id", None),
+            label=_risk_label(risk),
+        )
+        for risk in (active_risks or [])[:8]
     )
     if snapshot.latest_vitals:
         sources.append(
@@ -121,6 +162,7 @@ def clinical_evidence_marks(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     lab_results: list[object] | None = None,
+    active_risks: list[object] | None = None,
 ) -> list[ClinicalEvidenceMark]:
     marks: list[ClinicalEvidenceMark] = []
     marks.extend(
@@ -159,6 +201,33 @@ def clinical_evidence_marks(
             )
         )
     marks.extend(lab_evidence_marks(lab_results or []))
+    marks.extend(
+        ClinicalEvidenceMark(
+            label=diagnosis.title,
+            status="confirmed",
+            detail="Diagnostico historico curado; no es problema activo actual.",
+            source_id=diagnosis.source_event_id,
+        )
+        for diagnosis in snapshot.historical_diagnoses[:5]
+    )
+    marks.extend(
+        ClinicalEvidenceMark(
+            label=allergy.substance,
+            status="confirmed",
+            detail="Alergia activa registrada en la ficha.",
+            source_id=allergy.id,
+        )
+        for allergy in snapshot.active_allergies[:5]
+    )
+    marks.extend(
+        ClinicalEvidenceMark(
+            label=_risk_label(risk),
+            status="needs_review",
+            detail="Riesgo activo registrado; requiere accion humana visible.",
+            source_id=getattr(risk, "id", None),
+        )
+        for risk in (active_risks or [])[:5]
+    )
     if not snapshot.active_problems:
         marks.append(
             ClinicalEvidenceMark(
@@ -174,11 +243,20 @@ def clinical_context_sections(
     snapshot: PatientRecordSnapshot,
     events: list[object],
     lab_results: list[object] | None = None,
+    active_risks: list[object] | None = None,
 ) -> list[ClinicalContextSection]:
     return [
         ClinicalContextSection(
             title="Problemas activos",
             items=[problem.title for problem in snapshot.active_problems[:6]],
+        ),
+        ClinicalContextSection(
+            title="Diagnosticos historicos",
+            items=[diagnosis.title for diagnosis in snapshot.historical_diagnoses[:6]],
+        ),
+        ClinicalContextSection(
+            title="Alergias activas",
+            items=[allergy.substance for allergy in snapshot.active_allergies[:6]],
         ),
         ClinicalContextSection(
             title="Eventos recientes",
@@ -189,6 +267,10 @@ def clinical_context_sections(
             items=[med.name for med in snapshot.active_medications[:6]],
         ),
         ClinicalContextSection(
+            title="Riesgos activos",
+            items=[_risk_label(risk) for risk in (active_risks or [])[:6]],
+        ),
+        ClinicalContextSection(
             title="Examenes estructurados",
             items=lab_context_items(lab_results or []),
         ),
@@ -197,3 +279,13 @@ def clinical_context_sections(
             items=[entry.title for entry in snapshot.recent_entries[:5]],
         ),
     ]
+
+
+def _risk_label(risk: object) -> str:
+    risk_type = getattr(
+        getattr(risk, "risk_type", "riesgo"),
+        "value",
+        getattr(risk, "risk_type", "riesgo"),
+    )
+    reason = getattr(risk, "reason", None)
+    return f"Riesgo {risk_type}: {reason}" if reason else f"Riesgo {risk_type}"
