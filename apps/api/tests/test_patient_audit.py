@@ -94,7 +94,14 @@ def test_patient_status_and_problem_update_are_audited(
     problem_response = client.post(
         f"/api/v1/patients/{patient_id}/problems",
         headers=auth,
-        json={"title": "Diabetes tipo 2", "status": "active"},
+        json={
+            "title": "Diabetes tipo 2 sensible",
+            "status": "active",
+            "code_system": "ICD-10",
+            "code": "E11",
+            "onset_date": "2026-06-01",
+            "notes": "Nota clinica sensible del problema activo",
+        },
     )
     assert problem_response.status_code == 201
     problem_id = problem_response.json()["id"]
@@ -102,7 +109,12 @@ def test_patient_status_and_problem_update_are_audited(
     update_response = client.patch(
         f"/api/v1/patients/{patient_id}/problems/{problem_id}",
         headers=auth,
-        json={"status": "resolved", "resolved_on": "2026-06-20"},
+        json={
+            "title": "Diabetes tipo 2 con texto actualizado",
+            "status": "resolved",
+            "resolved_on": "2026-06-20",
+            "notes": "Nota libre sensible actualizada",
+        },
     )
     assert update_response.status_code == 200
     assert update_response.json()["status"] == "resolved"
@@ -115,11 +127,29 @@ def test_patient_status_and_problem_update_are_audited(
     assert list_response.status_code == 200
     assert list_response.json() == []
 
+    problem_events = audit_events_for_patient(patient_id)
+    problem_create = next(
+        item for item in problem_events if item["action"] == "problem.created"
+    )
+    assert problem_create["extra_data"]["after"] == {
+        "code": "E11",
+        "code_system": "ICD-10",
+        "onset_date": "2026-06-01",
+        "patient_id": patient_id,
+        "resolved_on": None,
+        "status": "active",
+    }
     problem_update = next(
         item
-        for item in audit_events_for_patient(patient_id)
+        for item in problem_events
         if item["action"] == "problem.updated"
     )
+    assert problem_update["extra_data"]["fields"] == [
+        "notes",
+        "resolved_on",
+        "status",
+        "title",
+    ]
     assert problem_update["extra_data"]["before"] == {
         "status": "active",
         "resolved_on": None,
@@ -128,6 +158,11 @@ def test_patient_status_and_problem_update_are_audited(
         "status": "resolved",
         "resolved_on": "2026-06-20",
     }
+    problem_audit_payload = str([problem_create["extra_data"], problem_update["extra_data"]])
+    assert "Diabetes tipo 2 sensible" not in problem_audit_payload
+    assert "Nota clinica sensible" not in problem_audit_payload
+    assert "texto actualizado" not in problem_audit_payload
+    assert "Nota libre sensible" not in problem_audit_payload
 
 
 def test_vital_sign_audit_uses_structural_allowlist(
