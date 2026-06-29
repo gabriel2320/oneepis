@@ -45,6 +45,15 @@ CURATED_ANTECEDENT_EVENT_TYPES = {
     "familiar_social": ClinicalEventType.CLINICAL_NOTE,
     "plan_longitudinal": ClinicalEventType.CARE_PLAN,
 }
+CLINICAL_EVENT_AUDIT_FIELDS = [
+    "created_by",
+    "encounter_id",
+    "event_type",
+    "occurred_at",
+    "patient_id",
+    "source_ref",
+    "source_type",
+]
 
 
 def validate_clinical_event_source(
@@ -97,6 +106,11 @@ def validate_curated_antecedent_payload(
         )
 
 
+def clinical_event_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(CLINICAL_EVENT_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
+
 @router.get("/{patient_id}/clinical-events", response_model=list[ClinicalEventRead])
 def list_clinical_events(
     patient_id: uuid.UUID,
@@ -142,7 +156,7 @@ def create_clinical_event(
         entity_id=event.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "event_type": payload.event_type.value},
-        after=audit_snapshot(event),
+        after=audit_snapshot(event, CLINICAL_EVENT_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(event)
@@ -194,12 +208,13 @@ def update_clinical_event(
     elif "event_type" in payload_data:
         validate_curated_antecedent_payload(event.payload, final_event_type)
     update_fields = sorted(payload_data.keys())
-    before = audit_snapshot(event, update_fields)
+    before = audit_snapshot(event, clinical_event_audit_fields(update_fields))
     fields = apply_update(event, payload)
+    audit_fields = clinical_event_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=event,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
