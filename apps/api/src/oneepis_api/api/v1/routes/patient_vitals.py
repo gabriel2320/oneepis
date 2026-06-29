@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import VitalSignActorDep
+from oneepis_api.api.deps import PatientReadActorDep, VitalSignActorDep
 from oneepis_api.models.clinical_record import VitalSign
 from oneepis_api.schemas.clinical_record import VitalSignCreate, VitalSignRead, VitalSignUpdate
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
@@ -16,6 +16,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
 )
@@ -26,10 +27,17 @@ router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 def list_vital_signs(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[VitalSign]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="vital_signs.read",
+    )
     statement = (
         select(VitalSign)
         .where(VitalSign.patient_id == patient_id)
@@ -74,15 +82,23 @@ def get_vital_sign(
     patient_id: uuid.UUID,
     vital_sign_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> VitalSign:
     require_patient(session, patient_id)
-    return require_patient_child(
+    vital = require_patient_child(
         session,
         VitalSign,
         vital_sign_id,
         patient_id,
         "Vital sign not found",
     )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="vital_sign.read",
+    )
+    return vital
 
 
 @router.patch("/{patient_id}/vital-signs/{vital_sign_id}", response_model=VitalSignRead)

@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import EncounterActorDep
+from oneepis_api.api.deps import EncounterActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_order import ClinicalOrder, ClinicalOrderStatus
 from oneepis_api.models.clinical_record import ClinicalEncounter
 from oneepis_api.schemas.clinical_order import (
@@ -24,6 +24,7 @@ from .patient_shared import (
     LimitQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
 )
 
@@ -47,9 +48,16 @@ def clinical_order_audit_fields(fields: list[str]) -> list[str]:
 def list_clinical_orders(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
 ) -> list[ClinicalOrder]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="clinical_orders.read",
+    )
     statement = (
         select(ClinicalOrder)
         .where(ClinicalOrder.patient_id == patient_id)

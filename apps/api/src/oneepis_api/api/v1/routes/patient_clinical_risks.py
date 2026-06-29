@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import ClinicalRiskActorDep
+from oneepis_api.api.deps import ClinicalRiskActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, RecordStatus, VitalSign
 from oneepis_api.models.clinical_risk import (
     ClinicalRisk,
@@ -27,6 +27,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
     validate_encounter_for_patient,
@@ -56,11 +57,18 @@ def clinical_risk_audit_fields(fields: list[str]) -> list[str]:
 def list_clinical_risks(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
     risk_status: RiskStatusQuery = None,
 ) -> list[ClinicalRisk]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="clinical_risks.read",
+    )
     filters = [ClinicalRisk.patient_id == patient_id]
     if risk_status is not None:
         filters.append(ClinicalRisk.status == risk_status)
@@ -110,9 +118,17 @@ def get_clinical_risk(
     patient_id: uuid.UUID,
     risk_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> ClinicalRisk:
     require_patient(session, patient_id)
-    return _require_clinical_risk(session, patient_id, risk_id)
+    risk = _require_clinical_risk(session, patient_id, risk_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="clinical_risk.read",
+    )
+    return risk
 
 
 @router.patch("/{patient_id}/clinical-risks/{risk_id}", response_model=ClinicalRiskRead)
