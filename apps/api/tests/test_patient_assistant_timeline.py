@@ -131,7 +131,13 @@ def test_assistant_timeline_reads_longitudinal_sources_without_writing(
     assert "/lab-panels/" in lab_item["source_path"]
     assert lab_item["source_path"].endswith("/results/" + lab_item["item_id"])
     after_audit = audit_events(client, auth, patient_id)
-    assert after_audit == before_audit
+    _assert_only_read_audit_added(
+        before_audit,
+        after_audit,
+        action="assistant_timeline.read",
+        method="GET",
+        path=f"/api/v1/patients/{patient_id}/assistant/timeline",
+    )
 
 
 def test_assistant_timeline_reads_historical_diagnoses_as_context_without_writing(
@@ -200,7 +206,13 @@ def test_assistant_timeline_reads_historical_diagnoses_as_context_without_writin
     assert all(item["source_label"] != "historical_diagnoses" for item in payload["items"])
     assert [item["item_id"] for item in payload["items"]].count(event_id) == 1
     after_audit = audit_events(client, auth, patient_id)
-    assert after_audit == before_audit
+    _assert_only_read_audit_added(
+        before_audit,
+        after_audit,
+        action="assistant_timeline.read",
+        method="GET",
+        path=f"/api/v1/patients/{patient_id}/assistant/timeline",
+    )
 
 
 def test_assistant_timeline_exposes_encounter_metadata(
@@ -439,7 +451,13 @@ def test_assistant_search_reads_sources_without_writing(
     assert "/lab-panels/" in lab_item["source_path"]
     assert lab_item["source_path"].endswith("/results/" + lab_item["item_id"])
     after_audit = audit_events(client, auth, patient_id)
-    assert after_audit == before_audit
+    _assert_only_read_audit_added(
+        before_audit,
+        after_audit,
+        action="assistant_search.read",
+        method="GET",
+        path=f"/api/v1/patients/{patient_id}/assistant/search",
+    )
 
 
 def test_assistant_search_allows_readonly_user(
@@ -623,7 +641,13 @@ def test_assistant_chart_returns_vitals_and_exam_series_without_writing(
         "/clinical-events/" + legacy_point["source_id"]
     )
     after_audit = audit_events(client, auth, patient_id)
-    assert after_audit == before_audit
+    _assert_only_read_audit_added(
+        before_audit,
+        after_audit,
+        action="assistant_chart.read",
+        method="POST",
+        path=f"/api/v1/patients/{patient_id}/assistant/chart",
+    )
 
 
 def test_assistant_chart_allows_readonly_user(
@@ -904,3 +928,22 @@ def test_assistant_correlate_unknown_patient_returns_404(
     )
 
     assert response.status_code == 404
+
+
+def _assert_only_read_audit_added(
+    before_audit: list[dict],
+    after_audit: list[dict],
+    *,
+    action: str,
+    method: str,
+    path: str,
+) -> None:
+    before_ids = {item["id"] for item in before_audit}
+    new_events = [item for item in after_audit if item["id"] not in before_ids]
+    assert len(new_events) == 1
+    read_event = new_events[0]
+    assert read_event["action"] == action
+    assert read_event["actor_id"] == "medico@oneepis.local"
+    assert read_event["request_method"] == method
+    assert read_event["request_path"] == path
+    assert read_event["extra_data"] == {}

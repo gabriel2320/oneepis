@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 
+from oneepis_api.api.deps import PatientReadActorDep
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
@@ -32,7 +33,7 @@ from .patient_assistant_search_results import (
     problem_results,
     vital_results,
 )
-from .patient_shared import LimitQuery, SessionDep, require_patient
+from .patient_shared import LimitQuery, SessionDep, record_patient_scoped_read, require_patient
 
 router = APIRouter()
 AssistantSearchQuery = Annotated[str, Query(alias="q", min_length=2, max_length=120)]
@@ -42,6 +43,7 @@ AssistantSearchQuery = Annotated[str, Query(alias="q", min_length=2, max_length=
 def search_assistant_read_layer(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     q: AssistantSearchQuery,
     limit: LimitQuery = 20,
 ) -> AssistantSearchResponse:
@@ -52,6 +54,12 @@ def search_assistant_read_layer(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Search query must contain at least 2 non-space characters.",
         )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="assistant_search.read",
+    )
     query_limit = limit + 1
     pattern = like_pattern(query)
     encounters = _search_encounters(session, patient_id, pattern, query_limit)
