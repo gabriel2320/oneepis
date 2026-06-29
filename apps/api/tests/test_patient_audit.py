@@ -61,16 +61,24 @@ def test_audit_events_include_correlation_and_before_after(
     assert public_patient_update["request_method"] == "PATCH"
     assert public_patient_update["request_path"] == f"/api/v1/patients/{patient_id}"
 
-    patient_update = next(
-        item
-        for item in audit_events_for_patient(patient_id)
-        if item["action"] == "patient.updated"
-    )
+    patient_events = audit_events_for_patient(patient_id)
+    patient_create = next(item for item in patient_events if item["action"] == "patient.created")
+    patient_update = next(item for item in patient_events if item["action"] == "patient.updated")
+    assert patient_create["extra_data"]["after"] == {
+        "clinical_status": "active",
+        "current_care_context": "unknown",
+    }
     assert patient_update["correlation_id"] == "corr-test-001"
     assert patient_update["request_method"] == "PATCH"
     assert patient_update["request_path"] == f"/api/v1/patients/{patient_id}"
-    assert patient_update["extra_data"]["before"] == {"last_name": "Paciente"}
-    assert patient_update["extra_data"]["after"] == {"last_name": "Auditado"}
+    assert patient_update["extra_data"]["fields"] == ["last_name"]
+    assert patient_update["extra_data"]["before"] == {}
+    assert patient_update["extra_data"]["after"] == {}
+    patient_audit_payload = str([patient_create["extra_data"], patient_update["extra_data"]])
+    assert "Permisos" not in patient_audit_payload
+    assert "Paciente" not in patient_audit_payload
+    assert "Auditado" not in patient_audit_payload
+    assert "1990-01-01" not in patient_audit_payload
 
 
 def test_patient_status_and_problem_update_are_audited(
