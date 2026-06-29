@@ -10,6 +10,7 @@ from oneepis_api.models.clinical_record import (
     Allergy,
     ClinicalEntry,
     ClinicalEvent,
+    ClinicalEventType,
     Medication,
     RecordStatus,
     VitalSign,
@@ -61,6 +62,18 @@ def get_recent_events(
         .where(ClinicalEvent.patient_id == patient_id)
         .order_by(ClinicalEvent.occurred_at.desc())
         .limit(limit)
+    )
+    return list(session.scalars(statement))
+
+
+def get_diagnosis_events(session: Session, patient_id: uuid.UUID) -> list[ClinicalEvent]:
+    statement = (
+        select(ClinicalEvent)
+        .where(
+            ClinicalEvent.patient_id == patient_id,
+            ClinicalEvent.event_type == ClinicalEventType.DIAGNOSIS,
+        )
+        .order_by(ClinicalEvent.occurred_at.desc())
     )
     return list(session.scalars(statement))
 

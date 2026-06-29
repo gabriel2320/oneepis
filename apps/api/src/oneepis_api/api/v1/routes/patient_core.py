@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, status
 
 from oneepis_api.api.deps import AiAccessDep, PatientActorDep, PatientReadActorDep
+from oneepis_api.models.clinical_record import ClinicalEvent
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.ai import PatientAiSuggestionRequest, PatientAiSuggestionsResponse
 from oneepis_api.schemas.patient import (
+    HistoricalDiagnosisRead,
     PatientCreate,
     PatientRead,
     PatientRecordSnapshot,
@@ -37,6 +40,36 @@ from .patient_shared import (
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
 
+def _historical_diagnosis_from_event(event: ClinicalEvent) -> HistoricalDiagnosisRead | None:
+    antecedent = event.payload.get("antecedent")
+    if not isinstance(antecedent, dict) or antecedent.get("category") != "diagnostico_historico":
+        return None
+    source_label = antecedent.get("source_label")
+    limit = antecedent.get("limit")
+    if not isinstance(source_label, str) or not isinstance(limit, str):
+        return None
+    return HistoricalDiagnosisRead(
+        source_event_id=event.id,
+        title=event.summary,
+        occurred_at=event.occurred_at,
+        source_type=event.source_type,
+        source_ref=event.source_ref,
+        source_label=source_label,
+        limit=limit,
+        code_system=_optional_payload_text(event.payload.get("code_system")),
+        code=_optional_payload_text(event.payload.get("code")),
+    )
+
+
+def _historical_diagnoses_from_events(events: list[ClinicalEvent]) -> list[HistoricalDiagnosisRead]:
+    diagnoses = [_historical_diagnosis_from_event(event) for event in events]
+    return [diagnosis for diagnosis in diagnoses if diagnosis is not None]
+
+
+def _optional_payload_text(value: Any) -> str | None:
+    return value if isinstance(value, str) and value.strip() else None
+
+
 def _build_patient_record_snapshot(
     session: SessionDep,
     patient_id: uuid.UUID,
@@ -48,6 +81,9 @@ def _build_patient_record_snapshot(
         active_allergies=patient_repo.get_active_allergies(session, patient_id),
         active_medications=patient_repo.get_active_medications(session, patient_id),
         active_problems=patient_repo.get_active_problems(session, patient_id),
+        historical_diagnoses=_historical_diagnoses_from_events(
+            patient_repo.get_diagnosis_events(session, patient_id)
+        ),
         recent_entries=patient_repo.get_recent_entries(session, patient_id),
     )
 

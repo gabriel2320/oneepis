@@ -12839,6 +12839,87 @@
         ],
         "title": "HealthCheck"
       },
+      "HistoricalDiagnosisRead": {
+        "properties": {
+          "source_event_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Event Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 280,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "source_type": {
+            "$ref": "#/components/schemas/ClinicalEventSourceType"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Source Label"
+          },
+          "limit": {
+            "type": "string",
+            "maxLength": 280,
+            "minLength": 1,
+            "title": "Limit"
+          },
+          "code_system": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code System"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_event_id",
+          "title",
+          "occurred_at",
+          "source_type",
+          "source_label",
+          "limit"
+        ],
+        "title": "HistoricalDiagnosisRead"
+      },
       "HospitalBedCreate": {
         "properties": {
           "ward": {
@@ -16199,6 +16280,13 @@
             },
             "type": "array",
             "title": "Active Problems"
+          },
+          "historical_diagnoses": {
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDiagnosisRead"
+            },
+            "type": "array",
+            "title": "Historical Diagnoses"
           },
           "recent_entries": {
             "items": {

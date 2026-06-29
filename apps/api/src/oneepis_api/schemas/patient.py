@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import Field
 
+from oneepis_api.models.clinical_record import ClinicalEventSourceType
 from oneepis_api.models.patient import CareContext, PatientClinicalStatus, SexAtBirth
 from oneepis_api.schemas.clinical_record import (
     ActiveProblemRead,
@@ -53,10 +54,23 @@ class PatientRead(PatientBase):
     updated_at: datetime
 
 
+class HistoricalDiagnosisRead(APIModel):
+    source_event_id: uuid.UUID
+    title: str = Field(min_length=1, max_length=280)
+    occurred_at: datetime
+    source_type: ClinicalEventSourceType
+    source_ref: str | None = Field(default=None, max_length=160)
+    source_label: str = Field(min_length=1, max_length=160)
+    limit: str = Field(min_length=1, max_length=280)
+    code_system: str | None = Field(default=None, max_length=80)
+    code: str | None = Field(default=None, max_length=80)
+
+
 class PatientRecordSnapshot(APIModel):
     patient: PatientRead
     latest_vitals: VitalSignRead | None = None
     active_allergies: list[AllergyRead] = Field(default_factory=list)
     active_medications: list[MedicationRead] = Field(default_factory=list)
     active_problems: list[ActiveProblemRead] = Field(default_factory=list)
+    historical_diagnoses: list[HistoricalDiagnosisRead] = Field(default_factory=list)
     recent_entries: list[ClinicalEntryRead] = Field(default_factory=list)

@@ -235,6 +235,18 @@ export type ActiveProblem = {
 
 export type ActiveProblemUpdate = Partial<ActiveProblemCreate>;
 
+export type HistoricalDiagnosis = {
+  source_event_id: string;
+  title: string;
+  occurred_at: string;
+  source_type: ClinicalEventSourceType;
+  source_ref?: string | null;
+  source_label: string;
+  limit: string;
+  code_system?: string | null;
+  code?: string | null;
+};
+
 export type ClinicalEncounterCreate = {
   type?: EncounterType;
   status?: EncounterStatus;
@@ -268,6 +280,7 @@ export type PatientRecordSnapshot = {
   active_allergies: Allergy[];
   active_medications: Medication[];
   active_problems: ActiveProblem[];
+  historical_diagnoses: HistoricalDiagnosis[];
   recent_entries: ClinicalEntry[];
 };
 

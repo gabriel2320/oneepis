@@ -90,6 +90,45 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     )
     assert problem_response.status_code == 201
 
+    diagnosis_event_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2023-04-10T09:00:00Z",
+            "summary": "Neumonia resuelta en control previo",
+            "payload": {
+                "code_system": "CIE-10",
+                "code": "J18.9",
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica previa",
+                    "limit": "No equivale a problema activo actual.",
+                },
+            },
+        },
+    )
+    assert diagnosis_event_response.status_code == 201
+    diagnosis_event = diagnosis_event_response.json()
+
+    procedure_event_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "procedure",
+            "occurred_at": "2022-01-10T09:00:00Z",
+            "summary": "Procedimiento previo curado",
+            "payload": {
+                "antecedent": {
+                    "category": "procedimiento",
+                    "source_label": "Historia clinica previa",
+                    "limit": "No equivale a diagnostico historico.",
+                },
+            },
+        },
+    )
+    assert procedure_event_response.status_code == 201
+
     vital_response = client.post(
         f"/api/v1/patients/{patient_id}/vital-signs",
         headers=auth,
@@ -112,6 +151,12 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     assert snapshot["patient"]["current_care_context"] == "unknown"
     assert snapshot["active_problems"][0]["title"] == "Hipertension arterial"
     assert snapshot["active_problems"][0]["code"] == "I10"
+    assert snapshot["historical_diagnoses"][0]["source_event_id"] == diagnosis_event["id"]
+    assert snapshot["historical_diagnoses"][0]["title"] == "Neumonia resuelta en control previo"
+    assert snapshot["historical_diagnoses"][0]["code"] == "J18.9"
+    assert snapshot["historical_diagnoses"][0]["source_label"] == "Historia clinica previa"
+    assert snapshot["historical_diagnoses"][0]["limit"] == "No equivale a problema activo actual."
+    assert len(snapshot["historical_diagnoses"]) == 1
     assert snapshot["latest_vitals"]["heart_rate_bpm"] == 78
     assert snapshot["active_allergies"][0]["substance"] == "Penicilina"
     assert snapshot["active_medications"][0]["name"] == "Paracetamol"
