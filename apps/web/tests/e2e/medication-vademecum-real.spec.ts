@@ -26,6 +26,9 @@ test("Medication page renders vademecum and dose validation without executable p
   await page.getByLabel("Agregar favorito").first().click();
   await expect(page.getByText("Favoritos", { exact: true })).toBeVisible();
   await expect(page.getByText("Dosis y alertas")).toBeVisible();
+  await expect(page.getByText("Usos curados")).toBeVisible();
+  await expect(page.getByText("Dolor o fiebre demo / adult_general_demo")).toBeVisible();
+  await expect(page.getByText("Alertas informativas")).toBeVisible();
   await expect(page.getByText("no consulta FDA/openFDA en vivo")).toBeVisible();
 
   await page.goto(
@@ -152,6 +155,31 @@ const catalogItem = {
   route: "oral",
   status: "available",
   tags: ["demo"],
+  clinical_uses: [
+    {
+      indication: "Dolor o fiebre demo",
+      population: "adult_general_demo",
+      notes: "Ejemplo no clinico para validar contrato y UI.",
+    },
+  ],
+  administration_routes: ["oral"],
+  interaction_alerts: [
+    {
+      substance: "interaccion-demo",
+      effect: "Ejemplo informativo; no evalua interacciones reales.",
+      recommendation: "Requiere revision humana y fuente curada antes de uso clinico.",
+      severity: "warning",
+    },
+  ],
+  safety_alerts: [
+    {
+      title: "Alerta demo",
+      description: "No usar como recomendacion clinica real.",
+      action: "Mantener solo para desarrollo y pruebas.",
+      severity: "info",
+    },
+  ],
+  monitoring_notes: ["Confirmar alergias, comorbilidades y fuente local antes de indicar."],
   dose_rules: [
     {
       id: "10000000-0000-4000-8000-000000000201",
