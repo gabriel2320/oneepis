@@ -85,6 +85,73 @@ def test_clinical_events_timeline_and_draft_are_audited(
     assert draft_audit["extra_data"]["section_sources"][0]["section"] == "subjective"
 
 
+def test_clinical_event_audit_snapshots_use_allowlist(
+    client: TestClient,
+    auth_headers,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_response = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Evento",
+            "last_name": "Auditado",
+            "birth_date": "1985-05-12",
+            "sex_at_birth": "female",
+        },
+    )
+    assert patient_response.status_code == 201
+    patient_id = patient_response.json()["id"]
+
+    event_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Texto clinico libre no debe quedar en auditoria.",
+            "payload": {"details": "Detalle narrativo sensible de prueba."},
+        },
+    )
+    assert event_response.status_code == 201
+    event_id = event_response.json()["id"]
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{event_id}",
+        headers=auth,
+        json={
+            "summary": "Texto clinico actualizado tampoco se copia.",
+            "payload": {"details": "Nuevo detalle narrativo sensible."},
+        },
+    )
+    assert update_response.status_code == 200
+
+    audit_events = audit_events_for_patient(patient_id)
+    created_audit = next(
+        item
+        for item in audit_events
+        if item["action"] == "clinical_event.created" and item["entity_id"] == event_id
+    )
+    updated_audit = next(
+        item
+        for item in audit_events
+        if item["action"] == "clinical_event.updated" and item["entity_id"] == event_id
+    )
+    created_after = created_audit["extra_data"]["after"]
+    assert created_after["event_type"] == "clinical_note"
+    assert created_after["patient_id"] == patient_id
+    assert "summary" not in created_after
+    assert "payload" not in created_after
+    assert updated_audit["extra_data"]["fields"] == ["payload", "summary"]
+    assert updated_audit["extra_data"]["before"] == {}
+    assert updated_audit["extra_data"]["after"] == {}
+    audit_payload = str([created_audit["extra_data"], updated_audit["extra_data"]])
+    assert "Texto clinico" not in audit_payload
+    assert "Detalle narrativo" not in audit_payload
+    assert "Nuevo detalle" not in audit_payload
+
+
 def test_clinical_event_detail_is_readable_without_audit_write(
     client: TestClient,
     auth_headers,
