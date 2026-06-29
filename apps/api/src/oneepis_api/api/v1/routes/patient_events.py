@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ClinicalEventActorDep
+from oneepis_api.api.deps import ClinicalEventActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEvent,
@@ -26,6 +26,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
     validate_encounter_for_patient,
@@ -115,10 +116,17 @@ def clinical_event_audit_fields(fields: list[str]) -> list[str]:
 def list_clinical_events(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalEvent]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="clinical_events.read",
+    )
     statement = (
         select(ClinicalEvent)
         .where(ClinicalEvent.patient_id == patient_id)
@@ -168,15 +176,23 @@ def get_clinical_event(
     patient_id: uuid.UUID,
     event_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
-    return require_patient_child(
+    event = require_patient_child(
         session,
         ClinicalEvent,
         event_id,
         patient_id,
         "Clinical event not found",
     )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="clinical_event.read",
+    )
+    return event
 
 
 @router.patch("/{patient_id}/clinical-events/{event_id}", response_model=ClinicalEventRead)
@@ -235,9 +251,16 @@ def update_clinical_event(
 def get_clinical_timeline(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
 ) -> ClinicalTimelineRead:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="timeline.read",
+    )
     return ClinicalTimelineRead(
         events=list(
             session.scalars(
