@@ -29,6 +29,9 @@ fuente canonica viva.
 - Auditoria de paciente reforzada (Dev-126): `/pacientes/[patientId]/auditoria`
   resume total, lecturas y escrituras, filtra localmente y mantiene actor, ruta
   y `correlation_id` visibles sin endpoint ni contrato nuevo.
+- Cobertura de auditoria de accesos (Dev-129): lecturas de paciente/ficha
+  prueban actor, metodo, ruta, `correlation_id` y dedupe con ultima correlacion;
+  el E2E real valida filtros lectura/escritura sin claim de logs seguros.
 - Logs PHI-safe backend (#110): sanitizador reutilizable para estructuras y
   strings planos, con filtro de logging activo al arrancar la API; sin
   Sentry/OTel ni observabilidad productiva.
@@ -73,9 +76,8 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-DEV-129: cobertura de auditoria de accesos. Reforzar pruebas de lecturas y
-eventos de acceso sobre rutas existentes, sin rutas nuevas ni claims de
-cumplimiento legal.
+DEV-130: logs PHI-safe en frontend/CI o politica explicita de bloqueo para
+hallazgos altos. Resolver el riesgo sin claims de observabilidad productiva.
 
 Criterio de exito:
 
