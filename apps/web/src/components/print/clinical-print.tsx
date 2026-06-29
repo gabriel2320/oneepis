@@ -149,6 +149,25 @@ export function PatientSummaryPrintSheet({
         </p>
       </section>
       <section className="print-section">
+        <h2 className="text-sm font-semibold">Diagnosticos historicos</h2>
+        {record.historical_diagnoses.length ? (
+          <ul className="mt-2 space-y-2 text-sm">
+            {record.historical_diagnoses.map((diagnosis) => (
+              <li key={diagnosis.source_event_id} className="rounded-md border p-2">
+                <p className="font-medium">{diagnosis.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  Fuente: {diagnosis.source_label}
+                  {diagnosis.code ? ` / Codigo: ${diagnosis.code}` : ""}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{diagnosis.limit}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-sm">Sin diagnosticos historicos curados</p>
+        )}
+      </section>
+      <section className="print-section">
         <h2 className="mb-3 text-sm font-semibold">Evoluciones recientes</h2>
         <ClinicalTimeline entries={record.recent_entries} />
       </section>
