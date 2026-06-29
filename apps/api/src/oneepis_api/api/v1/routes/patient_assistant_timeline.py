@@ -81,12 +81,15 @@ def get_assistant_timeline(
     lab_results = fetch_lab_results_for_timeline(session, patient_id, query_limit)
     historical_diagnoses = historical_diagnoses_from_events(events)
     historical_event_ids = {diagnosis.source_event_id for diagnosis in historical_diagnoses}
+    historical_events_by_id = {
+        event.id: event for event in events if event.id in historical_event_ids
+    }
     timeline_events = [event for event in events if event.id not in historical_event_ids]
     items = [
         *_encounter_items(patient_id, encounters),
         *_entry_items(patient_id, entries),
         *_event_items(patient_id, timeline_events),
-        *_historical_diagnosis_items(patient_id, historical_diagnoses),
+        *_historical_diagnosis_items(patient_id, historical_diagnoses, historical_events_by_id),
         *_vital_items(patient_id, vitals),
         *_medication_items(patient_id, medications),
         *_problem_items(patient_id, problems),
@@ -193,6 +196,7 @@ def _event_items(patient_id: uuid.UUID, events: list[ClinicalEvent]) -> list[Ass
 def _historical_diagnosis_items(
     patient_id: uuid.UUID,
     diagnoses: list[HistoricalDiagnosisRead],
+    source_events: dict[uuid.UUID, ClinicalEvent],
 ) -> list[AssistantTimelineItem]:
     return [
         AssistantTimelineItem(
@@ -203,9 +207,20 @@ def _historical_diagnosis_items(
             summary=_historical_diagnosis_summary(diagnosis),
             source_label=diagnosis.source_label,
             source_path=clinical_event_source_path(patient_id, diagnosis.source_event_id),
+            **_encounter_metadata(_historical_source_encounter(diagnosis, source_events)),
         )
         for diagnosis in diagnoses
     ]
+
+
+def _historical_source_encounter(
+    diagnosis: HistoricalDiagnosisRead,
+    source_events: dict[uuid.UUID, ClinicalEvent],
+) -> ClinicalEncounter | None:
+    event = source_events.get(diagnosis.source_event_id)
+    if event is None:
+        return None
+    return event.encounter
 
 
 def _vital_items(patient_id: uuid.UUID, vitals: list[VitalSign]) -> list[AssistantTimelineItem]:
