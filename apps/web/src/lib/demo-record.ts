@@ -152,7 +152,19 @@ export const demoRecords: PatientRecordSnapshot[] = [
     active_allergies: [],
     active_medications: [],
     active_problems: [],
-    historical_diagnoses: [],
+    historical_diagnoses: [
+      {
+        source_event_id: "92222222-2222-4222-8222-222222222222",
+        title: "Diagnostico historico hospital demo",
+        occurred_at: "2026-05-18T09:30:00Z",
+        source_type: "manual",
+        source_ref: null,
+        source_label: "Evento curado hospital demo",
+        limit: "Contexto historico demo; no es diagnostico de egreso.",
+        code_system: "DEMO",
+        code: "DX-H002",
+      },
+    ],
     recent_entries: [
       {
         id: "62222222-2222-4222-8222-222222222222",

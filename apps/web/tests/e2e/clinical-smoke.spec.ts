@@ -348,6 +348,11 @@ test("hospital discharge summary renders governed draft workspace", async ({ pag
 
   await expect(page.getByRole("heading", { name: "Alta y epicrisis" })).toBeVisible();
   await expect(page.getByText("Borrador de epicrisis")).toBeVisible();
+  await expect(page.getByText("Contexto historico para epicrisis")).toBeVisible();
+  await expect(page.getByText("Diagnostico historico hospital demo")).toBeVisible();
+  await expect(page.getByText("No diagnostico de egreso")).toBeVisible();
+  const dischargeEntry = page.locator("article").filter({ hasText: "Epicrisis preliminar demo" });
+  await expect(dischargeEntry.getByText("Diagnostico historico hospital demo")).toHaveCount(0);
   await expect(page.getByLabel("Hospitalizacion para epicrisis")).toContainText("Hospitalizacion demo");
   await expect(page.getByText("Epicrisis preliminar demo")).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar epicrisis" })).toBeDisabled();
@@ -511,6 +516,9 @@ test("ambulatory summary renders real read-only patient context", async ({ page 
   await expect(page.getByText("Lectura de apoyo para la atencion clinica ambulatoria")).toBeVisible();
   await expect(page.getByText("Snapshot ambulatorio")).toBeVisible();
   await expect(page.getByText("Problema demo activo")).toBeVisible();
+  await expect(page.getByText("Contexto historico ambulatorio")).toBeVisible();
+  await expect(page.getByText("Diagnostico historico demo")).toBeVisible();
+  await expect(page.getByText("Este bloque solo aporta contexto longitudinal")).toBeVisible();
   await expect(page.getByText("Control ambulatorio demo")).toBeVisible();
   await expect(page.getByText("No emite receta valida")).toBeVisible();
   await expect(page.getByRole("link", { name: "Abrir atencion" })).toBeVisible();
@@ -583,6 +591,9 @@ test("AI settings and print routes render", async ({ page }) => {
   );
   await expect(page.getByRole("heading", { name: "Alta y epicrisis" })).toBeVisible();
   await expect(page.getByText("Epicrisis preliminar demo")).toBeVisible();
+  await expect(page.getByText("Contexto historico (no egreso)")).toBeVisible();
+  await expect(page.getByText("Diagnostico historico hospital demo")).toBeVisible();
+  await expect(page.getByText("Diagnosticos de egreso", { exact: true })).toBeVisible();
 });
 
 test("login route renders local auth form", async ({ page }) => {

@@ -7,6 +7,7 @@ import { CalendarClock } from "lucide-react";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { AmbulatoryClinicalShell } from "@/components/clinical/clinical-domain-shell";
 import { formatDateTime } from "@/components/clinical/date-format";
+import { HistoricalDiagnosisContextCard } from "@/components/clinical/historical-diagnosis-context";
 import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import {
   AllergyList,
@@ -110,6 +111,10 @@ function AmbulatorySummaryWorkspace({
             <MedicationList medications={record.active_medications} />
           </div>
         </ClinicalSectionCard>
+        <HistoricalDiagnosisContextCard
+          diagnoses={record.historical_diagnoses}
+          title="Contexto historico ambulatorio"
+        />
         <ClinicalSectionCard title="Evoluciones ambulatorias recientes">
           <ClinicalTimeline entries={ambulatoryEntryItems} />
         </ClinicalSectionCard>
