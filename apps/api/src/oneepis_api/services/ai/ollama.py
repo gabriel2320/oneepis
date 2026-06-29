@@ -15,6 +15,11 @@ from oneepis_api.schemas.ai import (
     PatientAiSuggestionsResponse,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.ai.active_medication_context import (
+    active_medication_suggestions,
+    medication_context_safety_notes,
+    merge_readonly_suggestions,
+)
 from oneepis_api.services.ai.parsing import as_string_list, parse_json_content, parse_suggestions
 from oneepis_api.services.ai.snapshot import (
     local_snapshot_suggestions,
@@ -117,9 +122,21 @@ class OllamaProvider:
         payload: PatientAiSuggestionRequest,
     ) -> PatientAiSuggestionsResponse:
         model = self.suggestions_model or self.summary_model or self.fallback_model
+        readonly_suggestions = active_medication_suggestions(snapshot)
         try:
             content = self._patient_suggestions_chat(snapshot, payload, model)
         except (HTTPError, URLError, TimeoutError, OSError) as exc:
+            suggestions = merge_readonly_suggestions(
+                readonly_suggestions,
+                local_snapshot_suggestions(snapshot),
+            )
+            safety_notes = [
+                "Fallback local no generativo.",
+                "No se modifico la ficha clinica.",
+                "Verifica que Ollama este corriendo y que el modelo exista localmente.",
+            ]
+            if readonly_suggestions:
+                safety_notes.extend(medication_context_safety_notes())
             return PatientAiSuggestionsResponse(
                 provider=self.name,
                 status="error",
@@ -127,23 +144,22 @@ class OllamaProvider:
                 patient_id=snapshot.patient.id,
                 generated_at=datetime.now(UTC),
                 summary=f"Ollama no pudo generar sugerencias: {exc}",
-                suggestions=local_snapshot_suggestions(snapshot),
-                safety_notes=[
-                    "Fallback local no generativo.",
-                    "No se modifico la ficha clinica.",
-                    "Verifica que Ollama este corriendo y que el modelo exista localmente.",
-                ],
+                suggestions=suggestions,
+                safety_notes=safety_notes,
             )
 
         parsed = parse_json_content(content)
         suggestions = parse_suggestions(parsed.get("suggestions"), source="ollama")
         if not suggestions:
             suggestions = local_snapshot_suggestions(snapshot)
+        suggestions = merge_readonly_suggestions(readonly_suggestions, suggestions)
 
         safety_notes = as_string_list(parsed.get("safety_notes")) or [
             "Borrador generado por Ollama local.",
             "Requiere revision humana antes de cualquier accion clinica.",
         ]
+        if readonly_suggestions:
+            safety_notes.extend(medication_context_safety_notes())
         summary = str(parsed.get("summary") or snapshot_summary(snapshot)).strip()
 
         return PatientAiSuggestionsResponse(
