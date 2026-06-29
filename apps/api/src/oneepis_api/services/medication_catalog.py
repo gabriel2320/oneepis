@@ -30,6 +30,8 @@ from oneepis_api.services.medication_catalog_seed import (
     ensure_demo_medication_catalog,
 )
 
+__all__ = ["DEMO_ANALGESIC_ID", "DEMO_CARDIO_ID"]
+
 NO_SAFE_RULE_LIMITATION = (
     "Sin regla segura disponible para este medicamento/via; "
     "OneEpis no valida dosis con este borrador."

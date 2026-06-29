@@ -22,7 +22,9 @@ def active_medication_suggestions(
         source_label = medication.source.source_label if medication.source else "Fuente pendiente"
         draft_note = _draft_source_note(medication)
         farmaco_note = _farmaco_txt_note(medication)
-        title_state = "requiere curacion" if draft_note else "incompleta" if missing else "con fuente"
+        title_state = (
+            "requiere curacion" if draft_note else "incompleta" if missing else "con fuente"
+        )
         detail_parts = [
             _medication_summary(medication),
             f"Fuente: {source_label}.",
@@ -48,7 +50,9 @@ def active_medication_suggestions(
                     medication=medication,
                 ),
                 source="local_rules",
-                action_label="Revisar fuente Farmaco" if farmaco_note else "Revisar medicacion activa",
+                action_label=(
+                    "Revisar fuente Farmaco" if farmaco_note else "Revisar medicacion activa"
+                ),
             )
         )
     return suggestions[:5]
