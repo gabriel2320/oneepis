@@ -23,6 +23,10 @@ test.describe("print routes", () => {
     await expect(page.getByText("Metadata documental")).toBeVisible();
     await expect(page.getByText("Fuente: record paciente")).toBeVisible();
     await expect(page.getByText("Estado: Ficha de lectura no firmada")).toBeVisible();
+    await expect(page.getByText("Diagnosticos historicos")).toBeVisible();
+    await expect(page.getByText("Diagnostico historico demo")).toBeVisible();
+    await expect(page.getByText("Fuente: Evento curado demo / Codigo: DX-H001")).toBeVisible();
+    await expect(page.getByText("Lectura historica demo; no es problema activo.")).toBeVisible();
     await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
 
     await page.goto(`/print/pacientes/${demoPatientId}/resumen`);
