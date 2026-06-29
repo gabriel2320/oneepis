@@ -27,6 +27,21 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
+ACTIVE_PROBLEM_AUDIT_FIELDS = [
+    "code",
+    "code_system",
+    "onset_date",
+    "patient_id",
+    "resolved_on",
+    "status",
+]
+
+
+def active_problem_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(ACTIVE_PROBLEM_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
+
 @router.get("/{patient_id}/problems", response_model=list[ActiveProblemRead])
 def list_active_problems(
     patient_id: uuid.UUID,
@@ -77,7 +92,7 @@ def create_active_problem(
         entity_id=problem.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "status": problem.status.value},
-        after=audit_snapshot(problem),
+        after=audit_snapshot(problem, ACTIVE_PROBLEM_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(problem)
@@ -125,12 +140,13 @@ def update_active_problem(
         "Problem not found",
     )
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(problem, update_fields)
+    before = audit_snapshot(problem, active_problem_audit_fields(update_fields))
     fields = apply_update(problem, payload)
+    audit_fields = active_problem_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=problem,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
