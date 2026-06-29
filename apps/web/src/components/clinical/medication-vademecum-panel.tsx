@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { GripVertical, Search, ShieldAlert, Star } from "lucide-react";
+import { GripVertical, Search, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import {
-  AddMedicationButton,
   MedicationHistory,
   MedicationShortcutList,
 } from "@/components/clinical/medication-vademecum-actions";
+import { SelectedMedicationCard } from "@/components/clinical/medication-vademecum-selected-card";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/clinical/states";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -228,44 +227,6 @@ function CatalogRow({
     </button>
   );
 }
-
-function SelectedMedicationCard({
-  item,
-  patientId,
-  canWrite,
-}: {
-  item: MedicationCatalogItem;
-  patientId: string;
-  canWrite: boolean;
-}) {
-  const rule = item.dose_rules[0];
-  return (
-    <div className="rounded-md border bg-muted/20 p-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold">{item.display_name}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Fuente: {item.source_label} · {item.review_status}
-          </p>
-        </div>
-        <Badge variant={item.status === "available" ? "safe" : "outline"}>{item.status}</Badge>
-      </div>
-      {rule ? (
-        <div className="mt-3 rounded-md border bg-card p-3 text-xs">
-          <p className="flex items-center gap-2 font-semibold">
-            <ShieldAlert className="h-4 w-4" />
-            Dosis y alertas
-          </p>
-          <p className="mt-1 text-muted-foreground">{rule.usual_dose_text ?? "Dosis usual no curada."}</p>
-          <p className="mt-1 text-muted-foreground">{rule.avoid_dose_text ?? "Dosis a evitar no curada."}</p>
-          <p className="mt-1 text-muted-foreground">Fuente regla: {rule.source_label}</p>
-        </div>
-      ) : null}
-      <AddMedicationButton item={item} patientId={patientId} canWrite={canWrite} />
-    </div>
-  );
-}
-
 function toggleFavorite(favoriteIds: string[], itemId: string) {
   return favoriteIds.includes(itemId)
     ? favoriteIds.filter((favoriteId) => favoriteId !== itemId)
