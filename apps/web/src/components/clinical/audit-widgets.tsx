@@ -13,7 +13,7 @@ type AuditKind = "lectura" | "escritura";
 type AuditFilter = "todos" | AuditKind;
 
 export function auditEventKind(action: string): "lectura" | "escritura" | null {
-  if (action.endsWith(".read") || action.includes(".read.")) {
+  if (action.endsWith(".read") || action.endsWith(".read_deduped") || action.includes(".read.")) {
     return "lectura";
   }
   if (action.includes(".")) {
