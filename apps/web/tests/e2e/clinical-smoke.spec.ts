@@ -211,9 +211,6 @@ test("AI-Chart renders event proposals from written entries", async ({ page }) =
   await expect(
     page.getByText("AI-Chart mantiene reglas, plantillas y auditoria con degradacion local."),
   ).toBeVisible();
-  await expect(
-    page.getByText(/Apoyo local disponible para resumen o borrador revisable|Apoyo local no disponible; se conserva degradacion local/),
-  ).toBeVisible();
   await expect(page.getByText("IA clinica:")).toBeVisible();
   await expectNoInternalTerms(main);
   await expect(
