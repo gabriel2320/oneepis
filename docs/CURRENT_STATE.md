@@ -35,6 +35,9 @@ fuente canonica viva.
 - Logs PHI-safe backend (#110): sanitizador reutilizable para estructuras y
   strings planos, con filtro de logging activo al arrancar la API; sin
   Sentry/OTel ni observabilidad productiva.
+- Guard PHI-safe frontend/CI (Dev-130): `check:web` bloquea `console.*` en
+  `apps/web/src`; CI bloquea OSV npm high/critical, mientras dependency review,
+  CodeQL y `pip-audit` siguen report-only hasta politica especifica.
 - Contrato auth/sesion ejecutable (#111): tests de revocacion en lecturas
   clinicas y gate OpenAPI sobre rutas auth y GET protegidos de paciente.
 - ClinicalOrder borrador backend (#112): modelo, migracion, API y guards con
@@ -76,15 +79,17 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-DEV-130: logs PHI-safe en frontend/CI o politica explicita de bloqueo para
-hallazgos altos. Resolver el riesgo sin claims de observabilidad productiva.
+Evaluar un unico modulo clinico nuevo dentro de la ficha existente. Candidatos
+permitidos: diagnosticos historicos separados de problemas activos, o
+antecedentes estructurados dentro de la ficha existente.
 
 Criterio de exito:
 
-- El walkthrough clinico sigue siendo unico y no abre superficies nuevas.
-- Auditoria distingue acceso/lectura/escritura con actor, ruta y correlacion
-  cuando usa API real.
-- No hay claim de logs seguros, auditoria completa ni cumplimiento legal.
+- El modulo elegido mejora lectura clinica longitudinal sin crear rutas nuevas.
+- Solo se evalua e implementa un modulo; el otro queda diferido.
+- El walkthrough clinico unico sigue cubriendo el flujo sin fragmentarse.
+- No hay claim de logs seguros, auditoria completa, cumplimiento legal ni
+  observabilidad productiva PHI-safe.
 - No aparecen etiquetas positivas de receta, firma, dispensacion,
   administracion, MAR u orden ejecutable.
 
@@ -109,8 +114,8 @@ Criterio de no-hacer:
 
 CI agrega:
 
-- `security-report`: `gitleaks` bloqueante; dependency review, CodeQL, OSV npm
-  advisory check y `pip-audit` report-only hasta politica explicita.
+- `security-report`: `gitleaks` y OSV npm high/critical bloqueantes;
+  dependency review, CodeQL y `pip-audit` report-only hasta politica explicita.
 - `postgres-alembic`: PostgreSQL 15, `alembic upgrade head` desde cero y smoke
   `downgrade -1`/`upgrade head`.
 
@@ -119,7 +124,8 @@ CI agrega:
 - Produccion sanitaria: OneEpis no esta listo para uso clinico real ni software
   certificado.
 - Seguridad: faltan secretos formales, cifrado, backups/restore, retencion,
-  control contextual por institucion/equipo y cobertura PHI-safe en frontend/CI.
+  control contextual por institucion/equipo y observabilidad productiva
+  PHI-safe formal.
 - Identidad: auth local sirve para desarrollo; usuarios persistentes, sesiones
   productivas, revocacion y recuperacion institucional siguen pendientes.
 - Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro.
