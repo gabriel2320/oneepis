@@ -42,12 +42,17 @@ def test_accepting_entry_event_proposal_creates_sourced_event(
     assert event["payload"]["confirmed_from_patch"] is True
     assert event["payload"]["clinical_patch_id"] == proposal["patch"]["patch_id"]
     patient_audit_events = audit_events(client, auth, patient_id)
-    assert any(
-        audit["action"] == "ai.clinical_patch.accepted"
-        and audit["extra_data"]["patch_id"] == proposal["patch"]["patch_id"]
-        and audit["extra_data"]["applies_changes"] is True
+    accepted_audit = next(
+        audit
         for audit in patient_audit_events
+        if audit["action"] == "ai.clinical_patch.accepted"
+        and audit["extra_data"]["patch_id"] == proposal["patch"]["patch_id"]
     )
+    assert accepted_audit["extra_data"]["applies_changes"] is True
+    assert accepted_audit["extra_data"]["note"] == {"present": False, "length": 0}
+    assert accepted_audit["extra_data"]["after"]["event_type"] == event["event_type"]
+    assert "summary" not in accepted_audit["extra_data"]["after"]
+    assert "payload" not in accepted_audit["extra_data"]["after"]
 
 
 def test_rejecting_entry_event_patch_audits_without_creating_event(
@@ -86,12 +91,18 @@ def test_rejecting_entry_event_patch_audits_without_creating_event(
     assert events_response.status_code == 200
     assert events_response.json() == []
     patient_audit_events = audit_events(client, auth, patient_id)
-    assert any(
-        audit["action"] == "ai.clinical_patch.rejected"
-        and audit["extra_data"]["patch_id"] == proposal["patch"]["patch_id"]
-        and audit["extra_data"]["applies_changes"] is False
+    rejected_audit = next(
+        audit
         for audit in patient_audit_events
+        if audit["action"] == "ai.clinical_patch.rejected"
+        and audit["extra_data"]["patch_id"] == proposal["patch"]["patch_id"]
     )
+    assert rejected_audit["extra_data"]["applies_changes"] is False
+    assert rejected_audit["extra_data"]["note"] == {
+        "present": True,
+        "length": len("No corresponde a evento longitudinal."),
+    }
+    assert "No corresponde a evento longitudinal." not in str(rejected_audit["extra_data"])
 
 
 def test_accepting_patch_without_human_confirmation_is_blocked(
@@ -232,12 +243,18 @@ def test_accepting_evolution_patch_creates_reviewed_draft_entry(
     assert entry["extra_data"]["confirmed_from_patch"] is True
     assert entry["extra_data"]["human_reviewed"] is True
     patient_audit_events = audit_events(client, auth, patient_id)
-    assert any(
-        audit["action"] == "ai.clinical_patch.accepted"
+    accepted_audit = next(
+        audit
+        for audit in patient_audit_events
+        if audit["action"] == "ai.clinical_patch.accepted"
         and audit["entity_type"] == "clinical_entry"
         and audit["extra_data"]["target"] == "evolution"
-        for audit in patient_audit_events
     )
+    assert accepted_audit["extra_data"]["after"]["kind"] == "progress"
+    assert accepted_audit["extra_data"]["after"]["status"] == "draft"
+    assert "title" not in accepted_audit["extra_data"]["after"]
+    assert "subjective" not in accepted_audit["extra_data"]["after"]
+    assert "extra_data" not in accepted_audit["extra_data"]["after"]
 
 
 def test_accepting_evolution_patch_must_remain_draft(
