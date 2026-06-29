@@ -5,6 +5,7 @@ def test_encounter_update_and_cancel_are_audited(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -52,9 +53,7 @@ def test_encounter_update_and_cancel_are_audited(
     assert get_response.status_code == 200
     assert get_response.json()["status"] == "cancelled"
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
-    events = audit_response.json()
+    events = audit_events_for_patient(patient_id)
     encounter_update = next(item for item in events if item["action"] == "encounter.updated")
     assert encounter_update["extra_data"]["before"] == {
         "status": "in_progress",
@@ -74,6 +73,7 @@ def test_clinical_entry_can_be_linked_and_unlinked_from_encounter(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -118,11 +118,9 @@ def test_clinical_entry_can_be_linked_and_unlinked_from_encounter(
     assert unlink_response.status_code == 200
     assert unlink_response.json()["encounter_id"] is None
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
     updates = [
         item
-        for item in audit_response.json()
+        for item in audit_events_for_patient(patient_id)
         if item["action"] == "clinical_entry.updated"
     ]
     assert any(
@@ -247,6 +245,7 @@ def test_discharge_summary_requires_hospitalization_encounter(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -301,11 +300,9 @@ def test_discharge_summary_requires_hospitalization_encounter(
     assert created["status"] == "draft"
     assert created["encounter_id"] == hospital_encounter["id"]
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
     created_audit = next(
         item
-        for item in audit_response.json()
+        for item in audit_events_for_patient(patient_id)
         if item["action"] == "clinical_entry.created"
         and item["extra_data"]["kind"] == "discharge_summary"
     )

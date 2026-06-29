@@ -293,6 +293,5 @@ export type AuditEvent = {
   correlation_id?: string | null;
   request_method?: string | null;
   request_path?: string | null;
-  extra_data: Record<string, unknown>;
   created_at: string;
 };

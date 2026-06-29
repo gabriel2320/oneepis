@@ -5,6 +5,7 @@ def test_appointments_are_persisted_listed_and_audited(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_id = create_patient_for_permissions(client, auth)
@@ -55,9 +56,7 @@ def test_appointments_are_persisted_listed_and_audited(
     )
     assert invalid_time.status_code == 422
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
-    events = audit_response.json()
+    events = audit_events_for_patient(patient_id)
     created_audit = next(item for item in events if item["action"] == "appointment.created")
     assert created_audit["entity_id"] == appointment["id"]
     updated_audit = next(item for item in events if item["action"] == "appointment.updated")

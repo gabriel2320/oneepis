@@ -1,8 +1,10 @@
+import uuid
 from collections.abc import Callable, Iterator
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, or_, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -18,9 +20,11 @@ from oneepis_api.models import clinical_risk as _clinical_risk_models  # noqa: F
 from oneepis_api.models import hospitalization as _hospitalization_models  # noqa: F401
 from oneepis_api.models import lab as _lab_models  # noqa: F401
 from oneepis_api.models import patient as _patient_models  # noqa: F401
+from oneepis_api.models.audit import AuditEvent
 
 AuthHeadersFactory = Callable[..., dict[str, str]]
 CreatePatientFactory = Callable[..., str]
+AuditEventsForPatientFactory = Callable[..., list[dict[str, Any]]]
 
 
 @pytest.fixture
@@ -92,3 +96,45 @@ def create_patient_for_permissions(
         return str(response.json()["id"])
 
     return create
+
+
+@pytest.fixture
+def audit_events_for_patient() -> AuditEventsForPatientFactory:
+    def list_events(patient_id: str, limit: int = 50) -> list[dict[str, Any]]:
+        override_session = app.dependency_overrides[get_session]
+        session_iterator = override_session()
+        session = next(session_iterator)
+        try:
+            patient_uuid = uuid.UUID(patient_id)
+            statement = (
+                select(AuditEvent)
+                .where(
+                    or_(
+                        (AuditEvent.entity_type == "patient")
+                        & (AuditEvent.entity_id == patient_uuid),
+                        AuditEvent.extra_data["patient_id"].as_string() == patient_id,
+                    )
+                )
+                .order_by(AuditEvent.created_at.desc())
+                .limit(limit)
+            )
+            events = session.scalars(statement).all()
+            return [
+                {
+                    "id": str(event.id),
+                    "action": event.action,
+                    "entity_type": event.entity_type,
+                    "entity_id": str(event.entity_id) if event.entity_id else None,
+                    "actor_id": event.actor_id,
+                    "correlation_id": event.correlation_id,
+                    "request_method": event.request_method,
+                    "request_path": event.request_path,
+                    "extra_data": event.extra_data,
+                    "created_at": event.created_at.isoformat(),
+                }
+                for event in events
+            ]
+        finally:
+            session_iterator.close()
+
+    return list_events

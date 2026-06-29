@@ -7,6 +7,7 @@ from oneepis_api.services.clinical_intent import route_clinical_intent
 def test_clinical_events_timeline_and_draft_are_audited(
     client: TestClient,
     auth_headers,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient_response = client.post(
@@ -77,9 +78,7 @@ def test_clinical_events_timeline_and_draft_are_audited(
     }
     assert "Dolor toracico resuelto" in draft["subjective"]
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
-    assert audit_response.status_code == 200
-    audit_events = audit_response.json()
+    audit_events = audit_events_for_patient(patient_id)
     actions = {item["action"] for item in audit_events}
     assert {"clinical_event.created", "ai.soap_draft.created"}.issubset(actions)
     draft_audit = next(item for item in audit_events if item["action"] == "ai.soap_draft.created")
@@ -215,6 +214,7 @@ def test_derived_clinical_event_requires_source_ref(
 def test_curated_antecedent_event_is_validated_and_audited(
     client: TestClient,
     auth_headers,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     auth["X-OneEpis-Correlation-ID"] = "dev-132-antecedent-validation"
@@ -249,11 +249,7 @@ def test_curated_antecedent_event_is_validated_and_audited(
     assert response.status_code == 201
     event = response.json()
     assert event["payload"]["antecedent"]["category"] == "diagnostico_historico"
-    audit_response = client.get(
-        f"/api/v1/patients/{patient['id']}/audit-events",
-        headers=auth,
-    )
-    audit_events = audit_response.json()
+    audit_events = audit_events_for_patient(patient["id"])
     event_audit = next(item for item in audit_events if item["entity_id"] == event["id"])
     assert event_audit["action"] == "clinical_event.created"
     assert event_audit["actor_id"] == "medico@oneepis.local"
@@ -445,6 +441,7 @@ def test_draft_rejects_events_from_other_patient(
 def test_clinical_intent_returns_sources_and_audit(
     client: TestClient,
     auth_headers,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     patient = client.post(
@@ -668,8 +665,7 @@ def test_clinical_intent_returns_sources_and_audit(
     )
     assert intent["requires_human_confirmation"] is False
 
-    audit_response = client.get(f"/api/v1/patients/{patient['id']}/audit-events", headers=auth)
-    audit_events = audit_response.json()
+    audit_events = audit_events_for_patient(patient["id"])
     actions = {item["action"] for item in audit_events}
     assert "ai.clinical_intent.created" in actions
     review_decision = next(
@@ -722,13 +718,10 @@ def test_clinical_intent_returns_sources_and_audit(
     assert action_decision["applies_changes"] is False
     assert action_decision["decision"] == "accepted"
 
-    action_audit_response = client.get(
-        f"/api/v1/patients/{patient['id']}/audit-events",
-        headers=auth,
-    )
+    action_audit_events = audit_events_for_patient(patient["id"])
     action_audit = next(
         item
-        for item in action_audit_response.json()
+        for item in action_audit_events
         if item["action"] == "ai.clinical_action.decided"
     )
     assert action_audit["extra_data"]["action_id"] == soap_action["action_id"]

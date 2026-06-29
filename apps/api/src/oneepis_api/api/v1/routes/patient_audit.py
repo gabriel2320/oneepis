@@ -6,14 +6,14 @@ from fastapi import APIRouter
 from sqlalchemy import or_, select
 
 from oneepis_api.models.audit import AuditEvent
-from oneepis_api.schemas.audit import AuditEventRead
+from oneepis_api.schemas.audit import AuditEventPublicRead
 
 from .patient_shared import PATIENT_ROUTER_OPTIONS, LimitQuery, SessionDep, require_patient
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
 
-@router.get("/{patient_id}/audit-events", response_model=list[AuditEventRead])
+@router.get("/{patient_id}/audit-events", response_model=list[AuditEventPublicRead])
 def list_patient_audit_events(
     patient_id: uuid.UUID,
     session: SessionDep,
