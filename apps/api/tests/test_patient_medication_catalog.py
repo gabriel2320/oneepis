@@ -98,8 +98,18 @@ def test_medication_catalog_validation_and_override_audit(
         for item in audit_events(client, auth, patient_id)
         if item["action"] == "medication.created"
     ]
-    assert medication_events[0]["extra_data"]["dose_warning_count"] == 1
-    assert medication_events[0]["extra_data"]["dose_override"] is True
+    medication_event = medication_events[0]
+    metadata = medication_event["extra_data"]
+    assert metadata["dose_validation_blocking"] is True
+    assert metadata["dose_warning_count"] == 1
+    assert metadata["dose_warning_severities"] == ["warning"]
+    assert metadata["dose_override"] is True
+    assert metadata["dose_override_reason_present"] is True
+    assert metadata["dose_override_reason_length"] == len("Decision clinica documentada en demo.")
+    assert metadata["dose_source_count"] >= 1
+    assert "Decision clinica documentada en demo." not in str(metadata)
+    assert "dose_override_reason" not in metadata["after"]
+    assert metadata["after"]["dose_check_snapshot"]["blocking"] is True
 
 
 def test_medication_read_exposes_missing_fields_for_unlinked_manual_medication(
