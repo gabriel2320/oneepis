@@ -72,6 +72,40 @@ def test_patient_read_audit_dedupes_repeated_same_route_reads(
     assert record_reads[0]["extra_data"]["last_correlation_id"] == "dedupe-read-003"
 
 
+def test_patient_audit_events_filter_by_patient_before_limit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    other_patient_id = create_patient_for_permissions(client, auth)
+
+    target_response = client.patch(
+        f"/api/v1/patients/{patient_id}",
+        headers={**auth, "X-OneEpis-Correlation-ID": "target-patient-update"},
+        json={"last_name": "Paciente Auditado"},
+    )
+    assert target_response.status_code == 200
+
+    for index in range(9):
+        other_response = client.patch(
+            f"/api/v1/patients/{other_patient_id}",
+            headers={**auth, "X-OneEpis-Correlation-ID": f"other-patient-update-{index}"},
+            json={"last_name": f"Paciente Externo {index}"},
+        )
+        assert other_response.status_code == 200
+
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events?limit=2",
+        headers=auth,
+    )
+    assert audit_response.status_code == 200
+    audit_events = audit_response.json()
+    assert "target-patient-update" in [item["correlation_id"] for item in audit_events]
+    assert {item["entity_id"] for item in audit_events} == {patient_id}
+
+
 def test_patient_read_audit_skips_missing_patient(
     client: TestClient,
     auth_headers,
