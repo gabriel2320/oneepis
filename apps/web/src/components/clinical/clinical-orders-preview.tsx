@@ -56,7 +56,7 @@ function ClinicalOrderDraftList({ orders }: { orders: ClinicalOrder[] }) {
     return (
       <EmptyState
         title="Sin ordenes registradas"
-        description="Las ordenes borrador apareceran aqui con su estado y fuente API."
+        description="Las ordenes borrador apareceran aqui con su estado y fuente tecnica."
       />
     );
   }
@@ -79,9 +79,17 @@ function ClinicalOrderDraftList({ orders }: { orders: ClinicalOrder[] }) {
           {order.rationale ? (
             <p className="mt-2 text-xs text-muted-foreground">Motivo: {order.rationale}</p>
           ) : null}
-          <p className="mt-2 break-all text-[11px] text-muted-foreground">
-            Fuente: /api/v1/patients/{order.patient_id}/clinical-orders/{order.id}
-          </p>
+          <p className="mt-2 text-xs text-muted-foreground">Fuente: orden borrador del paciente</p>
+          <details className="mt-2 rounded-md border bg-muted/20 p-2 text-[11px] text-muted-foreground">
+            <summary className="cursor-pointer font-medium text-foreground">Detalle tecnico</summary>
+            <div className="mt-2 space-y-1">
+              <p>ID: {order.id}</p>
+              <p>Estado: {order.status}</p>
+              <p className="break-all">
+                Ruta: /api/v1/patients/{order.patient_id}/clinical-orders/{order.id}
+              </p>
+            </div>
+          </details>
         </div>
       ))}
     </div>

@@ -39,7 +39,7 @@ export function AiChartGovernancePanel({
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li>Todo borrador requiere revision humana.</li>
           <li>Las fuentes quedan en metadata del borrador.</li>
-          <li>Si la IA local esta apagada, se usa degradacion local.</li>
+          <li>Si el apoyo local no esta disponible, se usa degradacion local.</li>
         </ul>
         <ul className="space-y-1 text-xs text-muted-foreground">
           <li>IA clinica: {canUseAi ? "habilitada" : "requiere perfil autorizado"}</li>

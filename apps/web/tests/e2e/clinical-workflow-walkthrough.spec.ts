@@ -134,9 +134,12 @@ async function expectPatientRecord(page: Page, workspace: "patient") {
   const main = page.getByRole("main");
   await expectSemanticShell(page, workspace);
   await expect(main.getByText("Hoja clinica viva")).toBeVisible();
-  await expect(main.getByText("Mapa longitudinal del paciente")).toBeVisible();
-  await expect(main.getByText("El paciente es unico; los episodios separan el contexto")).toBeVisible();
   await expect(main.getByText("Linea clinica longitudinal")).toBeVisible();
+  await expect(main.getByText("Mapa longitudinal del paciente")).toBeVisible();
+  const lineBox = await main.getByText("Linea clinica longitudinal").first().boundingBox();
+  const mapBox = await main.getByText("Mapa longitudinal del paciente").first().boundingBox();
+  expect(lineBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(mapBox?.y ?? 0);
+  await expect(main.getByText("El paciente es unico; los episodios separan el contexto")).toBeVisible();
   await expect(main.getByText("Antecedentes clinicos")).toBeVisible();
   await expect(main.getByText("Fuentes usadas")).toBeVisible();
   await expectNoInternalTerms(main);

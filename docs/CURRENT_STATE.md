@@ -48,6 +48,9 @@ fuente canonica viva.
   ejecutable fuera de contexto bloqueado/futuro.
 - Ficha anti-dashboard compactada (#124): el resumen superior quedo como strip
   clinico sobrio; la linea clinica longitudinal sigue siendo el cuerpo principal.
+- Ficha jerarquizada (Dev-127): la linea clinica sube como primer cuerpo real,
+  el mapa longitudinal queda secundario, el header interno usa conteos y el rail
+  oculta rutas/API y detalle tecnico primario en `<details>` nativo.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -67,17 +70,16 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Walkthrough minimo de ficha solo si consolida assertions existentes: recorrer
-un paciente ficticio por identidad, linea clinica, medicacion segura, fuente de
-laboratorio, orden borrador y auditoria. No agregar datos, rutas ni paneles.
+Evaluar rail clinico colapsable solo si la ficha sigue sobrecargada tras Dev-127.
+No agregar `Command`, `Sheet`, `Data Table`, filtros multiples, rutas ni paneles
+nuevos antes de medir que el reordenamiento no fue suficiente.
 
 Criterio de exito:
 
-- Una prueba o gate reemplaza fragilidad dispersa por un flujo humano unico.
-- La ficha sigue centrada en paciente, no olvidar, revisar y borradores/no
-  ejecutable.
-- Auditoria distingue acceso/lectura/escritura sin claim de logs seguros ni
-  cumplimiento legal completo.
+- La linea clinica longitudinal sigue antes que mapa/resumen/contexto secundario.
+- El rail no compite con la linea clinica ni expone rutas tecnicas como texto
+  primario.
+- Auditoria distingue acceso/lectura/escritura sin claim de logs seguros.
 - No aparecen etiquetas positivas de receta, firma, dispensacion,
   administracion, MAR u orden ejecutable.
 

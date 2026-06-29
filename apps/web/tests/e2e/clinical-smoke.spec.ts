@@ -74,10 +74,10 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expectSemanticShell(page, "patient");
   await expect(page.getByRole("heading", { name: /Paciente Demo Alfa/ })).toBeVisible();
   await expect(page.getByText("Hoja clinica viva")).toBeVisible();
-  await expect(page.getByText("Problemas activos")).toBeVisible();
-  await expect(page.getByText("Medicacion vigente")).toBeVisible();
+  await expect(page.getByText("Problemas 1")).toBeVisible();
+  await expect(page.getByText("Alergias 1")).toBeVisible();
+  await expect(page.getByText("Medicamentos 1 / 1 incompletos")).toBeVisible();
   await expect(page.getByText("Ultima atencion")).toBeVisible();
-  await expect(page.getByText("Sin alergias criticas")).toBeVisible();
   await expect(page.getByText("Linea clinica longitudinal")).toBeVisible();
   await expect(page.getByText("Antecedentes clinicos")).toBeVisible();
   await expect(page.getByText("Problema demo activo").first()).toBeVisible();
@@ -98,11 +98,17 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(medicationCard.getByText("Fuente pendiente")).toBeVisible();
   await expect(medicationCard.getByText("Faltantes: fuente")).toBeVisible();
   await expect(
-    medicationCard.getByText("Lectura clínica. No receta. No dispensación. No MAR."),
-  ).toBeVisible();
+    main.getByText("Lectura clinica. No receta. No dispensacion. No MAR."),
+  ).toHaveCount(1);
+  await expect(
+    medicationCard.getByText("Lectura clinica. No receta. No dispensacion. No MAR."),
+  ).toHaveCount(0);
   await expect(medicationCard.getByText("Receta valida", { exact: true })).toHaveCount(0);
   await expect(medicationCard.getByText("MAR activo", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Eventos curados: 0")).toBeVisible();
+  const lineBox = await main.getByText("Linea clinica longitudinal").first().boundingBox();
+  const mapBox = await main.getByText("Mapa longitudinal del paciente").first().boundingBox();
+  expect(lineBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(mapBox?.y ?? 0);
   await expect(page.getByText("Mapa longitudinal del paciente")).toBeVisible();
   await expect(page.getByText("Contexto operativo")).toBeVisible();
   await expect(page.getByText("Actos con episodio")).toBeVisible();
@@ -115,7 +121,7 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Timeline avanzado disponible con API real")).toBeVisible();
   await expect(page.getByText("Riesgos clinicos")).toBeVisible();
   await expect(page.getByText("sin scores automaticos")).toBeVisible();
-  await expect(page.getByText("Fuente API", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fuente API", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Fuente declarada", { exact: true })).toBeVisible();
   await expect(page.getByText("Sin LIS/RIS/PACS", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ordenes clinicas" })).toBeVisible();
@@ -201,9 +207,9 @@ test("AI-Chart renders event proposals from written entries", async ({ page }) =
   await expect(page.getByText("Estado operativo")).toBeVisible();
   await expect(page.getByText("Seleccionados")).toBeVisible();
   await expect(page.getByText("propuesta revisable")).toBeVisible();
-  await expect(page.getByText("Si la IA local esta apagada, se usa degradacion local.")).toBeVisible();
+  await expect(page.getByText("Si el apoyo local no esta disponible, se usa degradacion local.")).toBeVisible();
   await expect(
-    page.getByText("AI-Chart mantiene reglas, plantillas y auditoria aunque la IA local no este disponible."),
+    page.getByText("AI-Chart mantiene reglas, plantillas y auditoria con degradacion local."),
   ).toBeVisible();
   await expect(page.getByText("IA clinica:")).toBeVisible();
   await expectNoInternalTerms(main);

@@ -147,14 +147,20 @@ export function GenerativeAiStatus({
     <div className="mb-4 rounded-md border bg-background p-3 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="font-medium">Estado IA generativa</p>
+          <p className="font-medium">Apoyo contextual</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            AI-Chart mantiene reglas, plantillas y auditoria aunque la IA local no este disponible.
+            AI-Chart mantiene reglas, plantillas y auditoria con degradacion local.
           </p>
         </div>
         <span className="rounded-md border px-2 py-1 text-xs text-muted-foreground">{label}</span>
       </div>
-      {status ? <p className="mt-2 text-xs text-muted-foreground">{status.message}</p> : null}
+      {status ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          {status.available
+            ? "Apoyo local disponible para resumen o borrador revisable."
+            : "Apoyo local no disponible; se conserva degradacion local."}
+        </p>
+      ) : null}
     </div>
   );
 }

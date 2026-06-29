@@ -26,14 +26,13 @@ export function LabResultsPreview({ patientId }: { patientId: string }) {
     >
       <div className="mb-3 flex flex-wrap gap-2">
         <Badge variant="safe">Solo lectura</Badge>
-        <Badge variant="outline">Fuente API</Badge>
         <Badge variant="outline">Fuente declarada</Badge>
         <Badge variant="outline">Sin LIS/RIS/PACS</Badge>
       </div>
       {DEMO_MODE ? (
         <EmptyState
           title="Laboratorio disponible con API real"
-          description="Cada resultado incluye origen del panel y ruta API; la ficha demo no simula resultados productivos."
+          description="Cada resultado incluye origen del panel; la ficha demo no simula resultados productivos."
         />
       ) : null}
       {labPanelsQuery.isLoading ? <LoadingRows rows={2} /> : null}
@@ -72,7 +71,7 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
         </div>
         <div>
           <p className="font-medium text-foreground">Fuente estructurada</p>
-          <p>Cada resultado expone origen del panel y ruta API.</p>
+          <p>Cada resultado expone origen clinico del panel.</p>
         </div>
       </div>
       {panels.map((panel) => (
@@ -109,25 +108,32 @@ function LabPanelPreviewList({ panels }: { panels: LabPanel[] }) {
                     Rango ref.: {result.reference_range}
                   </p>
                 ) : null}
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  {result.status === "entered_in_error"
-                    ? "Corregido; fuera de tendencias"
-                    : result.numeric_value !== null && result.numeric_value !== undefined
-                      ? "Activo y graficable si la serie lo solicita"
-                      : "Activo, no graficable sin valor numerico"}
-                </p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Badge variant="outline">{result.source.label}</Badge>
-                  <span className="break-all text-[11px] text-muted-foreground">
-                    {result.source.request_path}
-                  </span>
                 </div>
+                <details className="mt-2 rounded-md border bg-background/80 p-2 text-[11px] text-muted-foreground">
+                  <summary className="cursor-pointer font-medium text-foreground">Detalle tecnico</summary>
+                  <div className="mt-2 space-y-1">
+                    <p>Estado tecnico: {result.status}</p>
+                    <p>
+                      Serie:{" "}
+                      {result.status === "entered_in_error"
+                        ? "fuera de tendencias"
+                        : result.numeric_value !== null && result.numeric_value !== undefined
+                          ? "valor numerico disponible"
+                          : "sin valor numerico"}
+                    </p>
+                    <p className="break-all">Ruta: {result.source.request_path}</p>
+                  </div>
+                </details>
               </div>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            Fuente panel: {labPanelSourcePath(panel)} - Resultados: {panel.results.length}
-          </p>
+          <details className="mt-2 rounded-md border bg-muted/20 p-2 text-[11px] text-muted-foreground">
+            <summary className="cursor-pointer font-medium text-foreground">Detalle tecnico del panel</summary>
+            <p className="mt-2 break-all">Ruta panel: {labPanelSourcePath(panel)}</p>
+            <p className="mt-1">Resultados: {panel.results.length}</p>
+          </details>
         </div>
       ))}
     </div>
