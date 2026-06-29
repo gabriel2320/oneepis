@@ -22,6 +22,8 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
+VITAL_SIGN_AUDIT_FIELDS = ["patient_id", "measured_at"]
+
 
 @router.get("/{patient_id}/vital-signs", response_model=list[VitalSignRead])
 def list_vital_signs(
@@ -69,8 +71,8 @@ def create_vital_sign(
         entity_type="vital_sign",
         entity_id=vital.id,
         actor_id=actor,
-        metadata={"patient_id": str(patient_id), "measured_at": vital.measured_at.isoformat()},
-        after=audit_snapshot(vital),
+        metadata=_vital_sign_audit_metadata(vital),
+        after=audit_snapshot(vital, VITAL_SIGN_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(vital)
@@ -118,20 +120,25 @@ def update_vital_sign(
         "Vital sign not found",
     )
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(vital, update_fields)
+    audit_fields = _vital_sign_audit_fields(update_fields)
+    before = audit_snapshot(vital, audit_fields) if audit_fields else {}
     fields = apply_update(vital, payload)
-    before_changed, after_changed = changed_field_snapshots(
-        before=before,
-        after_model=vital,
-        fields=fields,
-    )
+    changed_audit_fields = _vital_sign_audit_fields(fields)
+    if changed_audit_fields:
+        before_changed, after_changed = changed_field_snapshots(
+            before=before,
+            after_model=vital,
+            fields=changed_audit_fields,
+        )
+    else:
+        before_changed, after_changed = {}, {}
     record_audit_event(
         session,
         action="vital_sign.updated",
         entity_type="vital_sign",
         entity_id=vital.id,
         actor_id=actor,
-        metadata={"patient_id": str(patient_id), "fields": fields},
+        metadata=_vital_sign_audit_metadata(vital, fields),
         before=before_changed,
         after=after_changed,
     )
@@ -155,16 +162,32 @@ def delete_vital_sign(
         patient_id,
         "Vital sign not found",
     )
-    before = audit_snapshot(vital)
     record_audit_event(
         session,
         action="vital_sign.deleted",
         entity_type="vital_sign",
         entity_id=vital.id,
         actor_id=actor,
-        metadata={"patient_id": str(patient_id), "measured_at": vital.measured_at.isoformat()},
-        before=before,
+        metadata=_vital_sign_audit_metadata(vital),
+        before=audit_snapshot(vital, VITAL_SIGN_AUDIT_FIELDS),
     )
     session.delete(vital)
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _vital_sign_audit_fields(fields: list[str]) -> list[str]:
+    return [field for field in fields if field in VITAL_SIGN_AUDIT_FIELDS]
+
+
+def _vital_sign_audit_metadata(
+    vital: VitalSign,
+    fields: list[str] | None = None,
+) -> dict[str, object]:
+    metadata: dict[str, object] = {
+        "patient_id": str(vital.patient_id),
+        "measured_at": vital.measured_at.isoformat(),
+    }
+    if fields is not None:
+        metadata["fields"] = fields
+    return metadata

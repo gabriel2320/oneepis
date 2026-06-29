@@ -121,3 +121,72 @@ def test_patient_status_and_problem_update_are_audited(
         "status": "resolved",
         "resolved_on": "2026-06-20",
     }
+
+
+def test_vital_sign_audit_uses_structural_allowlist(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-20T12:00:00Z",
+            "temperature_c": "38.2",
+            "systolic_bp": 130,
+            "diastolic_bp": 78,
+            "heart_rate_bpm": 104,
+            "oxygen_saturation_pct": "92.0",
+            "notes": "Nota clinica sensible de signos vitales.",
+        },
+    )
+    assert create_response.status_code == 201
+    vital_id = create_response.json()["id"]
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
+        headers=auth,
+        json={
+            "heart_rate_bpm": 82,
+            "oxygen_saturation_pct": "96.0",
+            "notes": "Nota clinica corregida.",
+        },
+    )
+    assert update_response.status_code == 200
+
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
+        headers=auth,
+    )
+    assert delete_response.status_code == 204
+
+    events = audit_events_for_patient(patient_id)
+    created = next(item for item in events if item["action"] == "vital_sign.created")
+    updated = next(item for item in events if item["action"] == "vital_sign.updated")
+    deleted = next(item for item in events if item["action"] == "vital_sign.deleted")
+    created_after = created["extra_data"]["after"]
+    assert created_after["patient_id"] == patient_id
+    assert created_after["measured_at"].startswith("2026-06-20T12:00:00")
+    assert set(created_after) == {"patient_id", "measured_at"}
+    assert updated["extra_data"]["fields"] == [
+        "heart_rate_bpm",
+        "notes",
+        "oxygen_saturation_pct",
+    ]
+    assert updated["extra_data"]["before"] == {}
+    assert updated["extra_data"]["after"] == {}
+    deleted_before = deleted["extra_data"]["before"]
+    assert deleted_before["patient_id"] == patient_id
+    assert deleted_before["measured_at"].startswith("2026-06-20T12:00:00")
+    assert set(deleted_before) == {"patient_id", "measured_at"}
+    audit_text = str([created["extra_data"], updated["extra_data"], deleted["extra_data"]])
+    assert "temperature_c" not in audit_text
+    assert "systolic_bp" not in audit_text
+    assert "diastolic_bp" not in audit_text
+    assert "heart_rate_bpm" in audit_text
+    assert "oxygen_saturation_pct" in audit_text
+    assert "Nota clinica" not in audit_text
