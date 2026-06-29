@@ -47,7 +47,12 @@ def test_clinical_risk_create_read_patch_and_audit(
     patch_response = client.patch(
         f"/api/v1/patients/{patient_id}/clinical-risks/{risk['id']}",
         headers=auth,
-        json={"severity": "moderate", "status": "resolved"},
+        json={
+            "severity": "moderate",
+            "status": "resolved",
+            "reason": "Control supervisado con marcha estable.",
+            "human_action": "Cerrar seguimiento preventivo.",
+        },
     )
 
     assert patch_response.status_code == 200
@@ -59,8 +64,21 @@ def test_clinical_risk_create_read_patch_and_audit(
     updated = next(item for item in events if item["action"] == "clinical_risk.updated")
     assert created["extra_data"]["risk_type"] == "fall"
     assert created["extra_data"]["after"]["source_ref"] == vital["id"]
+    assert "reason" not in created["extra_data"]["after"]
+    assert "human_action" not in created["extra_data"]["after"]
+    assert updated["extra_data"]["fields"] == [
+        "human_action",
+        "reason",
+        "severity",
+        "status",
+    ]
     assert updated["extra_data"]["before"] == {"severity": "high", "status": "active"}
     assert updated["extra_data"]["after"] == {"severity": "moderate", "status": "resolved"}
+    audit_payload = str([created["extra_data"], updated["extra_data"]])
+    assert "Marcha inestable" not in audit_payload
+    assert "Reevaluar" not in audit_payload
+    assert "Control supervisado" not in audit_payload
+    assert "Cerrar seguimiento" not in audit_payload
 
 
 def test_clinical_risk_permissions_ownership_and_no_delete(
