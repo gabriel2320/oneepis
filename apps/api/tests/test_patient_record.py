@@ -149,6 +149,7 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     assert snapshot["patient"]["clinical_identifier"] == "ONE-001"
     assert snapshot["patient"]["clinical_status"] == "active"
     assert snapshot["patient"]["current_care_context"] == "unknown"
+    assert len(snapshot["active_problems"]) == 1
     assert snapshot["active_problems"][0]["title"] == "Hipertension arterial"
     assert snapshot["active_problems"][0]["code"] == "I10"
     assert snapshot["historical_diagnoses"][0]["source_event_id"] == diagnosis_event["id"]
@@ -164,6 +165,16 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     assert snapshot["active_medications"][0]["missing_fields"] == ["source"]
     assert snapshot["recent_entries"][0]["title"] == "Evolucion SOAP"
     assert snapshot["recent_entries"][0]["encounter_id"] == encounter_id
+
+    active_problems_ai_response = client.post(
+        f"/api/v1/patients/{patient_id}/ai/clinical-intent",
+        headers=auth,
+        json={"intent_type": "active_problems"},
+    )
+    assert active_problems_ai_response.status_code == 200
+    active_problems_ai = active_problems_ai_response.json()
+    assert "Hipertension arterial" in active_problems_ai["clinical_answer"]
+    assert "Neumonia resuelta en control previo" not in active_problems_ai["clinical_answer"]
 
     audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
     assert audit_response.status_code == 200
