@@ -54,17 +54,31 @@ def test_encounter_update_and_cancel_are_audited(
     assert get_response.json()["status"] == "cancelled"
 
     events = audit_events_for_patient(patient_id)
+    encounter_create = next(item for item in events if item["action"] == "encounter.created")
     encounter_update = next(item for item in events if item["action"] == "encounter.updated")
+    assert encounter_create["extra_data"]["after"] == {
+        "ended_at": None,
+        "patient_id": patient_id,
+        "started_at": "2026-06-20T08:00:00+00:00",
+        "status": "in_progress",
+        "type": "hospitalization",
+        "workflow_kind": "general",
+    }
+    assert encounter_update["extra_data"]["fields"] == ["ended_at", "notes", "status"]
     assert encounter_update["extra_data"]["before"] == {
         "status": "in_progress",
         "ended_at": None,
-        "notes": None,
     }
     assert encounter_update["extra_data"]["after"] == {
         "status": "completed",
         "ended_at": "2026-06-20T18:00:00+00:00",
-        "notes": "Cierre administrativo de desarrollo",
     }
+    encounter_audit_payload = str(
+        [encounter_create["extra_data"], encounter_update["extra_data"]]
+    )
+    assert "Ingreso hospitalario" not in encounter_audit_payload
+    assert "Sala 2" not in encounter_audit_payload
+    assert "Cierre administrativo" not in encounter_audit_payload
     encounter_cancel = next(item for item in events if item["action"] == "encounter.cancelled")
     assert encounter_cancel["extra_data"]["after"] == {"status": "cancelled"}
 

@@ -33,6 +33,21 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
+ENCOUNTER_AUDIT_FIELDS = [
+    "ended_at",
+    "patient_id",
+    "started_at",
+    "status",
+    "type",
+    "workflow_kind",
+]
+
+
+def encounter_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(ENCOUNTER_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
+
 @router.get("/{patient_id}/encounters", response_model=list[ClinicalEncounterRead])
 def list_clinical_encounters(
     patient_id: uuid.UUID,
@@ -86,7 +101,7 @@ def create_clinical_encounter(
             "status": encounter.status.value,
             "workflow_kind": encounter.workflow_kind.value,
         },
-        after=audit_snapshot(encounter),
+        after=audit_snapshot(encounter, ENCOUNTER_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(encounter)
@@ -157,12 +172,13 @@ def update_clinical_encounter(
         "Encounter not found",
     )
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(encounter, update_fields)
+    before = audit_snapshot(encounter, encounter_audit_fields(update_fields))
     fields = apply_update(encounter, payload)
+    audit_fields = encounter_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=encounter,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
