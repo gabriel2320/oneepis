@@ -2,15 +2,20 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from sqlalchemy import or_, select
 
+from oneepis_api.api.deps import require_audit_read_access
 from oneepis_api.models.audit import AuditEvent
 from oneepis_api.schemas.audit import AuditEventPublicRead
 
-from .patient_shared import PATIENT_ROUTER_OPTIONS, LimitQuery, SessionDep, require_patient
+from .patient_shared import LimitQuery, SessionDep, require_patient
 
-router = APIRouter(**PATIENT_ROUTER_OPTIONS)
+router = APIRouter(
+    prefix="/patients",
+    tags=["patients"],
+    dependencies=[Depends(require_audit_read_access)],
+)
 
 
 @router.get("/{patient_id}/audit-events", response_model=list[AuditEventPublicRead])

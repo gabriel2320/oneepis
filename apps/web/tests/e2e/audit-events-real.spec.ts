@@ -3,10 +3,16 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 const patientId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const createdAt = "2026-06-20T10:00:00Z";
 const authUser = {
-  email: "medico@oneepis.local",
-  name: "Medico E2E",
-  roles: ["medico"],
-  actor_id: "e2e-medico",
+  email: "admin@oneepis.local",
+  name: "Admin E2E",
+  roles: ["admin", "dev"],
+  actor_id: "e2e-admin",
+};
+const readonlyUser = {
+  email: "lector@oneepis.local",
+  name: "Lectura E2E",
+  roles: ["solo_lectura"],
+  actor_id: "e2e-lector",
 };
 
 test.skip(
@@ -62,16 +68,25 @@ test("patient audit events expose local read/write filters and trace metadata", 
   );
 });
 
-async function mockClinicalApi(page: Page) {
+test("patient nav hides audit for users without audit_read", async ({ page }) => {
+  await mockClinicalApi(page, readonlyUser);
+
+  await page.goto(`/pacientes/${patientId}/ficha`);
+
+  await expect(page.getByRole("heading", { name: /Paciente Auditoria/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Auditoria" })).toHaveCount(0);
+});
+
+async function mockClinicalApi(page: Page, user = authUser) {
   await page.addInitScript(() => {
     window.localStorage.setItem("oneepis.auth.session", "active");
   });
   await page.route("**/api/v1/**", async (route) => {
-    await fulfillApi(route);
+    await fulfillApi(route, user);
   });
 }
 
-async function fulfillApi(route: Route) {
+async function fulfillApi(route: Route, user: typeof authUser) {
   const request = route.request();
   const url = new URL(request.url());
   const path = url.pathname;
@@ -88,7 +103,7 @@ async function fulfillApi(route: Route) {
     return;
   }
   if (path === "/api/v1/auth/me") {
-    await route.fulfill({ json: authUser, headers: corsHeaders });
+    await route.fulfill({ json: user, headers: corsHeaders });
     return;
   }
   if (path === "/api/v1/ai/status") {

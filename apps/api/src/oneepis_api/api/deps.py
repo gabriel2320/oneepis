@@ -142,8 +142,13 @@ def require_ai_access(user: CurrentUserDep) -> AuthenticatedUser:
     return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
 
 
+def require_audit_read_access(user: CurrentUserDep) -> AuthenticatedUser:
+    return require_roles(UserRole.ADMIN, UserRole.DEV)(user)
+
+
 ReadAccessDep = Annotated[AuthenticatedUser, Depends(require_patient_read_access)]
 AiAccessDep = Annotated[AuthenticatedUser, Depends(require_ai_access)]
+AuditReadAccessDep = Annotated[AuthenticatedUser, Depends(require_audit_read_access)]
 PatientWriteAccessDep = Annotated[AuthenticatedUser, Depends(require_patient_write_access)]
 ClinicalEntryWriteAccessDep = Annotated[
     AuthenticatedUser,
