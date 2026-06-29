@@ -838,6 +838,16 @@ def test_clinical_intent_returns_sources_and_audit(
     )
     assert review_decision["extra_data"]["decision"] == "accepted"
     assert review_decision["extra_data"]["applies_changes"] is False
+    assert review_decision["extra_data"]["label"]["present"] is True
+    assert review_decision["extra_data"]["detail"]["present"] is True
+    assert review_decision["extra_data"]["note"] == {
+        "present": True,
+        "length": len("Revisado en test."),
+    }
+    review_audit_payload = str(review_decision["extra_data"])
+    assert "Revisado en test." not in review_audit_payload
+    assert review_item["label"] not in review_audit_payload
+    assert review_item["detail"] not in review_audit_payload
 
     repeated_response = client.post(
         f"/api/v1/patients/{patient['id']}/ai/clinical-intent",
@@ -891,6 +901,16 @@ def test_clinical_intent_returns_sources_and_audit(
     )
     assert action_audit["extra_data"]["action_id"] == soap_action["action_id"]
     assert action_audit["extra_data"]["applies_changes"] is False
+    assert action_audit["extra_data"]["label"]["present"] is True
+    assert action_audit["extra_data"]["description"]["present"] is True
+    assert action_audit["extra_data"]["note"] == {
+        "present": True,
+        "length": len("Accion revisada en test."),
+    }
+    action_audit_payload = str(action_audit["extra_data"])
+    assert "Accion revisada en test." not in action_audit_payload
+    assert soap_action["label"] not in action_audit_payload
+    assert soap_action["description"] not in action_audit_payload
 
 
 def test_clinical_intent_router_is_directed_and_audited(
