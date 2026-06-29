@@ -72,7 +72,7 @@ export function PrintHeader({
         </div>
         <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs">
           <p className="font-semibold uppercase text-warning-foreground">Desarrollo</p>
-          <p className="text-muted-foreground">No uso clinico real</p>
+          <p className="text-muted-foreground">No PHI / no uso clinico real</p>
         </div>
       </div>
       <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
@@ -107,7 +107,7 @@ export function PrintFooter() {
         </p>
         <p>Folio demo: ONE-DEV - Pagina 1</p>
       </div>
-      <p className="mt-1 font-semibold">Documento de desarrollo / no uso clinico real.</p>
+      <p className="mt-1 font-semibold">Documento de desarrollo / no PHI / no uso clinico real.</p>
     </footer>
   );
 }

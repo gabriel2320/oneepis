@@ -20,6 +20,7 @@ import {
   clinicalNavGroupsForContext,
 } from "@/components/clinical/patient-clinical-nav";
 import { ClinicalSessionFooter } from "@/components/clinical/clinical-workspace";
+import { NoProductionSeal } from "@/components/clinical/no-production-seal";
 import { ScreenCapabilityBadges } from "@/components/clinical/screen-capability-badges";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { TemplateSelector } from "@/components/theme/template-selector";
@@ -165,6 +166,7 @@ export function PatientClinicalShell({
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <NoProductionSeal />
                 <SessionButton compact />
                 <Badge variant={aiStatus.data?.available ? "safe" : "warning"}>
                   <BrainCircuit className="mr-1 h-3 w-3" />

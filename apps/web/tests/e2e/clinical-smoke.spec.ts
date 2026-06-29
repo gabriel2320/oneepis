@@ -4,6 +4,8 @@ const demoPatientId = "11111111-1111-4111-8111-111111111111";
 const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
 const demoIntakeEntryId = "61111111-1111-4111-8111-111111111111";
 const demoDischargeSummaryEntryId = "62222222-2222-4222-8222-222222222222";
+const NO_PRODUCTION_SEAL_TEXT = "Desarrollo / no PHI / no uso clinico real";
+const PRINT_NO_PRODUCTION_FOOTER = "Documento de desarrollo / no PHI / no uso clinico real.";
 
 async function expectSemanticShell(page: Page, workspace: "patient" | "ambulatory" | "hospital") {
   const shell = page.locator(`[data-workspace="${workspace}"]`);
@@ -27,6 +29,8 @@ const VISIBLE_CLINICAL_ROUTES = [
   `/consulta/pacientes/${demoPatientId}/atencion`,
   "/hospitalizacion",
 ];
+
+const CLINICAL_NO_PRODUCTION_ROUTES = VISIBLE_CLINICAL_ROUTES.filter((route) => route !== "/login");
 
 const PRESCRIPTION_MAR_BOUNDARY_ROUTES = [
   ...VISIBLE_CLINICAL_ROUTES,
@@ -578,7 +582,7 @@ test("AI settings and print routes render", async ({ page }) => {
   await page.goto(`/print/pacientes/${demoPatientId}/ficha`);
   await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
   await expect(page.getByText("Vista papel")).toBeVisible();
-  await expect(page.getByText("Documento de desarrollo / no uso clinico real.")).toBeVisible();
+  await expect(page.getByText(PRINT_NO_PRODUCTION_FOOTER)).toBeVisible();
   await expect(page.getByText("sugerencias asistidas")).toBeVisible();
   await expect(page.getByText("sugerencias Ollama")).toHaveCount(0);
 
@@ -644,6 +648,22 @@ test("visible clinical routes hide technical and canon copy", async ({ page }) =
     const main = page.getByRole("main");
     await expect(main).toBeVisible();
     await expect(main).not.toContainText(FORBIDDEN_CLINICAL_COPY);
+  }
+});
+
+test("visible clinical routes expose no-production guard", async ({ page }) => {
+  for (const route of CLINICAL_NO_PRODUCTION_ROUTES) {
+    await page.goto(route);
+    const surface = page.locator("body");
+    const seal = page
+      .locator('[data-no-production-seal="true"]:visible')
+      .filter({ hasText: NO_PRODUCTION_SEAL_TEXT })
+      .first();
+
+    await expect(seal).toBeVisible();
+    await expect(surface).not.toContainText(
+      /apto para produccion sanitaria|software clinico certificado|uso clinico real validado/i,
+    );
   }
 });
 
