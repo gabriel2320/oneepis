@@ -134,7 +134,8 @@ IA permitida:
 
 ## Criterios de salida del ciclo
 
-- Los tres escenarios tienen walkthrough humano sin datos reales.
+- Los tres escenarios quedan cubiertos por un walkthrough humano unico, sin
+  datos reales y sin rutas nuevas.
 - `npm run check:screens`, `npm run check:api`, `npm run check:web` y
   `npm run check:contract` pasan.
 - Las rutas hospitalarias, documentales e IA minima declaran
