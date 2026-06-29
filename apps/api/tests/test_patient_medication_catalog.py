@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from patient_ai_helpers import audit_events, create_patient
 
-from oneepis_api.services.medication_catalog import DEMO_ANALGESIC_ID
+from oneepis_api.services.medication_catalog import DEMO_ANALGESIC_ID, DEMO_CARDIO_ID
 
 
 def test_medication_catalog_validation_and_override_audit(
@@ -133,6 +133,52 @@ def test_medication_read_exposes_missing_fields_for_unlinked_manual_medication(
     listed = list_response.json()[0]
     assert listed["source"] is None
     assert listed["missing_fields"] == ["dose", "route", "frequency", "source"]
+
+
+def test_critical_dose_validation_blocks_save_without_override_reason(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Med", last_name="Critico")
+    catalog_response = client.get("/api/v1/medication-catalog", headers=auth)
+    assert catalog_response.status_code == 200
+    catalog = catalog_response.json()
+    cardio_item = next(item for item in catalog if item["id"] == str(DEMO_CARDIO_ID))
+
+    validation_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications/validate-draft",
+        headers=auth,
+        json={
+            "catalog_item_id": str(DEMO_CARDIO_ID),
+            "name": cardio_item["display_name"],
+            "dose": "40 mg",
+            "route": "oral",
+            "frequency": "cada 24 horas",
+        },
+    )
+    assert validation_response.status_code == 200
+    validation = validation_response.json()
+    assert validation["blocking"] is True
+    assert validation["warnings"][0]["severity"] == "critical"
+    assert validation["warnings"][0]["requires_override"] is True
+
+    blocked_create = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={
+            "catalog_item_id": str(DEMO_CARDIO_ID),
+            "name": cardio_item["display_name"],
+            "dose": "40 mg",
+            "route": "oral",
+            "frequency": "cada 24 horas",
+        },
+    )
+    assert blocked_create.status_code == 422
+    detail = blocked_create.json()["detail"]
+    assert detail["blocking"] is True
+    assert detail["warnings"][0]["severity"] == "critical"
+    assert detail["warnings"][0]["requires_override"] is True
 
 
 def test_medication_drafting_context_readonly_and_no_executable_prescription(
