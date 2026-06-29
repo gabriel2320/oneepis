@@ -34,6 +34,22 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 RiskStatusQuery = Annotated[RecordStatus | None, Query(alias="status")]
+CLINICAL_RISK_AUDIT_FIELDS = [
+    "created_by",
+    "encounter_id",
+    "patient_id",
+    "reviewed_at",
+    "risk_type",
+    "severity",
+    "source_kind",
+    "source_ref",
+    "status",
+]
+
+
+def clinical_risk_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(CLINICAL_RISK_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
 
 
 @router.get("/{patient_id}/clinical-risks", response_model=list[ClinicalRiskRead])
@@ -82,7 +98,7 @@ def create_clinical_risk(
         entity_id=risk.id,
         actor_id=actor,
         metadata=_risk_metadata(patient_id, risk),
-        after=audit_snapshot(risk),
+        after=audit_snapshot(risk, CLINICAL_RISK_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(risk)
@@ -117,12 +133,13 @@ def update_clinical_risk(
     if "source_kind" in update_data or "source_ref" in update_data:
         _validate_risk_source(session, patient_id, source_kind, source_ref)
     update_fields = sorted(update_data.keys())
-    before = audit_snapshot(risk, update_fields)
+    before = audit_snapshot(risk, clinical_risk_audit_fields(update_fields))
     fields = apply_update(risk, payload)
+    audit_fields = clinical_risk_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=risk,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
