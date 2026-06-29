@@ -7,8 +7,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import HospitalDailySheetActorDep, require_patient_read_access
-from oneepis_api.api.v1.routes.patient_shared import apply_update, require_patient
+from oneepis_api.api.deps import (
+    HospitalDailySheetActorDep,
+    PatientReadActorDep,
+    require_patient_read_access,
+)
+from oneepis_api.api.v1.routes.patient_shared import (
+    apply_update,
+    record_patient_scoped_read,
+    require_patient,
+)
 from oneepis_api.db.session import get_session
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
@@ -48,9 +56,16 @@ HOSPITAL_DAILY_SHEET_AUDIT_FIELDS = [
 def list_hospital_daily_sheets(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 30,
 ) -> list[HospitalDailySheet]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="hospital_daily_sheets.read",
+    )
     statement = (
         select(HospitalDailySheet)
         .where(HospitalDailySheet.patient_id == patient_id)

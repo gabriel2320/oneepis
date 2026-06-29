@@ -7,8 +7,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import HospitalIndicationActorDep, require_patient_read_access
-from oneepis_api.api.v1.routes.patient_shared import apply_update, require_patient
+from oneepis_api.api.deps import (
+    HospitalIndicationActorDep,
+    PatientReadActorDep,
+    require_patient_read_access,
+)
+from oneepis_api.api.v1.routes.patient_shared import (
+    apply_update,
+    record_patient_scoped_read,
+    require_patient,
+)
 from oneepis_api.db.session import get_session
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
@@ -47,9 +55,16 @@ HOSPITAL_INDICATION_AUDIT_FIELDS = [
 def list_hospital_indications(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
 ) -> list[HospitalIndication]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="hospital_indications.read",
+    )
     statement = (
         select(HospitalIndication)
         .where(HospitalIndication.patient_id == patient_id)
