@@ -233,6 +233,107 @@ def test_patient_vitals_risks_and_orders_emit_read_audit(
         assert "extra_data" not in read_event
 
 
+def test_patient_medications_allergies_and_problems_emit_read_audit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    medication_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={
+            "name": "Medicamento para lectura auditada",
+            "dose": "500 mg",
+            "route": "oral",
+            "frequency": "cada 12 horas",
+        },
+    )
+    assert medication_response.status_code == 201
+    medication_id = medication_response.json()["id"]
+    allergy_response = client.post(
+        f"/api/v1/patients/{patient_id}/allergies",
+        headers=auth,
+        json={
+            "substance": "Alergeno auditado",
+            "reaction": "Exantema",
+            "recorded_at": "2026-06-20T12:00:00Z",
+        },
+    )
+    assert allergy_response.status_code == 201
+    allergy_id = allergy_response.json()["id"]
+    problem_response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=auth,
+        json={
+            "title": "Problema activo auditado",
+            "status": "active",
+        },
+    )
+    assert problem_response.status_code == 201
+    problem_id = problem_response.json()["id"]
+    reads = [
+        (
+            "medications.read",
+            f"/api/v1/patients/{patient_id}/medications",
+            "read-medications-001",
+        ),
+        (
+            "medication.read",
+            f"/api/v1/patients/{patient_id}/medications/{medication_id}",
+            "read-medication-001",
+        ),
+        (
+            "medication_drafting_context.read",
+            f"/api/v1/patients/{patient_id}/medication-drafting-context",
+            "read-medication-context-001",
+        ),
+        (
+            "allergies.read",
+            f"/api/v1/patients/{patient_id}/allergies",
+            "read-allergies-001",
+        ),
+        (
+            "allergy.read",
+            f"/api/v1/patients/{patient_id}/allergies/{allergy_id}",
+            "read-allergy-001",
+        ),
+        (
+            "problems.read",
+            f"/api/v1/patients/{patient_id}/problems",
+            "read-problems-001",
+        ),
+        (
+            "problem.read",
+            f"/api/v1/patients/{patient_id}/problems/{problem_id}",
+            "read-problem-001",
+        ),
+    ]
+
+    for _, path, correlation_id in reads:
+        response = client.get(
+            path,
+            headers={**auth, "X-OneEpis-Correlation-ID": correlation_id},
+        )
+        assert response.status_code == 200
+
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
+    assert audit_response.status_code == 200
+    audit_events = audit_response.json()
+    for action, path, correlation_id in reads:
+        read_event = next(item for item in audit_events if item["action"] == action)
+        assert read_event["actor_id"] == "medico@oneepis.local"
+        assert read_event["correlation_id"] == correlation_id
+        assert read_event["request_method"] == "GET"
+        assert read_event["request_path"] == path
+        assert "extra_data" not in read_event
+
+
 def test_patient_audit_events_require_audit_read_access(
     client: TestClient,
     auth_headers,

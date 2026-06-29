@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from oneepis_api.api.deps import MedicationActorDep
+from oneepis_api.api.deps import MedicationActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import Medication, RecordStatus
 from oneepis_api.models.hospitalization import HospitalIndication
 from oneepis_api.schemas.clinical_record import (
@@ -38,6 +38,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
 )
@@ -49,10 +50,17 @@ router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 def list_medications(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[Medication]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="medications.read",
+    )
     statement = (
         select(Medication)
         .options(selectinload(Medication.catalog_item))
@@ -106,8 +114,15 @@ def create_medication(
 def get_medication_drafting_context(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> MedicationDraftingContext:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="medication_drafting_context.read",
+    )
     medication_statement = (
         select(Medication)
         .options(selectinload(Medication.catalog_item))
@@ -160,15 +175,23 @@ def get_medication(
     patient_id: uuid.UUID,
     medication_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> Medication:
     require_patient(session, patient_id)
-    return require_patient_child(
+    medication = require_patient_child(
         session,
         Medication,
         medication_id,
         patient_id,
         "Medication not found",
     )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="medication.read",
+    )
+    return medication
 
 
 @router.patch("/{patient_id}/medications/{medication_id}", response_model=MedicationRead)
