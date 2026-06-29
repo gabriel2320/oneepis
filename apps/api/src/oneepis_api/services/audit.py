@@ -149,7 +149,7 @@ def _recent_duplicate_read_event(
 
 def audit_snapshot(model: object, fields: list[str] | None = None) -> dict[str, Any]:
     mapper = inspect(model).mapper
-    allowed_fields = set(fields) if fields else None
+    allowed_fields = set(fields) if fields is not None else None
     snapshot: dict[str, Any] = {}
     for attr in mapper.column_attrs:
         field = attr.key
