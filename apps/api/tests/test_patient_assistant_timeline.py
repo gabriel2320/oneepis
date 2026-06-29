@@ -171,7 +171,7 @@ def test_assistant_timeline_reads_historical_diagnoses_as_context_without_writin
     payload = response.json()
     assert payload["applies_changes"] is False
     historical_item = next(
-        item for item in payload["items"] if item["source_label"] == "historical_diagnoses"
+        item for item in payload["items"] if item["source_label"] == "Historia clinica previa"
     )
     assert historical_item["item_type"] == "clinical_event"
     assert historical_item["item_id"] == event_id
@@ -180,6 +180,7 @@ def test_assistant_timeline_reads_historical_diagnoses_as_context_without_writin
         "Historia clinica previa: No equivale a problema activo actual. (CIE-10: J18.9)"
     )
     assert historical_item["source_path"].endswith("/clinical-events/" + event_id)
+    assert all(item["source_label"] != "historical_diagnoses" for item in payload["items"])
     assert [item["item_id"] for item in payload["items"]].count(event_id) == 1
     after_audit = audit_events(client, auth, patient_id)
     assert after_audit == before_audit

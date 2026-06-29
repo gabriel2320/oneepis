@@ -4,6 +4,7 @@ const patientId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const eventId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const curatedAntecedentEventId = "b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const uncuratedAntecedentEventId = "b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const historicalDiagnosisEventId = "b3333333-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const entryId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const vitalId = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const medicationId = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
@@ -37,25 +38,48 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
       "Fuente: Entrevista clinica. Limite: Dato familiar sin modulo estructurado propio.",
     ),
   ).toBeVisible();
+  const fichaHistoricalDiagnosis = page
+    .locator("article")
+    .filter({ hasText: "Fuente: Historia clinica previa. CIE-10: J18.9." });
+  await expect(fichaHistoricalDiagnosis.getByText("Neumonia resuelta previa")).toBeVisible();
+  await expect(
+    fichaHistoricalDiagnosis.getByText("Fuente: Historia clinica previa. CIE-10: J18.9."),
+  ).toBeVisible();
   await expect(page.getByText("Nota sin curaduria para ficha")).not.toBeVisible();
   await expect(page.getByText("Resultados estructurados")).toBeVisible();
   await expect(page.getByText("Perfil renal")).toBeVisible();
   await expect(page.getByText("Creatinina")).toBeVisible();
   await expect(page.getByText("Rango ref.: 0.7-1.3").first()).toBeVisible();
   await expect(page.getByText(new RegExp(`/lab-panels/${labPanelId}/results/${labResultId}`))).not.toBeVisible();
-  await page.getByText("Detalle tecnico", { exact: true }).first().click();
+  const creatinineResult = page
+    .getByText("Rango ref.: 0.7-1.3")
+    .first()
+    .locator("xpath=ancestor::div[contains(@class, 'rounded-md')][1]");
+  await creatinineResult.getByText("Detalle tecnico", { exact: true }).click();
   await expect(
     page.getByText(new RegExp(`/lab-panels/${labPanelId}/results/${labResultId}`)),
   ).toBeVisible();
   await expect(page.getByText("Linea de tiempo avanzada")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Todo 2/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Todo 3/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Evoluciones 1/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Eventos 1/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Eventos 2/ })).toBeVisible();
   await expect(page.getByText("Control longitudinal real").first()).toBeVisible();
   await expect(page.getByText("Fuente: clinical_entries").first()).toBeVisible();
-  await page.getByRole("button", { name: /Eventos 1/ }).click();
+  await page.getByRole("button", { name: /Eventos 2/ }).click();
   await expect(page.getByText("Disnea y saturacion baja").first()).toBeVisible();
   await expect(page.getByText("Fuente: clinical_events")).toBeVisible();
+  const historicalTimelineItem = page
+    .locator("article")
+    .filter({ hasText: "Tipo clinico: Diagnostico historico" });
+  await expect(historicalTimelineItem.getByText("Fuente: Historia clinica previa")).toBeVisible();
+  await expect(historicalTimelineItem.getByText("Tipo clinico: Diagnostico historico")).toBeVisible();
+  await expect(
+    historicalTimelineItem.getByText(new RegExp(`/clinical-events/${historicalDiagnosisEventId}`)),
+  ).not.toBeVisible();
+  await historicalTimelineItem.getByText("Detalle tecnico", { exact: true }).click();
+  await expect(
+    historicalTimelineItem.getByText(new RegExp(`/clinical-events/${historicalDiagnosisEventId}`)),
+  ).toBeVisible();
   await expect(page.getByText("Limite aplicado: 20").first()).toBeVisible();
 
   await page.goto(`/pacientes/${patientId}/ai-chart`);
@@ -210,6 +234,19 @@ const patientRecord = {
   active_allergies: [],
   active_medications: [],
   active_problems: [],
+  historical_diagnoses: [
+    {
+      source_event_id: historicalDiagnosisEventId,
+      title: "Neumonia resuelta previa",
+      occurred_at: "2026-06-19T09:30:00Z",
+      source_type: "manual",
+      source_ref: null,
+      source_label: "Historia clinica previa",
+      limit: "No equivale a problema activo actual.",
+      code_system: "CIE-10",
+      code: "J18.9",
+    },
+  ],
   recent_entries: [recentEntry],
 };
 
@@ -295,6 +332,15 @@ const assistantTimeline = {
       summary: "Paciente refiere disnea leve.",
       source_label: "clinical_entries",
       source_path: `/api/v1/patients/${patientId}/clinical-entries/${entryId}`,
+    },
+    {
+      item_type: "clinical_event",
+      item_id: historicalDiagnosisEventId,
+      occurred_at: "2026-06-19T09:30:00Z",
+      label: "Neumonia resuelta previa",
+      summary: "Historia clinica previa: No equivale a problema activo actual. (CIE-10: J18.9)",
+      source_label: "Historia clinica previa",
+      source_path: `/api/v1/patients/${patientId}/clinical-events/${historicalDiagnosisEventId}`,
     },
     {
       item_type: "clinical_event",

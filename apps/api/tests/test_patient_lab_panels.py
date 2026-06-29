@@ -150,7 +150,11 @@ def test_lab_panel_create_read_patch_and_audit(
     assert result_patch.json()["status"] == "entered_in_error"
 
     events = audit_events(client, auth, patient_id)
-    created = next(item for item in events if item["action"] == "lab_panel.created")
+    created = next(
+        item
+        for item in events
+        if item["action"] == "lab_panel.created" and item["entity_id"] == panel["id"]
+    )
     panel_updated = next(item for item in events if item["action"] == "lab_panel.updated")
     result_updated = next(item for item in events if item["action"] == "lab_result.updated")
     assert created["extra_data"]["result_count"] == 2
