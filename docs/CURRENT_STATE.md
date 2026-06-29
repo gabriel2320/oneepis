@@ -81,6 +81,10 @@ fuente canonica viva.
   y propone borradores revisables, no decide, no firma y no escribe sin
   confirmacion humana/backend. AI-EVAL sintetico minimo cubre fuentes esperadas,
   falsos positivos y ausencia de consejo terapeutico autonomo.
+- P1 clinicos post Dev-154 a Dev-166 quedaron cerrados: matriz de antecedentes,
+  metadata de diagnostico historico, alertas completas de vademecum,
+  `ended_on` en auditoria de medicacion y minimizacion de auditoria con
+  allowlists estructurales.
 - Las superficies clinicas y papel muestran guard visible de desarrollo/no PHI/no
   uso clinico real.
 - El registry estructurado de pantallas vive en
@@ -89,15 +93,17 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Cerrar inconsistencias P1 clinicas antes de ampliar modulos.
+Cerrar trazabilidad P1 antes de ampliar modulos.
 
 Cola inmediata:
 
-- Validar matriz `payload.antecedent.category` contra `ClinicalEvent.event_type`.
-- Preservar metadata de encuentro en diagnosticos historicos del assistant
-  timeline.
-- Mostrar todas las alertas curadas de vademecum; no ocultar safety alerts.
-- Completar auditoria de creacion de medicacion con `ended_on`.
+- Auditar lecturas clinicas patient-scoped que aun devuelven PHI sin
+  `record_read_audit_event`.
+- Eliminar hard delete clinico en entradas y signos vitales, usando estados
+  `entered_in_error` o equivalente.
+- Completar allowlist de auditoria faltante en signos vitales.
+- Mantener ABAC/contexto asistencial como contrato diferido; no implementarlo
+  antes de cerrar trazabilidad y borrado logico.
 
 Criterio de no-hacer:
 
@@ -136,6 +142,8 @@ CI agrega:
 - Identidad: auth local sirve para desarrollo; usuarios persistentes, sesiones
   productivas, revocacion y recuperacion institucional siguen pendientes.
 - Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro.
+- Auditoria: las escrituras recientes usan minimizacion creciente, pero faltan
+  read-audit completo y borrado logico en algunas superficies clinicas.
 - IA externa: bloqueada hasta gateway PHI, anonimizacion, autorizacion, auditoria
   y politica explicita.
 - Legal clinico: firma, receta valida, orden ejecutable, MAR, consentimientos y
