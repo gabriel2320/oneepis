@@ -9,6 +9,7 @@ import { useCurrentUser } from "@/components/auth/use-current-user";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
 import { HospitalClinicalShell } from "@/components/clinical/clinical-domain-shell";
 import { formatDateTime } from "@/components/clinical/date-format";
+import { HistoricalDiagnosisContextCard } from "@/components/clinical/historical-diagnosis-context";
 import { PatientClinicalLoading } from "@/components/clinical/patient-clinical-shell";
 import { EmptyState, ErrorState } from "@/components/clinical/states";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ import { DEMO_MODE } from "@/lib/api/client";
 import { demoEncounters } from "@/lib/demo-record";
 import { activeHospitalizationEncounters } from "@/lib/hospitalization-workflows";
 import { canManageClinicalEntries } from "@/lib/permissions";
-import type { ClinicalEncounter, ClinicalEntry } from "@/lib/types";
+import type { ClinicalEncounter, ClinicalEntry, PatientRecordSnapshot } from "@/lib/types";
 
 import {
   BackLink,
@@ -72,7 +73,7 @@ export function HospitalDischargeSummaryPage() {
           title="Alta y epicrisis"
           description="Borrador de egreso hospitalario vinculado a una hospitalizacion activa."
         />
-        <DischargeSummaryWorkspace patientId={patientId} entries={record.recent_entries} />
+        <DischargeSummaryWorkspace patientId={patientId} record={record} />
       </div>
     </HospitalClinicalShell>
   );
@@ -80,10 +81,10 @@ export function HospitalDischargeSummaryPage() {
 
 function DischargeSummaryWorkspace({
   patientId,
-  entries,
+  record,
 }: {
   patientId: string;
-  entries: ClinicalEntry[];
+  record: PatientRecordSnapshot;
 }) {
   const queryClient = useQueryClient();
   const { user, isLoading: userLoading } = useCurrentUser();
@@ -99,7 +100,7 @@ function DischargeSummaryWorkspace({
     : (encountersQuery.data ?? []);
   const hospitalEncounters = activeHospitalizationEncounters(encounters);
   const selectedEncounterId = formState.encounter_id || hospitalEncounters[0]?.id || "";
-  const dischargeEntries = entries.filter((entry) => entry.kind === "discharge_summary");
+  const dischargeEntries = record.recent_entries.filter((entry) => entry.kind === "discharge_summary");
   const mutation = useMutation({
     mutationFn: (payload: DischargeFormState) =>
       createClinicalEntry(patientId, {
@@ -122,9 +123,16 @@ function DischargeSummaryWorkspace({
 
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
-      <ClinicalSectionCard title="Epicrisis registradas">
-        <DischargeSummaryList patientId={patientId} entries={dischargeEntries} />
-      </ClinicalSectionCard>
+      <div className="space-y-5">
+        <HistoricalDiagnosisContextCard
+          diagnoses={record.historical_diagnoses}
+          title="Contexto historico para epicrisis"
+          description="Antecedentes historicos disponibles para revisar antes de redactar; no completan diagnosticos de egreso."
+        />
+        <ClinicalSectionCard title="Epicrisis registradas">
+          <DischargeSummaryList patientId={patientId} entries={dischargeEntries} />
+        </ClinicalSectionCard>
+      </div>
       <ClinicalSectionCard
         title="Borrador de epicrisis"
         description="No equivale a firma de alta ni documento legal; se imprime como desarrollo."

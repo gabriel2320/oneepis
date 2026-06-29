@@ -81,11 +81,37 @@ function HospitalDischargeSummaryPrintSheet({
           </p>
         </div>
         <PrintTextBlock label="Motivo de ingreso y antecedentes" value={entry.subjective} />
+        <HistoricalDiagnosisPrintBlock diagnoses={record.historical_diagnoses} />
         <PrintTextBlock label="Evolucion intrahospitalaria" value={entry.objective} />
         <PrintTextBlock label="Diagnosticos de egreso" value={entry.assessment} />
         <PrintTextBlock label="Plan de alta y seguimiento" value={entry.plan} />
       </section>
     </ClinicalPaperSheet>
+  );
+}
+
+function HistoricalDiagnosisPrintBlock({
+  diagnoses,
+}: {
+  diagnoses: PatientRecordSnapshot["historical_diagnoses"];
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold text-muted-foreground">
+        Contexto historico (no egreso)
+      </p>
+      {diagnoses.length === 0 ? (
+        <p className="mt-1 text-sm">Sin diagnosticos historicos curados</p>
+      ) : (
+        <ul className="mt-1 space-y-1 text-sm">
+          {diagnoses.map((diagnosis) => (
+            <li key={diagnosis.source_event_id}>
+              {diagnosis.title} - Fuente: {diagnosis.source_label}. {diagnosis.limit}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
