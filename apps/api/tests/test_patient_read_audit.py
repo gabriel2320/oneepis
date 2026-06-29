@@ -405,6 +405,79 @@ def test_patient_labs_encounters_and_hospital_drafts_emit_read_audit(
     _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
 
 
+def test_patient_assistant_and_context_reads_emit_read_audit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    event_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:00:00Z",
+            "summary": "Lectura assistant auditada",
+        },
+    )
+    assert event_response.status_code == 201
+    vital_response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={"measured_at": "2026-06-20T12:05:00Z", "heart_rate_bpm": 72},
+    )
+    assert vital_response.status_code == 201
+    reads = [
+        (
+            "patient_context.read",
+            f"/api/v1/patients/{patient_id}/context",
+            "read-patient-context-001",
+        ),
+        (
+            "assistant_timeline.read",
+            f"/api/v1/patients/{patient_id}/assistant/timeline",
+            "read-assistant-timeline-001",
+        ),
+        (
+            "assistant_search.read",
+            f"/api/v1/patients/{patient_id}/assistant/search",
+            "read-assistant-search-001",
+        ),
+        (
+            "assistant_chart.read",
+            f"/api/v1/patients/{patient_id}/assistant/chart",
+            "read-assistant-chart-001",
+            "POST",
+        ),
+    ]
+
+    context_response = client.get(
+        reads[0][1],
+        headers={**auth, "X-OneEpis-Correlation-ID": reads[0][2]},
+    )
+    timeline_response = client.get(
+        reads[1][1],
+        headers={**auth, "X-OneEpis-Correlation-ID": reads[1][2]},
+    )
+    search_response = client.get(
+        f"{reads[2][1]}?q=assistant",
+        headers={**auth, "X-OneEpis-Correlation-ID": reads[2][2]},
+    )
+    chart_response = client.post(
+        reads[3][1],
+        headers={**auth, "X-OneEpis-Correlation-ID": reads[3][2]},
+        json={"series": ["heart_rate_bpm"]},
+    )
+
+    assert context_response.status_code == 200
+    assert timeline_response.status_code == 200
+    assert search_response.status_code == 200
+    assert chart_response.status_code == 200
+    _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
+
+
 def test_patient_audit_events_require_audit_read_access(
     client: TestClient,
     auth_headers,
@@ -574,7 +647,7 @@ def _assert_public_read_audit_events(
     client: TestClient,
     audit_auth: dict[str, str],
     patient_id: str,
-    reads: list[tuple[str, str, str]],
+    reads: list[tuple[str, str, str] | tuple[str, str, str, str]],
 ) -> None:
     audit_response = client.get(
         f"/api/v1/patients/{patient_id}/audit-events",
@@ -582,11 +655,12 @@ def _assert_public_read_audit_events(
     )
     assert audit_response.status_code == 200
     audit_events = audit_response.json()
-    for action, path, correlation_id in reads:
+    for read in reads:
+        action, path, correlation_id, *method = read
         read_event = next(item for item in audit_events if item["action"] == action)
         assert read_event["actor_id"] == "medico@oneepis.local"
         assert read_event["correlation_id"] == correlation_id
-        assert read_event["request_method"] == "GET"
+        assert read_event["request_method"] == (method[0] if method else "GET")
         assert read_event["request_path"] == path
         assert "extra_data" not in read_event
 

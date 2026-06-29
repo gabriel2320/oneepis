@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter
 from sqlalchemy import select
 
+from oneepis_api.api.deps import PatientReadActorDep
 from oneepis_api.models.clinical_record import ClinicalEvent, ClinicalEventType, VitalSign
 from oneepis_api.schemas.clinical_record import (
     AssistantChartPoint,
@@ -15,7 +16,7 @@ from oneepis_api.schemas.clinical_record import (
 
 from .patient_assistant_common import VITAL_CHART_SERIES, normalize_series_key, numeric_value
 from .patient_assistant_labs import exam_chart_series, fetch_lab_results_for_assistant
-from .patient_shared import SessionDep, require_patient
+from .patient_shared import SessionDep, record_patient_scoped_read, require_patient
 
 router = APIRouter()
 
@@ -25,8 +26,15 @@ def get_assistant_chart_data(
     patient_id: uuid.UUID,
     payload: AssistantChartRequest,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> AssistantChartResponse:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="assistant_chart.read",
+    )
     selected = {normalize_series_key(series) for series in payload.series if series.strip()}
     query_limit = payload.limit + 1
     vitals = list(

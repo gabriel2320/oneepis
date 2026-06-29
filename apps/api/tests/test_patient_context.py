@@ -55,7 +55,14 @@ def test_patient_context_derives_active_hospitalization_without_writing(
     assert payload["recent_ambulatory_encounters"][0]["id"] == ambulatory_response.json()["id"]
     assert payload["active_problems"][0]["label"] == "Hipertension arterial"
     assert payload["recent_labs"][0]["label"] == "Perfil renal contexto"
-    assert audit_events(client, auth, patient_id) == before_audit
+    after_audit = audit_events(client, auth, patient_id)
+    _assert_only_read_audit_added(
+        before_audit,
+        after_audit,
+        action="patient_context.read",
+        method="GET",
+        path=f"/api/v1/patients/{patient_id}/context",
+    )
 
 
 def test_patient_context_allows_readonly_user(
@@ -70,3 +77,22 @@ def test_patient_context_allows_readonly_user(
 
     assert response.status_code == 200
     assert response.json()["patient_id"] == patient_id
+
+
+def _assert_only_read_audit_added(
+    before_audit: list[dict],
+    after_audit: list[dict],
+    *,
+    action: str,
+    method: str,
+    path: str,
+) -> None:
+    before_ids = {item["id"] for item in before_audit}
+    new_events = [item for item in after_audit if item["id"] not in before_ids]
+    assert len(new_events) == 1
+    read_event = new_events[0]
+    assert read_event["action"] == action
+    assert read_event["actor_id"] == "medico@oneepis.local"
+    assert read_event["request_method"] == method
+    assert read_event["request_path"] == path
+    assert read_event["extra_data"] == {}
