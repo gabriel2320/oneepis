@@ -111,7 +111,7 @@ def test_clinical_event_detail_is_readable_without_audit_write(
     ).json()
     before_audit = client.get(
         f"/api/v1/patients/{patient['id']}/audit-events",
-        headers=auth,
+        headers=auth_headers(client, email="admin@oneepis.local", password="admin"),
     ).json()
     readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
 
@@ -126,7 +126,7 @@ def test_clinical_event_detail_is_readable_without_audit_write(
     assert payload["summary"] == "Evento puntual para fuente inspeccionable"
     after_audit = client.get(
         f"/api/v1/patients/{patient['id']}/audit-events",
-        headers=auth,
+        headers=auth_headers(client, email="admin@oneepis.local", password="admin"),
     ).json()
     assert after_audit == before_audit
 
@@ -771,7 +771,10 @@ def test_clinical_intent_router_is_directed_and_audited(
     assert fallback["intent_type"] is None
     assert fallback["fallback_options"]
 
-    audit_response = client.get(f"/api/v1/patients/{patient['id']}/audit-events", headers=auth)
+    audit_response = client.get(
+        f"/api/v1/patients/{patient['id']}/audit-events",
+        headers=auth_headers(client, email="admin@oneepis.local", password="admin"),
+    )
     actions = [item["action"] for item in audit_response.json()]
     assert actions.count("ai.clinical_intent.routed") == 2
 

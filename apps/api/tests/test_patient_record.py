@@ -176,7 +176,11 @@ def test_patient_record_flow_writes_snapshot_and_audit(
     assert "Hipertension arterial" in active_problems_ai["clinical_answer"]
     assert "Neumonia resuelta en control previo" not in active_problems_ai["clinical_answer"]
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
     assert audit_response.status_code == 200
     audit_events = audit_response.json()
     actions = {item["action"] for item in audit_events}

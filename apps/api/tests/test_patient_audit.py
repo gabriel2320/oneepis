@@ -19,7 +19,11 @@ def test_audit_events_include_correlation_and_before_after(
     assert update_response.status_code == 200
     assert update_response.headers["X-OneEpis-Correlation-ID"] == "corr-test-001"
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
     assert audit_response.status_code == 200
     public_patient_update = next(
         item for item in audit_response.json() if item["action"] == "patient.updated"

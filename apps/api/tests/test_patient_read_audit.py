@@ -7,6 +7,7 @@ def test_patient_read_endpoints_emit_read_audit_events(
     create_patient_for_permissions,
 ) -> None:
     auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     patient_id = create_patient_for_permissions(client, auth)
 
     patient_read_headers = {**auth, "X-OneEpis-Correlation-ID": "read-patient-001"}
@@ -26,7 +27,10 @@ def test_patient_read_endpoints_emit_read_audit_events(
     assert record_response.status_code == 200
     assert record_response.headers["X-OneEpis-Correlation-ID"] == "read-record-001"
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
     assert audit_response.status_code == 200
     audit_events = audit_response.json()
     actions = [item["action"] for item in audit_events]
@@ -44,6 +48,31 @@ def test_patient_read_endpoints_emit_read_audit_events(
     assert record_read["request_path"] == f"/api/v1/patients/{patient_id}/record"
 
 
+def test_patient_audit_events_require_audit_read_access(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+
+    medico_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    readonly_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=readonly_auth,
+    )
+    admin_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
+
+    assert medico_response.status_code == 403
+    assert readonly_response.status_code == 403
+    assert admin_response.status_code == 200
+
+
 def test_patient_read_audit_dedupes_repeated_same_route_reads(
     client: TestClient,
     auth_headers,
@@ -51,6 +80,7 @@ def test_patient_read_audit_dedupes_repeated_same_route_reads(
     audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     patient_id = create_patient_for_permissions(client, auth)
 
     for index in range(3):
@@ -60,7 +90,10 @@ def test_patient_read_audit_dedupes_repeated_same_route_reads(
         )
         assert response.status_code == 200
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
     assert audit_response.status_code == 200
     record_reads = [
         item for item in audit_response.json() if item["action"] == "record.read"
@@ -85,6 +118,7 @@ def test_patient_audit_events_filter_by_patient_before_limit(
     create_patient_for_permissions,
 ) -> None:
     auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     patient_id = create_patient_for_permissions(client, auth)
     other_patient_id = create_patient_for_permissions(client, auth)
 
@@ -105,7 +139,7 @@ def test_patient_audit_events_filter_by_patient_before_limit(
 
     audit_response = client.get(
         f"/api/v1/patients/{patient_id}/audit-events?limit=2",
-        headers=auth,
+        headers=audit_auth,
     )
     assert audit_response.status_code == 200
     audit_events = audit_response.json()
@@ -131,13 +165,17 @@ def test_solo_lectura_read_audit_uses_readonly_actor(
     create_patient_for_permissions,
 ) -> None:
     auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
     patient_id = create_patient_for_permissions(client, auth)
 
     response = client.get(f"/api/v1/patients/{patient_id}/record", headers=readonly_auth)
     assert response.status_code == 200
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
     assert audit_response.status_code == 200
     record_read = next(
         item for item in audit_response.json() if item["action"] == "record.read"
@@ -151,12 +189,19 @@ def test_audit_events_list_does_not_emit_record_read(
     create_patient_for_permissions,
 ) -> None:
     auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     patient_id = create_patient_for_permissions(client, auth)
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
     assert audit_response.status_code == 200
     assert all(item["action"] != "record.read" for item in audit_response.json())
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=auth)
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
     assert audit_response.status_code == 200
     assert all(item["action"] != "record.read" for item in audit_response.json())

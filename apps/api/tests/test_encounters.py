@@ -133,6 +133,7 @@ def test_nursing_can_create_ambulatory_preconsult_encounter(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     patient_id = create_patient_for_permissions(client, auth_headers(client))
     nursing_auth = auth_headers(
@@ -160,10 +161,10 @@ def test_nursing_can_create_ambulatory_preconsult_encounter(
     assert created["status"] == "in_progress"
     assert created["workflow_kind"] == "ambulatory_preconsult"
 
-    audit_response = client.get(f"/api/v1/patients/{patient_id}/audit-events", headers=nursing_auth)
-    assert audit_response.status_code == 200
     created_audit = next(
-        item for item in audit_response.json() if item["action"] == "encounter.created"
+        item
+        for item in audit_events_for_patient(patient_id)
+        if item["action"] == "encounter.created"
     )
     assert created_audit["actor_id"] == "enfermeria@oneepis.local"
 

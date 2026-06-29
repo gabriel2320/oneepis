@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { useCurrentUser } from "@/components/auth/use-current-user";
 import { SessionButton } from "@/components/auth/session-button";
 import {
   clinicalNavForContext,
@@ -26,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAiStatus } from "@/lib/api/ai";
 import { careContextLabel, clinicalStatusLabel } from "@/lib/patient-display";
+import { canReadAudit } from "@/lib/permissions";
 import { findScreenCapability } from "@/lib/screen-capabilities";
 import type { PatientRecordSnapshot } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -42,13 +44,21 @@ export function PatientClinicalShell({
   const pathname = usePathname();
   const router = useRouter();
   const aiStatus = useQuery({ queryKey: ["ai-status"], queryFn: getAiStatus, staleTime: 30_000 });
+  const { user } = useCurrentUser();
   const patient = record.patient;
   const relevantAllergy =
     record.active_allergies.find((item) => item.severity === "severe") ??
     record.active_allergies[0];
   const latestEntry = record.recent_entries[0];
-  const navGroups = clinicalNavGroupsForContext(patient.current_care_context);
-  const navItems = clinicalNavForContext(patient.current_care_context);
+  const navGroups = clinicalNavGroupsForContext(patient.current_care_context)
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => item.key !== "auditoria" || canReadAudit(user)),
+    }))
+    .filter((group) => group.items.length > 0);
+  const navItems = clinicalNavForContext(patient.current_care_context).filter(
+    (item) => item.key !== "auditoria" || canReadAudit(user),
+  );
   const activeNavItem = navItems.find((item) => activeSection === item.key);
   const screenCapability = findScreenCapability(pathname);
 
