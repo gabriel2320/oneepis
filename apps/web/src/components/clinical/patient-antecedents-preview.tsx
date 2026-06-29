@@ -15,6 +15,7 @@ import {
   buildAntecedentItems,
   categoryLabel,
   isCuratedAntecedentEvent,
+  isCuratedHistoricalDiagnosisEvent,
   sourceDetails,
   sourceLabels,
   type AntecedentSource,
@@ -33,13 +34,16 @@ export function PatientAntecedentsPreview({
     enabled: !DEMO_MODE,
   });
   const curatedEvents = (timelineQuery.data?.events ?? [])
-    .filter(isCuratedAntecedentEvent)
+    .filter(
+      (event) => isCuratedAntecedentEvent(event) && !isCuratedHistoricalDiagnosisEvent(event),
+    )
     .slice(0, 4);
   const items = buildAntecedentItems(record, patientId, curatedEvents);
-  const sourceCounts = {
+  const sourceCounts: Record<AntecedentSource, number> = {
     problemas: record.active_problems.length,
     alergias: record.active_allergies.length,
     medicacion: record.active_medications.length,
+    diagnosticos: (record.historical_diagnoses ?? []).length,
     eventos: curatedEvents.length,
   };
 
@@ -143,7 +147,7 @@ function AntecedentSourceSummary({
   counts,
   total,
 }: {
-  counts: Record<"problemas" | "alergias" | "medicacion" | "eventos", number>;
+  counts: Record<AntecedentSource, number>;
   total: number;
 }) {
   return (

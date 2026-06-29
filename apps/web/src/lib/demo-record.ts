@@ -84,7 +84,19 @@ export const demoRecords: PatientRecordSnapshot[] = [
         updated_at: "2026-06-20T10:10:00Z",
       },
     ],
-    historical_diagnoses: [],
+    historical_diagnoses: [
+      {
+        source_event_id: "91111111-1111-4111-8111-111111111111",
+        title: "Diagnostico historico demo",
+        occurred_at: "2026-05-20T09:30:00Z",
+        source_type: "manual",
+        source_ref: null,
+        source_label: "Evento curado demo",
+        limit: "Lectura historica demo; no es problema activo.",
+        code_system: "DEMO",
+        code: "DX-H001",
+      },
+    ],
     recent_entries: [
       {
         id: "51111111-1111-4111-8111-111111111111",

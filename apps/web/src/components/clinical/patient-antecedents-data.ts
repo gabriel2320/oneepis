@@ -1,6 +1,11 @@
 import type { ClinicalEvent, PatientRecordSnapshot } from "@/lib/types";
 
-export type AntecedentSource = "problemas" | "alergias" | "medicacion" | "eventos";
+export type AntecedentSource =
+  | "problemas"
+  | "alergias"
+  | "medicacion"
+  | "diagnosticos"
+  | "eventos";
 
 export type AntecedentItem = {
   id: string;
@@ -30,6 +35,7 @@ export const sourceLabels: Record<AntecedentSource, string> = {
   problemas: "Antecedentes activos",
   alergias: "Alergias",
   medicacion: "Medicacion",
+  diagnosticos: "Diagnosticos historicos",
   eventos: "Eventos curados",
 };
 
@@ -37,6 +43,7 @@ export const sourceDetails: Record<AntecedentSource, string> = {
   problemas: "Diagnosticos o antecedentes activos registrados.",
   alergias: "Sustancias, reaccion y severidad visibles.",
   medicacion: "Tratamiento activo; no equivale a receta.",
+  diagnosticos: "Lectura historica validada desde el snapshot record.",
   eventos: "Hechos curados desde timeline clinica.",
 };
 
@@ -90,6 +97,18 @@ export function buildAntecedentItems(
       href: `/pacientes/${patientId}/medicacion`,
       occurredAt: medication.started_on ?? undefined,
     })),
+    ...(record.historical_diagnoses ?? []).map((diagnosis) => ({
+      id: `historical-diagnosis-${diagnosis.source_event_id}`,
+      label: diagnosis.title,
+      detail: diagnosis.limit,
+      context: diagnosis.code
+        ? `${diagnosis.code_system ?? "Codigo"}: ${diagnosis.code}`
+        : `Fuente: ${diagnosis.source_label}.`,
+      category: "diagnostico_historico",
+      source: "diagnosticos" as const,
+      href: `/pacientes/${patientId}/eventos`,
+      occurredAt: diagnosis.occurred_at,
+    })),
     ...events.map((event) => eventAntecedentItem(event, patientId)),
   ]
     .filter((item) => item.detail.trim().length > 0)
@@ -105,6 +124,10 @@ export function isCuratedAntecedentEvent(event: ClinicalEvent) {
     antecedentEventTypes.has(event.event_type) &&
     parseCuratedAntecedent(event.payload.antecedent) !== null
   );
+}
+
+export function isCuratedHistoricalDiagnosisEvent(event: ClinicalEvent) {
+  return parseCuratedAntecedent(event.payload.antecedent)?.category === "diagnostico_historico";
 }
 
 function eventAntecedentItem(event: ClinicalEvent, patientId: string): AntecedentItem {

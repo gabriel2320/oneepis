@@ -87,6 +87,9 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expect(page.getByText("Antecedente activo: 1")).toBeVisible();
   await expect(page.getByText("Alergia: 1")).toBeVisible();
   await expect(page.getByText("Medicacion activa: 1")).toBeVisible();
+  await expect(page.getByText("Diagnostico historico: 1")).toBeVisible();
+  await expect(page.getByText("Diagnostico historico demo")).toBeVisible();
+  await expect(page.getByText("Diagnosticos historicos: 1")).toBeVisible();
   const medicationCard = main.getByRole("listitem").filter({ hasText: "Medicamento demo" });
   await expect(medicationCard).toBeVisible();
   await expect(medicationCard.getByText("Dosis")).toBeVisible();
