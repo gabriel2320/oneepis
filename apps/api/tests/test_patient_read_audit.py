@@ -73,7 +73,7 @@ def test_patient_audit_events_require_audit_read_access(
     assert admin_response.status_code == 200
 
 
-def test_patient_read_audit_dedupes_repeated_same_route_reads(
+def test_patient_read_audit_appends_repeated_same_route_reads(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
@@ -95,21 +95,34 @@ def test_patient_read_audit_dedupes_repeated_same_route_reads(
         headers=audit_auth,
     )
     assert audit_response.status_code == 200
-    record_reads = [
-        item for item in audit_response.json() if item["action"] == "record.read"
+    audit_events = audit_response.json()
+    record_reads = [item for item in audit_events if item["action"] == "record.read"]
+    deduped_reads = [
+        item for item in audit_events if item["action"] == "record.read_deduped"
     ]
     assert len(record_reads) == 1
+    assert len(deduped_reads) == 2
     assert record_reads[0]["correlation_id"] == "dedupe-read-001"
     assert record_reads[0]["request_method"] == "GET"
     assert record_reads[0]["request_path"] == f"/api/v1/patients/{patient_id}/record"
     assert "extra_data" not in record_reads[0]
-    raw_record_reads = [
-        item
-        for item in audit_events_for_patient(patient_id)
-        if item["action"] == "record.read"
+    raw_events = audit_events_for_patient(patient_id)
+    raw_record_read = next(item for item in raw_events if item["action"] == "record.read")
+    raw_deduped_reads = [
+        item for item in raw_events if item["action"] == "record.read_deduped"
     ]
-    assert raw_record_reads[0]["extra_data"]["deduped_count"] == 2
-    assert raw_record_reads[0]["extra_data"]["last_correlation_id"] == "dedupe-read-003"
+    assert "deduped_count" not in raw_record_read["extra_data"]
+    assert "last_correlation_id" not in raw_record_read["extra_data"]
+    assert {item["correlation_id"] for item in raw_deduped_reads} == {
+        "dedupe-read-002",
+        "dedupe-read-003",
+    }
+    assert {
+        item["extra_data"]["deduped_from_audit_event_id"] for item in raw_deduped_reads
+    } == {raw_record_read["id"]}
+    assert {
+        item["extra_data"]["deduped_from_correlation_id"] for item in raw_deduped_reads
+    } == {"dedupe-read-001"}
 
 
 def test_patient_audit_events_filter_by_patient_before_limit(

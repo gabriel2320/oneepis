@@ -100,12 +100,24 @@ def record_read_audit_event(
         )
         return
 
-    extra_data = existing.extra_data.copy()
-    extra_data["deduped_count"] = int(extra_data.get("deduped_count") or 0) + 1
-    context = _audit_request_context.get()
-    if context is not None:
-        extra_data["last_correlation_id"] = context.correlation_id
-    existing.extra_data = extra_data
+    dedupe_metadata = metadata.copy() if metadata else {}
+    dedupe_metadata["deduped_from_audit_event_id"] = str(existing.id)
+    if existing.correlation_id:
+        dedupe_metadata["deduped_from_correlation_id"] = existing.correlation_id
+    record_audit_event(
+        session,
+        action=_deduped_read_action(action),
+        entity_type=entity_type,
+        entity_id=entity_id,
+        actor_id=actor_id,
+        metadata=dedupe_metadata,
+    )
+
+
+def _deduped_read_action(action: str) -> str:
+    if action.endswith(".read"):
+        return f"{action.removesuffix('.read')}.read_deduped"
+    return f"{action}.deduped"
 
 
 def _recent_duplicate_read_event(
