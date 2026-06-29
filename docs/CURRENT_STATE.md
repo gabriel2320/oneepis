@@ -1,6 +1,6 @@
 # Current State
 
-Fecha: 2026-06-28
+Fecha: 2026-06-29
 
 Este documento es estado operativo vigente, no historial. El historial
 cronologico vive en `docs/ROADMAP.md`; los reportes fechados son snapshots y no
@@ -26,12 +26,13 @@ fuente canonica viva.
 - Base HIS minima (#107-#109): Vercel git deploys desactivados en PRs;
   lecturas de ficha/paciente auditadas con `AuditEvent`, dedupe por ventana
   corta y auditoria UI que distingue lectura/escritura sin rutas nuevas.
-- Auditoria de paciente reforzada (Dev-126): `/pacientes/[patientId]/auditoria`
-  resume total, lecturas y escrituras, filtra localmente y mantiene actor, ruta
-  y `correlation_id` visibles sin endpoint ni contrato nuevo.
-- Cobertura de auditoria de accesos (Dev-129): lecturas de paciente/ficha
-  prueban actor, metodo, ruta, `correlation_id` y dedupe con ultima correlacion;
-  el E2E real valida filtros lectura/escritura sin claim de logs seguros.
+- Auditoria de paciente reforzada: `/pacientes/[patientId]/auditoria` usa
+  `audit_read`, no lectura clinica general; expone respuesta publica minimizada
+  sin `extra_data` crudo y clasifica lectura/escritura con actor, ruta y
+  `correlation_id`.
+- Cobertura de auditoria de accesos: lecturas de paciente/ficha prueban actor,
+  metodo, ruta y `correlation_id`; el dedupe de lectura ya no actualiza eventos
+  existentes, sino que agrega eventos append-only `*.read_deduped`.
 - Logs PHI-safe backend (#110): sanitizador reutilizable para estructuras y
   strings planos, con filtro de logging activo al arrancar la API; sin
   Sentry/OTel ni observabilidad productiva.
@@ -52,6 +53,9 @@ fuente canonica viva.
   copy explicito de no receta/no dispensacion/no MAR. El E2E bloquea etiquetas
   positivas exactas de receta, firma, dispensacion, administracion, MAR y orden
   ejecutable fuera de contexto bloqueado/futuro.
+- Vademecum local draft entro a `main`: candidatos, evidencia, reglas demo y
+  validacion de dosis siguen siendo apoyo de borrador, no motor prescriptivo ni
+  fuente de recetas, ordenes ejecutables o MAR.
 - Ficha anti-dashboard compactada (#124): el resumen superior quedo como strip
   clinico sobrio; la linea clinica longitudinal sigue siendo el cuerpo principal.
 - Ficha jerarquizada (Dev-127): la linea clinica sube como primer cuerpo real,
@@ -63,6 +67,9 @@ fuente canonica viva.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
+- Diagnosticos historicos curados ya existen como lectura separada de problemas
+  activos en snapshot, ficha, Assistant Read, papel y resumenes. Siguen derivados
+  de `ClinicalEvent` y deben conservar tipo de evento y contexto de encuentro.
 - Ambulatorio minimo existe: agenda persistida, preconsulta minima gobernada,
   atencion ambulatoria, resumen de lectura y ficha comun.
 - Hospitalizacion minima existe: camas, rondas, ingreso borrador, hoja diaria,
@@ -72,26 +79,25 @@ fuente canonica viva.
   adjuntos externos, consentimientos y firma real siguen fuera.
 - AI-Chart/Assistant Read existe como apoyo contextual gobernado; la IA resume
   y propone borradores revisables, no decide, no firma y no escribe sin
-  confirmacion humana/backend.
+  confirmacion humana/backend. AI-EVAL sintetico minimo cubre fuentes esperadas,
+  falsos positivos y ausencia de consejo terapeutico autonomo.
+- Las superficies clinicas y papel muestran guard visible de desarrollo/no PHI/no
+  uso clinico real.
 - El registry estructurado de pantallas vive en
   `apps/web/src/lib/screen-capabilities.registry.json`; la tabla de rutas reales
   en `docs/SCREEN_TREE.md` se genera desde ese registry.
 
 ## Proximo Objetivo Unico
 
-Evaluar un unico modulo clinico nuevo dentro de la ficha existente. Candidatos
-permitidos: diagnosticos historicos separados de problemas activos, o
-antecedentes estructurados dentro de la ficha existente.
+Cerrar inconsistencias P1 clinicas antes de ampliar modulos.
 
-Criterio de exito:
+Cola inmediata:
 
-- El modulo elegido mejora lectura clinica longitudinal sin crear rutas nuevas.
-- Solo se evalua e implementa un modulo; el otro queda diferido.
-- El walkthrough clinico unico sigue cubriendo el flujo sin fragmentarse.
-- No hay claim de logs seguros, auditoria completa, cumplimiento legal ni
-  observabilidad productiva PHI-safe.
-- No aparecen etiquetas positivas de receta, firma, dispensacion,
-  administracion, MAR u orden ejecutable.
+- Validar matriz `payload.antecedent.category` contra `ClinicalEvent.event_type`.
+- Preservar metadata de encuentro en diagnosticos historicos del assistant
+  timeline.
+- Mostrar todas las alertas curadas de vademecum; no ocultar safety alerts.
+- Completar auditoria de creacion de medicacion con `ended_on`.
 
 Criterio de no-hacer:
 
@@ -99,6 +105,7 @@ Criterio de no-hacer:
 - No crear modulo de IA nuevo.
 - No promover receta, firma, orden ejecutable, UCI, pabellon, adjuntos o
   consentimientos productivos.
+- No duplicar el carril farmaco local ya mergeado.
 - No abrir PR docs-only salvo que evite dano clinico, seguridad rota, setup roto
   o claim publico falso.
 
