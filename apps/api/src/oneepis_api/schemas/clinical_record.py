@@ -111,11 +111,14 @@ from oneepis_api.schemas.clinical_record_contracts.longitudinal import (
 )
 from oneepis_api.schemas.clinical_record_contracts.medication_catalog import (
     MedicationCatalogItemRead,
+    MedicationClinicalUse,
     MedicationDoseRuleRead,
     MedicationDoseWarning,
     MedicationDraftingContext,
     MedicationDraftValidationRequest,
     MedicationDraftValidationResponse,
+    MedicationInteractionAlert,
+    MedicationSafetyAlert,
     MedicationSourceReference,
 )
 from oneepis_api.schemas.clinical_record_contracts.patient_context import (
@@ -215,13 +218,16 @@ __all__ = [
     "LabResultUpdate",
     "MedicationBase",
     "MedicationCatalogItemRead",
+    "MedicationClinicalUse",
     "MedicationCreate",
     "MedicationDoseRuleRead",
     "MedicationDoseWarning",
     "MedicationDraftingContext",
     "MedicationDraftValidationRequest",
     "MedicationDraftValidationResponse",
+    "MedicationInteractionAlert",
     "MedicationRead",
+    "MedicationSafetyAlert",
     "MedicationSourceRead",
     "MedicationSourceReference",
     "MedicationUpdate",

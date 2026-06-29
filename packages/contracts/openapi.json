@@ -14535,6 +14535,41 @@
             "type": "array",
             "title": "Tags"
           },
+          "clinical_uses": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationClinicalUse"
+            },
+            "type": "array",
+            "title": "Clinical Uses"
+          },
+          "administration_routes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Administration Routes"
+          },
+          "interaction_alerts": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationInteractionAlert"
+            },
+            "type": "array",
+            "title": "Interaction Alerts"
+          },
+          "safety_alerts": {
+            "items": {
+              "$ref": "#/components/schemas/MedicationSafetyAlert"
+            },
+            "type": "array",
+            "title": "Safety Alerts"
+          },
+          "monitoring_notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Monitoring Notes"
+          },
           "dose_rules": {
             "items": {
               "$ref": "#/components/schemas/MedicationDoseRuleRead"
@@ -14573,6 +14608,44 @@
           "draft"
         ],
         "title": "MedicationCatalogStatus"
+      },
+      "MedicationClinicalUse": {
+        "properties": {
+          "indication": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Indication"
+          },
+          "population": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Population"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "indication"
+        ],
+        "title": "MedicationClinicalUse"
       },
       "MedicationCreate": {
         "properties": {
@@ -15081,6 +15154,42 @@
         "type": "object",
         "title": "MedicationDraftingContext"
       },
+      "MedicationInteractionAlert": {
+        "properties": {
+          "substance": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Substance"
+          },
+          "effect": {
+            "type": "string",
+            "maxLength": 280,
+            "title": "Effect"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/MedicationDoseSeverity",
+            "default": "warning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "substance",
+          "effect"
+        ],
+        "title": "MedicationInteractionAlert"
+      },
       "MedicationRead": {
         "properties": {
           "catalog_item_id": {
@@ -15229,6 +15338,42 @@
           "updated_at"
         ],
         "title": "MedicationRead"
+      },
+      "MedicationSafetyAlert": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 320,
+            "title": "Description"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 280
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/MedicationDoseSeverity",
+            "default": "warning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description"
+        ],
+        "title": "MedicationSafetyAlert"
       },
       "MedicationSourceRead": {
         "properties": {
