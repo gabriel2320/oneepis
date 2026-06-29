@@ -83,23 +83,28 @@ def test_hospital_daily_sheet_create_list_update_and_audit(
     assert locked_update_response.status_code == 409
 
     events = audit_events_for_patient(patient_id)
-    assert any(item["action"] == "hospital_daily_sheet.created" for item in events)
+    create_event = next(item for item in events if item["action"] == "hospital_daily_sheet.created")
+    assert create_event["extra_data"]["after"]["status"] == "draft"
+    assert create_event["extra_data"]["after"]["sheet_date"] == "2026-06-20"
+    assert create_event["extra_data"]["after"]["encounter_id"] == encounter_id
+    assert "clinical_summary" not in create_event["extra_data"]["after"]
+    assert "overnight_events" not in create_event["extra_data"]["after"]
+    assert "active_plan" not in create_event["extra_data"]["after"]
+    assert "pending_tasks" not in create_event["extra_data"]["after"]
+    assert "safety_notes" not in create_event["extra_data"]["after"]
+    assert "Evolucion hospitalaria estable" not in str(create_event["extra_data"])
     update_event = next(
         item
         for item in events
         if item["action"] == "hospital_daily_sheet.updated"
-        and item["extra_data"]["after"].get("active_plan")
-        == "Mantener plan y preparar reevaluacion."
+        and item["extra_data"].get("fields") == ["active_plan"]
     )
     assert update_event["extra_data"]["patient_id"] == patient_id
     assert update_event["extra_data"]["encounter_id"] == encounter_id
     assert update_event["extra_data"]["status"] == "draft"
-    assert update_event["extra_data"]["before"] == {
-        "active_plan": "Continuar observacion clinica."
-    }
-    assert update_event["extra_data"]["after"] == {
-        "active_plan": "Mantener plan y preparar reevaluacion."
-    }
+    assert update_event["extra_data"]["before"] == {}
+    assert update_event["extra_data"]["after"] == {}
+    assert "Mantener plan y preparar reevaluacion." not in str(update_event["extra_data"])
     close_event = next(
         item
         for item in events
