@@ -32,6 +32,32 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
+LAB_PANEL_AUDIT_FIELDS = [
+    "encounter_id",
+    "occurred_at",
+    "patient_id",
+    "source_ref",
+    "source_type",
+    "status",
+]
+LAB_RESULT_AUDIT_FIELDS = [
+    "code",
+    "flag",
+    "panel_id",
+    "patient_id",
+    "status",
+]
+
+
+def lab_panel_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(LAB_PANEL_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
+
+def lab_result_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(LAB_RESULT_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
 
 @router.get("/{patient_id}/lab-panels", response_model=list[LabPanelRead])
 def list_lab_panels(
@@ -87,7 +113,7 @@ def create_lab_panel(
         entity_id=panel.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "result_count": len(panel.results)},
-        after=audit_snapshot(panel),
+        after=audit_snapshot(panel, LAB_PANEL_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(panel)
@@ -125,12 +151,13 @@ def update_lab_panel(
     if "encounter_id" in payload.model_dump(exclude_unset=True):
         validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(panel, update_fields)
+    before = audit_snapshot(panel, lab_panel_audit_fields(update_fields))
     fields = apply_update(panel, payload)
+    audit_fields = lab_panel_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=panel,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
@@ -186,12 +213,13 @@ def update_lab_result(
     _require_lab_panel(session, patient_id, panel_id)
     result = _require_lab_result(session, patient_id, panel_id, result_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(result, update_fields)
+    before = audit_snapshot(result, lab_result_audit_fields(update_fields))
     fields = apply_update(result, payload)
+    audit_fields = lab_result_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=result,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
