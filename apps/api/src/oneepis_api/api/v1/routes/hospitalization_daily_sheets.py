@@ -35,6 +35,13 @@ router = APIRouter(
 )
 SessionDep = Annotated[Session, Depends(get_session)]
 LimitQuery = Annotated[int, Query(ge=1, le=100)]
+HOSPITAL_DAILY_SHEET_AUDIT_FIELDS = [
+    "created_by",
+    "encounter_id",
+    "patient_id",
+    "sheet_date",
+    "status",
+]
 
 
 @router.get("/patients/{patient_id}/daily-sheets", response_model=list[HospitalDailySheetRead])
@@ -82,7 +89,7 @@ def create_hospital_daily_sheet(
         entity_id=sheet.id,
         actor_id=actor,
         metadata=_daily_sheet_audit_metadata(sheet),
-        after=audit_snapshot(sheet),
+        after=audit_snapshot(sheet, HOSPITAL_DAILY_SHEET_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(sheet)
@@ -103,15 +110,20 @@ def update_hospital_daily_sheet(
     sheet = _require_daily_sheet(session, patient_id, sheet_id)
     _validate_daily_sheet_editable(sheet)
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(sheet, fields)
+    audit_fields = _daily_sheet_audit_fields(fields)
+    before = audit_snapshot(sheet, audit_fields) if audit_fields else {}
     changed_fields = apply_update(sheet, payload)
     _validate_daily_sheet_date_for_encounter(sheet, sheet.encounter)
     _validate_daily_sheet_unique(session, sheet)
-    before_changed, after_changed = changed_field_snapshots(
-        before=before,
-        after_model=sheet,
-        fields=changed_fields,
-    )
+    audit_changed_fields = _daily_sheet_audit_fields(changed_fields)
+    if audit_changed_fields:
+        before_changed, after_changed = changed_field_snapshots(
+            before=before,
+            after_model=sheet,
+            fields=audit_changed_fields,
+        )
+    else:
+        before_changed, after_changed = {}, {}
     record_audit_event(
         session,
         action="hospital_daily_sheet.updated",
@@ -219,3 +231,7 @@ def _daily_sheet_audit_metadata(
     if fields is not None:
         metadata["fields"] = fields
     return metadata
+
+
+def _daily_sheet_audit_fields(fields: list[str]) -> list[str]:
+    return [field for field in fields if field in HOSPITAL_DAILY_SHEET_AUDIT_FIELDS]
