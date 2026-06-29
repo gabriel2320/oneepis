@@ -158,11 +158,35 @@ def test_lab_panel_create_read_patch_and_audit(
     panel_updated = next(item for item in events if item["action"] == "lab_panel.updated")
     result_updated = next(item for item in events if item["action"] == "lab_result.updated")
     assert created["extra_data"]["result_count"] == 2
-    assert created["extra_data"]["after"]["panel_name"] == "Perfil renal"
-    assert panel_updated["extra_data"]["before"] == {"summary": "Control inicial"}
-    assert panel_updated["extra_data"]["after"] == {"summary": "Control corregido"}
+    assert created["extra_data"]["after"] == {
+        "encounter_id": encounter["id"],
+        "occurred_at": "2026-06-20T09:00:00+00:00",
+        "patient_id": patient_id,
+        "source_ref": None,
+        "source_type": "manual",
+        "status": "active",
+    }
+    assert panel_updated["extra_data"]["fields"] == ["summary"]
+    assert panel_updated["extra_data"]["before"] == {}
+    assert panel_updated["extra_data"]["after"] == {}
+    assert result_updated["extra_data"]["fields"] == ["numeric_value", "status"]
     assert result_updated["extra_data"]["before"]["status"] == "active"
     assert result_updated["extra_data"]["after"]["status"] == "entered_in_error"
+    lab_audit_payload = str(
+        [created["extra_data"], panel_updated["extra_data"], result_updated["extra_data"]]
+    )
+    for raw_value in (
+        "Perfil renal",
+        "Control inicial",
+        "Control corregido",
+        "Creatinina",
+        "Urea",
+        "1.10",
+        "1.20",
+        "mg/dL",
+        "0.7-1.3",
+    ):
+        assert raw_value not in lab_audit_payload
 
 
 def test_lab_panel_permissions_and_ownership(
