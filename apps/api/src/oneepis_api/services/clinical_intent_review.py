@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import uuid
 
 from sqlalchemy import select
@@ -93,13 +94,19 @@ def apply_review_decisions(
         return items
     applied: list[ClinicalReviewItem] = []
     for item in items:
-        key = _review_item_key(
+        fingerprint = review_item_fingerprint(
             item_type=item.item_type,
             source_type=item.source_type,
             source_id=item.source_id,
             label=item.label,
         )
-        decision = decisions.get(key)
+        legacy_key = _review_item_key(
+            item_type=item.item_type,
+            source_type=item.source_type,
+            source_id=item.source_id,
+            label=item.label,
+        )
+        decision = decisions.get(fingerprint) or decisions.get(legacy_key)
         if decision:
             item = item.model_copy(
                 update={
@@ -173,12 +180,14 @@ def _review_decision_map(
         decision = metadata.get("decision")
         if decision not in {"accepted", "rejected"}:
             continue
-        key = _review_item_key(
-            item_type=str(metadata.get("item_type") or ""),
-            source_type=str(metadata.get("source_type") or ""),
-            source_id=metadata.get("source_id"),
-            label=str(metadata.get("label") or ""),
-        )
+        key = str(metadata.get("item_fingerprint") or "")
+        if not key:
+            key = _review_item_key(
+                item_type=str(metadata.get("item_type") or ""),
+                source_type=str(metadata.get("source_type") or ""),
+                source_id=metadata.get("source_id"),
+                label=str(metadata.get("label") or ""),
+            )
         decisions.setdefault(
             key,
             {
@@ -189,6 +198,22 @@ def _review_decision_map(
             },
         )
     return decisions
+
+
+def review_item_fingerprint(
+    *,
+    item_type: str,
+    source_type: str,
+    source_id: uuid.UUID | str | None,
+    label: str,
+) -> str:
+    key = _review_item_key(
+        item_type=item_type,
+        source_type=source_type,
+        source_id=source_id,
+        label=label.strip(),
+    )
+    return hashlib.sha256(key.encode("utf-8")).hexdigest()
 
 
 def _review_item_key(
