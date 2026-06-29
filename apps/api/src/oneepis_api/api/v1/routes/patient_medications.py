@@ -19,6 +19,11 @@ from oneepis_api.schemas.clinical_record import (
     MedicationUpdate,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.medication_audit import (
+    MEDICATION_CREATE_AUDIT_FIELDS,
+    medication_dose_audit_metadata,
+    sanitize_override_reason_audit,
+)
 from oneepis_api.services.medication_catalog import (
     get_catalog_item,
     list_catalog_items,
@@ -88,10 +93,9 @@ def create_medication(
         metadata={
             "patient_id": str(patient_id),
             "status": medication.status.value,
-            "dose_warning_count": len(dose_check_snapshot.get("warnings", [])),
-            "dose_override": bool(payload.dose_override_reason),
+            **medication_dose_audit_metadata(dose_check_snapshot, payload.dose_override_reason),
         },
-        after=audit_snapshot(medication),
+        after=audit_snapshot(medication, MEDICATION_CREATE_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(medication)
@@ -198,13 +202,22 @@ def update_medication(
         after_model=medication,
         fields=fields,
     )
+    sanitize_override_reason_audit(before_changed)
+    sanitize_override_reason_audit(after_changed)
+    metadata: dict[str, Any] = {"patient_id": str(patient_id), "fields": fields}
+    if dose_check_snapshot is not None:
+        override_reason = payload.model_dump(exclude_unset=True).get(
+            "dose_override_reason",
+            medication.dose_override_reason,
+        )
+        metadata.update(medication_dose_audit_metadata(dose_check_snapshot, override_reason))
     record_audit_event(
         session,
         action="medication.updated",
         entity_type="medication",
         entity_id=medication.id,
         actor_id=actor,
-        metadata={"patient_id": str(patient_id), "fields": fields},
+        metadata=metadata,
         before=before_changed,
         after=after_changed,
     )
