@@ -41,6 +41,23 @@ def test_medication_catalog_validation_and_override_audit(
     assert validation["applies_changes"] is False
     assert validation["warnings"][0]["requires_override"] is True
 
+    no_safe_rule_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications/validate-draft",
+        headers=auth,
+        json={
+            "catalog_item_id": str(DEMO_ANALGESIC_ID),
+            "name": demo_item["display_name"],
+            "dose": "500 mg",
+            "route": "intravenosa",
+            "frequency": "cada 8 horas",
+        },
+    )
+    assert no_safe_rule_response.status_code == 200
+    no_safe_rule = no_safe_rule_response.json()
+    assert no_safe_rule["blocking"] is False
+    assert no_safe_rule["warnings"] == []
+    assert any("Sin regla segura disponible" in item for item in no_safe_rule["limitations"])
+
     blocked_create = client.post(
         f"/api/v1/patients/{patient_id}/medications",
         headers=auth,

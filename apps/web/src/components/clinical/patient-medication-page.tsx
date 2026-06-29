@@ -184,9 +184,15 @@ function MedicationDoseValidationPanel({
 }: {
   validation: MedicationDraftValidationResponse;
 }) {
+  const noSafeRule = hasNoSafeRule(validation);
   const tone = validation.blocking ? "danger" : "info";
+  const title = validation.blocking
+    ? "Alerta de dosis"
+    : noSafeRule
+      ? "Sin regla segura disponible"
+      : "Validacion de dosis";
   return (
-    <AlertCard title={validation.blocking ? "Alerta de dosis" : "Validacion de dosis"} tone={tone}>
+    <AlertCard title={title} tone={tone}>
       {validation.warnings.length ? (
         <div className="space-y-2">
           {validation.warnings.map((warning) => (
@@ -202,7 +208,11 @@ function MedicationDoseValidationPanel({
           ))}
         </div>
       ) : (
-        <p>No se detectaron alertas bloqueantes con las reglas disponibles.</p>
+        <p>
+          {noSafeRule
+            ? "OneEpis no valida dosis porque no hay regla curada aplicable para este borrador."
+            : "No se detectaron alertas bloqueantes con las reglas disponibles."}
+        </p>
       )}
       {validation.limitations.length ? (
         <ul className="mt-2 list-disc space-y-1 pl-4 text-xs">
@@ -212,5 +222,11 @@ function MedicationDoseValidationPanel({
         </ul>
       ) : null}
     </AlertCard>
+  );
+}
+
+function hasNoSafeRule(validation: MedicationDraftValidationResponse) {
+  return validation.limitations.some((item) =>
+    item.toLowerCase().includes("sin regla segura disponible"),
   );
 }
