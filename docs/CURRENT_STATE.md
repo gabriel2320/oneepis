@@ -51,6 +51,9 @@ fuente canonica viva.
 - Ficha jerarquizada (Dev-127): la linea clinica sube como primer cuerpo real,
   el mapa longitudinal queda secundario, el header interno usa conteos y el rail
   oculta rutas/API y detalle tecnico primario en `<details>` nativo.
+- Walkthrough clinico unico (Dev-128): el spec canonico atraviesa login, mapa
+  hospitalario, consulta ambulatoria, ficha, documentos/papel, auditoria demo,
+  hospitalizacion, indicaciones borrador y ficha hospitalizada sin rutas nuevas.
 - La identidad clinica sigue siendo `Patient` unico; los contextos se separan
   con `ClinicalEncounter` y la ficha longitudinal reconcilia antecedentes,
   eventos, evoluciones, medicacion, alergias, riesgos, signos y resultados.
@@ -70,16 +73,16 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Evaluar rail clinico colapsable solo si la ficha sigue sobrecargada tras Dev-127.
-No agregar `Command`, `Sheet`, `Data Table`, filtros multiples, rutas ni paneles
-nuevos antes de medir que el reordenamiento no fue suficiente.
+DEV-129: cobertura de auditoria de accesos. Reforzar pruebas de lecturas y
+eventos de acceso sobre rutas existentes, sin rutas nuevas ni claims de
+cumplimiento legal.
 
 Criterio de exito:
 
-- La linea clinica longitudinal sigue antes que mapa/resumen/contexto secundario.
-- El rail no compite con la linea clinica ni expone rutas tecnicas como texto
-  primario.
-- Auditoria distingue acceso/lectura/escritura sin claim de logs seguros.
+- El walkthrough clinico sigue siendo unico y no abre superficies nuevas.
+- Auditoria distingue acceso/lectura/escritura con actor, ruta y correlacion
+  cuando usa API real.
+- No hay claim de logs seguros, auditoria completa ni cumplimiento legal.
 - No aparecen etiquetas positivas de receta, firma, dispensacion,
   administracion, MAR u orden ejecutable.
 

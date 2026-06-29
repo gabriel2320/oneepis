@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 const demoPatientId = "11111111-1111-4111-8111-111111111111";
 const demoHospitalizedPatientId = "12222222-2222-4222-8222-222222222222";
 
-test("canonical clinical walkthrough stays oriented by workplace and reconciles in patient record", async ({
+test("single canonical clinical walkthrough stays oriented by workplace and reconciles in patient record", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "desktop walkthrough uses side navigation");
@@ -29,6 +29,8 @@ test("canonical clinical walkthrough stays oriented by workplace and reconciles 
   await page.getByRole("link", { name: "Ficha longitudinal" }).click();
   await expect(page).toHaveURL(new RegExp(`/pacientes/${demoPatientId}/ficha$`));
   await expectPatientRecord(page, "patient");
+  await expectPatientDocuments(page, demoPatientId);
+  await expectPatientAuditDemo(page, demoPatientId);
 
   await page.getByRole("link", { name: /OneEpis Mapa del hospital/ }).click();
   await expect(page).toHaveURL(/\/home$/);
@@ -41,10 +43,14 @@ test("canonical clinical walkthrough stays oriented by workplace and reconciles 
   await page.getByRole("link", { name: "Ingreso" }).first().click();
   await expect(page).toHaveURL(new RegExp(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/ingreso$`));
   await expectHospitalWorkspace(page);
+  await page.getByRole("link", { name: "Indicaciones" }).click();
+  await expect(page).toHaveURL(new RegExp(`/hospitalizacion/pacientes/${demoHospitalizedPatientId}/indicaciones$`));
+  await expectHospitalIndications(page);
 
   await page.getByRole("link", { name: "Ficha longitudinal" }).click();
   await expect(page).toHaveURL(new RegExp(`/pacientes/${demoHospitalizedPatientId}/ficha$`));
   await expectPatientRecord(page, "patient");
+  await expectPatientDocuments(page, demoHospitalizedPatientId);
 });
 
 async function expectCleanLogin(page: Page) {
@@ -130,6 +136,18 @@ async function expectHospitalWorkspace(page: Page) {
   await expectNoInternalTerms(main);
 }
 
+async function expectHospitalIndications(page: Page) {
+  const main = page.getByRole("main");
+  await expectSemanticShell(page, "hospital");
+  await expect(page.getByRole("heading", { name: "Indicaciones hospitalarias" })).toBeVisible();
+  await expect(main.getByText("Borradores registrados")).toBeVisible();
+  await expect(main.getByText("Borrador hospitalario; no sustituye firma")).toBeVisible();
+  await expect(main.getByText("Ejecucion bloqueada")).toBeVisible();
+  await expect(main.getByRole("button", { name: "Cerrar borrador" })).toBeDisabled();
+  await expect(main.getByRole("button", { name: "Guardar borrador" })).toBeDisabled();
+  await expectNoInternalTerms(main);
+}
+
 async function expectPatientRecord(page: Page, workspace: "patient") {
   const main = page.getByRole("main");
   await expectSemanticShell(page, workspace);
@@ -142,6 +160,33 @@ async function expectPatientRecord(page: Page, workspace: "patient") {
   await expect(main.getByText("El paciente es unico; los episodios separan el contexto")).toBeVisible();
   await expect(main.getByText("Antecedentes clinicos")).toBeVisible();
   await expect(main.getByText("Fuentes usadas")).toBeVisible();
+  await expectNoInternalTerms(main);
+}
+
+async function expectPatientDocuments(page: Page, patientId: string) {
+  await page.getByRole("link", { name: "Documentos" }).click();
+  await expect(page).toHaveURL(new RegExp(`/pacientes/${patientId}/documentos$`));
+  const main = page.getByRole("main");
+  await expectSemanticShell(page, "patient");
+  await expect(main.getByText("Documentos y papel")).toBeVisible();
+  await expect(main.getByText("Ficha clinica")).toBeVisible();
+  await expect(main.getByText("Receta valida")).toBeVisible();
+  await expect(main.locator("div").filter({ hasText: "Receta valida" }).filter({ hasText: "Bloqueado" }).first()).toBeVisible();
+  await expect(main.getByText("Adjuntos externos", { exact: true })).toBeVisible();
+  await expect(main.getByText("Consentimientos", { exact: true })).toBeVisible();
+  await expectNoInternalTerms(main);
+}
+
+async function expectPatientAuditDemo(page: Page, patientId: string) {
+  await page.getByRole("link", { name: "Auditoria" }).click();
+  await expect(page).toHaveURL(new RegExp(`/pacientes/${patientId}/auditoria$`));
+  const main = page.getByRole("main");
+  await expectSemanticShell(page, "patient");
+  await expect(main.getByRole("heading", { name: "Auditoria" })).toBeVisible();
+  await expect(main.getByText("Lectura")).toBeVisible();
+  await expect(main.getByText("Escritura")).toBeVisible();
+  await expect(main.getByText("Auditoria no disponible en demo")).toBeVisible();
+  await expect(main).not.toContainText(/logs seguros|cumplimiento legal/i);
   await expectNoInternalTerms(main);
 }
 
