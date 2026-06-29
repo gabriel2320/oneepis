@@ -31,6 +31,10 @@ DEMO_ANALGESIC_RULE_ID = uuid.UUID("10000000-0000-4000-8000-000000000201")
 DEMO_CARDIO_ID = uuid.UUID("10000000-0000-4000-8000-000000000102")
 DEMO_CARDIO_RULE_ID = uuid.UUID("10000000-0000-4000-8000-000000000202")
 DEMO_SOURCE_LABEL = "Fixture demo OneEpis; no uso clinico"
+NO_SAFE_RULE_LIMITATION = (
+    "Sin regla segura disponible para este medicamento/via; "
+    "OneEpis no valida dosis con este borrador."
+)
 DEMO_ANALGESIC_DETAILS = {
     "clinical_uses": [
         {
@@ -204,7 +208,7 @@ def validate_medication_draft(
         ],
     )
     if item is None:
-        response.limitations.append("Sin medicamento de catalogo: no hay regla segura disponible.")
+        response.limitations.append(NO_SAFE_RULE_LIMITATION)
         return response
 
     reviewed_rules = [
@@ -215,7 +219,7 @@ def validate_medication_draft(
     ]
     response.source_refs.append(_source_from_item(item))
     if not reviewed_rules:
-        response.limitations.append("Sin regla revisada aplicable para esta via.")
+        response.limitations.append(NO_SAFE_RULE_LIMITATION)
         return response
 
     dose_value = _parse_first_decimal(payload.dose)

@@ -42,6 +42,17 @@ test("Medication page renders vademecum and dose validation without executable p
   await expect(page.getByText("Dosis 1500 fuera del rango curado")).toBeVisible();
   await expect(page.getByText("Justificacion de override")).toBeVisible();
   await expect(page.getByText("No crea receta valida")).toBeVisible();
+
+  await page.goto(
+    `/pacientes/${patientId}/medicacion/nueva?catalogItemId=${catalogItemId}` +
+      "&name=Analgesico%20demo%20500%20mg%20comprimido&route=intravenosa",
+  );
+  await page.locator("input").nth(1).fill("500 mg");
+  await page.getByRole("button", { name: "Validar dosis" }).click();
+
+  await expect(page.getByText("Sin regla segura disponible", { exact: true })).toBeVisible();
+  await expect(page.getByText("OneEpis no valida dosis porque no hay regla curada")).toBeVisible();
+  await expect(page.getByText("Justificacion de override")).toHaveCount(0);
 });
 
 async function mockClinicalApi(page: Page) {
@@ -85,7 +96,11 @@ async function fulfillApi(route: Route) {
     return;
   }
   if (path === `/api/v1/patients/${patientId}/medications/validate-draft`) {
-    await route.fulfill({ json: validationResponse, headers: corsHeaders });
+    const payload = request.postDataJSON() as { route?: string };
+    await route.fulfill({
+      json: payload.route === "intravenosa" ? noSafeRuleResponse : validationResponse,
+      headers: corsHeaders,
+    });
     return;
   }
   await route.fulfill({
@@ -241,5 +256,16 @@ const validationResponse = {
   limitations: ["Pediatria, embarazo, renal/hepatica e interacciones requieren regla explicita."],
   source_refs: [],
   normalized_dose: { value: "1500", raw: "1500 mg" },
+  applies_changes: false,
+};
+
+const noSafeRuleResponse = {
+  warnings: [],
+  blocking: false,
+  limitations: [
+    "Sin regla segura disponible para este medicamento/via; OneEpis no valida dosis con este borrador.",
+  ],
+  source_refs: [],
+  normalized_dose: {},
   applies_changes: false,
 };
