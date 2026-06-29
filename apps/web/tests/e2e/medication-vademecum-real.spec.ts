@@ -29,6 +29,23 @@ test("Medication page renders vademecum and dose validation without executable p
   await expect(page.getByText("Usos curados")).toBeVisible();
   await expect(page.getByText("Dolor o fiebre demo / adult_general_demo")).toBeVisible();
   await expect(page.getByText("Alertas informativas")).toBeVisible();
+  await expect(
+    page.getByText("Interaccion: interaccion-demo - Ejemplo informativo; no evalua interacciones reales."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Interaccion: interaccion-demo-renal - Ejemplo renal informativo; no calcula ajuste real."),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Interaccion: interaccion-demo-hepatica - Ejemplo hepatico informativo; no calcula ajuste real.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByText("Alerta demo: No usar como recomendacion clinica real.")).toBeVisible();
+  await expect(page.getByText("Alerta demo embarazo: No evalua embarazo ni lactancia real.")).toBeVisible();
+  await expect(page.getByText("Alerta demo alergia: No sustituye revision de alergias activas.")).toBeVisible();
+  await expect(page.getByText("Receta valida", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("MAR", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Orden ejecutable", { exact: true })).toHaveCount(0);
   await expect(page.getByText("no consulta FDA/openFDA en vivo")).toBeVisible();
 
   await page.goto(
@@ -185,6 +202,18 @@ const catalogItem = {
       recommendation: "Requiere revision humana y fuente curada antes de uso clinico.",
       severity: "warning",
     },
+    {
+      substance: "interaccion-demo-renal",
+      effect: "Ejemplo renal informativo; no calcula ajuste real.",
+      recommendation: "Revisar regla curada y contexto renal sintetico.",
+      severity: "warning",
+    },
+    {
+      substance: "interaccion-demo-hepatica",
+      effect: "Ejemplo hepatico informativo; no calcula ajuste real.",
+      recommendation: "Confirmar fuente local y criterio humano.",
+      severity: "info",
+    },
   ],
   safety_alerts: [
     {
@@ -192,6 +221,18 @@ const catalogItem = {
       description: "No usar como recomendacion clinica real.",
       action: "Mantener solo para desarrollo y pruebas.",
       severity: "info",
+    },
+    {
+      title: "Alerta demo embarazo",
+      description: "No evalua embarazo ni lactancia real.",
+      action: "Requiere regla curada antes de cualquier uso clinico.",
+      severity: "warning",
+    },
+    {
+      title: "Alerta demo alergia",
+      description: "No sustituye revision de alergias activas.",
+      action: "Confirmar fuentes del paciente y criterio humano.",
+      severity: "warning",
     },
   ],
   monitoring_notes: ["Confirmar alergias, comorbilidades y fuente local antes de indicar."],

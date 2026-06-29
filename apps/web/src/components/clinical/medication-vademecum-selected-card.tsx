@@ -76,12 +76,12 @@ export function SelectedMedicationCard({
         <div className="mt-3 rounded-md border bg-card p-3 text-xs">
           <p className="font-semibold">Alertas informativas</p>
           <ul className="mt-1 space-y-1 text-muted-foreground">
-            {interactionAlerts.slice(0, 2).map((alert) => (
+            {interactionAlerts.map((alert) => (
               <li key={`${alert.substance}-${alert.effect}`}>
                 Interaccion: {alert.substance} - {alert.effect}
               </li>
             ))}
-            {safetyAlerts.slice(0, 2).map((alert) => (
+            {safetyAlerts.map((alert) => (
               <li key={`${alert.title}-${alert.description}`}>
                 {alert.title}: {alert.description}
               </li>
