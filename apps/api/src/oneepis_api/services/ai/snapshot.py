@@ -4,6 +4,7 @@ import json
 
 from oneepis_api.schemas.ai import ClinicalAiSuggestion
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.ai.active_medication_context import active_medication_suggestions
 
 
 def local_snapshot_suggestions(snapshot: PatientRecordSnapshot) -> list[ClinicalAiSuggestion]:
@@ -56,6 +57,8 @@ def local_snapshot_suggestions(snapshot: PatientRecordSnapshot) -> list[Clinical
                 action_label="Ver alergias",
             )
         )
+
+    suggestions.extend(active_medication_suggestions(snapshot))
 
     if not suggestions:
         suggestions.append(

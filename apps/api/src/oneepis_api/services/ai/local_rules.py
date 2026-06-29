@@ -11,6 +11,7 @@ from oneepis_api.schemas.ai import (
     PatientAiSuggestionsResponse,
 )
 from oneepis_api.schemas.patient import PatientRecordSnapshot
+from oneepis_api.services.ai.active_medication_context import medication_context_safety_notes
 from oneepis_api.services.ai.snapshot import local_snapshot_suggestions, snapshot_summary
 
 
@@ -25,7 +26,7 @@ class LocalRulesProvider:
             if item.strip()
         ]
         points = sentences[:5]
-        summary = " ".join(points[:2]) if points else "Sin contenido suficiente para resumir."
+        summary = " ".join(sentences[:2]) if sentences else "Sin contenido suficiente para resumir."
         if summary and not summary.endswith("."):
             summary = f"{summary}."
 
@@ -55,6 +56,13 @@ class LocalRulesProvider:
         snapshot: PatientRecordSnapshot,
         payload: PatientAiSuggestionRequest,
     ) -> PatientAiSuggestionsResponse:
+        suggestions = local_snapshot_suggestions(snapshot)
+        safety_notes = [
+            "Borrador IA basado en reglas locales.",
+            "Requiere revision humana antes de cualquier accion clinica.",
+        ]
+        if snapshot.active_medications:
+            safety_notes.extend(medication_context_safety_notes())
         return PatientAiSuggestionsResponse(
             provider=self.name,
             status="draft",
@@ -62,9 +70,6 @@ class LocalRulesProvider:
             patient_id=snapshot.patient.id,
             generated_at=datetime.now(UTC),
             summary=snapshot_summary(snapshot),
-            suggestions=local_snapshot_suggestions(snapshot),
-            safety_notes=[
-                "Borrador IA basado en reglas locales.",
-                "Requiere revision humana antes de cualquier accion clinica.",
-            ],
+            suggestions=suggestions,
+            safety_notes=safety_notes,
         )
