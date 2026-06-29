@@ -10,6 +10,7 @@ from oneepis_api.models.clinical_record import (
     Allergy,
     ClinicalEncounter,
     ClinicalEntry,
+    ClinicalEntryStatus,
     EncounterStatus,
     EncounterType,
     Medication,
@@ -202,7 +203,10 @@ def _recent_entries(session: Session, patient_id: uuid.UUID) -> list[ClinicalEnt
         session.scalars(
             select(ClinicalEntry)
             .options(selectinload(ClinicalEntry.encounter))
-            .where(ClinicalEntry.patient_id == patient_id)
+            .where(
+                ClinicalEntry.patient_id == patient_id,
+                ClinicalEntry.status != ClinicalEntryStatus.ENTERED_IN_ERROR,
+            )
             .order_by(ClinicalEntry.occurred_at.desc())
             .limit(CONTEXT_LIMIT)
         )

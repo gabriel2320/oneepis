@@ -10432,7 +10432,8 @@
         "enum": [
           "draft",
           "signed",
-          "amended"
+          "amended",
+          "entered_in_error"
         ],
         "title": "ClinicalEntryStatus"
       },
