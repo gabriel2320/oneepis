@@ -37,6 +37,20 @@ HOSPITAL_DOCUMENT_KINDS = {
     ClinicalEntryKind.INTAKE,
     ClinicalEntryKind.DISCHARGE_SUMMARY,
 }
+CLINICAL_ENTRY_AUDIT_FIELDS = [
+    "created_by",
+    "encounter_id",
+    "kind",
+    "occurred_at",
+    "patient_id",
+    "status",
+]
+
+
+def clinical_entry_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(CLINICAL_ENTRY_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
 
 @router.get("/{patient_id}/clinical-entries", response_model=list[ClinicalEntryRead])
 def list_clinical_entries(
@@ -97,7 +111,7 @@ def create_clinical_entry(
         entity_id=entry.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "kind": payload.kind.value},
-        after=audit_snapshot(entry),
+        after=audit_snapshot(entry, CLINICAL_ENTRY_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(entry)
@@ -123,12 +137,13 @@ def update_clinical_entry(
     if "encounter_id" in payload.model_dump(exclude_unset=True):
         validate_entry_encounter(session, patient_id, entry.kind, payload.encounter_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(entry, update_fields)
+    before = audit_snapshot(entry, clinical_entry_audit_fields(update_fields))
     fields = apply_update(entry, payload)
+    audit_fields = clinical_entry_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=entry,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
@@ -165,7 +180,7 @@ def delete_draft_clinical_entry(
             status_code=status.HTTP_409_CONFLICT,
             detail="Only draft clinical entries can be deleted",
         )
-    before = audit_snapshot(entry)
+    before = audit_snapshot(entry, CLINICAL_ENTRY_AUDIT_FIELDS)
     record_audit_event(
         session,
         action="clinical_entry.deleted",
