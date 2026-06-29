@@ -48,6 +48,86 @@ def test_patient_read_endpoints_emit_read_audit_events(
     assert record_read["request_path"] == f"/api/v1/patients/{patient_id}/record"
 
 
+def test_patient_clinical_entries_events_and_timeline_emit_read_audit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    entry_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json={
+            "kind": "progress",
+            "occurred_at": "2026-06-20T12:00:00Z",
+            "title": "Evolucion para lectura auditada",
+        },
+    )
+    assert entry_response.status_code == 201
+    entry_id = entry_response.json()["id"]
+    event_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:05:00Z",
+            "summary": "Evento para lectura auditada",
+        },
+    )
+    assert event_response.status_code == 201
+    event_id = event_response.json()["id"]
+    reads = [
+        (
+            "clinical_entries.read",
+            f"/api/v1/patients/{patient_id}/clinical-entries",
+            "read-entries-001",
+        ),
+        (
+            "clinical_entry.read",
+            f"/api/v1/patients/{patient_id}/clinical-entries/{entry_id}",
+            "read-entry-001",
+        ),
+        (
+            "clinical_events.read",
+            f"/api/v1/patients/{patient_id}/clinical-events",
+            "read-events-001",
+        ),
+        (
+            "clinical_event.read",
+            f"/api/v1/patients/{patient_id}/clinical-events/{event_id}",
+            "read-event-001",
+        ),
+        (
+            "timeline.read",
+            f"/api/v1/patients/{patient_id}/timeline",
+            "read-timeline-001",
+        ),
+    ]
+
+    for _, path, correlation_id in reads:
+        response = client.get(
+            path,
+            headers={**auth, "X-OneEpis-Correlation-ID": correlation_id},
+        )
+        assert response.status_code == 200
+
+    audit_response = client.get(
+        f"/api/v1/patients/{patient_id}/audit-events",
+        headers=audit_auth,
+    )
+    assert audit_response.status_code == 200
+    audit_events = audit_response.json()
+    for action, path, correlation_id in reads:
+        read_event = next(item for item in audit_events if item["action"] == action)
+        assert read_event["actor_id"] == "medico@oneepis.local"
+        assert read_event["correlation_id"] == correlation_id
+        assert read_event["request_method"] == "GET"
+        assert read_event["request_path"] == path
+        assert "extra_data" not in read_event
+
+
 def test_patient_audit_events_require_audit_read_access(
     client: TestClient,
     auth_headers,

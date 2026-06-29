@@ -152,11 +152,12 @@ def test_clinical_event_audit_snapshots_use_allowlist(
     assert "Nuevo detalle" not in audit_payload
 
 
-def test_clinical_event_detail_is_readable_without_audit_write(
+def test_clinical_event_detail_read_is_audited_for_readonly_user(
     client: TestClient,
     auth_headers,
 ) -> None:
     auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     patient = client.post(
         "/api/v1/patients",
         headers=auth,
@@ -176,26 +177,33 @@ def test_clinical_event_detail_is_readable_without_audit_write(
             "summary": "Evento puntual para fuente inspeccionable",
         },
     ).json()
-    before_audit = client.get(
-        f"/api/v1/patients/{patient['id']}/audit-events",
-        headers=auth_headers(client, email="admin@oneepis.local", password="admin"),
-    ).json()
     readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
 
     response = client.get(
         f"/api/v1/patients/{patient['id']}/clinical-events/{event['id']}",
-        headers=readonly_auth,
+        headers={**readonly_auth, "X-OneEpis-Correlation-ID": "readonly-event-read-001"},
     )
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["id"] == event["id"]
     assert payload["summary"] == "Evento puntual para fuente inspeccionable"
-    after_audit = client.get(
+    audit_response = client.get(
         f"/api/v1/patients/{patient['id']}/audit-events",
-        headers=auth_headers(client, email="admin@oneepis.local", password="admin"),
-    ).json()
-    assert after_audit == before_audit
+        headers=audit_auth,
+    )
+    assert audit_response.status_code == 200
+    read_audit = next(
+        item for item in audit_response.json() if item["action"] == "clinical_event.read"
+    )
+    assert read_audit["actor_id"] == "lector@oneepis.local"
+    assert read_audit["correlation_id"] == "readonly-event-read-001"
+    assert read_audit["request_method"] == "GET"
+    assert (
+        read_audit["request_path"]
+        == f"/api/v1/patients/{patient['id']}/clinical-events/{event['id']}"
+    )
+    assert "extra_data" not in read_audit
 
 
 def test_clinical_event_detail_requires_patient_ownership(

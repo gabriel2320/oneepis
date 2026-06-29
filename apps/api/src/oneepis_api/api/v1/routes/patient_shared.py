@@ -12,6 +12,7 @@ from oneepis_api.db.session import get_session
 from oneepis_api.models.clinical_record import ClinicalEncounter, EncounterType
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
+from oneepis_api.services.audit import record_read_audit_event
 
 SessionDep = Annotated[Session, Depends(get_session)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
@@ -31,6 +32,23 @@ def require_patient(session: Session, patient_id: uuid.UUID) -> Patient:
     if patient is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
     return patient
+
+
+def record_patient_scoped_read(
+    session: Session,
+    *,
+    patient_id: uuid.UUID,
+    actor_id: str,
+    action: str,
+) -> None:
+    record_read_audit_event(
+        session,
+        action=action,
+        entity_type="patient",
+        entity_id=patient_id,
+        actor_id=actor_id,
+    )
+    session.commit()
 
 
 def require_patient_child[T](

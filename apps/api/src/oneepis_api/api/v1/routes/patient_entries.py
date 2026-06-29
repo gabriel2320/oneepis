@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ClinicalEntryActorDep
+from oneepis_api.api.deps import ClinicalEntryActorDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEntryKind,
@@ -25,6 +25,7 @@ from .patient_shared import (
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_encounter_for_patient,
     require_patient,
     require_patient_child,
@@ -56,10 +57,17 @@ def clinical_entry_audit_fields(fields: list[str]) -> list[str]:
 def list_clinical_entries(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 25,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalEntry]:
     require_patient(session, patient_id)
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="clinical_entries.read",
+    )
     statement = (
         select(ClinicalEntry)
         .where(ClinicalEntry.patient_id == patient_id)
@@ -75,15 +83,23 @@ def get_clinical_entry(
     patient_id: uuid.UUID,
     entry_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
-    return require_patient_child(
+    entry = require_patient_child(
         session,
         ClinicalEntry,
         entry_id,
         patient_id,
         "Clinical entry not found",
     )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="clinical_entry.read",
+    )
+    return entry
 
 
 @router.post(
