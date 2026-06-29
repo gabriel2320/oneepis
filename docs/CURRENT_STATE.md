@@ -81,10 +81,10 @@ fuente canonica viva.
   y propone borradores revisables, no decide, no firma y no escribe sin
   confirmacion humana/backend. AI-EVAL sintetico minimo cubre fuentes esperadas,
   falsos positivos y ausencia de consejo terapeutico autonomo.
-- P1 clinicos post Dev-154 a Dev-166 quedaron cerrados: matriz de antecedentes,
+- P1 clinicos post Dev-154 a Dev-175 quedaron cerrados: matriz de antecedentes,
   metadata de diagnostico historico, alertas completas de vademecum,
-  `ended_on` en auditoria de medicacion y minimizacion de auditoria con
-  allowlists estructurales.
+  `ended_on` en auditoria de medicacion, read-audit patient-scoped principal,
+  minimizacion de auditoria por allowlists y borrado logico de entradas/signos.
 - Las superficies clinicas y papel muestran guard visible de desarrollo/no PHI/no
   uso clinico real.
 - El registry estructurado de pantallas vive en
@@ -93,17 +93,17 @@ fuente canonica viva.
 
 ## Proximo Objetivo Unico
 
-Cerrar trazabilidad P1 antes de ampliar modulos.
+No ampliar modulos clinicos hasta mantener claro el limite pre-HIS. El siguiente
+trabajo permitido debe reducir riesgo operacional o consolidar contrato, no
+crear nuevas superficies.
 
-Cola inmediata:
+Contrato minimo diferido para ABAC antes de cualquier piloto real:
 
-- Auditar lecturas clinicas patient-scoped que aun devuelven PHI sin
-  `record_read_audit_event`.
-- Eliminar hard delete clinico en entradas y signos vitales, usando estados
-  `entered_in_error` o equivalente.
-- Completar allowlist de auditoria faltante en signos vitales.
-- Mantener ABAC/contexto asistencial como contrato diferido; no implementarlo
-  antes de cerrar trazabilidad y borrado logico.
+- Institucion o tenant clinico como frontera obligatoria.
+- Equipo/servicio tratante y relacion asistencial verificable.
+- Motivo de acceso cuando no exista relacion asistencial activa.
+- Break-glass auditado, justificado y revisable.
+- Sin implementacion decorativa: primero contrato, tests y politica de uso.
 
 Criterio de no-hacer:
 
@@ -137,13 +137,15 @@ CI agrega:
 - Produccion sanitaria: OneEpis no esta listo para uso clinico real ni software
   certificado.
 - Seguridad: faltan secretos formales, cifrado, backups/restore, retencion,
-  control contextual por institucion/equipo y observabilidad productiva
-  PHI-safe formal.
+  control contextual por institucion/equipo/relacion asistencial y
+  observabilidad productiva PHI-safe formal.
 - Identidad: auth local sirve para desarrollo; usuarios persistentes, sesiones
   productivas, revocacion y recuperacion institucional siguen pendientes.
-- Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro.
-- Auditoria: las escrituras recientes usan minimizacion creciente, pero faltan
-  read-audit completo y borrado logico en algunas superficies clinicas.
+- Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro y debe
+  incluir motivo de acceso y break-glass auditado antes de piloto real.
+- Auditoria: read-audit y borrado logico ya cubren las superficies P1
+  principales, pero falta politica medico-legal completa de retencion,
+  exportacion, revision e inmutabilidad formal.
 - IA externa: bloqueada hasta gateway PHI, anonimizacion, autorizacion, auditoria
   y politica explicita.
 - Legal clinico: firma, receta valida, orden ejecutable, MAR, consentimientos y
