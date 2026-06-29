@@ -212,6 +212,144 @@ def test_derived_clinical_event_requires_source_ref(
     assert "source_ref is required" in response.json()["detail"]
 
 
+def test_curated_antecedent_event_is_validated_and_audited(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    auth["X-OneEpis-Correlation-ID"] = "dev-132-antecedent-validation"
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Antecedente",
+            "last_name": "Curado",
+            "birth_date": "1984-02-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+
+    response = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Diagnostico historico confirmado por ficha previa",
+            "payload": {
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica",
+                    "limit": "Fecha exacta pendiente de confirmacion humana.",
+                },
+            },
+        },
+    )
+
+    assert response.status_code == 201
+    event = response.json()
+    assert event["payload"]["antecedent"]["category"] == "diagnostico_historico"
+    audit_response = client.get(
+        f"/api/v1/patients/{patient['id']}/audit-events",
+        headers=auth,
+    )
+    audit_events = audit_response.json()
+    event_audit = next(item for item in audit_events if item["entity_id"] == event["id"])
+    assert event_audit["action"] == "clinical_event.created"
+    assert event_audit["actor_id"] == "medico@oneepis.local"
+    assert event_audit["correlation_id"] == "dev-132-antecedent-validation"
+    assert event_audit["extra_data"]["patient_id"] == patient["id"]
+
+
+def test_curated_antecedent_event_rejects_invalid_payload(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Antecedente",
+            "last_name": "Invalido",
+            "birth_date": "1984-02-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+
+    invalid_category = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Antecedente con categoria invalida",
+            "payload": {
+                "antecedent": {
+                    "category": "riesgo_clinico",
+                    "source_label": "Historia clinica",
+                    "limit": "No usar como riesgo estructurado.",
+                },
+            },
+        },
+    )
+    missing_limit = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Antecedente sin limite",
+            "payload": {
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica",
+                },
+            },
+        },
+    )
+
+    assert invalid_category.status_code == 422
+    assert "category is not allowed" in invalid_category.json()["detail"]
+    assert missing_limit.status_code == 422
+    assert "requires category, source_label and limit" in missing_limit.json()["detail"]
+
+
+def test_curated_antecedent_update_rejects_invalid_payload(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient = client.post(
+        "/api/v1/patients",
+        headers=auth,
+        json={
+            "first_name": "Antecedente",
+            "last_name": "Actualizado",
+            "birth_date": "1984-02-01",
+            "sex_at_birth": "unknown",
+        },
+    ).json()
+    event = client.post(
+        f"/api/v1/patients/{patient['id']}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-22T10:05:00Z",
+            "summary": "Evento por curar",
+        },
+    ).json()
+
+    response = client.patch(
+        f"/api/v1/patients/{patient['id']}/clinical-events/{event['id']}",
+        headers=auth,
+        json={"payload": {"antecedent": "diagnostico_historico"}},
+    )
+
+    assert response.status_code == 422
+    assert "payload.antecedent must be an object" in response.json()["detail"]
+
+
 def test_derived_clinical_event_cannot_clear_source_ref(
     client: TestClient,
     auth_headers,
