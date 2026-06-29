@@ -23,7 +23,7 @@ def list_patient_audit_events(
     patient_id: uuid.UUID,
     session: SessionDep,
     limit: LimitQuery = 50,
-) -> list[AuditEvent]:
+) -> list[AuditEventPublicRead]:
     require_patient(session, patient_id)
     patient_id_text = str(patient_id)
     statement = (
@@ -37,4 +37,4 @@ def list_patient_audit_events(
         .order_by(AuditEvent.created_at.desc())
         .limit(limit)
     )
-    return list(session.scalars(statement))
+    return [AuditEventPublicRead.model_validate(event) for event in session.scalars(statement)]
