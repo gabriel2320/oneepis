@@ -201,7 +201,7 @@ def _historical_diagnosis_items(
             occurred_at=diagnosis.occurred_at,
             label=diagnosis.title,
             summary=_historical_diagnosis_summary(diagnosis),
-            source_label="historical_diagnoses",
+            source_label=diagnosis.source_label,
             source_path=clinical_event_source_path(patient_id, diagnosis.source_event_id),
         )
         for diagnosis in diagnoses

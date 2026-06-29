@@ -210,8 +210,13 @@ function TimelineItemList({
           <p className="mt-2 text-sm text-muted-foreground">{item.summary}</p>
           <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
             <p>Fuente: {item.source_label}</p>
-            <p className="break-all">Ruta: {item.source_path}</p>
-            <p>Tipo clinico: {TYPE_LABELS[item.item_type]}</p>
+            <p>Tipo clinico: {timelineTypeLabel(item)}</p>
+            <details>
+              <summary className="cursor-pointer font-medium text-foreground">
+                Detalle tecnico
+              </summary>
+              <p className="mt-1 break-all">Ruta: {item.source_path}</p>
+            </details>
           </div>
         </article>
       ))}
@@ -255,4 +260,11 @@ function filterLabel(filter: TimelineFilter) {
     return "todo";
   }
   return TYPE_LABELS[filter];
+}
+
+function timelineTypeLabel(item: AssistantTimelineItem) {
+  if (item.item_type === "clinical_event" && item.source_label !== "clinical_events") {
+    return "Diagnostico historico";
+  }
+  return TYPE_LABELS[item.item_type];
 }

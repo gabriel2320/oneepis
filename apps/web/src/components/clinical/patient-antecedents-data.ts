@@ -101,9 +101,12 @@ export function buildAntecedentItems(
       id: `historical-diagnosis-${diagnosis.source_event_id}`,
       label: diagnosis.title,
       detail: diagnosis.limit,
-      context: diagnosis.code
-        ? `${diagnosis.code_system ?? "Codigo"}: ${diagnosis.code}`
-        : `Fuente: ${diagnosis.source_label}.`,
+      context: [
+        `Fuente: ${diagnosis.source_label}.`,
+        diagnosis.code ? `${diagnosis.code_system ?? "Codigo"}: ${diagnosis.code}.` : null,
+      ]
+        .filter(Boolean)
+        .join(" "),
       category: "diagnostico_historico",
       source: "diagnosticos" as const,
       href: `/pacientes/${patientId}/eventos`,
