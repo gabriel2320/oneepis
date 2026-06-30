@@ -14,6 +14,14 @@ from oneepis_api.services.audit import (
 )
 from oneepis_api.services.phi_logging import configure_phi_safe_logging
 
+UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS = (
+    "X-OneEpis-Break-Glass",
+    "X-OneEpis-Access-Reason",
+    "X-OneEpis-Institution",
+    "X-OneEpis-Tenant",
+    "X-OneEpis-Care-Team",
+)
+
 
 def create_app() -> FastAPI:
     configure_phi_safe_logging()
@@ -32,10 +40,10 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
-    async def break_glass_guard_middleware(request: Request, call_next):
-        if _uses_break_glass_header(request):
+    async def contextual_access_guard_middleware(request: Request, call_next):
+        if _uses_unsupported_contextual_access_header(request):
             return JSONResponse(
-                {"detail": "Break-glass access is not enabled."},
+                {"detail": "Contextual access override is not enabled."},
                 status_code=403,
             )
         return await call_next(request)
@@ -96,7 +104,7 @@ def _requires_csrf(request: Request, settings: Settings) -> bool:
     return settings.auth_session_cookie_name in request.cookies
 
 
-def _uses_break_glass_header(request: Request) -> bool:
+def _uses_unsupported_contextual_access_header(request: Request) -> bool:
     if not request.url.path.startswith(
         (
             "/api/v1/patients",
@@ -107,7 +115,7 @@ def _uses_break_glass_header(request: Request) -> bool:
         )
     ):
         return False
-    return bool(request.headers.get("X-OneEpis-Break-Glass"))
+    return any(request.headers.get(header) for header in UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS)
 
 
 app = create_app()
