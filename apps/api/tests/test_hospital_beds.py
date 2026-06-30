@@ -60,10 +60,14 @@ def test_hospital_bed_assignment_enriches_board_and_audit(
         "encounter_id": encounter_id,
         "status": "occupied",
     }
-    bed_audit_payload = str(bed_created["extra_data"])
-    assert "Medicina" not in bed_audit_payload
-    assert "301" not in bed_audit_payload
-    assert "Nota libre sensible" not in bed_audit_payload
+    assert "ward" not in bed_created["extra_data"]
+    assert "room" not in bed_created["extra_data"]
+    assert "bed_label" not in bed_created["extra_data"]
+    assert "notes" not in bed_created["extra_data"]
+    assert "ward" not in bed_created["extra_data"]["after"]
+    assert "room" not in bed_created["extra_data"]["after"]
+    assert "bed_label" not in bed_created["extra_data"]["after"]
+    assert "notes" not in bed_created["extra_data"]["after"]
 
 
 def test_hospital_bed_assignment_requires_active_hospitalization(

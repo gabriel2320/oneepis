@@ -85,3 +85,17 @@ Referencias oficiales:
 - Privacy & Safety Gateway antes de IA externa.
 - RAG gobernado solo despues de permisos, corpus aprobado y trazabilidad de fuente.
 - Embeddings solo cuando exista un flujo documental auditado.
+
+## IA externa
+
+La IA externa sigue bloqueada. El contrato ejecutable vive en
+`apps/api/src/oneepis_api/core/external_ai_contract.py`.
+
+Antes de habilitar cualquier proveedor externo se requiere:
+
+- gateway de privacidad PHI;
+- desidentificacion o minimizacion por caso de uso;
+- allowlist de proveedores aprobados;
+- opt-in humano explicito;
+- auditoria por solicitud externa;
+- revision legal, seguridad y gobernanza clinica.
