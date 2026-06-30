@@ -33,6 +33,7 @@ def test_hospital_bed_assignment_enriches_board_and_audit(
             "bed_label": "A",
             "status": "occupied",
             "encounter_id": encounter_id,
+            "notes": "Nota libre sensible de cama",
         },
     )
     assert bed_response.status_code == 201
@@ -49,11 +50,20 @@ def test_hospital_bed_assignment_enriches_board_and_audit(
     assert board_payload[0]["bed"]["id"] == bed_payload["id"]
     assert board_payload[0]["bed"]["room"] == "301"
 
-    assert any(
-        event["action"] == "hospital_bed.created"
-        and event["extra_data"]["encounter_id"] == encounter_id
+    bed_created = next(
+        event
         for event in audit_events_for_patient(patient_id)
+        if event["action"] == "hospital_bed.created"
     )
+    assert bed_created["extra_data"]["encounter_id"] == encounter_id
+    assert bed_created["extra_data"]["after"] == {
+        "encounter_id": encounter_id,
+        "status": "occupied",
+    }
+    bed_audit_payload = str(bed_created["extra_data"])
+    assert "Medicina" not in bed_audit_payload
+    assert "301" not in bed_audit_payload
+    assert "Nota libre sensible" not in bed_audit_payload
 
 
 def test_hospital_bed_assignment_requires_active_hospitalization(
@@ -186,17 +196,28 @@ def test_hospital_bed_can_be_assigned_released_and_reassigned(
     release_response = client.patch(
         f"/api/v1/hospitalization/beds/{bed_id}",
         headers=auth,
-        json={"status": "available", "encounter_id": None},
+        json={
+            "status": "available",
+            "encounter_id": None,
+            "notes": "Nota libre sensible de liberacion",
+        },
     )
     assert release_response.status_code == 200
     assert release_response.json()["encounter_id"] is None
 
-    assert any(
-        event["action"] == "hospital_bed.updated"
-        and event["extra_data"]["encounter_id"] == first_encounter_id
-        and event["extra_data"]["after"]["encounter_id"] is None
+    bed_release_audit = next(
+        event
         for event in audit_events_for_patient(first_patient_id)
+        if event["action"] == "hospital_bed.updated"
+        and event["extra_data"]["encounter_id"] == first_encounter_id
+        and event["extra_data"]["after"].get("encounter_id") is None
     )
+    assert bed_release_audit["extra_data"]["fields"] == ["encounter_id", "notes", "status"]
+    assert bed_release_audit["extra_data"]["after"] == {
+        "encounter_id": None,
+        "status": "available",
+    }
+    assert "Nota libre sensible" not in str(bed_release_audit["extra_data"])
 
     reassignment_response = client.patch(
         f"/api/v1/hospitalization/beds/{bed_id}",
