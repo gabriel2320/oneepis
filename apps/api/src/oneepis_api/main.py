@@ -8,9 +8,11 @@ from starlette.responses import JSONResponse
 from oneepis_api.api.v1.router import api_router
 from oneepis_api.core.clinical_access import PROTECTED_CLINICAL_ROUTE_PREFIXES
 from oneepis_api.core.config import Settings, get_settings
+from oneepis_api.db.session import get_session
 from oneepis_api.services.audit import (
     AuditRequestContext,
     clear_audit_request_context,
+    record_audit_event,
     set_audit_request_context,
 )
 from oneepis_api.services.phi_logging import configure_phi_safe_logging
@@ -42,7 +44,9 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def contextual_access_guard_middleware(request: Request, call_next):
-        if _uses_unsupported_contextual_access_header(request):
+        blocked_headers = _unsupported_contextual_access_headers(request)
+        if blocked_headers:
+            _record_contextual_access_header_block(request, blocked_headers)
             return JSONResponse(
                 {"detail": "Contextual access override is not enabled."},
                 status_code=403,
@@ -105,10 +109,36 @@ def _requires_csrf(request: Request, settings: Settings) -> bool:
     return settings.auth_session_cookie_name in request.cookies
 
 
-def _uses_unsupported_contextual_access_header(request: Request) -> bool:
+def _unsupported_contextual_access_headers(request: Request) -> tuple[str, ...]:
     if not request.url.path.startswith(PROTECTED_CLINICAL_ROUTE_PREFIXES):
-        return False
-    return any(request.headers.get(header) for header in UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS)
+        return ()
+    return tuple(
+        header for header in UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS if request.headers.get(header)
+    )
+
+
+def _record_contextual_access_header_block(
+    request: Request,
+    blocked_headers: tuple[str, ...],
+) -> None:
+    session_provider = request.app.dependency_overrides.get(get_session, get_session)
+    session_iterator = session_provider()
+    session = next(session_iterator)
+    try:
+        record_audit_event(
+            session,
+            action="security.contextual_access_header_blocked",
+            entity_type="security",
+            entity_id=None,
+            actor_id="system",
+            metadata={
+                "blocked_headers": sorted(blocked_headers),
+                "header_count": len(blocked_headers),
+            },
+        )
+        session.commit()
+    finally:
+        session_iterator.close()
 
 
 app = create_app()
