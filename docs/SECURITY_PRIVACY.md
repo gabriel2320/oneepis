@@ -92,6 +92,22 @@ Si `ONEEPIS_ENVIRONMENT` no es `development`, la API rechaza el arranque con:
 - `ONEEPIS_AUTH_ALLOW_DEV_ACTOR_HEADER=true`
 - `ONEEPIS_AUTH_ENABLED=false`
 
+## Auth Productiva
+
+La autenticacion local sigue orientada a desarrollo. El contrato ejecutable de
+auth productiva vive en
+`apps/api/src/oneepis_api/core/productive_auth_contract.py`.
+
+Antes de produccion sanitaria se requiere, como minimo:
+
+- proveedor institucional de identidad, por ejemplo OIDC, SAML o equivalente;
+- MFA o control de assurance equivalente para cuentas clinicas y privilegiadas;
+- usuarios y roles persistentes fuera de configuracion estatica;
+- ciclo de pertenencia institucional, equipo o servicio;
+- revocacion administrativa central de sesiones;
+- recuperacion institucional auditada;
+- auditoria minimizada de cambios de identidad, roles y recuperacion.
+
 ## IA Clínica
 
 La IA inicial solo puede:

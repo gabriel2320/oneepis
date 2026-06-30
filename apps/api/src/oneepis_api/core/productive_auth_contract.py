@@ -7,6 +7,7 @@ class ProductiveAuthRequirement:
     key: str
     label: str
     criterion: str
+    status: Literal["required_before_production"] = "required_before_production"
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,30 @@ PRODUCTIVE_AUTH_REQUIREMENTS: tuple[ProductiveAuthRequirement, ...] = (
         ),
     ),
     ProductiveAuthRequirement(
+        key="institutional_identity_provider",
+        label="Institutional identity provider",
+        criterion=(
+            "Production identity must be backed by an approved institutional "
+            "provider such as OIDC, SAML or equivalent managed identity."
+        ),
+    ),
+    ProductiveAuthRequirement(
+        key="multi_factor_authentication",
+        label="Multi-factor authentication",
+        criterion=(
+            "Privileged and clinical accounts must require MFA or an equivalent "
+            "institutional assurance control."
+        ),
+    ),
+    ProductiveAuthRequirement(
+        key="institution_membership_lifecycle",
+        label="Institution membership lifecycle",
+        criterion=(
+            "User access must track institution, care team or service membership "
+            "with join, change and termination lifecycle."
+        ),
+    ),
+    ProductiveAuthRequirement(
         key="admin_session_revocation",
         label="Administrative session revocation",
         criterion="Institutional admins must be able to revoke active sessions centrally.",
@@ -52,7 +77,27 @@ PRODUCTIVE_AUTH_REQUIREMENTS: tuple[ProductiveAuthRequirement, ...] = (
             "server-side invalidation."
         ),
     ),
+    ProductiveAuthRequirement(
+        key="identity_role_audit",
+        label="Identity and role audit",
+        criterion=(
+            "Identity changes, role assignments, role revocations and recovery "
+            "actions must emit minimized audit events."
+        ),
+    ),
 )
+
+
+PRODUCTIVE_AUTH_RUNTIME_STATUS = {
+    "institutional_identity_provider_enabled": False,
+    "mfa_enforced": False,
+    "persistent_user_store_enabled": False,
+    "persistent_role_store_enabled": False,
+    "reason": (
+        "Productive auth is an executable contract only; local auth remains "
+        "development-oriented."
+    ),
+}
 
 
 LOCAL_AUTH_DEVELOPMENT_LIMITS: tuple[LocalAuthDevelopmentLimit, ...] = (
