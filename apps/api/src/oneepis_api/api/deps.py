@@ -7,6 +7,12 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from oneepis_api.core.access_context_runtime import (
+    AccessContext,
+)
+from oneepis_api.core.access_context_runtime import (
+    build_access_context as build_runtime_access_context,
+)
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.services.auth import (
@@ -124,6 +130,18 @@ ACCESS_POLICIES: dict[str, AccessPolicy] = {
 }
 
 
+def build_access_context(user: AuthenticatedUser, request: Request) -> AccessContext:
+    return build_runtime_access_context(
+        user,
+        request,
+        abac_requirements=ABAC_MINIMUM_REQUIREMENTS,
+    )
+
+
+def get_access_context(user: CurrentUserDep, request: Request) -> AccessContext:
+    return build_access_context(user, request)
+
+
 def require_roles(*allowed_roles: UserRole) -> Callable[[AuthenticatedUser], AuthenticatedUser]:
     allowed = set(allowed_roles)
 
@@ -235,6 +253,7 @@ ClinicalRiskWriteAccessDep = Annotated[
     AuthenticatedUser,
     Depends(require_clinical_risk_write_access),
 ]
+AccessContextDep = Annotated[AccessContext, Depends(get_access_context)]
 
 
 def get_patient_write_actor(user: PatientWriteAccessDep) -> str:
