@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
-from oneepis_api.api.deps import AiAccessDep, PatientActorDep, PatientReadActorDep
+from oneepis_api.api.deps import AiAccessDep, PatientActorDep, PatientReadActorDep, ReadAccessDep
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.ai import PatientAiSuggestionRequest, PatientAiSuggestionsResponse
@@ -15,6 +15,7 @@ from oneepis_api.schemas.patient import (
     PatientUpdate,
 )
 from oneepis_api.services.access_context_audit import (
+    record_denied_patient_access_context_decision,
     record_passive_patient_access_context_decision,
 )
 from oneepis_api.services.ai.provider import get_ai_provider
@@ -24,7 +25,11 @@ from oneepis_api.services.audit import (
     record_audit_event,
     record_read_audit_event,
 )
+from oneepis_api.services.auth import UserRole
 from oneepis_api.services.historical_diagnoses import historical_diagnoses_from_events
+from oneepis_api.services.patient_access_relationship import (
+    resolve_patient_access_relationship_dry_run,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -146,13 +151,21 @@ def create_patient(
 def get_patient(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> Patient:
     patient = require_patient(session, patient_id)
+    _enforce_patient_scope_for_single_patient_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     _record_patient_read_audit(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="patient.read",
     )
     return patient
@@ -207,6 +220,43 @@ def get_patient_record(
         action="record.read",
     )
     return snapshot
+
+
+def _enforce_patient_scope_for_single_patient_read(
+    session: SessionDep,
+    *,
+    patient_id: uuid.UUID,
+    actor_id: str,
+    roles: frozenset[UserRole],
+    settings: SettingsDep,
+) -> None:
+    if not settings.abac_enforcement_enabled:
+        return
+    if roles.intersection({UserRole.ADMIN, UserRole.DEV}):
+        return
+
+    patient_scope = resolve_patient_access_relationship_dry_run(
+        session,
+        actor_id=actor_id,
+        patient_id=patient_id,
+    )
+    if patient_scope.resolved:
+        return
+
+    record_denied_patient_access_context_decision(
+        session,
+        patient_id=patient_id,
+        actor_id=actor_id,
+        denial_reasons=(
+            "missing_abac_requirement:active_care_relationship_or_access_reason",
+        ),
+        runtime_enforced=True,
+    )
+    session.commit()
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Patient access is outside the active care relationship.",
+    )
 
 
 @router.post("/{patient_id}/ai/suggestions", response_model=PatientAiSuggestionsResponse)
