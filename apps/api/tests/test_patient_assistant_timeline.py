@@ -968,5 +968,12 @@ def _assert_only_read_audit_added(
             "active_care_relationship_or_access_reason",
             "audited_break_glass",
         ],
+        "patient_scope": {
+            "status": "none",
+            "matched_care_team_count": 0,
+            "actor_active_care_team_count": 0,
+            "patient_active_care_team_count": 0,
+            "runtime_enforced": False,
+        },
         "metadata_retention": "requirement_keys_only",
     }

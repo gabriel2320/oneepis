@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     auth_recovery_window_seconds: int = 3600
     auth_notification_provider: Literal["disabled", "development_log"] = "disabled"
     auth_public_web_base_url: str = "http://localhost:3000"
+    abac_enforcement_enabled: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -82,6 +83,11 @@ class Settings(BaseSettings):
             errors.append("auth_enabled cannot be false outside development")
         if self.auth_notification_provider == "development_log":
             errors.append("auth_notification_provider=development_log is development-only")
+        if self.abac_enforcement_enabled:
+            errors.append(
+                "abac_enforcement_enabled cannot be true outside development until "
+                "runtime ABAC production gates are complete"
+            )
         if any(origin.strip() == "*" for origin in self.cors_origins):
             errors.append("cors_origins cannot include wildcard outside development")
         if not self.cors_origins:

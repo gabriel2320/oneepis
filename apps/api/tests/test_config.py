@@ -9,6 +9,7 @@ def test_development_allows_default_security_settings() -> None:
     settings = Settings()
 
     assert settings.environment == "development"
+    assert settings.abac_enforcement_enabled is False
 
 
 @pytest.mark.parametrize(
@@ -31,6 +32,11 @@ def test_development_allows_default_security_settings() -> None:
             "auth_secret": "prod-secret",
             "auth_local_users": f"admin@example.local|{hash_password('secret')}|Admin|admin",
             "auth_notification_provider": "development_log",
+        },
+        {
+            "auth_secret": "prod-secret",
+            "auth_local_users": f"admin@example.local|{hash_password('secret')}|Admin|admin",
+            "abac_enforcement_enabled": True,
         },
     ],
 )
