@@ -54,6 +54,13 @@ ACCESS_BOUNDARY_STORES: tuple[AccessBoundaryStore, ...] = (
         purpose="Actor-to-care-team membership store required before scoped PHI access.",
         runtime_enforcement="disabled",
     ),
+    AccessBoundaryStore(
+        key="break_glass_access_request",
+        model="BreakGlassAccessRequest",
+        table="break_glass_access_requests",
+        purpose="Disabled-by-default future store for audited exceptional PHI access.",
+        runtime_enforcement="disabled",
+    ),
 )
 
 
@@ -64,6 +71,7 @@ ACCESS_BOUNDARY_RUNTIME_STATUS = {
     "care_team_store_available": True,
     "patient_care_team_relationship_store_available": True,
     "actor_care_team_membership_store_available": True,
+    "break_glass_access_request_store_available": True,
     "patient_scoping_enabled": False,
     "abac_runtime_enforced": False,
     "reason": "Access boundary stores are model stubs only; no patient access scoping yet.",

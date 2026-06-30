@@ -158,6 +158,28 @@ class ActorCareTeamMembership(Base, IdMixin, TimestampMixin):
     care_team: Mapped[CareTeam] = relationship(back_populates="actor_memberships")
 
 
+class BreakGlassAccessRequest(Base, IdMixin, TimestampMixin):
+    __tablename__ = "break_glass_access_requests"
+
+    actor_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        index=True,
+    )
+    correlation_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    reason_code: Mapped[str] = mapped_column(String(80), nullable=False)
+    status: Mapped[AccessBoundaryStatus] = mapped_column(
+        Enum(
+            AccessBoundaryStatus,
+            values_callable=enum_values,
+            name="access_boundary_status",
+        ),
+        default=AccessBoundaryStatus.DRAFT,
+        nullable=False,
+    )
+    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
+
+
 class PatientCareTeamRelationship(Base, IdMixin, TimestampMixin):
     __tablename__ = "patient_care_team_relationships"
     __table_args__ = (
