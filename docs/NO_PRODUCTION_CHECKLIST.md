@@ -15,20 +15,20 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 
 ## Gates antes de produccion sanitaria
 
-| ID | Gate | Estado | Criterio minimo |
-| --- | --- | --- | --- |
-| NOPROD-SEC-001 | Gestion formal de secretos | pendiente | secretos fuera del repo, rotacion, owners y procedimiento de incidente |
-| NOPROD-SEC-002 | Cifrado en reposo | pendiente | politica de cifrado para base, backups y almacenamiento documental |
-| NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos |
-| NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental |
-| NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con actor, ruta, correlacion, dedupe y cobertura E2E real de filtros lectura/escritura |
-| NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo y guard frontend/CI bloquea `console.*` en `apps/web/src`; falta observabilidad productiva formal |
-| NOPROD-SEC-007 | Control de acceso contextual | pendiente | institucion/tenant, equipo o servicio tratante, relacion asistencial, motivo de acceso y break-glass auditado |
-| NOPROD-SEC-008 | Auth productiva | pendiente | usuarios persistentes, hash, sesiones robustas, recuperacion y revocacion |
-| NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones |
-| NOPROD-SEC-010 | Politica IA externa | bloqueada | gateway PHI, anonimizacion, autorizacion, auditoria y opt-in explicito |
-| NOPROD-SEC-011 | Firma/receta/orden ejecutable | bloqueada | contrato legal, permisos, folio, actor, fecha clinica y auditoria |
-| NOPROD-SEC-012 | Adjuntos y consentimientos | pendiente | almacenamiento seguro, virus scan, versionado, custodia y trazabilidad |
+| ID | Gate | Estado | Criterio minimo | Evidencia actual |
+| --- | --- | --- | --- | --- |
+| NOPROD-SEC-001 | Gestion formal de secretos | pendiente | secretos fuera del repo, rotacion, owners y procedimiento de incidente | `docs/SECURITY_PRIVACY.md`; CI `security-report` bloquea Gitleaks |
+| NOPROD-SEC-002 | Cifrado en reposo | pendiente | politica de cifrado para base, backups y almacenamiento documental | `docs/SECURITY_PRIVACY.md`; sin implementacion productiva |
+| NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos | `docs/CURRENT_STATE.md`; sin procedimiento probado |
+| NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental | `docs/AUDIT.md`; falta contrato de retencion ejecutable |
+| NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con actor, ruta, correlacion, dedupe y cobertura E2E real de filtros lectura/escritura | `apps/api/tests/test_patient_read_audit.py`; `apps/api/tests/test_patient_audit.py` |
+| NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo y guard frontend/CI bloquea `console.*` en `apps/web/src`; falta observabilidad productiva formal | `apps/api/tests/test_phi_logging.py`; `scripts/check-frontend-phi-logs.mjs` |
+| NOPROD-SEC-007 | Control de acceso contextual | pendiente | institucion/tenant, equipo o servicio tratante, relacion asistencial, motivo de acceso y break-glass auditado | `apps/api/src/oneepis_api/core/clinical_access.py`; `apps/api/tests/test_break_glass_guard.py`; `apps/api/tests/test_clinical_access_contract.py` |
+| NOPROD-SEC-008 | Auth productiva | pendiente | usuarios persistentes, hash, sesiones robustas, recuperacion y revocacion | `apps/api/src/oneepis_api/core/productive_auth_contract.py`; `apps/api/tests/test_auth_session_contract.py`; `apps/api/tests/test_productive_auth_contract.py` |
+| NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones | `docs/GOVERNANCE.md`; sin aprobacion operacional |
+| NOPROD-SEC-010 | Politica IA externa | bloqueada | gateway PHI, anonimizacion, autorizacion, auditoria y opt-in explicito | `docs/OLLAMA_AND_TOOLS.md`; `apps/api/tests/test_config.py` bloquea Ollama externo fuera de desarrollo |
+| NOPROD-SEC-011 | Firma/receta/orden ejecutable | bloqueada | contrato legal, permisos, folio, actor, fecha clinica y auditoria | `docs/GOVERNANCE.md`; `apps/api/tests/test_clinical_orders.py`; `apps/api/tests/test_patient_medication_catalog.py` |
+| NOPROD-SEC-012 | Adjuntos y consentimientos | pendiente | almacenamiento seguro, virus scan, versionado, custodia y trazabilidad | `docs/ROADMAP.md`; `docs/SCREEN_TREE.md`; sin almacenamiento documental productivo |
 
 ## Regla de uso
 
