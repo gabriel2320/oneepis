@@ -59,11 +59,21 @@ def test_appointments_are_persisted_listed_and_audited(
     events = audit_events_for_patient(patient_id)
     created_audit = next(item for item in events if item["action"] == "appointment.created")
     assert created_audit["entity_id"] == appointment["id"]
-    updated_audit = next(item for item in events if item["action"] == "appointment.updated")
-    assert updated_audit["extra_data"]["after"] == {
-        "notes": "Paciente en sala de espera.",
-        "status": "check_in",
+    assert created_audit["extra_data"]["after"] == {
+        "ends_at": "2026-06-24T09:30:00+00:00",
+        "patient_id": patient_id,
+        "starts_at": "2026-06-24T09:00:00+00:00",
+        "status": "scheduled",
     }
+    updated_audit = next(item for item in events if item["action"] == "appointment.updated")
+    assert updated_audit["extra_data"]["fields"] == ["notes", "status"]
+    assert updated_audit["extra_data"]["before"] == {"status": "scheduled"}
+    assert updated_audit["extra_data"]["after"] == {"status": "check_in"}
+    appointment_audit_payload = str([created_audit["extra_data"], updated_audit["extra_data"]])
+    assert "Control ambulatorio" not in appointment_audit_payload
+    assert "Box 1" not in appointment_audit_payload
+    assert "Equipo demo" not in appointment_audit_payload
+    assert "Paciente en sala" not in appointment_audit_payload
 
 
 def test_appointment_permissions_and_patient_ownership(

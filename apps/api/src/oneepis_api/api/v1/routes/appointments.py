@@ -30,6 +30,18 @@ router = APIRouter(tags=["appointments"], dependencies=[Depends(require_patient_
 DateFromQuery = Annotated[datetime | None, Query()]
 DateToQuery = Annotated[datetime | None, Query()]
 
+APPOINTMENT_AUDIT_FIELDS = [
+    "ends_at",
+    "patient_id",
+    "starts_at",
+    "status",
+]
+
+
+def appointment_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(APPOINTMENT_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
 
 @router.get("/appointments", response_model=list[ClinicalAppointmentRead])
 def list_appointments(
@@ -95,7 +107,7 @@ def create_patient_appointment(
         entity_id=appointment.id,
         actor_id=actor,
         metadata={"patient_id": str(patient_id), "status": appointment.status.value},
-        after=audit_snapshot(appointment),
+        after=audit_snapshot(appointment, APPOINTMENT_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(appointment)
@@ -146,12 +158,13 @@ def update_patient_appointment(
     if ends_at is not None and comparable_datetime(ends_at) <= comparable_datetime(starts_at):
         raise HTTPException(status_code=422, detail="ends_at must be after starts_at")
     update_fields = sorted(update_data.keys())
-    before = audit_snapshot(appointment, update_fields)
+    before = audit_snapshot(appointment, appointment_audit_fields(update_fields))
     fields = apply_update(appointment, payload)
+    audit_fields = appointment_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=appointment,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
