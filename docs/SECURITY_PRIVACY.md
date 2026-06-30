@@ -108,6 +108,21 @@ Antes de produccion sanitaria se requiere, como minimo:
 - recuperacion institucional auditada;
 - auditoria minimizada de cambios de identidad, roles y recuperacion.
 
+## Gobernanza Legal y Clinica
+
+La gobernanza legal/clinica productiva sigue pendiente. El contrato ejecutable
+vive en `apps/api/src/oneepis_api/core/clinical_governance_contract.py`.
+
+Antes de usar PHI real u operar en un flujo asistencial se requiere, como
+minimo:
+
+- responsable clinico nombrado;
+- revision legal de uso permitido, datos, retencion y jurisdiccion;
+- politica aprobada de usos permitidos y excluidos;
+- revision de seguridad clinica, puntos de confirmacion humana y limitaciones;
+- aprobacion operacional fechada con ambiente, alcance, riesgo residual y
+  camino de incidente/rollback.
+
 ## IA Clínica
 
 La IA inicial solo puede:
