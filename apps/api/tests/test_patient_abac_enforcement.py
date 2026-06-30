@@ -137,6 +137,127 @@ def test_get_patient_abac_enforcement_keeps_dev_breakout_explicit(
     assert response.json()["id"] == patient_id
 
 
+def test_get_patient_record_abac_enforcement_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.get(f"/api/v1/patients/{patient_id}/record", headers=auth)
+
+    assert response.status_code == 403
+    assert response.json() == {
+        "detail": "Patient access is outside the active care relationship."
+    }
+    events = audit_events_for_patient(patient_id)
+    denied_event = next(event for event in events if event["action"] == "access_context.denied")
+    assert denied_event["actor_id"] == "medico@oneepis.local"
+    assert denied_event["extra_data"] == {
+        "policy": "contextual_abac",
+        "runtime_enforced": True,
+        "reason_keys": ["active_care_relationship_or_access_reason"],
+        "metadata_retention": "requirement_keys_only",
+    }
+    actions = _event_actions(events)
+    assert "record.read" not in actions
+    assert "record.read_deduped" not in actions
+    assert "access_context.passive_decision" not in actions
+
+
+def test_get_patient_record_abac_enforcement_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    response = client.get(f"/api/v1/patients/{patient_id}/record", headers=auth)
+
+    assert response.status_code == 200
+    assert response.json()["patient"]["id"] == patient_id
+
+
+@pytest.mark.parametrize(
+    "boundary_status_kwarg",
+    [
+        "care_team_status",
+        "service_status",
+        "tenant_status",
+        "institution_status",
+    ],
+)
+def test_get_patient_record_abac_enforcement_denies_inactive_boundary_chain(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+    boundary_status_kwarg: str,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+        **{boundary_status_kwarg: AccessBoundaryStatus.RETIRED},
+    )
+    _enable_development_abac_enforcement()
+
+    response = client.get(f"/api/v1/patients/{patient_id}/record", headers=auth)
+
+    assert response.status_code == 403
+    events = audit_events_for_patient(patient_id)
+    actions = _event_actions(events)
+    assert "access_context.denied" in actions
+    assert "record.read" not in actions
+    assert "record.read_deduped" not in actions
+    assert "access_context.passive_decision" not in actions
+
+
+def test_get_patient_record_abac_enforcement_keeps_admin_breakout_explicit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    _enable_development_abac_enforcement()
+
+    response = client.get(f"/api/v1/patients/{patient_id}/record", headers=admin_auth)
+
+    assert response.status_code == 200
+    assert response.json()["patient"]["id"] == patient_id
+
+
+def test_get_patient_record_abac_enforcement_keeps_dev_breakout_explicit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    _enable_development_abac_enforcement(
+        auth_local_users=(
+            f"{DEFAULT_AUTH_LOCAL_USERS};"
+            "dev@oneepis.local|dev|Dev OneEpis|dev"
+        )
+    )
+    dev_auth = auth_headers(client, email="dev@oneepis.local", password="dev")
+
+    response = client.get(f"/api/v1/patients/{patient_id}/record", headers=dev_auth)
+
+    assert response.status_code == 200
+    assert response.json()["patient"]["id"] == patient_id
+
+
 def _enable_development_abac_enforcement(
     *,
     auth_local_users: str = DEFAULT_AUTH_LOCAL_USERS,
