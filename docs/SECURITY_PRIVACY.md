@@ -53,6 +53,20 @@ Antes de produccion sanitaria, al menos deben quedar cubiertos:
 - ownership, rotacion y procedimiento de incidente para llaves;
 - restore que preserve cifrado y fronteras de acceso.
 
+## Backups y Restore
+
+Backups y restore productivos siguen pendientes. El contrato ejecutable vive en
+`apps/api/src/oneepis_api/core/backup_restore_contract.py`.
+
+Antes de produccion sanitaria se requiere, como minimo:
+
+- agenda automatizada de backups con monitoreo;
+- RPO/RTO definidos y aprobados;
+- prueba de restore en entorno aislado;
+- backups cifrados y con acceso controlado;
+- custodia, retencion, borrado y legal hold documentados;
+- evidencia versionada y revisada de cada restore drill.
+
 ## Configuracion fuera de Desarrollo
 
 Si `ONEEPIS_ENVIRONMENT` no es `development`, la API rechaza el arranque con:
