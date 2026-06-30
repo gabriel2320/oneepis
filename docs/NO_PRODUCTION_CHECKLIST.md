@@ -28,7 +28,7 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 | NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones | `docs/GOVERNANCE.md`; sin aprobacion operacional |
 | NOPROD-SEC-010 | Politica IA externa | bloqueada | gateway PHI, anonimizacion, autorizacion, auditoria y opt-in explicito | `docs/OLLAMA_AND_TOOLS.md`; `apps/api/tests/test_config.py` bloquea Ollama externo fuera de desarrollo |
 | NOPROD-SEC-011 | Firma/receta/orden ejecutable | bloqueada | contrato legal, permisos, folio, actor, fecha clinica y auditoria | `docs/GOVERNANCE.md`; `apps/api/tests/test_clinical_orders.py`; `apps/api/tests/test_patient_medication_catalog.py` |
-| NOPROD-SEC-012 | Adjuntos y consentimientos | pendiente | almacenamiento seguro, virus scan, versionado, custodia y trazabilidad | `docs/ROADMAP.md`; `docs/SCREEN_TREE.md`; sin almacenamiento documental productivo |
+| NOPROD-SEC-012 | Adjuntos y consentimientos | pendiente | almacenamiento seguro, virus scan, versionado, custodia y trazabilidad | `docs/ROADMAP.md`; `docs/SCREEN_TREE.md`; `apps/api/src/oneepis_api/core/document_custody_contract.py`; `apps/api/tests/test_document_custody_contract.py` |
 
 ## Regla de uso
 
