@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 from oneepis_api.core.audit_retention_contract import (
+    AUDIT_EVENT_PURGE_GUARD_PATTERNS,
     AUDIT_EVENT_RETENTION_GUARD,
     AUDIT_RETENTION_REQUIREMENTS,
     audit_retention_requirement_keys,
@@ -39,22 +40,12 @@ def test_audit_event_retention_guard_is_bound_to_model_table() -> None:
 
 def test_audit_event_runtime_purge_is_not_implemented_without_contract() -> None:
     src_root = Path(__file__).parents[1] / "src" / "oneepis_api"
-    forbidden_patterns = (
-        re.compile(r"\bdelete\s*\(\s*AuditEvent\b", re.IGNORECASE),
-        re.compile(r"\bsession\.delete\s*\(\s*AuditEvent\b", re.IGNORECASE),
-        re.compile(r"\bdelete\s+from\s+audit_events\b", re.IGNORECASE),
-        re.compile(r"\btruncate\s+(?:table\s+)?audit_events\b", re.IGNORECASE),
-        re.compile(r"\bdrop\s+table\s+(?:if\s+exists\s+)?audit_events\b", re.IGNORECASE),
-        re.compile(
-            r"\bsession\.execute\s*\(\s*(?:text\s*\()?['\"][^'\"]*"
-            r"(?:delete\s+from|truncate(?:\s+table)?|drop\s+table)"
-            r"\s+audit_events\b",
-            re.IGNORECASE,
-        ),
-    )
+    forbidden_patterns = _compiled_purge_guard_patterns()
 
     matches: list[str] = []
     for path in src_root.rglob("*.py"):
+        if path.name == "audit_retention_contract.py":
+            continue
         text = path.read_text(encoding="utf-8")
         for pattern in forbidden_patterns:
             if pattern.search(text):
@@ -63,9 +54,36 @@ def test_audit_event_runtime_purge_is_not_implemented_without_contract() -> None
     assert matches == []
 
 
+def test_audit_event_runtime_purge_guard_blocks_model_derived_sql() -> None:
+    forbidden_patterns = _compiled_purge_guard_patterns()
+    unsafe_snippets = (
+        'session.execute(text(f"DELETE FROM {AuditEvent.__tablename__}"))',
+        'session.execute(text(f"TRUNCATE TABLE {AuditEvent.__tablename__}"))',
+        'session.execute(text(f"DROP TABLE IF EXISTS {AuditEvent.__tablename__}"))',
+        'session.execute(text("DELETE FROM " + AuditEvent.__tablename__))',
+        'session.execute(text("TRUNCATE TABLE " + AuditEvent.__tablename__))',
+        'session.execute(text("DROP TABLE IF EXISTS " + AuditEvent.__tablename__))',
+    )
+
+    misses = [
+        snippet
+        for snippet in unsafe_snippets
+        if not any(pattern.search(snippet) for pattern in forbidden_patterns)
+    ]
+
+    assert misses == []
+
+
 def test_audit_event_retention_guard_allows_read_queries() -> None:
     read_query = "session.execute(select(AuditEvent).where(AuditEvent.action == 'record.read'))"
 
     assert "AuditEvent" in read_query
     assert not re.search(r"\bdelete\s+from\s+audit_events\b", read_query, re.IGNORECASE)
     assert not re.search(r"\btruncate\s+(?:table\s+)?audit_events\b", read_query, re.IGNORECASE)
+    assert not any(pattern.search(read_query) for pattern in _compiled_purge_guard_patterns())
+
+
+def _compiled_purge_guard_patterns() -> tuple[re.Pattern[str], ...]:
+    return tuple(
+        re.compile(pattern, re.IGNORECASE) for pattern in AUDIT_EVENT_PURGE_GUARD_PATTERNS
+    )
