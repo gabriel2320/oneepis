@@ -19,6 +19,16 @@ class ContextualAccessHeaderContract:
     value_retention: Literal["never_store_header_value"]
 
 
+@dataclass(frozen=True)
+class AccessReasonContract:
+    key: str
+    label: str
+    status: Literal["future_review_required"]
+    free_text_retention: Literal["never_store_raw_reason_text"]
+    requires_patient_scope: bool
+    requires_review: bool
+
+
 ACCESS_CONTEXT_REQUIREMENTS: tuple[AccessContextRequirement, ...] = (
     AccessContextRequirement(
         key="institution_or_tenant",
@@ -49,6 +59,42 @@ ACCESS_CONTEXT_REQUIREMENTS: tuple[AccessContextRequirement, ...] = (
             "and review workflow."
         ),
         status="required_before_phi",
+    ),
+)
+
+
+ACCESS_REASON_CONTRACTS: tuple[AccessReasonContract, ...] = (
+    AccessReasonContract(
+        key="active_care_relationship",
+        label="Active care relationship",
+        status="future_review_required",
+        free_text_retention="never_store_raw_reason_text",
+        requires_patient_scope=True,
+        requires_review=False,
+    ),
+    AccessReasonContract(
+        key="temporary_coverage",
+        label="Temporary clinical coverage",
+        status="future_review_required",
+        free_text_retention="never_store_raw_reason_text",
+        requires_patient_scope=True,
+        requires_review=True,
+    ),
+    AccessReasonContract(
+        key="care_coordination",
+        label="Care coordination",
+        status="future_review_required",
+        free_text_retention="never_store_raw_reason_text",
+        requires_patient_scope=True,
+        requires_review=True,
+    ),
+    AccessReasonContract(
+        key="break_glass",
+        label="Break-glass exceptional access",
+        status="future_review_required",
+        free_text_retention="never_store_raw_reason_text",
+        requires_patient_scope=True,
+        requires_review=True,
     ),
 )
 
@@ -106,3 +152,16 @@ def access_context_requirement_keys() -> tuple[str, ...]:
 
 def contextual_access_header_names() -> tuple[str, ...]:
     return tuple(contract.header for contract in CONTEXTUAL_ACCESS_HEADER_CONTRACTS)
+
+
+def access_reason_keys() -> tuple[str, ...]:
+    return tuple(contract.key for contract in ACCESS_REASON_CONTRACTS)
+
+
+def access_reason_audit_metadata(reason_key: str) -> dict[str, object]:
+    known_reason_keys = set(access_reason_keys())
+    return {
+        "access_reason_key": reason_key if reason_key in known_reason_keys else "unknown",
+        "access_reason_known": reason_key in known_reason_keys,
+        "raw_reason_retained": False,
+    }

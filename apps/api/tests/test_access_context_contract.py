@@ -4,8 +4,11 @@ from oneepis_api.api.deps import ABAC_MINIMUM_REQUIREMENTS, AccessContext, build
 from oneepis_api.core.access_context_contract import (
     ACCESS_CONTEXT_REQUIREMENTS,
     ACCESS_CONTEXT_RUNTIME_STATUS,
+    ACCESS_REASON_CONTRACTS,
     CONTEXTUAL_ACCESS_HEADER_CONTRACTS,
     access_context_requirement_keys,
+    access_reason_audit_metadata,
+    access_reason_keys,
     contextual_access_header_names,
 )
 from oneepis_api.core.access_context_runtime import (
@@ -54,6 +57,44 @@ def test_access_context_contract_does_not_claim_runtime_abac() -> None:
         "reason": (
             "Contextual ABAC is an executable contract only; runtime enforcement is future work."
         ),
+    }
+
+
+def test_access_reason_contract_declares_future_reviewed_reason_keys() -> None:
+    assert access_reason_keys() == (
+        "active_care_relationship",
+        "temporary_coverage",
+        "care_coordination",
+        "break_glass",
+    )
+    assert {contract.status for contract in ACCESS_REASON_CONTRACTS} == {
+        "future_review_required"
+    }
+    assert {contract.free_text_retention for contract in ACCESS_REASON_CONTRACTS} == {
+        "never_store_raw_reason_text"
+    }
+    assert all(contract.requires_patient_scope for contract in ACCESS_REASON_CONTRACTS)
+    assert {
+        contract.key
+        for contract in ACCESS_REASON_CONTRACTS
+        if contract.requires_review
+    } == {
+        "temporary_coverage",
+        "care_coordination",
+        "break_glass",
+    }
+
+
+def test_access_reason_audit_metadata_retains_only_reason_key() -> None:
+    assert access_reason_audit_metadata("care_coordination") == {
+        "access_reason_key": "care_coordination",
+        "access_reason_known": True,
+        "raw_reason_retained": False,
+    }
+    assert access_reason_audit_metadata("texto libre con PHI no debe quedar") == {
+        "access_reason_key": "unknown",
+        "access_reason_known": False,
+        "raw_reason_retained": False,
     }
 
 
