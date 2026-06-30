@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from oneepis_api.core.audit_retention_contract import (
@@ -38,18 +39,33 @@ def test_audit_event_retention_guard_is_bound_to_model_table() -> None:
 
 def test_audit_event_runtime_purge_is_not_implemented_without_contract() -> None:
     src_root = Path(__file__).parents[1] / "src" / "oneepis_api"
-    forbidden_fragments = (
-        "delete(AuditEvent",
-        "session.delete(AuditEvent",
-        "truncate audit_events",
-        "drop table audit_events",
+    forbidden_patterns = (
+        re.compile(r"\bdelete\s*\(\s*AuditEvent\b", re.IGNORECASE),
+        re.compile(r"\bsession\.delete\s*\(\s*AuditEvent\b", re.IGNORECASE),
+        re.compile(r"\bdelete\s+from\s+audit_events\b", re.IGNORECASE),
+        re.compile(r"\btruncate\s+(?:table\s+)?audit_events\b", re.IGNORECASE),
+        re.compile(r"\bdrop\s+table\s+(?:if\s+exists\s+)?audit_events\b", re.IGNORECASE),
+        re.compile(
+            r"\bsession\.execute\s*\(\s*(?:text\s*\()?['\"][^'\"]*"
+            r"(?:delete\s+from|truncate(?:\s+table)?|drop\s+table)"
+            r"\s+audit_events\b",
+            re.IGNORECASE,
+        ),
     )
 
     matches: list[str] = []
     for path in src_root.rglob("*.py"):
-        text = path.read_text(encoding="utf-8").lower()
-        for fragment in forbidden_fragments:
-            if fragment.lower() in text:
-                matches.append(f"{path.relative_to(src_root)} contains {fragment}")
+        text = path.read_text(encoding="utf-8")
+        for pattern in forbidden_patterns:
+            if pattern.search(text):
+                matches.append(f"{path.relative_to(src_root)} matches {pattern.pattern}")
 
     assert matches == []
+
+
+def test_audit_event_retention_guard_allows_read_queries() -> None:
+    read_query = "session.execute(select(AuditEvent).where(AuditEvent.action == 'record.read'))"
+
+    assert "AuditEvent" in read_query
+    assert not re.search(r"\bdelete\s+from\s+audit_events\b", read_query, re.IGNORECASE)
+    assert not re.search(r"\btruncate\s+(?:table\s+)?audit_events\b", read_query, re.IGNORECASE)
