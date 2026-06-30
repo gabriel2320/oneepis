@@ -14,6 +14,7 @@ from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
 
 DIAGNOSTIC_REFERENCE_SOURCE_LABEL = "Referencias diagnosticas locales curadas"
 DIAGNOSTIC_REFERENCE_SOURCE_VERSION = "diagnostic-references-v1"
+REQUIRED_DIAGNOSTIC_CODE_SYSTEMS = {"SNOMED-GPS", "CIE-10", "CIE-11"}
 
 
 @dataclass(frozen=True)
@@ -36,7 +37,19 @@ class DiagnosticReference:
 @lru_cache(maxsize=1)
 def load_diagnostic_references() -> tuple[DiagnosticReference, ...]:
     artifact = _load_artifact()
-    return tuple(_reference_from_item(item) for item in artifact.get("items", []))
+    references = tuple(_reference_from_item(item) for item in artifact.get("items", []))
+    errors = _diagnostic_reference_catalog_errors(artifact, references)
+    if errors:
+        raise ValueError(
+            "Invalid diagnostic reference catalog: " + "; ".join(errors)
+        )
+    return references
+
+
+def diagnostic_reference_catalog_errors() -> tuple[str, ...]:
+    artifact = _load_artifact()
+    references = tuple(_reference_from_item(item) for item in artifact.get("items", []))
+    return _diagnostic_reference_catalog_errors(artifact, references)
 
 
 def search_diagnostic_references(query: str, *, limit: int = 5) -> list[DiagnosticReference]:
@@ -117,3 +130,63 @@ def _reference_from_item(item: dict[str, object]) -> DiagnosticReference:
 def _load_artifact() -> dict[str, object]:
     resource = resources.files("oneepis_api.data").joinpath("diagnostic_references.json")
     return json.loads(resource.read_text(encoding="utf-8"))
+
+
+def _diagnostic_reference_catalog_errors(
+    artifact: dict[str, object],
+    references: tuple[DiagnosticReference, ...],
+) -> tuple[str, ...]:
+    errors: list[str] = []
+    if artifact.get("source_label") != DIAGNOSTIC_REFERENCE_SOURCE_LABEL:
+        errors.append("source_label must match the curated local source label")
+    if artifact.get("source_version") != DIAGNOSTIC_REFERENCE_SOURCE_VERSION:
+        errors.append("source_version must match the versioned diagnostic artifact")
+    if not references:
+        errors.append("catalog must contain at least one diagnostic reference")
+
+    seen_ids: set[uuid.UUID] = set()
+    seen_terms: dict[str, str] = {}
+    for reference in references:
+        if reference.reference_id in seen_ids:
+            errors.append(f"{reference.title}: duplicate reference_id")
+        seen_ids.add(reference.reference_id)
+
+        terms = [reference.title, *reference.aliases]
+        if not reference.aliases:
+            errors.append(f"{reference.title}: at least one alias is required")
+        for term in terms:
+            normalized = normalize_diagnostic_text(term)
+            if not normalized:
+                errors.append(f"{reference.title}: empty searchable term")
+                continue
+            previous = seen_terms.get(normalized)
+            if previous and previous != reference.title:
+                errors.append(
+                    f"{reference.title}: searchable term '{normalized}' also used by {previous}"
+                )
+            seen_terms[normalized] = reference.title
+
+        systems = {code.system for code in reference.coding_references}
+        missing = REQUIRED_DIAGNOSTIC_CODE_SYSTEMS - systems
+        if missing:
+            errors.append(
+                f"{reference.title}: missing required code systems {sorted(missing)}"
+            )
+        primary_codes = [
+            code for code in reference.coding_references if code.primary
+        ]
+        if len(primary_codes) != 1:
+            errors.append(f"{reference.title}: exactly one primary code is required")
+        elif primary_codes[0].system != "SNOMED-GPS":
+            errors.append(f"{reference.title}: primary code must be SNOMED-GPS")
+
+        if not reference.reference_sources:
+            errors.append(f"{reference.title}: at least one source is required")
+        if "candidato diagnostico revisable" not in normalize_diagnostic_text(
+            reference.clinical_use_limit
+        ):
+            errors.append(
+                f"{reference.title}: clinical_use_limit must state review-only use"
+            )
+
+    return tuple(errors)

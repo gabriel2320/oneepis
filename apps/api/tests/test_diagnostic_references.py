@@ -1,7 +1,14 @@
 from fastapi.testclient import TestClient
 from patient_ai_helpers import create_entry, create_event, create_patient, create_vitals
 
-from oneepis_api.services.diagnostic_references import search_diagnostic_references
+from oneepis_api.services.diagnostic_references import (
+    diagnostic_reference_catalog_errors,
+    search_diagnostic_references,
+)
+
+
+def test_diagnostic_reference_catalog_integrity_gate() -> None:
+    assert diagnostic_reference_catalog_errors() == ()
 
 
 def test_diagnostic_reference_search_returns_curated_codes() -> None:
