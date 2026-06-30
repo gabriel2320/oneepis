@@ -14,6 +14,9 @@ from oneepis_api.schemas.patient import (
     PatientRecordSnapshot,
     PatientUpdate,
 )
+from oneepis_api.services.access_context_audit import (
+    record_passive_patient_access_context_decision,
+)
 from oneepis_api.services.ai.provider import get_ai_provider
 from oneepis_api.services.audit import (
     audit_snapshot,
@@ -79,6 +82,12 @@ def _record_patient_read_audit(
         entity_type="patient",
         entity_id=patient_id,
         actor_id=actor_id,
+    )
+    record_passive_patient_access_context_decision(
+        session,
+        patient_id=patient_id,
+        actor_id=actor_id,
+        source_action=action,
     )
     session.commit()
 
