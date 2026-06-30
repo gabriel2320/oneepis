@@ -25,8 +25,8 @@ from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
     validate_diagnosis_code_pair,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
-from oneepis_api.services.diagnosis_event_permissions import (
-    validate_diagnosis_event_write_access,
+from oneepis_api.services.clinical_event_permissions import (
+    validate_clinical_event_semantic_write_access,
 )
 
 from .patient_shared import (
@@ -180,7 +180,7 @@ def create_clinical_event(
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
-    validate_diagnosis_event_write_access(
+    validate_clinical_event_semantic_write_access(
         user=user,
         current_event_type=None,
         final_event_type=payload.event_type,
@@ -259,7 +259,7 @@ def update_clinical_event(
     )
     final_event_type = payload_data.get("event_type", event.event_type)
     final_payload = payload_data.get("payload", event.payload)
-    validate_diagnosis_event_write_access(
+    validate_clinical_event_semantic_write_access(
         user=user,
         current_event_type=event.event_type,
         final_event_type=final_event_type,

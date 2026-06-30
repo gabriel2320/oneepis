@@ -305,3 +305,84 @@ def test_nursing_cannot_create_or_convert_diagnosis_events(
     assert convert_to_diagnosis.status_code == 403
     assert attach_historical_payload.status_code == 403
     assert allowed_diagnosis.status_code == 201
+
+
+def test_nursing_cannot_write_curated_procedure_or_longitudinal_plan_events(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+
+    nursing_note = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=nursing_auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:00:00Z",
+            "summary": "Nota contextual de enfermeria",
+        },
+    )
+    nursing_procedure = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=nursing_auth,
+        json={
+            "event_type": "procedure",
+            "occurred_at": "2026-06-20T12:05:00Z",
+            "summary": "Procedimiento curado no autorizado",
+            "payload": {
+                "antecedent": {
+                    "category": "procedimiento",
+                    "source_label": "Historia quirurgica",
+                    "limit": "No equivale a indicacion ejecutable.",
+                },
+            },
+        },
+    )
+    nursing_plan_payload = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{nursing_note.json()['id']}",
+        headers=nursing_auth,
+        json={
+            "event_type": "care_plan",
+            "payload": {
+                "antecedent": {
+                    "category": "plan_longitudinal",
+                    "source_label": "Plan historico",
+                    "limit": "Debe ser curado por rol medico.",
+                },
+            },
+        },
+    )
+    allowed_procedure = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "procedure",
+            "occurred_at": "2026-06-20T12:10:00Z",
+            "summary": "Procedimiento curado por medico",
+            "payload": {
+                "antecedent": {
+                    "category": "procedimiento",
+                    "source_label": "Historia quirurgica",
+                    "limit": "No equivale a indicacion ejecutable.",
+                },
+            },
+        },
+    )
+    nursing_update_procedure = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{allowed_procedure.json()['id']}",
+        headers=nursing_auth,
+        json={"summary": "Intento de editar procedimiento"},
+    )
+
+    assert nursing_note.status_code == 201
+    assert nursing_procedure.status_code == 403
+    assert nursing_plan_payload.status_code == 403
+    assert allowed_procedure.status_code == 201
+    assert nursing_update_procedure.status_code == 403
