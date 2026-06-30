@@ -7,20 +7,26 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import EncounterActorDep, require_patient_read_access
+from oneepis_api.api.deps import EncounterActorDep, PatientReadActorDep, require_patient_read_access
 from oneepis_api.models.clinical_record import ClinicalAppointment
 from oneepis_api.schemas.clinical_record import (
     ClinicalAppointmentCreate,
     ClinicalAppointmentRead,
     ClinicalAppointmentUpdate,
 )
-from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.audit import (
+    audit_snapshot,
+    changed_field_snapshots,
+    record_audit_event,
+    record_read_audit_event,
+)
 
 from .patient_shared import (
     LimitQuery,
     OffsetQuery,
     SessionDep,
     apply_update,
+    record_patient_scoped_read,
     require_patient,
     require_patient_child,
 )
@@ -46,6 +52,7 @@ def appointment_audit_fields(fields: list[str]) -> list[str]:
 @router.get("/appointments", response_model=list[ClinicalAppointmentRead])
 def list_appointments(
     session: SessionDep,
+    actor: PatientReadActorDep,
     date_from: DateFromQuery = None,
     date_to: DateToQuery = None,
     limit: LimitQuery = 100,
@@ -57,7 +64,23 @@ def list_appointments(
     if date_to is not None:
         statement = statement.where(ClinicalAppointment.starts_at < date_to)
     statement = statement.order_by(ClinicalAppointment.starts_at.asc()).offset(offset).limit(limit)
-    return list(session.scalars(statement))
+    appointments = list(session.scalars(statement))
+    record_read_audit_event(
+        session,
+        action="appointments_index.read",
+        entity_type="appointment_index",
+        entity_id=None,
+        actor_id=actor,
+        metadata={
+            "date_from_present": date_from is not None,
+            "date_to_present": date_to is not None,
+            "limit": limit,
+            "offset": offset,
+            "result_count": len(appointments),
+        },
+    )
+    session.commit()
+    return appointments
 
 
 @router.get(
@@ -67,6 +90,7 @@ def list_appointments(
 def list_patient_appointments(
     patient_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalAppointment]:
@@ -78,7 +102,14 @@ def list_patient_appointments(
         .offset(offset)
         .limit(limit)
     )
-    return list(session.scalars(statement))
+    appointments = list(session.scalars(statement))
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="appointments.read",
+    )
+    return appointments
 
 
 @router.post(
@@ -122,15 +153,23 @@ def get_patient_appointment(
     patient_id: uuid.UUID,
     appointment_id: uuid.UUID,
     session: SessionDep,
+    actor: PatientReadActorDep,
 ) -> ClinicalAppointment:
     require_patient(session, patient_id)
-    return require_patient_child(
+    appointment = require_patient_child(
         session,
         ClinicalAppointment,
         appointment_id,
         patient_id,
         "Appointment not found",
     )
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        action="appointment.read",
+    )
+    return appointment
 
 
 @router.patch(
