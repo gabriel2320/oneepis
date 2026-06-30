@@ -91,6 +91,27 @@ estado no ejecutable.
 5. Actualizar docs solo si cambia comportamiento o decision.
 6. Entregar resumen, pruebas y riesgos.
 
+## Handoff 2026-06-30
+
+Estado al cierre:
+
+- `main` sincronizado con `origin/main`.
+- Sin PRs abiertos y sin ramas `codex/*` o `fix/*` pendientes.
+- Ultimos PRs cerrados: #236 cadena activa ABAC, #237 guard recursivo de razones,
+  #238 contrato de motivo de acceso, #239 cobertura `GET patient`, #240
+  enforcement dev-only de `/record`, #241 reporte agregado ABAC.
+
+Retomar manana con PRs pequenos, en este orden:
+
+1. Formalizar politica `admin/dev` de desarrollo: `dev` no existe en produccion;
+   admin tecnico no equivale a acceso PHI productivo.
+2. Preparar contrato de break-glass review sin runtime: reason codes, expiracion,
+   MFA futura, revision posterior y auditoria high severity.
+3. Elegir la siguiente familia patient-scoped para ABAC dev-only solo despues de
+   revisar eventos agregados: appointments patient-scoped o medications/allergies/problems.
+4. Mantener fuera de alcance PHI real, piloto clinico, receta/firma/MAR,
+   adjuntos productivos, consentimientos productivos, IA externa y dashboards.
+
 ## Criterio De Producto
 
 OneEpis debe sentirse como mesa clinica viva:

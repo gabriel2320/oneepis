@@ -55,9 +55,10 @@ Evidencia actual de avance sin habilitacion productiva:
   relacion paciente-equipo, membresia actor-equipo y solicitud break-glass.
 - Existe resolvedor dry-run de relacion paciente/actor por equipos activos, con
   metadata minimizada para `AccessContext`.
-- Existe enforcement dev-only para `GET /api/v1/patients/{patient_id}` detras de
+- Existe enforcement dev-only para `GET /api/v1/patients/{patient_id}` y
+  `GET /api/v1/patients/{patient_id}/record` detras de
   `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`, con auditoria `access_context.denied`
-  minimizada en denegaciones.
+  minimizada en denegaciones y reporte agregado interno de observabilidad ABAC.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
