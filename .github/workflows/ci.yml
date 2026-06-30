@@ -76,20 +76,6 @@ jobs:
 
   postgres-alembic:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: oneepis
-          POSTGRES_USER: oneepis
-          POSTGRES_PASSWORD: oneepis
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U oneepis -d oneepis"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     env:
       ONEEPIS_DATABASE_URL: postgresql+psycopg://oneepis:oneepis@localhost:5432/oneepis
     steps:
@@ -106,6 +92,23 @@ jobs:
       - run: npm run check:toolchain
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e "apps/api[dev]"
+      - name: Prepare local PostgreSQL database
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql postgresql-client
+          fi
+
+          sudo systemctl start postgresql.service || sudo service postgresql start
+
+          sudo -u postgres psql --set ON_ERROR_STOP=1 <<'SQL'
+          DROP DATABASE IF EXISTS oneepis;
+          DROP ROLE IF EXISTS oneepis;
+          CREATE ROLE oneepis WITH LOGIN PASSWORD 'oneepis';
+          CREATE DATABASE oneepis OWNER oneepis;
+          SQL
+
+          PGPASSWORD=oneepis pg_isready -h localhost -p 5432 -U oneepis -d oneepis
       - name: Alembic upgrade head from empty PostgreSQL
         run: python -m alembic -c apps/api/alembic.ini upgrade head
       - name: Alembic downgrade/upgrade smoke
