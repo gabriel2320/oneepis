@@ -204,13 +204,21 @@ def update_patient(
 def get_patient_record(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> PatientRecordSnapshot:
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     snapshot = _build_patient_record_snapshot(session, patient_id)
     _record_patient_read_audit(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="record.read",
     )
     return snapshot
