@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal
 
 from starlette.requests import Request
@@ -8,6 +8,14 @@ from oneepis_api.core.access_context_contract import (
     contextual_access_header_names,
 )
 from oneepis_api.services.auth import AuthenticatedUser
+
+PATIENT_SCOPE_DRY_RUN_METADATA_KEYS = (
+    "status",
+    "matched_care_team_count",
+    "actor_active_care_team_count",
+    "patient_active_care_team_count",
+    "runtime_enforced",
+)
 
 
 @dataclass(frozen=True)
@@ -25,6 +33,7 @@ class AccessContext:
     runtime_abac_enforced: bool = False
     contextual_headers_accepted: bool = False
     break_glass_enabled: bool = False
+    patient_scope_dry_run_metadata: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -56,6 +65,16 @@ def build_access_context(
         contextual_headers_accepted=ACCESS_CONTEXT_RUNTIME_STATUS["contextual_headers_accepted"],
         break_glass_enabled=ACCESS_CONTEXT_RUNTIME_STATUS["break_glass_enabled"],
     )
+
+
+def attach_patient_scope_dry_run_metadata(
+    context: AccessContext,
+    metadata: dict[str, object],
+) -> AccessContext:
+    minimized_metadata = {
+        key: metadata[key] for key in PATIENT_SCOPE_DRY_RUN_METADATA_KEYS if key in metadata
+    }
+    return replace(context, patient_scope_dry_run_metadata=minimized_metadata)
 
 
 def evaluate_access_context(context: AccessContext) -> AccessContextDecision:

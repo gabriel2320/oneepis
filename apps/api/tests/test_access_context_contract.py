@@ -8,7 +8,11 @@ from oneepis_api.core.access_context_contract import (
     access_context_requirement_keys,
     contextual_access_header_names,
 )
-from oneepis_api.core.access_context_runtime import evaluate_access_context
+from oneepis_api.core.access_context_runtime import (
+    PATIENT_SCOPE_DRY_RUN_METADATA_KEYS,
+    attach_patient_scope_dry_run_metadata,
+    evaluate_access_context,
+)
 from oneepis_api.main import UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS
 from oneepis_api.services.auth import AuthenticatedUser, UserRole
 
@@ -147,6 +151,67 @@ def test_access_context_denial_contract_does_not_retain_header_values() -> None:
         f"missing_abac_requirement:{requirement}"
         for requirement in ABAC_MINIMUM_REQUIREMENTS
     )
+
+
+def test_access_context_can_carry_minimized_patient_scope_dry_run_metadata() -> None:
+    user = AuthenticatedUser(
+        email="medico@oneepis.local",
+        name="Medico OneEpis",
+        roles=frozenset({UserRole.MEDICO}),
+        actor_id="medico@oneepis.local",
+    )
+    context = build_access_context(user, _request_with_headers(()))
+
+    enriched_context = attach_patient_scope_dry_run_metadata(
+        context,
+        {
+            "status": "resolved",
+            "matched_care_team_count": 1,
+            "actor_active_care_team_count": 2,
+            "patient_active_care_team_count": 1,
+            "runtime_enforced": False,
+        },
+    )
+
+    assert enriched_context.patient_scope_dry_run_metadata == {
+        "status": "resolved",
+        "matched_care_team_count": 1,
+        "actor_active_care_team_count": 2,
+        "patient_active_care_team_count": 1,
+        "runtime_enforced": False,
+    }
+    assert tuple(enriched_context.patient_scope_dry_run_metadata) == (
+        PATIENT_SCOPE_DRY_RUN_METADATA_KEYS
+    )
+    assert enriched_context.runtime_abac_enforced is False
+    assert enriched_context.missing_abac_requirements == ABAC_MINIMUM_REQUIREMENTS
+
+
+def test_access_context_patient_scope_dry_run_metadata_filters_identifiers() -> None:
+    user = AuthenticatedUser(
+        email="medico@oneepis.local",
+        name="Medico OneEpis",
+        roles=frozenset({UserRole.MEDICO}),
+        actor_id="medico@oneepis.local",
+    )
+    context = build_access_context(user, _request_with_headers(()))
+
+    enriched_context = attach_patient_scope_dry_run_metadata(
+        context,
+        {
+            "status": "resolved",
+            "matched_care_team_count": 1,
+            "patient_id": "7f3d8733-74ba-4a0f-a041-99f957ab6bb6",
+            "matched_care_team_ids": ("care-team-no-retener",),
+        },
+    )
+
+    assert enriched_context.patient_scope_dry_run_metadata == {
+        "status": "resolved",
+        "matched_care_team_count": 1,
+    }
+    assert "7f3d8733-74ba-4a0f-a041-99f957ab6bb6" not in repr(enriched_context)
+    assert "care-team-no-retener" not in repr(enriched_context)
 
 
 def _request_with_headers(headers: tuple[tuple[bytes, bytes], ...]) -> Request:
