@@ -36,6 +36,16 @@ router = APIRouter(
 SessionDep = Annotated[Session, Depends(get_session)]
 LimitQuery = Annotated[int, Query(ge=1, le=100)]
 
+HOSPITAL_BED_AUDIT_FIELDS = [
+    "encounter_id",
+    "status",
+]
+
+
+def _bed_audit_fields(fields: list[str]) -> list[str]:
+    allowed_fields = set(HOSPITAL_BED_AUDIT_FIELDS)
+    return [field for field in fields if field in allowed_fields]
+
 
 def _apply_update(model: object, payload: object) -> list[str]:
     update_data = payload.model_dump(exclude_unset=True)
@@ -163,7 +173,7 @@ def create_hospital_bed(
         entity_id=bed.id,
         actor_id=actor,
         metadata=_bed_audit_metadata(session, bed),
-        after=audit_snapshot(bed),
+        after=audit_snapshot(bed, HOSPITAL_BED_AUDIT_FIELDS),
     )
     session.commit()
     session.refresh(bed)
@@ -179,7 +189,7 @@ def update_hospital_bed(
 ) -> HospitalBed:
     bed = _require_bed(session, bed_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    before = audit_snapshot(bed, update_fields)
+    before = audit_snapshot(bed, _bed_audit_fields(update_fields))
     previous_encounter_id = (
         before.get("encounter_id") if isinstance(before.get("encounter_id"), str) else None
     )
@@ -187,10 +197,11 @@ def update_hospital_bed(
     fields = _apply_update(bed, payload)
     _validate_bed_location_unique(session, bed)
     _validate_bed_assignment(session, bed)
+    audit_fields = _bed_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=bed,
-        fields=fields,
+        fields=audit_fields,
     )
     record_audit_event(
         session,
