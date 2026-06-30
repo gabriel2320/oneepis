@@ -4,6 +4,7 @@ from oneepis_api.models.access_boundary import (
     ClinicalInstitution,
     ClinicalService,
     ClinicalTenant,
+    PatientCareTeamRelationship,
 )
 from oneepis_api.models.audit import AuditEvent
 from oneepis_api.models.auth_security import (
@@ -57,5 +58,6 @@ __all__ = [
     "MedicationCatalogItem",
     "MedicationDoseRule",
     "Patient",
+    "PatientCareTeamRelationship",
     "VitalSign",
 ]
