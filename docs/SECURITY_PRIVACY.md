@@ -40,6 +40,19 @@ Antes de cualquier entorno productivo se requiere, como minimo:
 - procedimiento de incidente ante filtracion;
 - aislamiento entre secretos de desarrollo, staging y produccion.
 
+## Cifrado en Reposo
+
+El cifrado productivo en reposo sigue pendiente. El contrato ejecutable vive en
+`apps/api/src/oneepis_api/core/encryption_at_rest_contract.py`.
+
+Antes de produccion sanitaria, al menos deben quedar cubiertos:
+
+- almacenamiento de base clinica con llaves productivas gestionadas;
+- backups y artefactos de restore cifrados;
+- almacenamiento documental futuro cifrado;
+- ownership, rotacion y procedimiento de incidente para llaves;
+- restore que preserve cifrado y fronteras de acceso.
+
 ## Configuracion fuera de Desarrollo
 
 Si `ONEEPIS_ENVIRONMENT` no es `development`, la API rechaza el arranque con:
