@@ -86,11 +86,27 @@ def _record_patient_read_audit(
 @router.get("", response_model=list[PatientRead])
 def list_patients(
     session: SessionDep,
+    actor: PatientReadActorDep,
     search: PatientSearch = None,
     limit: LimitQuery = 25,
     offset: OffsetQuery = 0,
 ) -> list[Patient]:
-    return patient_repo.list_patients(session, search=search, limit=limit, offset=offset)
+    patients = patient_repo.list_patients(session, search=search, limit=limit, offset=offset)
+    record_read_audit_event(
+        session,
+        action="patient_index.read",
+        entity_type="patient_index",
+        entity_id=None,
+        actor_id=actor,
+        metadata={
+            "search_present": search is not None,
+            "limit": limit,
+            "offset": offset,
+            "result_count": len(patients),
+        },
+    )
+    session.commit()
+    return patients
 
 
 @router.post("", response_model=PatientRead, status_code=status.HTTP_201_CREATED)

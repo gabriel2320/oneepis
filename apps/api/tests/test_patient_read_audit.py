@@ -53,6 +53,35 @@ def test_patient_read_endpoints_emit_read_audit_events(
     assert record_read["request_path"] == f"/api/v1/patients/{patient_id}/record"
 
 
+def test_patient_index_read_audit_is_minimized(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    create_patient_for_permissions(client, auth)
+
+    response = client.get(
+        "/api/v1/patients?search=Permisos&limit=10&offset=0",
+        headers={**auth, "X-OneEpis-Correlation-ID": "read-patient-index-001"},
+    )
+
+    assert response.status_code == 200
+    audit_event = _latest_audit_event("patient_index.read")
+    assert audit_event.entity_type == "patient_index"
+    assert audit_event.entity_id is None
+    assert audit_event.actor_id == "medico@oneepis.local"
+    assert audit_event.correlation_id == "read-patient-index-001"
+    assert audit_event.request_method == "GET"
+    assert audit_event.request_path == "/api/v1/patients"
+    assert audit_event.extra_data == {
+        "search_present": True,
+        "limit": 10,
+        "offset": 0,
+        "result_count": 1,
+    }
+
+
 def test_patient_clinical_entries_events_and_timeline_emit_read_audit(
     client: TestClient,
     auth_headers,
