@@ -215,3 +215,93 @@ def test_readonly_user_cannot_write_clinical_events(
         json={"summary": "Intento solo lectura"},
     )
     assert update_response.status_code == 403
+
+
+def test_nursing_cannot_create_or_convert_diagnosis_events(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+
+    nursing_note = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=nursing_auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:00:00Z",
+            "summary": "Nota contextual de enfermeria",
+        },
+    )
+    nursing_diagnosis = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=nursing_auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2026-06-20T12:05:00Z",
+            "summary": "Diagnostico historico no autorizado",
+            "payload": {
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica",
+                    "limit": "No equivale a problema activo actual.",
+                },
+            },
+        },
+    )
+    medical_note = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "clinical_note",
+            "occurred_at": "2026-06-20T12:10:00Z",
+            "summary": "Evento medico por clasificar",
+        },
+    )
+    convert_to_diagnosis = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{medical_note.json()['id']}",
+        headers=nursing_auth,
+        json={"event_type": "diagnosis"},
+    )
+    attach_historical_payload = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{nursing_note.json()['id']}",
+        headers=nursing_auth,
+        json={
+            "payload": {
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica",
+                    "limit": "Debe ser curado por rol medico.",
+                },
+            },
+        },
+    )
+    allowed_diagnosis = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json={
+            "event_type": "diagnosis",
+            "occurred_at": "2026-06-20T12:15:00Z",
+            "summary": "Diagnostico historico curado por medico",
+            "payload": {
+                "antecedent": {
+                    "category": "diagnostico_historico",
+                    "source_label": "Historia clinica",
+                    "limit": "No equivale a problema activo actual.",
+                },
+            },
+        },
+    )
+
+    assert nursing_note.status_code == 201
+    assert nursing_diagnosis.status_code == 403
+    assert medical_note.status_code == 201
+    assert convert_to_diagnosis.status_code == 403
+    assert attach_historical_payload.status_code == 403
+    assert allowed_diagnosis.status_code == 201

@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ClinicalEventActorDep, PatientReadActorDep
+from oneepis_api.api.deps import ClinicalEventWriteAccessDep, PatientReadActorDep
 from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEntryStatus,
@@ -25,6 +25,9 @@ from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
     validate_diagnosis_code_pair,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.diagnosis_event_permissions import (
+    validate_diagnosis_event_write_access,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -173,14 +176,21 @@ def create_clinical_event(
     patient_id: uuid.UUID,
     payload: ClinicalEventCreate,
     session: SessionDep,
-    actor: ClinicalEventActorDep,
+    user: ClinicalEventWriteAccessDep,
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
+    validate_diagnosis_event_write_access(
+        user=user,
+        current_event_type=None,
+        final_event_type=payload.event_type,
+        payload=payload.payload,
+    )
     validate_clinical_event_source(payload.source_type, payload.source_ref)
     validate_curated_antecedent_payload(payload.payload, payload.event_type)
     validate_diagnostic_coding_payload(payload.payload, payload.summary)
     event_data = payload.model_dump()
+    actor = user.actor_id
     event_data["created_by"] = actor
     event = ClinicalEvent(patient_id=patient_id, **event_data)
     session.add(event)
@@ -229,7 +239,7 @@ def update_clinical_event(
     event_id: uuid.UUID,
     payload: ClinicalEventUpdate,
     session: SessionDep,
-    actor: ClinicalEventActorDep,
+    user: ClinicalEventWriteAccessDep,
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
     event = require_patient_child(
@@ -242,11 +252,19 @@ def update_clinical_event(
     if "encounter_id" in payload.model_dump(exclude_unset=True):
         validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     payload_data = payload.model_dump(exclude_unset=True)
+    actor = user.actor_id
     validate_clinical_event_source(
         payload_data.get("source_type", event.source_type),
         payload_data.get("source_ref", event.source_ref),
     )
     final_event_type = payload_data.get("event_type", event.event_type)
+    final_payload = payload_data.get("payload", event.payload)
+    validate_diagnosis_event_write_access(
+        user=user,
+        current_event_type=event.event_type,
+        final_event_type=final_event_type,
+        payload=final_payload,
+    )
     if "payload" in payload_data and payload_data["payload"] is not None:
         validate_curated_antecedent_payload(payload_data["payload"], final_event_type)
         validate_diagnostic_coding_payload(
