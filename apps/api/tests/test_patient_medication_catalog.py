@@ -144,6 +144,76 @@ def test_medication_read_exposes_missing_fields_for_unlinked_manual_medication(
     assert listed["missing_fields"] == ["dose", "route", "frequency", "source"]
 
 
+def test_medication_update_audit_is_minimized_for_dose_override(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient(client, auth, first_name="Med", last_name="UpdateAudit")
+    catalog_response = client.get("/api/v1/medication-catalog", headers=auth)
+    assert catalog_response.status_code == 200
+    catalog = catalog_response.json()
+    demo_item = next(item for item in catalog if item["id"] == str(DEMO_ANALGESIC_ID))
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={
+            "catalog_item_id": str(DEMO_ANALGESIC_ID),
+            "name": demo_item["display_name"],
+            "dose": "500 mg",
+            "route": "oral",
+            "frequency": "cada 8 horas",
+        },
+    )
+    assert create_response.status_code == 201
+    medication_id = create_response.json()["id"]
+
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/medications/{medication_id}",
+        headers=auth,
+        json={
+            "dose": "1500 mg",
+            "frequency": "cada 6 horas",
+            "dose_override_reason": "Decision clinica documentada para auditoria.",
+        },
+    )
+    assert update_response.status_code == 200
+
+    medication_events = [
+        item
+        for item in audit_events(client, auth, patient_id)
+        if item["action"] == "medication.updated"
+    ]
+    medication_event = medication_events[0]
+    metadata = medication_event["extra_data"]
+    assert metadata["dose_validation_blocking"] is True
+    assert metadata["dose_warning_count"] == 1
+    assert metadata["dose_warning_severities"] == ["warning"]
+    assert metadata["dose_override"] is True
+    assert metadata["dose_override_reason_present"] is True
+    assert metadata["dose_override_reason_length"] == len(
+        "Decision clinica documentada para auditoria."
+    )
+    assert metadata["dose_source_count"] >= 1
+    assert "1500 mg" not in str(metadata)
+    assert "cada 6 horas" not in str(metadata)
+    assert "Decision clinica documentada para auditoria." not in str(metadata)
+    assert demo_item["display_name"] not in str(metadata)
+    assert "name" not in metadata["before"]
+    assert "name" not in metadata["after"]
+    assert "dose" not in metadata["before"]
+    assert "dose" not in metadata["after"]
+    assert "route" not in metadata["before"]
+    assert "route" not in metadata["after"]
+    assert "frequency" not in metadata["before"]
+    assert "frequency" not in metadata["after"]
+    assert "dose_override_reason" not in metadata["before"]
+    assert "dose_override_reason" not in metadata["after"]
+    assert "dose_check_snapshot" not in metadata["before"]
+    assert "dose_check_snapshot" not in metadata["after"]
+
+
 def test_critical_dose_validation_blocks_save_without_override_reason(
     client: TestClient,
     auth_headers,
