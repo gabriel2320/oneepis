@@ -108,6 +108,12 @@ Contrato minimo diferido para ABAC antes de cualquier piloto real:
 - Break-glass auditado, justificado y revisable.
 - Sin implementacion decorativa: primero contrato, tests y politica de uso.
 
+Avance actual: existen stores y contratos para frontera institucional, equipo,
+relacion paciente-equipo, membresia actor-equipo, dry-run de relacion
+paciente/actor y entidad futura de break-glass. Esto no habilita PHI real:
+`patient_scoping_enabled`, `abac_runtime_enforced` y `break_glass_enabled`
+siguen desactivados.
+
 Criterio de no-hacer:
 
 - No crear nueva pantalla clinica.

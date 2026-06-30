@@ -37,8 +37,14 @@ const requiredEvidenceByGate = new Map([
     "NOPROD-SEC-007",
     [
       "apps/api/src/oneepis_api/core/clinical_access.py",
+      "apps/api/src/oneepis_api/core/access_context_contract.py",
+      "apps/api/src/oneepis_api/core/access_boundary_contract.py",
+      "apps/api/src/oneepis_api/services/patient_access_relationship.py",
       "apps/api/tests/test_break_glass_guard.py",
       "apps/api/tests/test_clinical_access_contract.py",
+      "apps/api/tests/test_access_context_contract.py",
+      "apps/api/tests/test_access_boundary_contract.py",
+      "apps/api/tests/test_patient_access_relationship.py",
     ],
   ],
   [
