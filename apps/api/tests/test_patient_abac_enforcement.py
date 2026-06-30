@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.main import app
+from oneepis_api.models.access_boundary import AccessBoundaryStatus
 from oneepis_api.models.patient import Patient
 
 
@@ -63,6 +64,29 @@ def test_get_patient_abac_enforcement_allows_active_relationship(
     assert response.json()["id"] == patient_id
 
 
+def test_get_patient_abac_enforcement_denies_inactive_boundary_chain(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+        care_team_status=AccessBoundaryStatus.RETIRED,
+    )
+    _enable_development_abac_enforcement()
+
+    response = client.get(f"/api/v1/patients/{patient_id}", headers=auth)
+
+    assert response.status_code == 403
+    events = audit_events_for_patient(patient_id)
+    assert "access_context.denied" in [event["action"] for event in events]
+    assert "patient.read" not in [event["action"] for event in events]
+
+
 def test_get_patient_abac_enforcement_keeps_admin_breakout_explicit(
     client: TestClient,
     auth_headers,
@@ -85,11 +109,16 @@ def _enable_development_abac_enforcement() -> None:
     )
 
 
-def _assign_patient_scope(*, patient_id: str, actor_id: str) -> None:
+def _assign_patient_scope(
+    *,
+    patient_id: str,
+    actor_id: str,
+    care_team_status: AccessBoundaryStatus = AccessBoundaryStatus.ACTIVE,
+) -> None:
     with _test_session() as session:
         patient = session.get(Patient, uuid.UUID(patient_id))
         assert patient is not None
-        care_team = create_care_team(session)
+        care_team = create_care_team(session, care_team_status=care_team_status)
         assign_actor_to_care_team(
             session,
             actor_id=actor_id,
