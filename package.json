@@ -21,7 +21,7 @@
     "review:screens": "node scripts/screen-canon-review.mjs",
     "check:size": "node scripts/check-file-size.mjs && npm run check:screens",
     "check:web": "npm run check:size && npm run check:frontend-phi-logs && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
-    "check:contract": "node scripts/export-openapi.mjs --check && node scripts/check-assistant-read-contract.mjs",
+    "check:contract": "node scripts/export-openapi.mjs --check && node scripts/check-assistant-read-contract.mjs && node scripts/check-clinical-auth-contract.mjs",
     "check:e2e": "npm --workspace apps/web run test:e2e && npm --workspace apps/web run test:e2e:assistant-read",
     "check:npm-advisories": "node scripts/check-npm-advisories.mjs",
     "check:frontend-phi-logs": "node scripts/check-frontend-phi-logs.mjs",
