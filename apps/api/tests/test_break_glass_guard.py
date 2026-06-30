@@ -46,6 +46,34 @@ def test_contextual_access_headers_are_rejected_until_abac_exists(
         assert response.json()["detail"] == "Contextual access override is not enabled."
 
 
+def test_empty_contextual_access_header_is_rejected_on_clinical_routes(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/record",
+        headers={**auth, "X-OneEpis-Tenant": ""},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Contextual access override is not enabled."
+
+
+def test_empty_contextual_access_header_does_not_block_non_clinical_routes(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+
+    response = client.get("/api/v1/health", headers={**auth, "X-OneEpis-Tenant": ""})
+
+    assert response.status_code == 200
+
+
 def test_contextual_access_header_rejection_emits_minimized_security_audit(
     client: TestClient,
     auth_headers,
@@ -76,6 +104,30 @@ def test_contextual_access_header_rejection_emits_minimized_security_audit(
         "blocked_headers": ["X-OneEpis-Access-Reason", "X-OneEpis-Tenant"],
         "header_count": 2,
     }
+
+
+def test_contextual_access_header_audit_truncates_long_request_path(
+    client: TestClient,
+    auth_headers,
+) -> None:
+    auth = auth_headers(client)
+    long_path = "/api/v1/patients/" + ("a" * 280)
+
+    response = client.get(
+        long_path,
+        headers={
+            **auth,
+            "X-OneEpis-Correlation-ID": "blocked-contextual-access-long-path",
+            "X-OneEpis-Tenant": "",
+        },
+    )
+
+    assert response.status_code == 403
+    audit_event = _latest_contextual_access_block_event()
+    assert audit_event.correlation_id == "blocked-contextual-access-long-path"
+    assert audit_event.request_method == "GET"
+    assert audit_event.request_path == long_path[:240]
+    assert len(audit_event.request_path) == 240
 
 
 def test_clinical_routes_still_work_without_break_glass_header(

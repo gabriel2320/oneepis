@@ -24,6 +24,7 @@ UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS = (
     "X-OneEpis-Tenant",
     "X-OneEpis-Care-Team",
 )
+AUDIT_REQUEST_PATH_MAX_LENGTH = 240
 
 
 def create_app() -> FastAPI:
@@ -113,7 +114,7 @@ def _unsupported_contextual_access_headers(request: Request) -> tuple[str, ...]:
     if not request.url.path.startswith(PROTECTED_CLINICAL_ROUTE_PREFIXES):
         return ()
     return tuple(
-        header for header in UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS if request.headers.get(header)
+        header for header in UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS if header in request.headers
     )
 
 
@@ -124,6 +125,16 @@ def _record_contextual_access_header_block(
     session_provider = request.app.dependency_overrides.get(get_session, get_session)
     session_iterator = session_provider()
     session = next(session_iterator)
+    set_audit_request_context(
+        AuditRequestContext(
+            correlation_id=_normalize_correlation_id(
+                request.headers.get("X-OneEpis-Correlation-ID")
+                or request.headers.get("X-Request-ID")
+            ),
+            request_method=request.method,
+            request_path=request.url.path[:AUDIT_REQUEST_PATH_MAX_LENGTH],
+        )
+    )
     try:
         record_audit_event(
             session,
@@ -138,6 +149,7 @@ def _record_contextual_access_header_block(
         )
         session.commit()
     finally:
+        clear_audit_request_context()
         session_iterator.close()
 
 
