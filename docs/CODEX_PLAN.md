@@ -35,6 +35,22 @@ Presupuesto por PR: 1 pantalla, 1 comportamiento, <=4 archivos, <=1 test, <=1 do
 (solo si cambia estado real), <=300 additions, 0 rutas nuevas, 0 docs nuevos,
 0 dependencias nuevas.
 
+Carriles de PR:
+
+- `fast`: bug acotado, test existente dirigido, sin cambio de contrato ni pantalla.
+  Gates locales: `npm run check:toolchain`, `npm run check:api:target -- <test>`
+  si toca API, o `npm run check:web` si toca UI.
+- `clinical`: permisos, auditoria, IA, medicacion, diagnosticos, escritura clinica o
+  seguridad. Gates locales: `npm run check:toolchain`, `npm run check:api`,
+  y `npm run check:contract` si cambia API.
+- `surface`: ruta, copy clinico visible, papel, registry o flujo E2E. Gates locales:
+  `npm run check:toolchain`, `npm run check:web`, `npm run check:screens`,
+  y E2E dirigido si cambia una ruta sensible.
+- `release`: merge o barrido previo. Gate completo: `npm run check`.
+
+El carril `fast` ahorra tiempo local, pero no reemplaza CI ni autoriza merge si el
+cambio toca seguridad clinica, permisos, auditoria, OpenAPI, registry o datos.
+
 Paquete de contexto por PR (ahorro de tokens): cargar solo (1) Estado Real +
 Proximo Objetivo de `CURRENT_STATE.md`; (2) Anti-Canonitis + Congelamiento de
 `GOVERNANCE.md`; (3) el archivo de pantalla tocado; (4) el E2E relacionado;
