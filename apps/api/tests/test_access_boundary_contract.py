@@ -112,12 +112,18 @@ def test_access_boundary_reason_fields_are_phi_adjacent_minimized_metadata() -> 
 def test_runtime_audit_code_does_not_reference_access_boundary_reason_text() -> None:
     api_source_root = Path(__file__).parents[1] / "src" / "oneepis_api"
     scanned_paths = [
-        *sorted((api_source_root / "api" / "v1" / "routes").glob("*.py")),
-        *sorted((api_source_root / "services").glob("*.py")),
+        *sorted((api_source_root / "api" / "v1" / "routes").rglob("*.py")),
+        *sorted((api_source_root / "services").rglob("*.py")),
     ]
+    scanned_relative_paths = {
+        path.relative_to(api_source_root).as_posix() for path in scanned_paths
+    }
+    assert "services/ai/ollama.py" in scanned_relative_paths
     blocked_fields = set(ACCESS_BOUNDARY_REASON_FIELDS)
     offenders: list[str] = []
     for path in scanned_paths:
+        if "__pycache__" in path.parts:
+            continue
         text = path.read_text(encoding="utf-8")
         for field in blocked_fields:
             if field in text:
