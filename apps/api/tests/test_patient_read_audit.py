@@ -1,4 +1,9 @@
 from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from oneepis_api.db.session import get_session
+from oneepis_api.main import app
+from oneepis_api.models.audit import AuditEvent
 
 
 def test_patient_read_endpoints_emit_read_audit_events(
@@ -405,6 +410,89 @@ def test_patient_labs_encounters_and_hospital_drafts_emit_read_audit(
     _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
 
 
+def test_patient_appointments_emit_read_audit(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    audit_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    appointment_response = client.post(
+        f"/api/v1/patients/{patient_id}/appointments",
+        headers=auth,
+        json={
+            "starts_at": "2026-06-20T12:00:00Z",
+            "ends_at": "2026-06-20T12:30:00Z",
+            "reason": "Control auditado",
+            "notes": "Nota clinica que no debe duplicarse en metadata.",
+        },
+    )
+    assert appointment_response.status_code == 201
+    appointment_id = appointment_response.json()["id"]
+
+    reads = [
+        (
+            "appointments.read",
+            f"/api/v1/patients/{patient_id}/appointments",
+            "read-appointments-001",
+        ),
+        (
+            "appointment.read",
+            f"/api/v1/patients/{patient_id}/appointments/{appointment_id}",
+            "read-appointment-001",
+        ),
+    ]
+
+    for _, path, correlation_id in reads:
+        response = client.get(
+            path,
+            headers={**auth, "X-OneEpis-Correlation-ID": correlation_id},
+        )
+        assert response.status_code == 200
+
+    _assert_public_read_audit_events(client, audit_auth, patient_id, reads)
+
+
+def test_appointment_index_read_audit_is_minimized(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    appointment_response = client.post(
+        f"/api/v1/patients/{patient_id}/appointments",
+        headers=auth,
+        json={
+            "starts_at": "2026-06-20T12:00:00Z",
+            "ends_at": "2026-06-20T12:30:00Z",
+            "reason": "Motivo sensible",
+            "notes": "Nota sensible",
+        },
+    )
+    assert appointment_response.status_code == 201
+
+    response = client.get(
+        "/api/v1/appointments?date_from=2026-06-20T00:00:00Z&limit=10&offset=0",
+        headers={**auth, "X-OneEpis-Correlation-ID": "read-appointments-index-001"},
+    )
+
+    assert response.status_code == 200
+    audit_event = _latest_audit_event("appointments_index.read")
+    assert audit_event.entity_type == "appointment_index"
+    assert audit_event.entity_id is None
+    assert audit_event.actor_id == "medico@oneepis.local"
+    assert audit_event.correlation_id == "read-appointments-index-001"
+    assert audit_event.extra_data == {
+        "date_from_present": True,
+        "date_to_present": False,
+        "limit": 10,
+        "offset": 0,
+        "result_count": 1,
+    }
+
+
 def test_patient_assistant_and_context_reads_emit_read_audit(
     client: TestClient,
     auth_headers,
@@ -649,6 +737,21 @@ def test_audit_events_list_does_not_emit_record_read(
     )
     assert audit_response.status_code == 200
     assert all(item["action"] != "record.read" for item in audit_response.json())
+
+
+def _latest_audit_event(action: str) -> AuditEvent:
+    override_session = app.dependency_overrides[get_session]
+    session_iterator = override_session()
+    session = next(session_iterator)
+    try:
+        return session.scalars(
+            select(AuditEvent)
+            .where(AuditEvent.action == action)
+            .order_by(AuditEvent.created_at.desc())
+            .limit(1)
+        ).one()
+    finally:
+        session_iterator.close()
 
 
 def _assert_public_read_audit_events(
