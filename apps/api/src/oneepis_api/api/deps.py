@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, Request, status
@@ -66,6 +67,63 @@ def get_current_user(
 CurrentUserDep = Annotated[AuthenticatedUser, Depends(get_current_user)]
 
 
+@dataclass(frozen=True)
+class AccessPolicy:
+    name: str
+    roles: frozenset[UserRole]
+    future_abac_requirements: tuple[str, ...]
+
+
+ABAC_MINIMUM_REQUIREMENTS = (
+    "institution_or_tenant",
+    "care_team_or_service",
+    "active_care_relationship_or_access_reason",
+    "audited_break_glass",
+)
+
+
+ACCESS_POLICIES: dict[str, AccessPolicy] = {
+    "patient_read": AccessPolicy(
+        name="patient_read",
+        roles=frozenset(
+            {
+                UserRole.ADMIN,
+                UserRole.MEDICO,
+                UserRole.ENFERMERIA,
+                UserRole.SOLO_LECTURA,
+                UserRole.DEV,
+            }
+        ),
+        future_abac_requirements=ABAC_MINIMUM_REQUIREMENTS,
+    ),
+    "patient_write": AccessPolicy(
+        name="patient_write",
+        roles=frozenset({UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV}),
+        future_abac_requirements=ABAC_MINIMUM_REQUIREMENTS,
+    ),
+    "clinical_event_write": AccessPolicy(
+        name="clinical_event_write",
+        roles=frozenset({UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV}),
+        future_abac_requirements=ABAC_MINIMUM_REQUIREMENTS,
+    ),
+    "nursing_structured_write": AccessPolicy(
+        name="nursing_structured_write",
+        roles=frozenset({UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV}),
+        future_abac_requirements=ABAC_MINIMUM_REQUIREMENTS,
+    ),
+    "ai_access": AccessPolicy(
+        name="ai_access",
+        roles=frozenset({UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV}),
+        future_abac_requirements=ABAC_MINIMUM_REQUIREMENTS,
+    ),
+    "audit_read": AccessPolicy(
+        name="audit_read",
+        roles=frozenset({UserRole.ADMIN, UserRole.DEV}),
+        future_abac_requirements=ABAC_MINIMUM_REQUIREMENTS,
+    ),
+}
+
+
 def require_roles(*allowed_roles: UserRole) -> Callable[[AuthenticatedUser], AuthenticatedUser]:
     allowed = set(allowed_roles)
 
@@ -80,70 +138,68 @@ def require_roles(*allowed_roles: UserRole) -> Callable[[AuthenticatedUser], Aut
     return dependency
 
 
+def _require_policy(policy_name: str) -> Callable[[AuthenticatedUser], AuthenticatedUser]:
+    return require_roles(*ACCESS_POLICIES[policy_name].roles)
+
+
 def require_patient_read_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(
-        UserRole.ADMIN,
-        UserRole.MEDICO,
-        UserRole.ENFERMERIA,
-        UserRole.SOLO_LECTURA,
-        UserRole.DEV,
-    )(user)
+    return _require_policy("patient_read")(user)
 
 
 def require_patient_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_clinical_entry_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_clinical_event_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
+    return _require_policy("clinical_event_write")(user)
 
 
 def require_allergy_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_medication_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_problem_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_encounter_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_hospital_daily_sheet_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_hospital_indication_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("patient_write")(user)
 
 
 def require_vital_sign_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
+    return _require_policy("nursing_structured_write")(user)
 
 
 def require_lab_result_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
+    return _require_policy("nursing_structured_write")(user)
 
 
 def require_clinical_risk_write_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.ENFERMERIA, UserRole.DEV)(user)
+    return _require_policy("nursing_structured_write")(user)
 
 
 def require_ai_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.MEDICO, UserRole.DEV)(user)
+    return _require_policy("ai_access")(user)
 
 
 def require_audit_read_access(user: CurrentUserDep) -> AuthenticatedUser:
-    return require_roles(UserRole.ADMIN, UserRole.DEV)(user)
+    return _require_policy("audit_read")(user)
 
 
 ReadAccessDep = Annotated[AuthenticatedUser, Depends(require_patient_read_access)]
