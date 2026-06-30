@@ -13,7 +13,12 @@ from sqlalchemy.pool import StaticPool
 from oneepis_api.api.v1.routes.patient_shared import record_patient_scoped_read
 from oneepis_api.db.base import Base
 from oneepis_api.models.audit import AuditEvent
-from oneepis_api.services.access_context_audit import PASSIVE_ACCESS_CONTEXT_DECISION_ACTION
+from oneepis_api.services.access_context_audit import (
+    DENIED_ACCESS_CONTEXT_DECISION_ACTION,
+    PASSIVE_ACCESS_CONTEXT_DECISION_ACTION,
+    denied_patient_access_context_metadata,
+    record_denied_patient_access_context_decision,
+)
 from oneepis_api.services.audit import (
     AuditRequestContext,
     clear_audit_request_context,
@@ -127,6 +132,74 @@ def test_patient_scoped_read_records_minimized_resolved_patient_scope() -> None:
     assert str(care_team.id) not in repr(passive_event.extra_data)
     assert "texto libre de cobertura" not in repr(passive_event.extra_data)
     assert "texto libre clinico" not in repr(passive_event.extra_data)
+
+
+def test_denied_patient_access_context_metadata_retains_requirement_keys_only() -> None:
+    metadata = denied_patient_access_context_metadata(
+        decision_policy="contextual_abac",
+        denial_reasons=(
+            "missing_abac_requirement:active_care_relationship_or_access_reason",
+            "missing_abac_requirement:audited_break_glass",
+            "care-team-id-no-retener",
+            "reason-text-no-retener",
+        ),
+        runtime_enforced=True,
+    )
+
+    assert metadata == {
+        "policy": "contextual_abac",
+        "runtime_enforced": True,
+        "reason_keys": (
+            "active_care_relationship_or_access_reason",
+            "audited_break_glass",
+        ),
+        "metadata_retention": "requirement_keys_only",
+    }
+    assert "care-team-id-no-retener" not in repr(metadata)
+    assert "reason-text-no-retener" not in repr(metadata)
+
+
+def test_record_denied_patient_access_context_decision_uses_minimized_metadata() -> None:
+    session = _session()
+    patient_id = uuid.uuid4()
+    set_audit_request_context(
+        AuditRequestContext(
+            correlation_id="abac-denied-unit-001",
+            request_method="GET",
+            request_path=f"/api/v1/patients/{patient_id}",
+        )
+    )
+    try:
+        record_denied_patient_access_context_decision(
+            session,
+            patient_id=patient_id,
+            actor_id="sololectura@oneepis.local",
+            denial_reasons=(
+                "missing_abac_requirement:care_team_or_service",
+                "raw-header-value-no-retener",
+            ),
+            runtime_enforced=True,
+        )
+        session.commit()
+    finally:
+        clear_audit_request_context()
+
+    event = session.scalars(select(AuditEvent)).one()
+
+    assert event.action == DENIED_ACCESS_CONTEXT_DECISION_ACTION
+    assert event.entity_type == "patient"
+    assert event.entity_id == patient_id
+    assert event.actor_id == "sololectura@oneepis.local"
+    assert event.correlation_id == "abac-denied-unit-001"
+    assert event.request_method == "GET"
+    assert event.request_path == f"/api/v1/patients/{patient_id}"
+    assert event.extra_data == {
+        "policy": "contextual_abac",
+        "runtime_enforced": True,
+        "reason_keys": ["care_team_or_service"],
+        "metadata_retention": "requirement_keys_only",
+    }
+    assert "raw-header-value-no-retener" not in repr(event.extra_data)
 
 
 def _session() -> Session:
