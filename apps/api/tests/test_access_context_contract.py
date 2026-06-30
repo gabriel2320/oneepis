@@ -8,6 +8,7 @@ from oneepis_api.core.access_context_contract import (
     access_context_requirement_keys,
     contextual_access_header_names,
 )
+from oneepis_api.core.access_context_runtime import evaluate_access_context
 from oneepis_api.main import UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS
 from oneepis_api.services.auth import AuthenticatedUser, UserRole
 
@@ -103,6 +104,49 @@ def test_access_context_runtime_object_does_not_retain_contextual_header_values(
     assert context.access_reason is None
     assert "tenant-secreto-no-retener" not in repr(context)
     assert "motivo-clinico-no-retener" not in repr(context)
+
+
+def test_access_context_denial_contract_is_not_runtime_enforcement_yet() -> None:
+    user = AuthenticatedUser(
+        email="sololectura@oneepis.local",
+        name="Solo Lectura OneEpis",
+        roles=frozenset({UserRole.SOLO_LECTURA}),
+        actor_id="sololectura@oneepis.local",
+    )
+    context = build_access_context(user, _request_with_headers(()))
+
+    decision = evaluate_access_context(context)
+
+    assert decision.policy == "contextual_abac"
+    assert decision.runtime_enforced is False
+    assert decision.allowed is True
+    assert decision.would_deny_if_enforced is True
+    assert decision.denial_reasons == tuple(
+        f"missing_abac_requirement:{requirement}"
+        for requirement in ABAC_MINIMUM_REQUIREMENTS
+    )
+    assert decision.metadata_retention == "requirement_keys_only"
+
+
+def test_access_context_denial_contract_does_not_retain_header_values() -> None:
+    user = AuthenticatedUser(
+        email="dev@oneepis.local",
+        name="Dev OneEpis",
+        roles=frozenset({UserRole.DEV}),
+        actor_id="dev@oneepis.local",
+    )
+    request = _request_with_headers(
+        ((b"x-oneepis-access-reason", b"valor-no-debe-quedar-en-decision"),)
+    )
+    context = build_access_context(user, request)
+
+    decision = evaluate_access_context(context)
+
+    assert "valor-no-debe-quedar-en-decision" not in repr(decision)
+    assert decision.denial_reasons == tuple(
+        f"missing_abac_requirement:{requirement}"
+        for requirement in ABAC_MINIMUM_REQUIREMENTS
+    )
 
 
 def _request_with_headers(headers: tuple[tuple[bytes, bytes], ...]) -> Request:
