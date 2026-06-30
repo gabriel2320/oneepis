@@ -122,3 +122,36 @@ class CareTeam(Base, IdMixin, TimestampMixin):
     created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
 
     service: Mapped[ClinicalService] = relationship(back_populates="care_teams")
+    patient_relationships: Mapped[list[PatientCareTeamRelationship]] = relationship(
+        back_populates="care_team",
+        cascade="all, delete-orphan",
+    )
+
+
+class PatientCareTeamRelationship(Base, IdMixin, TimestampMixin):
+    __tablename__ = "patient_care_team_relationships"
+    __table_args__ = (
+        UniqueConstraint("patient_id", "care_team_id", name="uq_patient_care_team_relationship"),
+    )
+
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        index=True,
+    )
+    care_team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("care_teams.id", ondelete="CASCADE"),
+        index=True,
+    )
+    status: Mapped[AccessBoundaryStatus] = mapped_column(
+        Enum(
+            AccessBoundaryStatus,
+            values_callable=enum_values,
+            name="access_boundary_status",
+        ),
+        default=AccessBoundaryStatus.DRAFT,
+        nullable=False,
+    )
+    relationship_reason: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
+
+    care_team: Mapped[CareTeam] = relationship(back_populates="patient_relationships")
