@@ -54,6 +54,29 @@ AUDIT_EVENT_RETENTION_GUARD = {
     "reason": "No production retention, legal hold or immutable audit store exists yet.",
 }
 
+AUDIT_EVENT_PURGE_GUARD_PATTERNS: tuple[str, ...] = (
+    r"\bdelete\s*\(\s*AuditEvent\b",
+    r"\bsession\.delete\s*\(\s*AuditEvent\b",
+    r"\bdelete\s+from\s+audit_events\b",
+    r"\btruncate\s+(?:table\s+)?audit_events\b",
+    r"\bdrop\s+table\s+(?:if\s+exists\s+)?audit_events\b",
+    (
+        r"\bsession\.execute\s*\(\s*(?:text\s*\()?['\"][^'\"]*"
+        r"(?:delete\s+from|truncate(?:\s+table)?|drop\s+table)"
+        r"\s+audit_events\b"
+    ),
+    (
+        r"f['\"][^'\"]*"
+        r"(?:delete\s+from|truncate(?:\s+table)?|drop\s+table(?:\s+if\s+exists)?)"
+        r"\s*\{\s*AuditEvent\.__tablename__\s*\}"
+    ),
+    (
+        r"['\"][^'\"]*"
+        r"(?:delete\s+from|truncate(?:\s+table)?|drop\s+table(?:\s+if\s+exists)?)"
+        r"\s*['\"]\s*\+\s*AuditEvent\.__tablename__\b"
+    ),
+)
+
 
 def audit_retention_requirement_keys() -> tuple[str, ...]:
     return tuple(requirement.key for requirement in AUDIT_RETENTION_REQUIREMENTS)
