@@ -12,6 +12,7 @@ from oneepis_api.db.session import get_session
 from oneepis_api.services.audit import (
     AuditRequestContext,
     clear_audit_request_context,
+    get_audit_request_context,
     record_audit_event,
     set_audit_request_context,
 )
@@ -47,11 +48,18 @@ def create_app() -> FastAPI:
     async def contextual_access_guard_middleware(request: Request, call_next):
         blocked_headers = _unsupported_contextual_access_headers(request)
         if blocked_headers:
-            _record_contextual_access_header_block(request, blocked_headers)
-            return JSONResponse(
+            correlation_id = _request_correlation_id(request)
+            _record_contextual_access_header_block(
+                request,
+                blocked_headers,
+                correlation_id=correlation_id,
+            )
+            response = JSONResponse(
                 {"detail": "Contextual access override is not enabled."},
                 status_code=403,
             )
+            response.headers["X-OneEpis-Correlation-ID"] = correlation_id
+            return response
         return await call_next(request)
 
     @app.middleware("http")
@@ -65,10 +73,7 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def audit_context_middleware(request: Request, call_next):
-        correlation_id = _normalize_correlation_id(
-            request.headers.get("X-OneEpis-Correlation-ID")
-            or request.headers.get("X-Request-ID")
-        )
+        correlation_id = _request_correlation_id(request)
         set_audit_request_context(
             AuditRequestContext(
                 correlation_id=correlation_id,
@@ -93,6 +98,16 @@ def _normalize_correlation_id(value: str | None) -> str:
         if normalized:
             return normalized
     return f"oneepis-{uuid.uuid4()}"
+
+
+def _request_correlation_id(request: Request) -> str:
+    context = get_audit_request_context()
+    if context:
+        return context.correlation_id
+    return _normalize_correlation_id(
+        request.headers.get("X-OneEpis-Correlation-ID")
+        or request.headers.get("X-Request-ID")
+    )
 
 
 def _requires_csrf(request: Request, settings: Settings) -> bool:
@@ -121,16 +136,15 @@ def _unsupported_contextual_access_headers(request: Request) -> tuple[str, ...]:
 def _record_contextual_access_header_block(
     request: Request,
     blocked_headers: tuple[str, ...],
+    *,
+    correlation_id: str,
 ) -> None:
     session_provider = request.app.dependency_overrides.get(get_session, get_session)
     session_iterator = session_provider()
     session = next(session_iterator)
     set_audit_request_context(
         AuditRequestContext(
-            correlation_id=_normalize_correlation_id(
-                request.headers.get("X-OneEpis-Correlation-ID")
-                or request.headers.get("X-Request-ID")
-            ),
+            correlation_id=correlation_id,
             request_method=request.method,
             request_path=request.url.path[:AUDIT_REQUEST_PATH_MAX_LENGTH],
         )
