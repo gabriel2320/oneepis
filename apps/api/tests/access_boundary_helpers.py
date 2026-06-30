@@ -34,30 +34,38 @@ def create_care_team(
     *,
     key: str = "team-a",
     status: AccessBoundaryStatus = AccessBoundaryStatus.ACTIVE,
+    institution_status: AccessBoundaryStatus | None = None,
+    tenant_status: AccessBoundaryStatus | None = None,
+    service_status: AccessBoundaryStatus | None = None,
+    care_team_status: AccessBoundaryStatus | None = None,
 ) -> CareTeam:
+    institution_status = institution_status or status
+    tenant_status = tenant_status or status
+    service_status = service_status or status
+    care_team_status = care_team_status or status
     suffix = uuid.uuid4().hex[:8]
     institution = ClinicalInstitution(
         key=f"institution-{key}-{suffix}",
         display_name="Institucion ABAC",
-        status=status,
+        status=institution_status,
     )
     tenant = ClinicalTenant(
         institution=institution,
         key=f"tenant-{key}-{suffix}",
         display_name="Tenant ABAC",
-        status=status,
+        status=tenant_status,
     )
     service = ClinicalService(
         tenant=tenant,
         key=f"service-{key}-{suffix}",
         display_name="Servicio ABAC",
-        status=status,
+        status=service_status,
     )
     care_team = CareTeam(
         service=service,
         key=f"care-team-{key}-{suffix}",
         display_name="Equipo ABAC",
-        status=status,
+        status=care_team_status,
     )
     session.add(care_team)
     session.commit()

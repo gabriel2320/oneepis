@@ -11,6 +11,10 @@ from oneepis_api.core.access_boundary_contract import ACCESS_BOUNDARY_RUNTIME_ST
 from oneepis_api.models.access_boundary import (
     AccessBoundaryStatus,
     ActorCareTeamMembership,
+    CareTeam,
+    ClinicalInstitution,
+    ClinicalService,
+    ClinicalTenant,
     PatientCareTeamRelationship,
 )
 
@@ -65,16 +69,38 @@ def resolve_patient_access_relationship_dry_run(
 
 
 def _active_actor_care_team_ids(session: Session, *, actor_id: str) -> set[uuid.UUID]:
-    statement = select(ActorCareTeamMembership.care_team_id).where(
-        ActorCareTeamMembership.actor_id == actor_id,
-        ActorCareTeamMembership.status == AccessBoundaryStatus.ACTIVE,
+    statement = (
+        select(ActorCareTeamMembership.care_team_id)
+        .join(CareTeam, ActorCareTeamMembership.care_team_id == CareTeam.id)
+        .join(ClinicalService, CareTeam.service_id == ClinicalService.id)
+        .join(ClinicalTenant, ClinicalService.tenant_id == ClinicalTenant.id)
+        .join(ClinicalInstitution, ClinicalTenant.institution_id == ClinicalInstitution.id)
+        .where(
+            ActorCareTeamMembership.actor_id == actor_id,
+            ActorCareTeamMembership.status == AccessBoundaryStatus.ACTIVE,
+            CareTeam.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalService.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalTenant.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalInstitution.status == AccessBoundaryStatus.ACTIVE,
+        )
     )
     return set(session.scalars(statement).all())
 
 
 def _active_patient_care_team_ids(session: Session, *, patient_id: uuid.UUID) -> set[uuid.UUID]:
-    statement = select(PatientCareTeamRelationship.care_team_id).where(
-        PatientCareTeamRelationship.patient_id == patient_id,
-        PatientCareTeamRelationship.status == AccessBoundaryStatus.ACTIVE,
+    statement = (
+        select(PatientCareTeamRelationship.care_team_id)
+        .join(CareTeam, PatientCareTeamRelationship.care_team_id == CareTeam.id)
+        .join(ClinicalService, CareTeam.service_id == ClinicalService.id)
+        .join(ClinicalTenant, ClinicalService.tenant_id == ClinicalTenant.id)
+        .join(ClinicalInstitution, ClinicalTenant.institution_id == ClinicalInstitution.id)
+        .where(
+            PatientCareTeamRelationship.patient_id == patient_id,
+            PatientCareTeamRelationship.status == AccessBoundaryStatus.ACTIVE,
+            CareTeam.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalService.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalTenant.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalInstitution.status == AccessBoundaryStatus.ACTIVE,
+        )
     )
     return set(session.scalars(statement).all())

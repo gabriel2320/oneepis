@@ -14,6 +14,7 @@ from sqlalchemy.pool import StaticPool
 
 from oneepis_api.core.config import Settings
 from oneepis_api.db.base import Base
+from oneepis_api.models.access_boundary import AccessBoundaryStatus
 from oneepis_api.models.audit import AuditEvent
 from oneepis_api.services.auth import UserRole
 from oneepis_api.services.patient_scope_enforcement import (
@@ -91,6 +92,36 @@ def test_patient_scope_enforcement_allows_shared_active_care_team() -> None:
     )
 
     assert session.scalars(select(AuditEvent)).all() == []
+
+
+def test_patient_scope_enforcement_denies_relationship_on_retired_boundary_chain() -> None:
+    session = _session()
+    patient = create_abac_patient(session)
+    care_team = create_care_team(session, care_team_status=AccessBoundaryStatus.RETIRED)
+    assign_actor_to_care_team(
+        session,
+        actor_id="medico@oneepis.local",
+        care_team=care_team,
+    )
+    assign_patient_to_care_team(session, patient=patient, care_team=care_team)
+
+    with pytest.raises(HTTPException) as exc:
+        enforce_patient_scope_for_read(
+            session,
+            patient_id=patient.id,
+            actor_id="medico@oneepis.local",
+            roles=frozenset({UserRole.MEDICO}),
+            settings=Settings(
+                ai_provider="local_rules",
+                abac_enforcement_enabled=True,
+            ),
+        )
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == PATIENT_SCOPE_DENIAL_DETAIL
+    event = session.scalars(select(AuditEvent)).one()
+    assert event.action == "access_context.denied"
+    assert event.entity_id == patient.id
 
 
 def test_patient_scope_enforcement_keeps_admin_and_dev_breakout() -> None:

@@ -52,6 +52,46 @@ def test_patient_access_relationship_dry_run_resolves_shared_active_care_team(
     }
 
 
+@pytest.mark.parametrize(
+    ("status_kwarg", "inactive_status"),
+    [
+        ("care_team_status", AccessBoundaryStatus.DRAFT),
+        ("care_team_status", AccessBoundaryStatus.RETIRED),
+        ("service_status", AccessBoundaryStatus.DRAFT),
+        ("service_status", AccessBoundaryStatus.RETIRED),
+        ("tenant_status", AccessBoundaryStatus.DRAFT),
+        ("tenant_status", AccessBoundaryStatus.RETIRED),
+        ("institution_status", AccessBoundaryStatus.DRAFT),
+        ("institution_status", AccessBoundaryStatus.RETIRED),
+    ],
+)
+def test_patient_access_relationship_dry_run_requires_active_boundary_chain(
+    session: Session,
+    status_kwarg: str,
+    inactive_status: AccessBoundaryStatus,
+) -> None:
+    patient = create_abac_patient(session)
+    care_team = create_care_team(session, **{status_kwarg: inactive_status})
+    assign_actor_to_care_team(
+        session,
+        actor_id="medico@oneepis.local",
+        care_team=care_team,
+    )
+    assign_patient_to_care_team(session, patient=patient, care_team=care_team)
+
+    result = resolve_patient_access_relationship_dry_run(
+        session,
+        actor_id="medico@oneepis.local",
+        patient_id=patient.id,
+    )
+
+    assert result.resolved is False
+    assert result.status == "none"
+    assert result.matched_care_team_ids == ()
+    assert result.actor_active_care_team_count == 0
+    assert result.patient_active_care_team_count == 0
+
+
 def test_patient_access_relationship_dry_run_ignores_draft_and_retired_links(
     session: Session,
 ) -> None:
