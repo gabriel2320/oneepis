@@ -44,3 +44,19 @@ Las eliminaciones logicas o fisicas guardan `before` y, cuando aplica, `after`.
 - Todo evento debe tener actor autenticado salvo modo dev explicito.
 - No se deben guardar secretos ni tokens en `extra_data`.
 - Antes de usar datos reales, se debe revisar minimizacion de PHI y retencion.
+
+## Retencion
+
+La retencion productiva de auditoria no esta implementada. Hasta que exista
+politica medico-legal aprobada, OneEpis no debe incorporar purga runtime de
+`AuditEvent`.
+
+El contrato ejecutable vive en
+`apps/api/src/oneepis_api/core/audit_retention_contract.py` y exige, antes de
+produccion o purga, al menos:
+
+- politica de retencion versionada;
+- exportacion controlada del log;
+- inmutabilidad o evidencia de manipulacion;
+- legal hold;
+- procedimiento de purga revisado, autorizado y auditado.
