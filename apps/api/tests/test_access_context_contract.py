@@ -52,10 +52,13 @@ def test_contextual_header_contract_matches_current_runtime_rejections() -> None
 def test_access_context_contract_does_not_claim_runtime_abac() -> None:
     assert ACCESS_CONTEXT_RUNTIME_STATUS == {
         "runtime_abac_enforced": False,
+        "development_patient_read_enforcement_available": True,
+        "development_patient_read_enforcement_scope": "GET /api/v1/patients/{patient_id}",
         "contextual_headers_accepted": False,
         "break_glass_enabled": False,
         "reason": (
-            "Contextual ABAC is an executable contract only; runtime enforcement is future work."
+            "Contextual ABAC production enforcement is disabled; development-only "
+            "patient read enforcement is available behind ONEEPIS_ABAC_ENFORCEMENT_ENABLED."
         ),
     }
 
