@@ -17,6 +17,7 @@ from oneepis_api.services.patient_access_relationship import (
 )
 
 PASSIVE_ACCESS_CONTEXT_DECISION_ACTION = "access_context.passive_decision"
+DENIED_ACCESS_CONTEXT_DECISION_ACTION = "access_context.denied"
 
 
 def record_passive_patient_access_context_decision(
@@ -57,6 +58,42 @@ def record_passive_patient_access_context_decision(
             "patient_scope": context.patient_scope_dry_run_metadata,
             "metadata_retention": decision.metadata_retention,
         },
+    )
+
+
+def denied_patient_access_context_metadata(
+    *,
+    decision_policy: str,
+    denial_reasons: tuple[str, ...],
+    runtime_enforced: bool,
+) -> dict[str, object]:
+    return {
+        "policy": decision_policy,
+        "runtime_enforced": runtime_enforced,
+        "reason_keys": _denial_reason_keys(denial_reasons),
+        "metadata_retention": "requirement_keys_only",
+    }
+
+
+def record_denied_patient_access_context_decision(
+    session: Session,
+    *,
+    patient_id: uuid.UUID,
+    actor_id: str,
+    denial_reasons: tuple[str, ...],
+    runtime_enforced: bool,
+) -> None:
+    record_audit_event(
+        session,
+        action=DENIED_ACCESS_CONTEXT_DECISION_ACTION,
+        entity_type="patient",
+        entity_id=patient_id,
+        actor_id=actor_id,
+        metadata=denied_patient_access_context_metadata(
+            decision_policy="contextual_abac",
+            denial_reasons=denial_reasons,
+            runtime_enforced=runtime_enforced,
+        ),
     )
 
 
