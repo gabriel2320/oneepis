@@ -12,6 +12,9 @@ from oneepis_api.db.session import get_session
 from oneepis_api.models.clinical_record import ClinicalEncounter, EncounterType
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
+from oneepis_api.services.access_context_audit import (
+    record_passive_patient_access_context_decision,
+)
 from oneepis_api.services.audit import record_read_audit_event
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -47,6 +50,12 @@ def record_patient_scoped_read(
         entity_type="patient",
         entity_id=patient_id,
         actor_id=actor_id,
+    )
+    record_passive_patient_access_context_decision(
+        session,
+        patient_id=patient_id,
+        actor_id=actor_id,
+        source_action=action,
     )
     session.commit()
 

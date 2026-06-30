@@ -6,6 +6,8 @@ from patient_ai_helpers import (
     create_problem,
 )
 
+from oneepis_api.services.access_context_audit import PASSIVE_ACCESS_CONTEXT_DECISION_ACTION
+
 
 def test_patient_context_derives_active_hospitalization_without_writing(
     client: TestClient,
@@ -89,10 +91,32 @@ def _assert_only_read_audit_added(
 ) -> None:
     before_ids = {item["id"] for item in before_audit}
     new_events = [item for item in after_audit if item["id"] not in before_ids]
-    assert len(new_events) == 1
-    read_event = new_events[0]
+    assert len(new_events) == 2
+    read_event = next(item for item in new_events if item["action"] == action)
     assert read_event["action"] == action
     assert read_event["actor_id"] == "medico@oneepis.local"
     assert read_event["request_method"] == method
     assert read_event["request_path"] == path
     assert read_event["extra_data"] == {}
+    passive_event = next(
+        item for item in new_events if item["action"] == PASSIVE_ACCESS_CONTEXT_DECISION_ACTION
+    )
+    assert passive_event["actor_id"] == "medico@oneepis.local"
+    assert passive_event["request_method"] == method
+    assert passive_event["request_path"] == path
+    assert passive_event["extra_data"] == {
+        "mode": "passive",
+        "source_action": action,
+        "policy": "contextual_abac",
+        "runtime_enforced": False,
+        "allowed": True,
+        "would_deny_if_enforced": True,
+        "denial_reason_count": 4,
+        "denial_reason_keys": [
+            "institution_or_tenant",
+            "care_team_or_service",
+            "active_care_relationship_or_access_reason",
+            "audited_break_glass",
+        ],
+        "metadata_retention": "requirement_keys_only",
+    }
