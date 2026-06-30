@@ -37,6 +37,12 @@ def test_future_document_workflows_remain_disabled_until_custody_exists() -> Non
         assert workflow.required_before_enablement
         assert set(workflow.required_before_enablement).issubset(requirement_keys)
         assert "document_access_audit" in workflow.required_before_enablement
+        if workflow.key in {
+            "external_attachment_upload",
+            "productive_consent_management",
+            "document_ocr_or_rag",
+        }:
+            assert "custody_retention_legal_hold" in workflow.required_before_enablement
 
 
 def test_document_custody_contract_does_not_claim_runtime_storage() -> None:
