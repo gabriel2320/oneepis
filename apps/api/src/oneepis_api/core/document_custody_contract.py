@@ -106,6 +106,7 @@ FUTURE_DOCUMENT_WORKFLOWS: tuple[FutureDocumentWorkflow, ...] = (
             "secure_document_storage",
             "malware_scan",
             "document_metadata_versioning",
+            "custody_retention_legal_hold",
             "document_access_audit",
         ),
     ),
