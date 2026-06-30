@@ -15,6 +15,7 @@
     "bootstrap:windows": "powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
     "check:toolchain": "node scripts/check-toolchain.mjs",
     "check:api": "node scripts/check-api.mjs",
+    "check:api:target": "node scripts/check-api-target.mjs",
     "generate:screens": "node scripts/generate-screen-tree.mjs",
     "check:screens": "node scripts/generate-screen-tree.mjs --check && node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
     "review:screens": "node scripts/screen-canon-review.mjs",
