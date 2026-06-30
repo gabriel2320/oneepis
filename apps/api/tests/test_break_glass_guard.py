@@ -130,6 +130,28 @@ def test_contextual_access_header_audit_truncates_long_request_path(
     assert len(audit_event.request_path) == 240
 
 
+def test_contextual_access_header_rejection_response_and_audit_share_generated_correlation(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/record",
+        headers={**auth, "X-OneEpis-Tenant": "tenant-bloqueado"},
+    )
+
+    assert response.status_code == 403
+    correlation_id = response.headers["X-OneEpis-Correlation-ID"]
+    assert correlation_id.startswith("oneepis-")
+    audit_event = _contextual_access_block_event_by_correlation(correlation_id)
+    assert audit_event.correlation_id == correlation_id
+    assert audit_event.request_method == "GET"
+    assert audit_event.request_path == f"/api/v1/patients/{patient_id}/record"
+
+
 def test_clinical_routes_still_work_without_break_glass_header(
     client: TestClient,
     auth_headers,
@@ -153,6 +175,21 @@ def _latest_contextual_access_block_event() -> AuditEvent:
             .where(AuditEvent.action == "security.contextual_access_header_blocked")
             .order_by(AuditEvent.created_at.desc())
             .limit(1)
+        ).one()
+    finally:
+        session_iterator.close()
+
+
+def _contextual_access_block_event_by_correlation(correlation_id: str) -> AuditEvent:
+    override_session = app.dependency_overrides[get_session]
+    session_iterator = override_session()
+    session = next(session_iterator)
+    try:
+        return session.scalars(
+            select(AuditEvent).where(
+                AuditEvent.action == "security.contextual_access_header_blocked",
+                AuditEvent.correlation_id == correlation_id,
+            )
         ).one()
     finally:
         session_iterator.close()
