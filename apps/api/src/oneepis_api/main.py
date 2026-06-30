@@ -32,6 +32,15 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
+    async def break_glass_guard_middleware(request: Request, call_next):
+        if _uses_break_glass_header(request):
+            return JSONResponse(
+                {"detail": "Break-glass access is not enabled."},
+                status_code=403,
+            )
+        return await call_next(request)
+
+    @app.middleware("http")
     async def csrf_cookie_middleware(request: Request, call_next):
         if _requires_csrf(request, settings):
             csrf_cookie = request.cookies.get(settings.auth_csrf_cookie_name)
@@ -85,6 +94,20 @@ def _requires_csrf(request: Request, settings: Settings) -> bool:
     if request.headers.get("Authorization", "").lower().startswith("bearer "):
         return False
     return settings.auth_session_cookie_name in request.cookies
+
+
+def _uses_break_glass_header(request: Request) -> bool:
+    if not request.url.path.startswith(
+        (
+            "/api/v1/patients",
+            "/api/v1/appointments",
+            "/api/v1/hospitalization",
+            "/api/v1/medication-catalog",
+            "/api/v1/ai",
+        )
+    ):
+        return False
+    return bool(request.headers.get("X-OneEpis-Break-Glass"))
 
 
 app = create_app()
