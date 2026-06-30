@@ -8,6 +8,7 @@ from alembic import context
 from oneepis_api.core.config import get_settings
 from oneepis_api.db.base import Base
 from oneepis_api.models import (  # noqa: F401
+    access_boundary,
     audit,
     auth_security,
     clinical_record,
