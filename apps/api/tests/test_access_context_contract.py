@@ -1,4 +1,6 @@
-from oneepis_api.api.deps import ABAC_MINIMUM_REQUIREMENTS
+from starlette.requests import Request
+
+from oneepis_api.api.deps import ABAC_MINIMUM_REQUIREMENTS, AccessContext, build_access_context
 from oneepis_api.core.access_context_contract import (
     ACCESS_CONTEXT_REQUIREMENTS,
     ACCESS_CONTEXT_RUNTIME_STATUS,
@@ -7,6 +9,7 @@ from oneepis_api.core.access_context_contract import (
     contextual_access_header_names,
 )
 from oneepis_api.main import UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS
+from oneepis_api.services.auth import AuthenticatedUser, UserRole
 
 
 def test_access_context_contract_matches_abac_policy_requirements() -> None:
@@ -47,3 +50,67 @@ def test_access_context_contract_does_not_claim_runtime_abac() -> None:
             "Contextual ABAC is an executable contract only; runtime enforcement is future work."
         ),
     }
+
+
+def test_access_context_runtime_object_is_rbac_only_until_abac_enforcement() -> None:
+    user = AuthenticatedUser(
+        email="medico@oneepis.local",
+        name="Medico OneEpis",
+        roles=frozenset({UserRole.MEDICO}),
+        actor_id="medico@oneepis.local",
+    )
+    request = _request_with_headers(())
+
+    context = build_access_context(user, request)
+
+    assert isinstance(context, AccessContext)
+    assert context.actor_id == "medico@oneepis.local"
+    assert context.role_names == ("medico",)
+    assert context.source == "rbac_only"
+    assert context.institution_id is None
+    assert context.tenant_id is None
+    assert context.care_team_id is None
+    assert context.access_reason is None
+    assert context.break_glass_requested is False
+    assert context.unsupported_contextual_header_names == ()
+    assert context.missing_abac_requirements == ABAC_MINIMUM_REQUIREMENTS
+    assert context.runtime_abac_enforced is False
+    assert context.contextual_headers_accepted is False
+    assert context.break_glass_enabled is False
+
+
+def test_access_context_runtime_object_does_not_retain_contextual_header_values() -> None:
+    user = AuthenticatedUser(
+        email="dev@oneepis.local",
+        name="Dev OneEpis",
+        roles=frozenset({UserRole.ADMIN, UserRole.DEV}),
+        actor_id="dev@oneepis.local",
+    )
+    request = _request_with_headers(
+        (
+            (b"x-oneepis-tenant", b"tenant-secreto-no-retener"),
+            (b"x-oneepis-access-reason", b"motivo-clinico-no-retener"),
+        )
+    )
+
+    context = build_access_context(user, request)
+
+    assert context.unsupported_contextual_header_names == (
+        "X-OneEpis-Access-Reason",
+        "X-OneEpis-Tenant",
+    )
+    assert context.tenant_id is None
+    assert context.access_reason is None
+    assert "tenant-secreto-no-retener" not in repr(context)
+    assert "motivo-clinico-no-retener" not in repr(context)
+
+
+def _request_with_headers(headers: tuple[tuple[bytes, bytes], ...]) -> Request:
+    return Request(
+        {
+            "type": "http",
+            "method": "GET",
+            "path": "/api/v1/patients",
+            "headers": headers,
+        }
+    )
