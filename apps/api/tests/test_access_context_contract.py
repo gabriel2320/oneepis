@@ -68,6 +68,7 @@ def test_access_reason_contract_declares_future_reviewed_reason_keys() -> None:
         "active_care_relationship",
         "temporary_coverage",
         "care_coordination",
+        "audit_review",
         "break_glass",
     )
     assert {contract.status for contract in ACCESS_REASON_CONTRACTS} == {
@@ -84,21 +85,31 @@ def test_access_reason_contract_declares_future_reviewed_reason_keys() -> None:
     } == {
         "temporary_coverage",
         "care_coordination",
+        "audit_review",
         "break_glass",
     }
 
 
 def test_access_reason_audit_metadata_retains_only_reason_key() -> None:
-    assert access_reason_audit_metadata("care_coordination") == {
+    assert access_reason_audit_metadata(
+        "care_coordination",
+        raw_text="texto operativo que no debe quedar",
+    ) == {
         "access_reason_key": "care_coordination",
         "access_reason_known": True,
+        "raw_reason_present": True,
         "raw_reason_retained": False,
     }
     assert access_reason_audit_metadata("texto libre con PHI no debe quedar") == {
         "access_reason_key": "unknown",
         "access_reason_known": False,
+        "raw_reason_present": False,
         "raw_reason_retained": False,
     }
+    sensitive_reason = "detalle clinico sensible de auditoria"
+    metadata = access_reason_audit_metadata("audit_review", raw_text=sensitive_reason)
+    assert metadata["access_reason_key"] == "audit_review"
+    assert sensitive_reason not in repr(metadata)
 
 
 def test_access_context_runtime_object_is_rbac_only_until_abac_enforcement() -> None:

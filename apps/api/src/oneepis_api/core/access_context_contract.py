@@ -89,6 +89,14 @@ ACCESS_REASON_CONTRACTS: tuple[AccessReasonContract, ...] = (
         requires_review=True,
     ),
     AccessReasonContract(
+        key="audit_review",
+        label="Audit or compliance review",
+        status="future_review_required",
+        free_text_retention="never_store_raw_reason_text",
+        requires_patient_scope=True,
+        requires_review=True,
+    ),
+    AccessReasonContract(
         key="break_glass",
         label="Break-glass exceptional access",
         status="future_review_required",
@@ -163,10 +171,15 @@ def access_reason_keys() -> tuple[str, ...]:
     return tuple(contract.key for contract in ACCESS_REASON_CONTRACTS)
 
 
-def access_reason_audit_metadata(reason_key: str) -> dict[str, object]:
+def access_reason_audit_metadata(
+    reason_key: str,
+    *,
+    raw_text: str | None = None,
+) -> dict[str, object]:
     known_reason_keys = set(access_reason_keys())
     return {
         "access_reason_key": reason_key if reason_key in known_reason_keys else "unknown",
         "access_reason_known": reason_key in known_reason_keys,
+        "raw_reason_present": bool((raw_text or "").strip()),
         "raw_reason_retained": False,
     }
