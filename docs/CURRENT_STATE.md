@@ -81,10 +81,11 @@ fuente canonica viva.
   y propone borradores revisables, no decide, no firma y no escribe sin
   confirmacion humana/backend. AI-EVAL sintetico minimo cubre fuentes esperadas,
   falsos positivos y ausencia de consejo terapeutico autonomo.
-- P1 clinicos post Dev-154 a Dev-175 quedaron cerrados: matriz de antecedentes,
+- P1 clinicos post Dev-154 a Dev-183 quedaron cerrados: matriz de antecedentes,
   metadata de diagnostico historico, alertas completas de vademecum,
   `ended_on` en auditoria de medicacion, read-audit patient-scoped principal,
-  minimizacion de auditoria por allowlists y borrado logico de entradas/signos.
+  minimizacion de auditoria por allowlists, barrido de snapshots completos en
+  rutas clinicas y borrado logico de entradas/signos.
 - Las superficies clinicas y papel muestran guard visible de desarrollo/no PHI/no
   uso clinico real.
 - El registry estructurado de pantallas vive en
@@ -143,9 +144,9 @@ CI agrega:
   productivas, revocacion y recuperacion institucional siguen pendientes.
 - Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro y debe
   incluir motivo de acceso y break-glass auditado antes de piloto real.
-- Auditoria: read-audit y borrado logico ya cubren las superficies P1
-  principales, pero falta politica medico-legal completa de retencion,
-  exportacion, revision e inmutabilidad formal.
+- Auditoria: read-audit, borrado logico y minimizacion de snapshots ya cubren
+  las superficies P1 principales, pero falta politica medico-legal completa de
+  retencion, exportacion, revision e inmutabilidad formal.
 - IA externa: bloqueada hasta gateway PHI, anonimizacion, autorizacion, auditoria
   y politica explicita.
 - Legal clinico: firma, receta valida, orden ejecutable, MAR, consentimientos y
