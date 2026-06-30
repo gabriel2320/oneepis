@@ -60,3 +60,17 @@ produccion o purga, al menos:
 - inmutabilidad o evidencia de manipulacion;
 - legal hold;
 - procedimiento de purga revisado, autorizado y auditado.
+
+## Integridad
+
+La integridad medico-legal productiva de auditoria no esta implementada. El
+contrato ejecutable vive en
+`apps/api/src/oneepis_api/core/audit_integrity_contract.py`.
+
+Antes de produccion sanitaria, la auditoria debe definir y probar:
+
+- serializacion canonica de cada `AuditEvent`;
+- enlace al digest anterior o almacenamiento WORM equivalente;
+- version explicita de algoritmo/canonicalizacion;
+- anclaje externo a la base mutable o infraestructura WORM;
+- procedimiento de verificacion que detecte el primer enlace roto.
