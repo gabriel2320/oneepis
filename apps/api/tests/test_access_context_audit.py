@@ -1,7 +1,13 @@
 import uuid
 
+from access_boundary_helpers import (
+    assign_actor_to_care_team,
+    assign_patient_to_care_team,
+    create_abac_patient,
+    create_care_team,
+)
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from oneepis_api.api.v1.routes.patient_shared import record_patient_scoped_read
@@ -15,7 +21,7 @@ from oneepis_api.services.audit import (
 )
 
 
-def test_patient_scoped_read_records_passive_abac_decision() -> None:
+def test_patient_scoped_read_records_passive_abac_decision_without_relationship() -> None:
     session = _session()
     patient_id = uuid.uuid4()
     set_audit_request_context(
@@ -61,11 +67,69 @@ def test_patient_scoped_read_records_passive_abac_decision() -> None:
             "active_care_relationship_or_access_reason",
             "audited_break_glass",
         ],
+        "patient_scope": {
+            "status": "none",
+            "matched_care_team_count": 0,
+            "actor_active_care_team_count": 0,
+            "patient_active_care_team_count": 0,
+            "runtime_enforced": False,
+        },
         "metadata_retention": "requirement_keys_only",
     }
 
 
-def _session():
+def test_patient_scoped_read_records_minimized_resolved_patient_scope() -> None:
+    session = _session()
+    patient = create_abac_patient(session)
+    care_team = create_care_team(session)
+    assign_actor_to_care_team(
+        session,
+        actor_id="medico@oneepis.local",
+        care_team=care_team,
+        membership_reason="texto libre de cobertura que no debe quedar",
+    )
+    assign_patient_to_care_team(
+        session,
+        patient=patient,
+        care_team=care_team,
+        relationship_reason="texto libre clinico que no debe quedar",
+    )
+    set_audit_request_context(
+        AuditRequestContext(
+            correlation_id="passive-abac-unit-002",
+            request_method="GET",
+            request_path=f"/api/v1/patients/{patient.id}",
+        )
+    )
+    try:
+        record_patient_scoped_read(
+            session,
+            patient_id=patient.id,
+            actor_id="medico@oneepis.local",
+            action="patient.read",
+        )
+    finally:
+        clear_audit_request_context()
+
+    passive_event = session.scalars(
+        select(AuditEvent)
+        .where(AuditEvent.action == PASSIVE_ACCESS_CONTEXT_DECISION_ACTION)
+        .order_by(AuditEvent.created_at.asc())
+    ).one()
+
+    assert passive_event.extra_data["patient_scope"] == {
+        "status": "resolved",
+        "matched_care_team_count": 1,
+        "actor_active_care_team_count": 1,
+        "patient_active_care_team_count": 1,
+        "runtime_enforced": False,
+    }
+    assert str(care_team.id) not in repr(passive_event.extra_data)
+    assert "texto libre de cobertura" not in repr(passive_event.extra_data)
+    assert "texto libre clinico" not in repr(passive_event.extra_data)
+
+
+def _session() -> Session:
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},

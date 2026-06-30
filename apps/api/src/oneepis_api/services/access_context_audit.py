@@ -6,8 +6,15 @@ from typing import Literal
 from sqlalchemy.orm import Session
 
 from oneepis_api.core.access_context_contract import access_context_requirement_keys
-from oneepis_api.core.access_context_runtime import AccessContext, evaluate_access_context
+from oneepis_api.core.access_context_runtime import (
+    AccessContext,
+    attach_patient_scope_dry_run_metadata,
+    evaluate_access_context,
+)
 from oneepis_api.services.audit import record_audit_event
+from oneepis_api.services.patient_access_relationship import (
+    resolve_patient_access_relationship_dry_run,
+)
 
 PASSIVE_ACCESS_CONTEXT_DECISION_ACTION = "access_context.passive_decision"
 
@@ -19,12 +26,18 @@ def record_passive_patient_access_context_decision(
     actor_id: str,
     source_action: str,
 ) -> None:
+    patient_scope = resolve_patient_access_relationship_dry_run(
+        session,
+        actor_id=actor_id,
+        patient_id=patient_id,
+    )
     context = AccessContext(
         actor_id=actor_id,
         role_names=(),
         source="rbac_only",
         missing_abac_requirements=access_context_requirement_keys(),
     )
+    context = attach_patient_scope_dry_run_metadata(context, patient_scope.as_metadata())
     decision = evaluate_access_context(context)
     record_audit_event(
         session,
@@ -41,6 +54,7 @@ def record_passive_patient_access_context_decision(
             "would_deny_if_enforced": decision.would_deny_if_enforced,
             "denial_reason_count": len(decision.denial_reasons),
             "denial_reason_keys": _denial_reason_keys(decision.denial_reasons),
+            "patient_scope": context.patient_scope_dry_run_metadata,
             "metadata_retention": decision.metadata_retention,
         },
     )
