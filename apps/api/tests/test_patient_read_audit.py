@@ -482,6 +482,7 @@ def test_patient_audit_events_require_audit_read_access(
     client: TestClient,
     auth_headers,
     create_patient_for_permissions,
+    audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
     readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
@@ -501,6 +502,13 @@ def test_patient_audit_events_require_audit_read_access(
     assert medico_response.status_code == 403
     assert readonly_response.status_code == 403
     assert admin_response.status_code == 200
+    raw_events = audit_events_for_patient(patient_id)
+    audit_read = next(item for item in raw_events if item["action"] == "patient_audit.read")
+    assert audit_read["actor_id"] == "admin@oneepis.local"
+    assert audit_read["entity_type"] == "patient"
+    assert audit_read["entity_id"] == patient_id
+    assert audit_read["request_method"] == "GET"
+    assert audit_read["request_path"] == f"/api/v1/patients/{patient_id}/audit-events"
 
 
 def test_patient_read_audit_appends_repeated_same_route_reads(

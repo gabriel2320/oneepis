@@ -1,5 +1,7 @@
 import json
 
+from fastapi.testclient import TestClient
+
 from oneepis_api.core.config import Settings
 from oneepis_api.schemas.ai import ClinicalInsightRequest
 from oneepis_api.services.ai.provider import OllamaProvider, get_ai_provider
@@ -64,6 +66,24 @@ def test_get_ai_provider_selects_ollama() -> None:
     provider = get_ai_provider(settings)
 
     assert provider.name == "ollama"
+
+
+def test_ai_status_requires_ai_access(client: TestClient, auth_headers) -> None:
+    medico_auth = auth_headers(client)
+    nursing_auth = auth_headers(
+        client,
+        email="enfermeria@oneepis.local",
+        password="enfermeria",
+    )
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    medico_response = client.get("/api/v1/ai/status", headers=medico_auth)
+    nursing_response = client.get("/api/v1/ai/status", headers=nursing_auth)
+    readonly_response = client.get("/api/v1/ai/status", headers=readonly_auth)
+
+    assert medico_response.status_code == 200
+    assert nursing_response.status_code == 403
+    assert readonly_response.status_code == 403
 
 
 def test_get_ai_provider_prefers_summary_model_for_clinical_insights() -> None:

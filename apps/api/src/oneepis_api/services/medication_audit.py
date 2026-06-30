@@ -4,16 +4,12 @@ from typing import Any
 
 MEDICATION_CREATE_AUDIT_FIELDS = [
     "catalog_item_id",
-    "dose",
-    "dose_check_snapshot",
-    "frequency",
-    "name",
     "patient_id",
-    "route",
     "started_on",
     "ended_on",
     "status",
 ]
+MEDICATION_UPDATE_AUDIT_FIELDS = set(MEDICATION_CREATE_AUDIT_FIELDS)
 
 
 def medication_dose_audit_metadata(
@@ -54,3 +50,7 @@ def sanitize_override_reason_audit(snapshot: dict[str, Any]) -> None:
         "present": True,
         "length": len(reason.strip()),
     }
+
+
+def medication_update_audit_fields(fields: list[str]) -> list[str]:
+    return [field for field in fields if field in MEDICATION_UPDATE_AUDIT_FIELDS]

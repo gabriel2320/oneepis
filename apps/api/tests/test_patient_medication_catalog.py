@@ -110,9 +110,15 @@ def test_medication_catalog_validation_and_override_audit(
     assert metadata["dose_override_reason_length"] == len("Decision clinica documentada en demo.")
     assert metadata["dose_source_count"] >= 1
     assert "Decision clinica documentada en demo." not in str(metadata)
+    assert demo_item["display_name"] not in str(metadata)
+    assert "1500 mg" not in str(metadata)
     assert "dose_override_reason" not in metadata["after"]
+    assert "name" not in metadata["after"]
+    assert "dose" not in metadata["after"]
+    assert "route" not in metadata["after"]
+    assert "frequency" not in metadata["after"]
+    assert "dose_check_snapshot" not in metadata["after"]
     assert metadata["after"]["ended_on"] == "2026-06-30"
-    assert metadata["after"]["dose_check_snapshot"]["blocking"] is True
 
 
 def test_medication_read_exposes_missing_fields_for_unlinked_manual_medication(
