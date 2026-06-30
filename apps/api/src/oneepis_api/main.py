@@ -6,6 +6,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from oneepis_api.api.v1.router import api_router
+from oneepis_api.core.clinical_access import PROTECTED_CLINICAL_ROUTE_PREFIXES
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.services.audit import (
     AuditRequestContext,
@@ -105,15 +106,7 @@ def _requires_csrf(request: Request, settings: Settings) -> bool:
 
 
 def _uses_unsupported_contextual_access_header(request: Request) -> bool:
-    if not request.url.path.startswith(
-        (
-            "/api/v1/patients",
-            "/api/v1/appointments",
-            "/api/v1/hospitalization",
-            "/api/v1/medication-catalog",
-            "/api/v1/ai",
-        )
-    ):
+    if not request.url.path.startswith(PROTECTED_CLINICAL_ROUTE_PREFIXES):
         return False
     return any(request.headers.get(header) for header in UNSUPPORTED_CONTEXTUAL_ACCESS_HEADERS)
 
