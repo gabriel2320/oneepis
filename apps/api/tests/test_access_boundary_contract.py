@@ -1,8 +1,10 @@
 from pathlib import Path
 
 from oneepis_api.core.access_boundary_contract import (
+    ACCESS_BOUNDARY_REASON_FIELDS,
     ACCESS_BOUNDARY_RUNTIME_STATUS,
     ACCESS_BOUNDARY_STORES,
+    access_boundary_reason_audit_metadata,
     access_boundary_store_keys,
 )
 from oneepis_api.models.access_boundary import (
@@ -83,6 +85,45 @@ def test_access_boundary_runtime_does_not_claim_patient_scoping() -> None:
         "abac_runtime_enforced": False,
         "reason": "Access boundary stores are model stubs only; no patient access scoping yet.",
     }
+
+
+def test_access_boundary_reason_fields_are_phi_adjacent_minimized_metadata() -> None:
+    assert ACCESS_BOUNDARY_REASON_FIELDS == ("membership_reason", "relationship_reason")
+    assert access_boundary_reason_audit_metadata(None) == {
+        "reason_present": False,
+        "reason_length_bucket": "none",
+        "raw_reason_retained": False,
+    }
+    assert access_boundary_reason_audit_metadata("Cobertura temporal") == {
+        "reason_present": True,
+        "reason_length_bucket": "1_40",
+        "raw_reason_retained": False,
+    }
+    assert access_boundary_reason_audit_metadata("x" * 80) == {
+        "reason_present": True,
+        "reason_length_bucket": "41_120",
+        "raw_reason_retained": False,
+    }
+    sensitive_reason = "texto libre con PHI que no debe quedar en auditoria"
+    metadata = access_boundary_reason_audit_metadata(sensitive_reason)
+    assert sensitive_reason not in repr(metadata)
+
+
+def test_runtime_audit_code_does_not_reference_access_boundary_reason_text() -> None:
+    api_source_root = Path(__file__).parents[1] / "src" / "oneepis_api"
+    scanned_paths = [
+        *sorted((api_source_root / "api" / "v1" / "routes").glob("*.py")),
+        *sorted((api_source_root / "services").glob("*.py")),
+    ]
+    blocked_fields = set(ACCESS_BOUNDARY_REASON_FIELDS)
+    offenders: list[str] = []
+    for path in scanned_paths:
+        text = path.read_text(encoding="utf-8")
+        for field in blocked_fields:
+            if field in text:
+                offenders.append(f"{path.relative_to(api_source_root)}:{field}")
+
+    assert offenders == []
 
 
 def test_access_boundary_migration_is_isolated_from_patient_table() -> None:

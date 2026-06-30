@@ -77,6 +77,27 @@ ACCESS_BOUNDARY_RUNTIME_STATUS = {
     "reason": "Access boundary stores are model stubs only; no patient access scoping yet.",
 }
 
+ACCESS_BOUNDARY_REASON_FIELDS = ("membership_reason", "relationship_reason")
+
+
+def access_boundary_reason_audit_metadata(reason_text: str | None) -> dict[str, object]:
+    normalized = (reason_text or "").strip()
+    return {
+        "reason_present": bool(normalized),
+        "reason_length_bucket": _reason_length_bucket(len(normalized)),
+        "raw_reason_retained": False,
+    }
+
 
 def access_boundary_store_keys() -> tuple[str, ...]:
     return tuple(store.key for store in ACCESS_BOUNDARY_STORES)
+
+
+def _reason_length_bucket(length: int) -> str:
+    if length == 0:
+        return "none"
+    if length <= 40:
+        return "1_40"
+    if length <= 120:
+        return "41_120"
+    return "121_240"
