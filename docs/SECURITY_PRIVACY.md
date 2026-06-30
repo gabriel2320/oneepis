@@ -26,6 +26,20 @@ El checklist versionado de gates no productivos vive en
 - Backups, restore, auditoría de accesos, logs PHI-safe, gestión formal de
   secretos y gobernanza legal/clínica son gates explícitos antes de producción.
 
+## Secretos
+
+La gestion formal de secretos sigue pendiente antes de produccion sanitaria.
+El contrato ejecutable vive en
+`apps/api/src/oneepis_api/core/secret_management_contract.py`.
+
+Antes de cualquier entorno productivo se requiere, como minimo:
+
+- almacenamiento externo de secretos, fuera del repo y archivos locales;
+- owners y mantenedores autorizados por secreto;
+- politica de rotacion normal, emergencia y revocacion;
+- procedimiento de incidente ante filtracion;
+- aislamiento entre secretos de desarrollo, staging y produccion.
+
 ## Configuracion fuera de Desarrollo
 
 Si `ONEEPIS_ENVIRONMENT` no es `development`, la API rechaza el arranque con:
