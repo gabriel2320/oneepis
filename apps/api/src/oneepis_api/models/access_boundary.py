@@ -64,3 +64,61 @@ class ClinicalTenant(Base, IdMixin, TimestampMixin):
     created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
 
     institution: Mapped[ClinicalInstitution] = relationship(back_populates="tenants")
+    services: Mapped[list[ClinicalService]] = relationship(
+        back_populates="tenant",
+        cascade="all, delete-orphan",
+    )
+
+
+class ClinicalService(Base, IdMixin, TimestampMixin):
+    __tablename__ = "clinical_services"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "key", name="uq_clinical_services_tenant_key"),
+    )
+
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("clinical_tenants.id", ondelete="CASCADE"),
+        index=True,
+    )
+    key: Mapped[str] = mapped_column(String(80), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    status: Mapped[AccessBoundaryStatus] = mapped_column(
+        Enum(
+            AccessBoundaryStatus,
+            values_callable=enum_values,
+            name="access_boundary_status",
+        ),
+        default=AccessBoundaryStatus.DRAFT,
+        nullable=False,
+    )
+    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
+
+    tenant: Mapped[ClinicalTenant] = relationship(back_populates="services")
+    care_teams: Mapped[list[CareTeam]] = relationship(
+        back_populates="service",
+        cascade="all, delete-orphan",
+    )
+
+
+class CareTeam(Base, IdMixin, TimestampMixin):
+    __tablename__ = "care_teams"
+    __table_args__ = (UniqueConstraint("service_id", "key", name="uq_care_teams_service_key"),)
+
+    service_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("clinical_services.id", ondelete="CASCADE"),
+        index=True,
+    )
+    key: Mapped[str] = mapped_column(String(80), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    status: Mapped[AccessBoundaryStatus] = mapped_column(
+        Enum(
+            AccessBoundaryStatus,
+            values_callable=enum_values,
+            name="access_boundary_status",
+        ),
+        default=AccessBoundaryStatus.DRAFT,
+        nullable=False,
+    )
+    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
+
+    service: Mapped[ClinicalService] = relationship(back_populates="care_teams")
