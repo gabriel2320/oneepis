@@ -2,23 +2,18 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { protectedClinicalRoutePrefixes } from "./clinical-access-contract.mjs";
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const openApiPath = path.join(repoRoot, "packages/contracts/openapi.json");
 const openApi = JSON.parse(readFileSync(openApiPath, "utf8"));
 
-const protectedPrefixes = [
-  "/api/v1/patients",
-  "/api/v1/appointments",
-  "/api/v1/hospitalization",
-  "/api/v1/medication-catalog",
-  "/api/v1/ai",
-];
 const methods = new Set(["get", "post", "put", "patch", "delete"]);
 const errors = [];
 let checked = 0;
 
 for (const [routePath, operations] of Object.entries(openApi.paths ?? {})) {
-  if (!protectedPrefixes.some((prefix) => routePath.startsWith(prefix))) {
+  if (!protectedClinicalRoutePrefixes.some((prefix) => routePath.startsWith(prefix))) {
     continue;
   }
   for (const [method, operation] of Object.entries(operations)) {
