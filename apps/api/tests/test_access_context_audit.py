@@ -16,6 +16,7 @@ from oneepis_api.models.audit import AuditEvent
 from oneepis_api.services.access_context_audit import (
     DENIED_ACCESS_CONTEXT_DECISION_ACTION,
     PASSIVE_ACCESS_CONTEXT_DECISION_ACTION,
+    build_access_context_observability_report,
     denied_patient_access_context_metadata,
     record_denied_patient_access_context_decision,
 )
@@ -200,6 +201,81 @@ def test_record_denied_patient_access_context_decision_uses_minimized_metadata()
         "metadata_retention": "requirement_keys_only",
     }
     assert "raw-header-value-no-retener" not in repr(event.extra_data)
+
+
+def test_access_context_observability_report_is_aggregate_and_minimized() -> None:
+    patient_id = uuid.uuid4()
+    care_team_id = uuid.uuid4()
+    events = [
+        AuditEvent(
+            action=PASSIVE_ACCESS_CONTEXT_DECISION_ACTION,
+            entity_type="patient",
+            entity_id=patient_id,
+            actor_id="medico@oneepis.local",
+            extra_data={
+                "source_action": "record.read",
+                "runtime_enforced": False,
+                "would_deny_if_enforced": True,
+                "denial_reason_keys": [
+                    "active_care_relationship_or_access_reason",
+                    "audited_break_glass",
+                ],
+                "patient_scope": {
+                    "status": "none",
+                    "care_team_id": str(care_team_id),
+                    "reason_text": "texto libre sensible no debe salir",
+                },
+            },
+        ),
+        AuditEvent(
+            action=PASSIVE_ACCESS_CONTEXT_DECISION_ACTION,
+            entity_type="patient",
+            entity_id=patient_id,
+            actor_id="medico@oneepis.local",
+            extra_data={
+                "source_action": "patient.read",
+                "runtime_enforced": False,
+                "would_deny_if_enforced": False,
+                "denial_reason_keys": [],
+            },
+        ),
+        AuditEvent(
+            action=DENIED_ACCESS_CONTEXT_DECISION_ACTION,
+            entity_type="patient",
+            entity_id=patient_id,
+            actor_id="medico@oneepis.local",
+            extra_data={
+                "runtime_enforced": True,
+                "reason_keys": ["active_care_relationship_or_access_reason"],
+            },
+        ),
+        AuditEvent(
+            action="patient.read",
+            entity_type="patient",
+            entity_id=patient_id,
+            actor_id="medico@oneepis.local",
+            extra_data={"clinical_identifier": "NO-RETENER"},
+        ),
+    ]
+
+    report = build_access_context_observability_report(events)
+
+    assert report == {
+        "passive_decision_count": 2,
+        "passive_would_deny_if_enforced_count": 1,
+        "denied_count": 1,
+        "runtime_enforced_denied_count": 1,
+        "source_actions": ("patient.read", "record.read"),
+        "reason_keys": (
+            "active_care_relationship_or_access_reason",
+            "audited_break_glass",
+        ),
+        "metadata_retention": "aggregate_counts_only",
+    }
+    assert str(patient_id) not in repr(report)
+    assert str(care_team_id) not in repr(report)
+    assert "texto libre sensible" not in repr(report)
+    assert "NO-RETENER" not in repr(report)
 
 
 def _session() -> Session:
