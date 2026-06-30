@@ -27,6 +27,16 @@ class AccessContext:
     break_glass_enabled: bool = False
 
 
+@dataclass(frozen=True)
+class AccessContextDecision:
+    policy: Literal["contextual_abac"]
+    runtime_enforced: bool
+    allowed: bool
+    would_deny_if_enforced: bool
+    denial_reasons: tuple[str, ...]
+    metadata_retention: Literal["requirement_keys_only"]
+
+
 def build_access_context(
     user: AuthenticatedUser,
     request: Request,
@@ -45,4 +55,20 @@ def build_access_context(
         runtime_abac_enforced=ACCESS_CONTEXT_RUNTIME_STATUS["runtime_abac_enforced"],
         contextual_headers_accepted=ACCESS_CONTEXT_RUNTIME_STATUS["contextual_headers_accepted"],
         break_glass_enabled=ACCESS_CONTEXT_RUNTIME_STATUS["break_glass_enabled"],
+    )
+
+
+def evaluate_access_context(context: AccessContext) -> AccessContextDecision:
+    denial_reasons = tuple(
+        f"missing_abac_requirement:{requirement}"
+        for requirement in context.missing_abac_requirements
+    )
+    would_deny_if_enforced = bool(denial_reasons)
+    return AccessContextDecision(
+        policy="contextual_abac",
+        runtime_enforced=context.runtime_abac_enforced,
+        allowed=not context.runtime_abac_enforced or not would_deny_if_enforced,
+        would_deny_if_enforced=would_deny_if_enforced,
+        denial_reasons=denial_reasons,
+        metadata_retention="requirement_keys_only",
     )
