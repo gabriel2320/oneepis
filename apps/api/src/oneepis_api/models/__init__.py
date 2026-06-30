@@ -1,5 +1,6 @@
 from oneepis_api.models.access_boundary import (
     AccessBoundaryStatus,
+    ActorCareTeamMembership,
     CareTeam,
     ClinicalInstitution,
     ClinicalService,
@@ -32,6 +33,7 @@ from oneepis_api.models.patient import Patient
 
 __all__ = [
     "AccessBoundaryStatus",
+    "ActorCareTeamMembership",
     "Allergy",
     "AuditEvent",
     "AuthLoginLock",

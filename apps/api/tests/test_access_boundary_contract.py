@@ -7,6 +7,7 @@ from oneepis_api.core.access_boundary_contract import (
 )
 from oneepis_api.models.access_boundary import (
     AccessBoundaryStatus,
+    ActorCareTeamMembership,
     CareTeam,
     ClinicalInstitution,
     ClinicalService,
@@ -22,9 +23,11 @@ def test_access_boundary_contract_declares_institution_and_tenant_stores() -> No
         "clinical_service",
         "care_team",
         "patient_care_team_relationship",
+        "actor_care_team_membership",
     )
     assert {store.runtime_enforcement for store in ACCESS_BOUNDARY_STORES} == {"disabled"}
     assert {store.model for store in ACCESS_BOUNDARY_STORES} == {
+        "ActorCareTeamMembership",
         "CareTeam",
         "ClinicalInstitution",
         "ClinicalService",
@@ -32,6 +35,7 @@ def test_access_boundary_contract_declares_institution_and_tenant_stores() -> No
         "PatientCareTeamRelationship",
     }
     assert {store.table for store in ACCESS_BOUNDARY_STORES} == {
+        "actor_care_team_memberships",
         "care_teams",
         "clinical_institutions",
         "clinical_services",
@@ -49,10 +53,13 @@ def test_access_boundary_models_are_bound_to_contract_tables() -> None:
     assert ClinicalService.__tablename__ == "clinical_services"
     assert CareTeam.__tablename__ == "care_teams"
     assert PatientCareTeamRelationship.__tablename__ == "patient_care_team_relationships"
+    assert ActorCareTeamMembership.__tablename__ == "actor_care_team_memberships"
     assert ClinicalService.tenant_id.property.columns[0].index is True
     assert CareTeam.service_id.property.columns[0].index is True
     assert PatientCareTeamRelationship.patient_id.property.columns[0].index is True
     assert PatientCareTeamRelationship.care_team_id.property.columns[0].index is True
+    assert ActorCareTeamMembership.actor_id.property.columns[0].index is True
+    assert ActorCareTeamMembership.care_team_id.property.columns[0].index is True
 
 
 def test_access_boundary_runtime_does_not_claim_patient_scoping() -> None:
@@ -62,6 +69,7 @@ def test_access_boundary_runtime_does_not_claim_patient_scoping() -> None:
         "clinical_service_store_available": True,
         "care_team_store_available": True,
         "patient_care_team_relationship_store_available": True,
+        "actor_care_team_membership_store_available": True,
         "patient_scoping_enabled": False,
         "abac_runtime_enforced": False,
         "reason": "Access boundary stores are model stubs only; no patient access scoping yet.",
@@ -95,6 +103,23 @@ def test_patient_care_team_relationship_migration_keeps_abac_runtime_disabled() 
     assert "care_teams.id" in migration
     assert "uq_patient_care_team_relationship" in migration
     assert "ACCESS_CONTEXT_RUNTIME_STATUS" not in migration
+    assert "abac_runtime_enforced" not in migration
+
+
+def test_actor_care_team_membership_migration_avoids_user_store_claim() -> None:
+    migration = (
+        Path(__file__).parents[1]
+        / "alembic"
+        / "versions"
+        / "202606200025_actor_care_team_memberships.py"
+    ).read_text(encoding="utf-8")
+
+    assert "actor_care_team_memberships" in migration
+    assert "actor_id" in migration
+    assert "care_teams.id" in migration
+    assert "uq_actor_care_team_membership" in migration
+    assert "auth_users" not in migration
+    assert "users.id" not in migration
     assert "abac_runtime_enforced" not in migration
 
 

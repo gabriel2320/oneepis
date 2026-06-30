@@ -126,6 +126,36 @@ class CareTeam(Base, IdMixin, TimestampMixin):
         back_populates="care_team",
         cascade="all, delete-orphan",
     )
+    actor_memberships: Mapped[list[ActorCareTeamMembership]] = relationship(
+        back_populates="care_team",
+        cascade="all, delete-orphan",
+    )
+
+
+class ActorCareTeamMembership(Base, IdMixin, TimestampMixin):
+    __tablename__ = "actor_care_team_memberships"
+    __table_args__ = (
+        UniqueConstraint("actor_id", "care_team_id", name="uq_actor_care_team_membership"),
+    )
+
+    actor_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    care_team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("care_teams.id", ondelete="CASCADE"),
+        index=True,
+    )
+    status: Mapped[AccessBoundaryStatus] = mapped_column(
+        Enum(
+            AccessBoundaryStatus,
+            values_callable=enum_values,
+            name="access_boundary_status",
+        ),
+        default=AccessBoundaryStatus.DRAFT,
+        nullable=False,
+    )
+    membership_reason: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    created_by: Mapped[str] = mapped_column(String(120), nullable=False, default="system")
+
+    care_team: Mapped[CareTeam] = relationship(back_populates="actor_memberships")
 
 
 class PatientCareTeamRelationship(Base, IdMixin, TimestampMixin):
