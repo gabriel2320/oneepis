@@ -92,6 +92,13 @@ test("Assistant Read renders real read-only timeline, search, chart and correlat
   await expect(page.getByText("Sin IA externa")).toBeVisible();
   await expect(page.getByText("Control longitudinal real").first()).toBeVisible();
   await expect(page.getByText("Fuente: clinical_entries")).toBeVisible();
+  await page.getByRole("button", { name: "Candidatos Dx" }).click();
+  await expect(page.getByText("Candidatos diagnosticos para revision")).toBeVisible();
+  await expect(page.getByText("Neumonia", { exact: true })).toBeVisible();
+  await expect(page.getByText("SNOMED-GPS: 233604007 - Pneumonia")).toBeVisible();
+  await expect(page.getByText("CIE-10: J18.9 - Neumonia, organismo no especificado")).toBeVisible();
+  await expect(page.getByText("Fuente: Farreras clinico depurado local / CL-0038")).toBeVisible();
+  await expect(page.getByText("No registra diagnostico automaticamente.")).toBeVisible();
 
   await page.getByRole("tab", { name: /Buscar/ }).click();
   await page.getByPlaceholder("Buscar antecedente, examen o medicamento").fill("metformina");
@@ -162,6 +169,10 @@ async function fulfillApi(route: Route) {
   }
   if (path === `/api/v1/patients/${patientId}/clinical-events`) {
     await route.fulfill({ json: clinicalEvents, headers: corsHeaders });
+    return;
+  }
+  if (path === `/api/v1/patients/${patientId}/ai/clinical-intent`) {
+    await route.fulfill({ json: diagnosticIntent, headers: corsHeaders });
     return;
   }
   if (path === `/api/v1/patients/${patientId}/timeline`) {
@@ -245,6 +256,7 @@ const patientRecord = {
       limit: "No equivale a problema activo actual.",
       code_system: "CIE-10",
       code: "J18.9",
+      coding_references: [],
     },
   ],
   recent_entries: [recentEntry],
@@ -442,6 +454,98 @@ const assistantCorrelation = {
   limit: 80,
   has_more: false,
   applies_changes: false,
+};
+
+const diagnosticIntent = {
+  intent_type: "diagnostic_candidates",
+  mode: "read",
+  clinical_answer: "- Neumonia: candidato sugerido por evidencia respiratoria.",
+  sources: [
+    { source_type: "clinical_event", source_id: eventId, label: "Disnea y saturacion baja" },
+    { source_type: "clinical_entry", source_id: entryId, label: "Control longitudinal real" },
+  ],
+  certainty: "moderate",
+  missing_data: [],
+  proposed_actions: [
+    {
+      action_type: "review_sources",
+      label: "Revisar fuentes",
+      description: "Revisar evidencia y codificacion.",
+      requires_confirmation: false,
+    },
+    {
+      action_type: "none",
+      label: "Sin escritura",
+      description: "No registra diagnosticos automaticamente.",
+      requires_confirmation: false,
+    },
+  ],
+  evidence_marks: [],
+  context_sections: [],
+  problem_contexts: [],
+  change_set: {
+    baseline: "Control longitudinal real",
+    new_items: ["Disnea y saturacion baja"],
+    rule_findings: [],
+    missing_for_comparison: [],
+  },
+  review_items: [],
+  diagnostic_candidates: [
+    {
+      candidate_id: "4b46723f-26df-5c61-8f81-bfbb4232d845",
+      title: "Neumonia",
+      domain: "respiratorio",
+      certainty: "moderate",
+      rationale: "Candidato sugerido por coincidencia con referencias diagnosticas.",
+      evidence: ["Evento: Disnea y saturacion baja", "Evolucion: Control longitudinal real"],
+      missing_data: [],
+      coding_references: [
+        {
+          system: "SNOMED-GPS",
+          code: "233604007",
+          label: "Pneumonia",
+          source_label: "SNOMED CT GPS",
+          source_version: "GPS flat identifier",
+          validation_status: "validated_reference",
+          primary: true,
+        },
+        {
+          system: "CIE-10",
+          code: "J18.9",
+          label: "Neumonia, organismo no especificado",
+          source_label: "WHO ICD-10",
+          source_version: "CIE-10 reference",
+          validation_status: "validated_reference",
+          primary: false,
+        },
+        {
+          system: "CIE-11",
+          code: "CA40.Z",
+          label: "Neumonia, no especificada",
+          source_label: "WHO ICD-11",
+          source_version: "ICD-11 MMS reference",
+          validation_status: "validated_reference",
+          primary: false,
+        },
+      ],
+      reference_sources: [
+        {
+          source_label: "Farreras clinico depurado local",
+          source_version: "2026-06-29",
+          chapter_id: "CL-0038",
+          page_label: "pagina 92",
+          summary: "Referencia general de contexto respiratorio.",
+        },
+      ],
+      warnings: ["Candidato diagnostico revisable; no confirma neumonia."],
+      requires_human_confirmation: true,
+    },
+  ],
+  warnings: [
+    "Candidatos para revision humana; no equivalen a diagnostico confirmado.",
+    "No se crea problema activo ni diagnostico historico desde este intent.",
+  ],
+  requires_human_confirmation: true,
 };
 
 const labPanels = [

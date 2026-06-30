@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
+from pydantic import ValidationError
 from sqlalchemy import select
 
 from oneepis_api.api.deps import ClinicalEventActorDep, PatientReadActorDep
@@ -18,6 +19,10 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalEventRead,
     ClinicalEventUpdate,
     ClinicalTimelineRead,
+)
+from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
+    diagnostic_code_references_from_payload,
+    validate_diagnosis_code_pair,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 
@@ -108,6 +113,27 @@ def validate_curated_antecedent_payload(
         )
 
 
+def validate_diagnostic_coding_payload(payload: dict, summary: str = "Diagnostico") -> None:
+    try:
+        validate_diagnosis_code_pair(
+            payload.get("code_system") if isinstance(payload.get("code_system"), str) else None,
+            payload.get("code") if isinstance(payload.get("code"), str) else None,
+        )
+        if "diagnostic_codes" not in payload:
+            return
+        if not isinstance(payload["diagnostic_codes"], list):
+            raise ValueError("payload.diagnostic_codes must be a list")
+        diagnostic_code_references_from_payload(
+            payload["diagnostic_codes"],
+            fallback_label=summary,
+        )
+    except (ValueError, ValidationError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
+
+
 def clinical_event_audit_fields(fields: list[str]) -> list[str]:
     allowed_fields = set(CLINICAL_EVENT_AUDIT_FIELDS)
     return [field for field in fields if field in allowed_fields]
@@ -153,6 +179,7 @@ def create_clinical_event(
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     validate_clinical_event_source(payload.source_type, payload.source_ref)
     validate_curated_antecedent_payload(payload.payload, payload.event_type)
+    validate_diagnostic_coding_payload(payload.payload, payload.summary)
     event_data = payload.model_dump()
     event_data["created_by"] = actor
     event = ClinicalEvent(patient_id=patient_id, **event_data)
@@ -222,8 +249,13 @@ def update_clinical_event(
     final_event_type = payload_data.get("event_type", event.event_type)
     if "payload" in payload_data and payload_data["payload"] is not None:
         validate_curated_antecedent_payload(payload_data["payload"], final_event_type)
+        validate_diagnostic_coding_payload(
+            payload_data["payload"],
+            payload_data.get("summary", event.summary),
+        )
     elif "event_type" in payload_data:
         validate_curated_antecedent_payload(event.payload, final_event_type)
+        validate_diagnostic_coding_payload(event.payload, event.summary)
     update_fields = sorted(payload_data.keys())
     before = audit_snapshot(event, clinical_event_audit_fields(update_fields))
     fields = apply_update(event, payload)

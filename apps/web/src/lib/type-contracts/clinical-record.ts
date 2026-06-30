@@ -1,4 +1,5 @@
 import type { Patient } from "./patient";
+import type { DiagnosisCodeReference } from "./ai";
 
 export type ClinicalEntryKind =
   | "intake"
@@ -225,6 +226,7 @@ export type ActiveProblem = {
   title: string;
   code_system?: string | null;
   code?: string | null;
+  coding_references: DiagnosisCodeReference[];
   status: RecordStatus;
   onset_date?: string | null;
   resolved_on?: string | null;
@@ -245,6 +247,7 @@ export type HistoricalDiagnosis = {
   limit: string;
   code_system?: string | null;
   code?: string | null;
+  coding_references: DiagnosisCodeReference[];
 };
 
 export type ClinicalEncounterCreate = {

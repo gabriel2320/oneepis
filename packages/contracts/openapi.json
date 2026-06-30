@@ -8433,6 +8433,13 @@
             "format": "uuid",
             "title": "Patient Id"
           },
+          "coding_references": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosisCodeReference"
+            },
+            "type": "array",
+            "title": "Coding References"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -11159,7 +11166,8 @@
               "active_problems",
               "timeline",
               "draft_soap",
-              "show_sources"
+              "show_sources",
+              "diagnostic_candidates"
             ],
             "title": "Intent Type"
           },
@@ -11282,6 +11290,13 @@
             "type": "array",
             "title": "Review Items"
           },
+          "diagnostic_candidates": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticCandidate"
+            },
+            "type": "array",
+            "title": "Diagnostic Candidates"
+          },
           "warnings": {
             "items": {
               "type": "string"
@@ -11347,7 +11362,8 @@
                   "active_problems",
                   "timeline",
                   "draft_soap",
-                  "show_sources"
+                  "show_sources",
+                  "diagnostic_candidates"
                 ]
               },
               {
@@ -12486,6 +12502,218 @@
         ],
         "title": "ConfirmClinicalPatchResponse"
       },
+      "DiagnosisCodeReference": {
+        "properties": {
+          "system": {
+            "type": "string",
+            "enum": [
+              "SNOMED-GPS",
+              "SNOMED-CT",
+              "CIE-10",
+              "ICD-10",
+              "CIE-11",
+              "ICD-11"
+            ],
+            "title": "System"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Source Label"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "validation_status": {
+            "type": "string",
+            "enum": [
+              "validated_reference",
+              "legacy",
+              "external",
+              "needs_review"
+            ],
+            "title": "Validation Status",
+            "default": "needs_review"
+          },
+          "primary": {
+            "type": "boolean",
+            "title": "Primary",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "system",
+          "code",
+          "label",
+          "source_label"
+        ],
+        "title": "DiagnosisCodeReference"
+      },
+      "DiagnosticCandidate": {
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Candidate Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Domain"
+          },
+          "certainty": {
+            "type": "string",
+            "enum": [
+              "moderate",
+              "low"
+            ],
+            "title": "Certainty",
+            "default": "low"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Rationale"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Data"
+          },
+          "coding_references": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosisCodeReference"
+            },
+            "type": "array",
+            "title": "Coding References"
+          },
+          "reference_sources": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticReferenceSource"
+            },
+            "type": "array",
+            "title": "Reference Sources"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "requires_human_confirmation": {
+            "type": "boolean",
+            "title": "Requires Human Confirmation",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "candidate_id",
+          "title",
+          "domain",
+          "rationale"
+        ],
+        "title": "DiagnosticCandidate"
+      },
+      "DiagnosticReferenceSource": {
+        "properties": {
+          "source_label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Source Label"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "chapter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chapter Id"
+          },
+          "page_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Label"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_label",
+          "summary"
+        ],
+        "title": "DiagnosticReferenceSource"
+      },
       "DraftSoapFromEventsRequest": {
         "properties": {
           "clinical_event_ids": {
@@ -12902,6 +13130,13 @@
               }
             ],
             "title": "Code"
+          },
+          "coding_references": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosisCodeReference"
+            },
+            "type": "array",
+            "title": "Coding References"
           }
         },
         "type": "object",

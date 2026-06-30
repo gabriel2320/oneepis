@@ -4,7 +4,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from oneepis_api.models.clinical_record import (
     AllergySeverity,
@@ -16,6 +16,11 @@ from oneepis_api.models.clinical_record import (
 from oneepis_api.models.medication_catalog import (
     MedicationSourceReviewStatus,
     MedicationSourceSystem,
+)
+from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
+    DiagnosisCodeReference,
+    legacy_diagnostic_code_reference,
+    validate_diagnosis_code_pair,
 )
 from oneepis_api.schemas.common import APIModel
 
@@ -105,6 +110,11 @@ class ActiveProblemBase(APIModel):
     resolved_on: date | None = None
     notes: str | None = Field(default=None, max_length=280)
 
+    @model_validator(mode="after")
+    def validate_diagnostic_code(self) -> ActiveProblemBase:
+        validate_diagnosis_code_pair(self.code_system, self.code)
+        return self
+
 
 class ActiveProblemCreate(ActiveProblemBase):
     pass
@@ -119,12 +129,31 @@ class ActiveProblemUpdate(APIModel):
     resolved_on: date | None = None
     notes: str | None = Field(default=None, max_length=280)
 
+    @model_validator(mode="after")
+    def validate_diagnostic_code(self) -> ActiveProblemUpdate:
+        validate_diagnosis_code_pair(self.code_system, self.code)
+        return self
+
 
 class ActiveProblemRead(ActiveProblemBase):
     id: uuid.UUID
     patient_id: uuid.UUID
+    coding_references: list[DiagnosisCodeReference] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
+
+    @model_validator(mode="after")
+    def populate_legacy_coding_reference(self) -> ActiveProblemRead:
+        if self.coding_references:
+            return self
+        reference = legacy_diagnostic_code_reference(
+            system=self.code_system,
+            code=self.code,
+            label=self.title,
+        )
+        if reference is not None:
+            self.coding_references = [reference]
+        return self
 
 
 class ClinicalEncounterBase(APIModel):

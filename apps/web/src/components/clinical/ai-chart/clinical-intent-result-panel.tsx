@@ -15,6 +15,7 @@ import {
 } from "./ai-chart-utils";
 import {
   ContextPanel,
+  DiagnosticCandidatesPanel,
   EvidenceMarksPanel,
   MissingDataPanel,
   ProblemsEvidencePanel,
@@ -115,6 +116,7 @@ export function ClinicalIntentResultPanel({
           </div>
         </div>
         <ProblemsEvidencePanel intent={intent} />
+        <DiagnosticCandidatesPanel intent={intent} />
         <ReviewItemsPanel
           pendingReviewItems={pendingReviewItems}
           decidedReviewItems={decidedReviewItems}

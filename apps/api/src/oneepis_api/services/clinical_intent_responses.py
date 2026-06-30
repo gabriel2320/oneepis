@@ -29,6 +29,7 @@ from oneepis_api.services.clinical_intent_medication_rules import (
     medication_review_findings as _medication_review_findings,
 )
 from oneepis_api.services.clinical_intent_text import join_titles as _join_titles
+from oneepis_api.services.diagnostic_candidates import build_diagnostic_candidates
 
 
 def summarize_patient_response(
@@ -253,6 +254,42 @@ def show_sources_response(
         change_set=change_set(snapshot, events, recent_vitals),
         review_items=review_items,
         proposed_actions=[_action("none", "Sin accion", "Lectura solamente.")],
+    )
+
+
+def diagnostic_candidates_response(
+    payload: ClinicalIntentRequest,
+    snapshot: PatientRecordSnapshot,
+    events: list[object],
+    recent_vitals: list[object],
+    lab_results: list[object],
+    review_items: list[ClinicalReviewItem],
+    active_risks: list[object] | None = None,
+) -> ClinicalIntentResponse:
+    candidates = build_diagnostic_candidates(snapshot, events, lab_results)
+    answer = (
+        "\n".join(f"- {candidate.title}: {candidate.rationale}" for candidate in candidates)
+        if candidates
+        else "Sin candidatos diagnosticos revisables con evidencia suficiente."
+    )
+    return ClinicalIntentResponse(
+        intent_type=payload.intent_type,
+        mode="read",
+        clinical_answer=answer,
+        **_context_payload(snapshot, events, lab_results, active_risks=active_risks),
+        certainty="moderate" if candidates else "low",
+        change_set=change_set(snapshot, events, recent_vitals),
+        review_items=review_items,
+        diagnostic_candidates=candidates,
+        proposed_actions=[
+            _action("review_sources", "Revisar fuentes", "Revisar evidencia y codificacion."),
+            _action("none", "Sin escritura", "No registra diagnosticos automaticamente."),
+        ],
+        warnings=[
+            "Candidatos para revision humana; no equivalen a diagnostico confirmado.",
+            "No se crea problema activo ni diagnostico historico desde este intent.",
+        ],
+        requires_human_confirmation=True,
     )
 
 

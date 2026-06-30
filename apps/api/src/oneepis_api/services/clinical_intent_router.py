@@ -47,6 +47,18 @@ def route_clinical_intent(payload: ClinicalIntentRouteRequest) -> ClinicalIntent
             ("problemas", "diagnosticos activos", "problemas activos", "ordena problemas"),
         ),
         (
+            "diagnostic_candidates",
+            "read",
+            (
+                "candidato diagnostico",
+                "candidatos diagnosticos",
+                "sugerencias diagnosticas",
+                "codificacion diagnostica",
+                "cie",
+                "snomed",
+            ),
+        ),
+        (
             "timeline",
             "read",
             ("timeline", "linea de tiempo", "hospitalizacion", "cronologia"),
@@ -104,6 +116,7 @@ def _intent_label(intent_type: ClinicalIntentType) -> str:
         "timeline": "Crear timeline",
         "draft_soap": "Preparar evolucion S/O/A/P",
         "show_sources": "Mostrar fuentes",
+        "diagnostic_candidates": "Revisar candidatos diagnosticos",
     }
     return labels[intent_type]
 
@@ -119,6 +132,11 @@ def _fallback_actions() -> list[ClinicalIntentAction]:
             requires_confirmation=True,
         ),
         _action("review_sources", "Mostrar fuentes", "Ver fuentes usadas por AI-Chart."),
+        _action(
+            "review_sources",
+            "Candidatos diagnosticos",
+            "Ver candidatos revisables sin escritura automatica.",
+        ),
     ]
 
 

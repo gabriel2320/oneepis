@@ -76,6 +76,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
         title: "Problema demo activo",
         code_system: "DEMO",
         code: "P001",
+        coding_references: [],
         status: "active",
         onset_date: "2026-06-01",
         resolved_on: null,
@@ -95,6 +96,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
         limit: "Lectura historica demo; no es problema activo.",
         code_system: "DEMO",
         code: "DX-H001",
+        coding_references: [],
       },
     ],
     recent_entries: [
@@ -163,6 +165,7 @@ export const demoRecords: PatientRecordSnapshot[] = [
         limit: "Contexto historico demo; no es diagnostico de egreso.",
         code_system: "DEMO",
         code: "DX-H002",
+        coding_references: [],
       },
     ],
     recent_entries: [

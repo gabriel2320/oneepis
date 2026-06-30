@@ -1,0 +1,141 @@
+{
+  "source_label": "Referencias diagnosticas locales curadas",
+  "source_version": "diagnostic-references-v1",
+  "items": [
+    {
+      "reference_id": "4b46723f-26df-5c61-8f81-bfbb4232d845",
+      "title": "Neumonia",
+      "domain": "respiratorio",
+      "aliases": ["neumonia", "neumonia adquirida en comunidad", "infeccion respiratoria baja", "disnea", "tos", "crepitos"],
+      "coding_references": [
+        {
+          "system": "SNOMED-GPS",
+          "code": "233604007",
+          "label": "Pneumonia",
+          "source_label": "SNOMED CT GPS",
+          "source_version": "GPS flat identifier",
+          "validation_status": "validated_reference",
+          "primary": true
+        },
+        {
+          "system": "CIE-10",
+          "code": "J18.9",
+          "label": "Neumonia, organismo no especificado",
+          "source_label": "WHO ICD-10",
+          "source_version": "CIE-10 reference",
+          "validation_status": "validated_reference",
+          "primary": false
+        },
+        {
+          "system": "CIE-11",
+          "code": "CA40.Z",
+          "label": "Neumonia, no especificada",
+          "source_label": "WHO ICD-11",
+          "source_version": "ICD-11 MMS reference",
+          "validation_status": "validated_reference",
+          "primary": false
+        }
+      ],
+      "reference_sources": [
+        {
+          "source_label": "Farreras clinico depurado local",
+          "source_version": "2026-06-29",
+          "chapter_id": "CL-0038",
+          "page_label": "pagina 92",
+          "summary": "Referencia general de contexto respiratorio; exige correlacion clinica, signos vitales y evidencia humana antes de confirmar diagnostico."
+        }
+      ],
+      "clinical_use_limit": "Candidato diagnostico revisable; no confirma neumonia ni indica tratamiento."
+    },
+    {
+      "reference_id": "b8d6dcac-15cf-52c7-b7f6-b739db9c8988",
+      "title": "Diabetes mellitus tipo 2",
+      "domain": "metabolico",
+      "aliases": ["diabetes", "diabetes mellitus", "diabetes tipo 2", "dm2", "glicemia", "glucosa", "hba1c", "hiperglicemia"],
+      "coding_references": [
+        {
+          "system": "SNOMED-GPS",
+          "code": "44054006",
+          "label": "Diabetes mellitus type 2",
+          "source_label": "SNOMED CT GPS",
+          "source_version": "GPS flat identifier",
+          "validation_status": "validated_reference",
+          "primary": true
+        },
+        {
+          "system": "CIE-10",
+          "code": "E11.9",
+          "label": "Diabetes mellitus tipo 2 sin complicaciones",
+          "source_label": "WHO ICD-10",
+          "source_version": "CIE-10 reference",
+          "validation_status": "validated_reference",
+          "primary": false
+        },
+        {
+          "system": "CIE-11",
+          "code": "5A11",
+          "label": "Diabetes mellitus tipo 2",
+          "source_label": "WHO ICD-11",
+          "source_version": "ICD-11 MMS reference",
+          "validation_status": "validated_reference",
+          "primary": false
+        }
+      ],
+      "reference_sources": [
+        {
+          "source_label": "Farreras clinico depurado local",
+          "source_version": "2026-06-29",
+          "chapter_id": "CL-0487",
+          "page_label": "referencia local endocrino-metabolica",
+          "summary": "Referencia general de contexto metabolico; requiere datos estructurados como glicemia o HbA1c y revision clinica."
+        }
+      ],
+      "clinical_use_limit": "Candidato diagnostico revisable; no establece diagnostico ni plan terapeutico."
+    },
+    {
+      "reference_id": "48a9f918-3328-58f5-9cae-a06b44d51cf1",
+      "title": "Hipertension arterial esencial",
+      "domain": "hemodinamico",
+      "aliases": ["hipertension", "hipertension arterial", "hta", "presion arterial", "presion alta", "sistolica", "diastolica"],
+      "coding_references": [
+        {
+          "system": "SNOMED-GPS",
+          "code": "38341003",
+          "label": "Hypertensive disorder",
+          "source_label": "SNOMED CT GPS",
+          "source_version": "GPS flat identifier",
+          "validation_status": "validated_reference",
+          "primary": true
+        },
+        {
+          "system": "CIE-10",
+          "code": "I10",
+          "label": "Hipertension esencial primaria",
+          "source_label": "WHO ICD-10",
+          "source_version": "CIE-10 reference",
+          "validation_status": "validated_reference",
+          "primary": false
+        },
+        {
+          "system": "CIE-11",
+          "code": "BA00.Z",
+          "label": "Hipertension esencial, no especificada",
+          "source_label": "WHO ICD-11",
+          "source_version": "ICD-11 MMS reference",
+          "validation_status": "validated_reference",
+          "primary": false
+        }
+      ],
+      "reference_sources": [
+        {
+          "source_label": "Farreras clinico depurado local",
+          "source_version": "2026-06-29",
+          "chapter_id": "CL-0290",
+          "page_label": "referencia local cardiovascular",
+          "summary": "Referencia general de contexto hemodinamico; requiere mediciones verificables y criterio humano antes de confirmar."
+        }
+      ],
+      "clinical_use_limit": "Candidato diagnostico revisable; no confirma hipertension ni ajusta tratamiento."
+    }
+  ]
+}

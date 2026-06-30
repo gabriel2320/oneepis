@@ -122,6 +122,7 @@ const intentActionMap: Record<ClinicalIntentType, ScreenAiAction> = {
   summarize_patient: "summarize",
   daily_changes: "summarize",
   active_problems: "read",
+  diagnostic_candidates: "read",
   timeline: "search",
   draft_soap: "draft",
   show_sources: "read",

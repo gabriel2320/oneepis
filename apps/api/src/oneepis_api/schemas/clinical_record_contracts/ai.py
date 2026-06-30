@@ -7,6 +7,7 @@ from typing import Any, Literal
 from pydantic import Field
 
 from oneepis_api.models.clinical_record import ClinicalEventSourceType, ClinicalEventType
+from oneepis_api.schemas.clinical_record_contracts.diagnostics import DiagnosticCandidate
 from oneepis_api.schemas.clinical_record_contracts.entries_events import (
     ClinicalEntryRead,
     ClinicalEventRead,
@@ -129,6 +130,7 @@ ClinicalIntentType = Literal[
     "timeline",
     "draft_soap",
     "show_sources",
+    "diagnostic_candidates",
 ]
 ClinicalIntentMode = Literal["read", "draft", "structured_proposal", "human_confirmation"]
 
@@ -268,6 +270,7 @@ class ClinicalIntentResponse(APIModel):
     problem_contexts: list[ClinicalProblemContext] = Field(default_factory=list)
     change_set: ClinicalChangeSet | None = None
     review_items: list[ClinicalReviewItem] = Field(default_factory=list)
+    diagnostic_candidates: list[DiagnosticCandidate] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     requires_human_confirmation: bool = False
 

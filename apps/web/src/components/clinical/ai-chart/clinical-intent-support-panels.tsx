@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import type { ClinicalIntentAction, ClinicalIntentResponse } from "@/lib/types";
+import type { ClinicalIntentAction, ClinicalIntentResponse, DiagnosticCandidate } from "@/lib/types";
 
 import { clinicalActionKey, clinicalActionTarget } from "./ai-chart-utils";
 
@@ -77,6 +77,58 @@ export function ContextPanel({ intent }: { intent: ClinicalIntentResponse }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+export function DiagnosticCandidatesPanel({ intent }: { intent: ClinicalIntentResponse }) {
+  if (intent.diagnostic_candidates.length === 0) {
+    return null;
+  }
+  return (
+    <div className="rounded-md border p-3">
+      <p className="text-sm font-medium">Candidatos diagnosticos para revision</p>
+      <div className="mt-2 space-y-3">
+        {intent.diagnostic_candidates.map((candidate) => (
+          <DiagnosticCandidateItem key={candidate.candidate_id} candidate={candidate} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DiagnosticCandidateItem({ candidate }: { candidate: DiagnosticCandidate }) {
+  return (
+    <div className="rounded-md border bg-background p-2 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-medium text-foreground">{candidate.title}</p>
+        <span className="rounded-md border px-1.5 py-0.5">{candidate.certainty}</span>
+      </div>
+      <p className="mt-1">
+        Dominio: {candidate.domain}. {candidate.rationale}
+      </p>
+      <ul className="mt-2 space-y-1">
+        {candidate.coding_references.map((reference) => (
+          <li key={`${reference.system}-${reference.code}`}>
+            {reference.system}: {reference.code} - {reference.label}
+          </li>
+        ))}
+      </ul>
+      <ul className="mt-2 space-y-1">
+        {candidate.evidence.map((item) => (
+          <li key={item}>Evidencia: {item}</li>
+        ))}
+        {candidate.missing_data.map((item) => (
+          <li key={item}>Faltante: {item}</li>
+        ))}
+      </ul>
+      {candidate.reference_sources.map((source) => (
+        <p key={`${source.source_label}-${source.chapter_id ?? source.summary}`} className="mt-2">
+          Fuente: {source.source_label}
+          {source.chapter_id ? ` / ${source.chapter_id}` : ""} - {source.summary}
+        </p>
+      ))}
+      <p className="mt-2 font-medium text-foreground">No registra diagnostico automaticamente.</p>
     </div>
   );
 }
