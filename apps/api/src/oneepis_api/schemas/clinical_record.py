@@ -63,6 +63,11 @@ from oneepis_api.schemas.clinical_record_contracts.clinical_risk import (
     ClinicalRiskRead,
     ClinicalRiskUpdate,
 )
+from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
+    DiagnosisCodeReference,
+    DiagnosticCandidate,
+    DiagnosticReferenceSource,
+)
 from oneepis_api.schemas.clinical_record_contracts.entries_events import (
     ClinicalEntryBase,
     ClinicalEntryCreate,
@@ -200,6 +205,9 @@ __all__ = [
     "ClinicalReviewItemType",
     "ClinicalTimelineRead",
     "ConfirmClinicalPatchRequest",
+    "DiagnosisCodeReference",
+    "DiagnosticCandidate",
+    "DiagnosticReferenceSource",
     "ConfirmClinicalPatchResponse",
     "DraftSoapFromEventsRequest",
     "DraftSoapFromEventsResponse",

@@ -81,6 +81,8 @@ fuente canonica viva.
   y propone borradores revisables, no decide, no firma y no escribe sin
   confirmacion humana/backend. AI-EVAL sintetico minimo cubre fuentes esperadas,
   falsos positivos y ausencia de consejo terapeutico autonomo.
+- AI-Chart agrega candidatos diagnosticos revisables con SNOMED GPS plano,
+  CIE-10/CIE-11 y referencias Farreras breves; no confirma diagnosticos.
 - P1 clinicos post Dev-154 a Dev-183 quedaron cerrados: matriz de antecedentes,
   metadata de diagnostico historico, alertas completas de vademecum,
   `ended_on` en auditoria de medicacion, read-audit patient-scoped principal,

@@ -88,6 +88,7 @@ export type ClinicalIntentType =
   | "summarize_patient"
   | "daily_changes"
   | "active_problems"
+  | "diagnostic_candidates"
   | "timeline"
   | "draft_soap"
   | "show_sources";
@@ -199,6 +200,38 @@ export type ClinicalIntentActionDecisionResponse = {
   message: string;
 };
 
+export type DiagnosisCodeReference = {
+  system: "SNOMED-GPS" | "SNOMED-CT" | "CIE-10" | "ICD-10" | "CIE-11" | "ICD-11";
+  code: string;
+  label: string;
+  source_label: string;
+  source_version?: string | null;
+  validation_status: "validated_reference" | "legacy" | "external" | "needs_review";
+  primary: boolean;
+};
+
+export type DiagnosticReferenceSource = {
+  source_label: string;
+  source_version?: string | null;
+  chapter_id?: string | null;
+  page_label?: string | null;
+  summary: string;
+};
+
+export type DiagnosticCandidate = {
+  candidate_id: string;
+  title: string;
+  domain: string;
+  certainty: "moderate" | "low";
+  rationale: string;
+  evidence: string[];
+  missing_data: string[];
+  coding_references: DiagnosisCodeReference[];
+  reference_sources: DiagnosticReferenceSource[];
+  warnings: string[];
+  requires_human_confirmation: true;
+};
+
 export type ClinicalIntentResponse = {
   intent_type: string;
   mode: string;
@@ -234,6 +267,7 @@ export type ClinicalIntentResponse = {
     missing_for_comparison: string[];
   } | null;
   review_items: ClinicalReviewItem[];
+  diagnostic_candidates: DiagnosticCandidate[];
   warnings: string[];
   requires_human_confirmation: boolean;
 };

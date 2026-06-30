@@ -127,6 +127,9 @@ export function fallbackActionToIntent(action: ClinicalIntentAction): ClinicalIn
   const normalized = (action.action_id ?? action.label).toLocaleLowerCase("es-CL");
   if (normalized.includes("resumir")) return "summarize_patient";
   if (normalized.includes("cambio")) return "daily_changes";
+  if (normalized.includes("candidato") || normalized.includes("diagnostico")) {
+    return "diagnostic_candidates";
+  }
   if (normalized.includes("evolucion") || normalized.includes("soap")) return "draft_soap";
   if (normalized.includes("fuentes")) return "show_sources";
   return null;

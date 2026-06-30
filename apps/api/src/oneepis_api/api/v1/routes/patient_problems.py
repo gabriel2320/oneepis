@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import PatientReadActorDep, ProblemActorDep
@@ -12,6 +12,7 @@ from oneepis_api.schemas.clinical_record import (
     ActiveProblemRead,
     ActiveProblemUpdate,
 )
+from oneepis_api.schemas.clinical_record_contracts.diagnostics import validate_diagnosis_code_pair
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 
 from .patient_shared import (
@@ -142,6 +143,13 @@ def update_active_problem(
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(problem, active_problem_audit_fields(update_fields))
     fields = apply_update(problem, payload)
+    try:
+        validate_diagnosis_code_pair(problem.code_system, problem.code)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
     audit_fields = active_problem_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,

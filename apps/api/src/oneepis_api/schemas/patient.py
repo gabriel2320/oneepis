@@ -4,7 +4,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from oneepis_api.models.clinical_record import ClinicalEventSourceType
 from oneepis_api.models.patient import CareContext, PatientClinicalStatus, SexAtBirth
@@ -14,6 +14,10 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalEntryRead,
     MedicationRead,
     VitalSignRead,
+)
+from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
+    DiagnosisCodeReference,
+    legacy_diagnostic_code_reference,
 )
 from oneepis_api.schemas.common import APIModel
 
@@ -64,6 +68,20 @@ class HistoricalDiagnosisRead(APIModel):
     limit: str = Field(min_length=1, max_length=280)
     code_system: str | None = Field(default=None, max_length=80)
     code: str | None = Field(default=None, max_length=80)
+    coding_references: list[DiagnosisCodeReference] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def populate_legacy_coding_reference(self) -> HistoricalDiagnosisRead:
+        if self.coding_references:
+            return self
+        reference = legacy_diagnostic_code_reference(
+            system=self.code_system,
+            code=self.code,
+            label=self.title,
+        )
+        if reference is not None:
+            self.coding_references = [reference]
+        return self
 
 
 class PatientRecordSnapshot(APIModel):

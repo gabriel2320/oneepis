@@ -19,6 +19,9 @@ from oneepis_api.services.clinical_intent_responses import (
     daily_changes_response as _daily_changes_response,
 )
 from oneepis_api.services.clinical_intent_responses import (
+    diagnostic_candidates_response as _diagnostic_candidates_response,
+)
+from oneepis_api.services.clinical_intent_responses import (
     draft_soap_intent_response as _draft_soap_intent_response,
 )
 from oneepis_api.services.clinical_intent_responses import (
@@ -115,6 +118,16 @@ def resolve_clinical_intent(
         )
     if payload.intent_type == "draft_soap":
         return _draft_soap_intent_response(
+            payload,
+            snapshot,
+            events,
+            recent_vitals,
+            lab_results,
+            review_items,
+            active_risks,
+        )
+    if payload.intent_type == "diagnostic_candidates":
+        return _diagnostic_candidates_response(
             payload,
             snapshot,
             events,

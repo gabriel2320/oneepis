@@ -3,6 +3,9 @@ from __future__ import annotations
 from typing import Any
 
 from oneepis_api.models.clinical_record import ClinicalEvent
+from oneepis_api.schemas.clinical_record_contracts.diagnostics import (
+    diagnostic_code_references_from_payload,
+)
 from oneepis_api.schemas.patient import HistoricalDiagnosisRead
 
 
@@ -24,6 +27,10 @@ def historical_diagnosis_from_event(event: ClinicalEvent) -> HistoricalDiagnosis
         limit=limit,
         code_system=optional_payload_text(event.payload.get("code_system")),
         code=optional_payload_text(event.payload.get("code")),
+        coding_references=diagnostic_code_references_from_payload(
+            event.payload.get("diagnostic_codes"),
+            fallback_label=event.summary,
+        ),
     )
 
 
