@@ -1,6 +1,8 @@
 from oneepis_api.models.access_boundary import (
     AccessBoundaryStatus,
+    CareTeam,
     ClinicalInstitution,
+    ClinicalService,
     ClinicalTenant,
 )
 from oneepis_api.models.audit import AuditEvent
@@ -35,6 +37,7 @@ __all__ = [
     "AuthRecoveryToken",
     "AuthSecurityEvent",
     "AuthSession",
+    "CareTeam",
     "ClinicalOrder",
     "ClinicalEncounter",
     "ClinicalAppointment",
@@ -42,6 +45,7 @@ __all__ = [
     "ClinicalEntry",
     "ClinicalInstitution",
     "ClinicalRisk",
+    "ClinicalService",
     "ClinicalTenant",
     "LabPanel",
     "LabResult",
