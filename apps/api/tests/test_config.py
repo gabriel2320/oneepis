@@ -48,3 +48,27 @@ def test_non_development_accepts_explicit_secure_auth_settings() -> None:
     )
 
     assert settings.environment == "production"
+
+
+def test_non_development_rejects_wildcard_cors_origin() -> None:
+    password_hash = hash_password("secret")
+
+    with pytest.raises(ValidationError):
+        Settings(
+            environment="production",
+            auth_secret="prod-secret",
+            auth_local_users=f"admin@example.local|{password_hash}|Admin|admin",
+            cors_origins=["*"],
+        )
+
+
+def test_non_development_rejects_external_ollama_base_url() -> None:
+    password_hash = hash_password("secret")
+
+    with pytest.raises(ValidationError):
+        Settings(
+            environment="production",
+            auth_secret="prod-secret",
+            auth_local_users=f"admin@example.local|{password_hash}|Admin|admin",
+            ollama_base_url="https://ollama.example.local",
+        )

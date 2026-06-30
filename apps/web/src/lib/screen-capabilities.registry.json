@@ -371,7 +371,7 @@
     "truthSource": "alergias activas",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "none",
     "aiProfile": "read",
     "futureComplexity": "alertas criticas mas amplias"
@@ -397,7 +397,7 @@
     "truthSource": "audit events",
     "writePolicy": "none",
     "permissionPolicy": "lectura auditoria",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "none",
     "aiProfile": "none",
     "futureComplexity": "auditoria de accesos futura"
@@ -410,7 +410,7 @@
     "truthSource": "record + print routes",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "none",
     "futureComplexity": "adjuntos externos y consentimientos futuros"
@@ -423,7 +423,7 @@
     "truthSource": "API encuentros",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "none",
     "aiProfile": "read",
     "futureComplexity": "episodio mas explicito"
@@ -462,7 +462,7 @@
     "truthSource": "clinical events",
     "writePolicy": "clinical_write",
     "permissionPolicy": "escritura clinica",
-    "auditPolicy": "writes",
+    "auditPolicy": "read_and_write_audit",
     "paperPolicy": "none",
     "aiProfile": "read",
     "futureComplexity": "curaduria de antecedentes"
@@ -475,7 +475,7 @@
     "truthSource": "clinical entries",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "read",
     "futureComplexity": "filtros por episodio/problema"
@@ -514,7 +514,7 @@
     "truthSource": "record paciente",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "summary",
     "futureComplexity": "antecedentes/resultados minimos"
@@ -527,7 +527,7 @@
     "truthSource": "AI status/sugerencias",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente + permiso IA",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "none",
     "aiProfile": "summary",
     "futureComplexity": "apoyo no central"
@@ -540,7 +540,7 @@
     "truthSource": "medicacion activa + vademecum",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "none",
     "aiProfile": "validate",
     "futureComplexity": "interacciones y receta futura"
@@ -553,7 +553,7 @@
     "truthSource": "medicacion + validacion dosis",
     "writePolicy": "clinical_write",
     "permissionPolicy": "escritura clinica",
-    "auditPolicy": "writes",
+    "auditPolicy": "read_and_write_audit",
     "paperPolicy": "none",
     "aiProfile": "validate",
     "futureComplexity": "sin receta/orden automatica"
@@ -566,7 +566,7 @@
     "truthSource": "problemas activos",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "none",
     "aiProfile": "read",
     "futureComplexity": "diagnosticos historicos"
@@ -579,7 +579,7 @@
     "truthSource": "problemas activos",
     "writePolicy": "clinical_write",
     "permissionPolicy": "medico/admin/dev",
-    "auditPolicy": "writes",
+    "auditPolicy": "read_and_write_audit",
     "paperPolicy": "none",
     "aiProfile": "none",
     "futureComplexity": "clasificacion diagnostica"
@@ -592,7 +592,7 @@
     "truthSource": "signos vitales",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "none",
     "aiProfile": "chart",
     "futureComplexity": "tabla/grafico amplio"
@@ -605,7 +605,7 @@
     "truthSource": "signos vitales",
     "writePolicy": "clinical_write",
     "permissionPolicy": "enfermeria/medico/admin/dev",
-    "auditPolicy": "writes",
+    "auditPolicy": "read_and_write_audit",
     "paperPolicy": "none",
     "aiProfile": "none",
     "futureComplexity": "escalas y monitoreo"

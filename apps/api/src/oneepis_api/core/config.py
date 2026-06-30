@@ -1,5 +1,6 @@
 from functools import lru_cache
 from typing import Literal
+from urllib.parse import urlparse
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -81,6 +82,12 @@ class Settings(BaseSettings):
             errors.append("auth_enabled cannot be false outside development")
         if self.auth_notification_provider == "development_log":
             errors.append("auth_notification_provider=development_log is development-only")
+        if any(origin.strip() == "*" for origin in self.cors_origins):
+            errors.append("cors_origins cannot include wildcard outside development")
+        if not self.cors_origins:
+            errors.append("cors_origins must be explicit outside development")
+        if self.ai_provider == "ollama" and not _is_local_url(self.ollama_base_url):
+            errors.append("ollama_base_url must be local outside development")
         if errors:
             raise ValueError("; ".join(errors))
         return self
@@ -103,3 +110,9 @@ def _contains_plain_local_password(raw_users: str) -> bool:
         if password and not password.startswith("pbkdf2_sha256$"):
             return True
     return False
+
+
+def _is_local_url(raw_url: str) -> bool:
+    parsed = urlparse(raw_url)
+    hostname = (parsed.hostname or "").lower()
+    return hostname in {"localhost", "127.0.0.1", "::1"}

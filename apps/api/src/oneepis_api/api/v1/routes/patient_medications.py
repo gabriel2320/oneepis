@@ -22,6 +22,7 @@ from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, 
 from oneepis_api.services.medication_audit import (
     MEDICATION_CREATE_AUDIT_FIELDS,
     medication_dose_audit_metadata,
+    medication_update_audit_fields,
     sanitize_override_reason_audit,
 )
 from oneepis_api.services.medication_catalog import (
@@ -215,15 +216,17 @@ def update_medication(
     if dose_check_snapshot is not None:
         update_fields.add("dose_check_snapshot")
     update_fields = sorted(update_fields)
-    before = audit_snapshot(medication, update_fields)
+    audit_fields = medication_update_audit_fields(update_fields)
+    before = audit_snapshot(medication, audit_fields)
     fields = apply_update(medication, payload)
     if dose_check_snapshot is not None:
         medication.dose_check_snapshot = dose_check_snapshot
         fields = sorted(set(fields) | {"dose_check_snapshot"})
+    audit_fields = medication_update_audit_fields(fields)
     before_changed, after_changed = changed_field_snapshots(
         before=before,
         after_model=medication,
-        fields=fields,
+        fields=audit_fields,
     )
     sanitize_override_reason_audit(before_changed)
     sanitize_override_reason_audit(after_changed)
