@@ -67,6 +67,22 @@ Antes de produccion sanitaria se requiere, como minimo:
 - custodia, retencion, borrado y legal hold documentados;
 - evidencia versionada y revisada de cada restore drill.
 
+## Adjuntos y Consentimientos
+
+Adjuntos externos, consentimientos productivos, OCR/RAG documental y
+almacenamiento documental siguen pendientes. El contrato ejecutable vive en
+`apps/api/src/oneepis_api/core/document_custody_contract.py`.
+
+Antes de habilitar cargas documentales se requiere, como minimo:
+
+- almacenamiento documental cifrado y con controles por entorno;
+- malware scan antes del uso clinico de cualquier archivo;
+- metadata, versionado, checksum, actor, fecha y alcance paciente;
+- reglas de custodia, retencion, borrado y legal hold;
+- ciclo de vida de consentimiento con plantilla, firmante, vigencia y
+  revocacion;
+- auditoria minimizada de lecturas, descargas, exportaciones y custodia.
+
 ## Configuracion fuera de Desarrollo
 
 Si `ONEEPIS_ENVIRONMENT` no es `development`, la API rechaza el arranque con:
