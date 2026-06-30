@@ -1,3 +1,8 @@
+from oneepis_api.models.access_boundary import (
+    AccessBoundaryStatus,
+    ClinicalInstitution,
+    ClinicalTenant,
+)
 from oneepis_api.models.audit import AuditEvent
 from oneepis_api.models.auth_security import (
     AuthLoginLock,
@@ -23,6 +28,7 @@ from oneepis_api.models.medication_catalog import MedicationCatalogItem, Medicat
 from oneepis_api.models.patient import Patient
 
 __all__ = [
+    "AccessBoundaryStatus",
     "Allergy",
     "AuditEvent",
     "AuthLoginLock",
@@ -34,7 +40,9 @@ __all__ = [
     "ClinicalAppointment",
     "ClinicalEvent",
     "ClinicalEntry",
+    "ClinicalInstitution",
     "ClinicalRisk",
+    "ClinicalTenant",
     "LabPanel",
     "LabResult",
     "HospitalBed",
