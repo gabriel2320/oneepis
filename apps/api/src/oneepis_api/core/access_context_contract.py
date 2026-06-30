@@ -140,9 +140,14 @@ CONTEXTUAL_ACCESS_HEADER_CONTRACTS: tuple[ContextualAccessHeaderContract, ...] =
 
 ACCESS_CONTEXT_RUNTIME_STATUS = {
     "runtime_abac_enforced": False,
+    "development_patient_read_enforcement_available": True,
+    "development_patient_read_enforcement_scope": "GET /api/v1/patients/{patient_id}",
     "contextual_headers_accepted": False,
     "break_glass_enabled": False,
-    "reason": "Contextual ABAC is an executable contract only; runtime enforcement is future work.",
+    "reason": (
+        "Contextual ABAC production enforcement is disabled; development-only "
+        "patient read enforcement is available behind ONEEPIS_ABAC_ENFORCEMENT_ENABLED."
+    ),
 }
 
 

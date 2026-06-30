@@ -23,7 +23,7 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 | NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental | `docs/AUDIT.md`; `apps/api/src/oneepis_api/core/audit_retention_contract.py`; `apps/api/src/oneepis_api/core/audit_integrity_contract.py`; `apps/api/tests/test_audit_retention_contract.py`; `apps/api/tests/test_audit_integrity_contract.py` |
 | NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con actor, ruta, correlacion, dedupe y cobertura E2E real de filtros lectura/escritura | `apps/api/tests/test_patient_read_audit.py`; `apps/api/tests/test_patient_audit.py` |
 | NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo y guard frontend/CI bloquea `console.*` en `apps/web/src`; falta observabilidad productiva formal | `apps/api/tests/test_phi_logging.py`; `scripts/check-frontend-phi-logs.mjs` |
-| NOPROD-SEC-007 | Control de acceso contextual | pendiente | institucion/tenant, equipo o servicio tratante, relacion asistencial, motivo de acceso y break-glass auditado | `apps/api/src/oneepis_api/core/clinical_access.py`; `apps/api/src/oneepis_api/core/access_context_contract.py`; `apps/api/src/oneepis_api/core/access_boundary_contract.py`; `apps/api/src/oneepis_api/services/patient_access_relationship.py`; `apps/api/tests/test_break_glass_guard.py`; `apps/api/tests/test_clinical_access_contract.py`; `apps/api/tests/test_access_context_contract.py`; `apps/api/tests/test_access_boundary_contract.py`; `apps/api/tests/test_patient_access_relationship.py` |
+| NOPROD-SEC-007 | Control de acceso contextual | en progreso | institucion/tenant, equipo o servicio tratante, relacion asistencial, motivo de acceso y break-glass auditado | `apps/api/src/oneepis_api/core/clinical_access.py`; `apps/api/src/oneepis_api/core/access_context_contract.py`; `apps/api/src/oneepis_api/core/access_boundary_contract.py`; `apps/api/src/oneepis_api/services/patient_access_relationship.py`; `apps/api/tests/test_break_glass_guard.py`; `apps/api/tests/test_clinical_access_contract.py`; `apps/api/tests/test_access_context_contract.py`; `apps/api/tests/test_access_boundary_contract.py`; `apps/api/tests/test_patient_access_relationship.py`; `apps/api/tests/test_patient_abac_enforcement.py` |
 | NOPROD-SEC-008 | Auth productiva | pendiente | proveedor institucional, MFA, usuarios/roles persistentes, sesiones robustas, recuperacion y revocacion | `apps/api/src/oneepis_api/core/productive_auth_contract.py`; `apps/api/tests/test_auth_session_contract.py`; `apps/api/tests/test_productive_auth_contract.py` |
 | NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones | `docs/GOVERNANCE.md`; `apps/api/src/oneepis_api/core/clinical_governance_contract.py`; `apps/api/tests/test_clinical_governance_contract.py`; sin aprobacion operacional |
 | NOPROD-SEC-010 | Politica IA externa | bloqueada | gateway PHI, anonimizacion, autorizacion, auditoria y opt-in explicito | `docs/OLLAMA_AND_TOOLS.md`; `apps/api/src/oneepis_api/core/external_ai_contract.py`; `apps/api/tests/test_external_ai_contract.py`; `apps/api/tests/test_config.py` bloquea Ollama externo fuera de desarrollo |
@@ -55,9 +55,14 @@ Evidencia actual de avance sin habilitacion productiva:
   relacion paciente-equipo, membresia actor-equipo y solicitud break-glass.
 - Existe resolvedor dry-run de relacion paciente/actor por equipos activos, con
   metadata minimizada para `AccessContext`.
+- Existe enforcement dev-only para `GET /api/v1/patients/{patient_id}` detras de
+  `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`, con auditoria `access_context.denied`
+  minimizada en denegaciones.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
-  `patient_scoping_enabled` y `abac_runtime_enforced` siguen en `False`.
-- Falta enforcement runtime, motivo de acceso operativo, revision break-glass,
+  `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
+  `False`.
+- Falta enforcement runtime productivo, cobertura de enforcement en el resto de
+  lecturas patient-scoped, motivo de acceso operativo, revision break-glass,
   UI/flujo institucional, ownership clinico/legal y pruebas E2E de denegacion.
 
 ## Proximo paso recomendado

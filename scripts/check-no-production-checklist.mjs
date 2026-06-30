@@ -45,6 +45,7 @@ const requiredEvidenceByGate = new Map([
       "apps/api/tests/test_access_context_contract.py",
       "apps/api/tests/test_access_boundary_contract.py",
       "apps/api/tests/test_patient_access_relationship.py",
+      "apps/api/tests/test_patient_abac_enforcement.py",
     ],
   ],
   [
