@@ -1,9 +1,12 @@
+import uuid
+
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from oneepis_api.db.session import get_session
 from oneepis_api.main import app
 from oneepis_api.models.audit import AuditEvent
+from oneepis_api.services.access_context_audit import PASSIVE_ACCESS_CONTEXT_DECISION_ACTION
 
 
 def test_patient_read_endpoints_emit_read_audit_events(
@@ -41,6 +44,7 @@ def test_patient_read_endpoints_emit_read_audit_events(
     actions = [item["action"] for item in audit_events]
     assert actions.count("patient.read") == 1
     assert actions.count("record.read") == 1
+    assert actions.count(PASSIVE_ACCESS_CONTEXT_DECISION_ACTION) == 2
     read_events = [item for item in audit_events if item["action"].endswith(".read")]
     assert {item["actor_id"] for item in read_events} == {"medico@oneepis.local"}
     patient_read = next(item for item in read_events if item["action"] == "patient.read")
@@ -51,6 +55,21 @@ def test_patient_read_endpoints_emit_read_audit_events(
     assert record_read["correlation_id"] == "read-record-001"
     assert record_read["request_method"] == "GET"
     assert record_read["request_path"] == f"/api/v1/patients/{patient_id}/record"
+    _assert_passive_abac_events(
+        patient_id,
+        [
+            (
+                "patient.read",
+                f"/api/v1/patients/{patient_id}",
+                "read-patient-001",
+            ),
+            (
+                "record.read",
+                f"/api/v1/patients/{patient_id}/record",
+                "read-record-001",
+            ),
+        ],
+    )
 
 
 def test_patient_index_read_audit_is_minimized(
@@ -803,6 +822,7 @@ def _assert_public_read_audit_events(
         assert read_event["request_method"] == (method[0] if method else "GET")
         assert read_event["request_path"] == path
         assert "extra_data" not in read_event
+    _assert_passive_abac_events(patient_id, reads)
 
     audit_response = client.get(
         f"/api/v1/patients/{patient_id}/audit-events",
@@ -810,3 +830,50 @@ def _assert_public_read_audit_events(
     )
     assert audit_response.status_code == 200
     assert all(item["action"] != "record.read" for item in audit_response.json())
+
+
+def _assert_passive_abac_events(
+    patient_id: str,
+    reads: list[tuple[str, str, str] | tuple[str, str, str, str]],
+) -> None:
+    raw_events = _raw_audit_events_for_patient(patient_id)
+    for read in reads:
+        action, path, correlation_id, *method = read
+        passive_event = next(
+            item
+            for item in raw_events
+            if item.action == PASSIVE_ACCESS_CONTEXT_DECISION_ACTION
+            and item.correlation_id == correlation_id
+            and item.extra_data["source_action"] == action
+        )
+        assert passive_event.actor_id == "medico@oneepis.local"
+        assert passive_event.request_method == (method[0] if method else "GET")
+        assert passive_event.request_path == path
+        assert passive_event.extra_data["mode"] == "passive"
+        assert passive_event.extra_data["policy"] == "contextual_abac"
+        assert passive_event.extra_data["runtime_enforced"] is False
+        assert passive_event.extra_data["allowed"] is True
+        assert passive_event.extra_data["would_deny_if_enforced"] is True
+        assert passive_event.extra_data["patient_scope"] == {
+            "status": "none",
+            "matched_care_team_count": 0,
+            "actor_active_care_team_count": 0,
+            "patient_active_care_team_count": 0,
+            "runtime_enforced": False,
+        }
+
+
+def _raw_audit_events_for_patient(patient_id: str) -> list[AuditEvent]:
+    override_session = app.dependency_overrides[get_session]
+    session_iterator = override_session()
+    session = next(session_iterator)
+    try:
+        return list(
+            session.scalars(
+                select(AuditEvent)
+                .where(AuditEvent.entity_id == uuid.UUID(patient_id))
+                .order_by(AuditEvent.created_at.asc())
+            )
+        )
+    finally:
+        session_iterator.close()
