@@ -17,7 +17,7 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 
 | ID | Gate | Estado | Criterio minimo | Evidencia actual |
 | --- | --- | --- | --- | --- |
-| NOPROD-SEC-001 | Gestion formal de secretos | pendiente | secretos fuera del repo, rotacion, owners y procedimiento de incidente | `docs/SECURITY_PRIVACY.md`; CI `security-report` bloquea Gitleaks |
+| NOPROD-SEC-001 | Gestion formal de secretos | pendiente | secretos fuera del repo, rotacion, owners y procedimiento de incidente | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/secret_management_contract.py`; `apps/api/tests/test_secret_management_contract.py`; CI `security-report` bloquea Gitleaks |
 | NOPROD-SEC-002 | Cifrado en reposo | pendiente | politica de cifrado para base, backups y almacenamiento documental | `docs/SECURITY_PRIVACY.md`; sin implementacion productiva |
 | NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos | `docs/CURRENT_STATE.md`; sin procedimiento probado |
 | NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental | `docs/AUDIT.md`; `apps/api/src/oneepis_api/core/audit_retention_contract.py`; `apps/api/tests/test_audit_retention_contract.py` |
