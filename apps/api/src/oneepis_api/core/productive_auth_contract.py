@@ -18,6 +18,14 @@ class LocalAuthDevelopmentLimit:
     status: Literal["development_only", "not_productive_auth"]
 
 
+@dataclass(frozen=True)
+class LocalRoleProductionBoundary:
+    key: str
+    role: str
+    rule: str
+    status: Literal["development_only", "not_productive_phi_access"]
+
+
 PRODUCTIVE_AUTH_REQUIREMENTS: tuple[ProductiveAuthRequirement, ...] = (
     ProductiveAuthRequirement(
         key="persistent_user_store",
@@ -93,6 +101,8 @@ PRODUCTIVE_AUTH_RUNTIME_STATUS = {
     "mfa_enforced": False,
     "persistent_user_store_enabled": False,
     "persistent_role_store_enabled": False,
+    "dev_role_available_in_production": False,
+    "technical_admin_phi_access_grant_enabled": False,
     "reason": (
         "Productive auth is an executable contract only; local auth remains "
         "development-oriented."
@@ -131,9 +141,39 @@ LOCAL_AUTH_DEVELOPMENT_LIMITS: tuple[LocalAuthDevelopmentLimit, ...] = (
 )
 
 
+DEVELOPMENT_ONLY_LOCAL_ROLE_VALUES = ("dev",)
+
+
+LOCAL_ROLE_PRODUCTION_BOUNDARIES: tuple[LocalRoleProductionBoundary, ...] = (
+    LocalRoleProductionBoundary(
+        key="dev_role",
+        role="dev",
+        rule=(
+            "The dev role is a local development/test breakout and must not be "
+            "accepted outside development."
+        ),
+        status="development_only",
+    ),
+    LocalRoleProductionBoundary(
+        key="technical_admin",
+        role="admin",
+        rule=(
+            "The local admin role is a technical control until institutional "
+            "identity, ABAC and audited membership exist; it does not grant "
+            "productive PHI access by itself."
+        ),
+        status="not_productive_phi_access",
+    ),
+)
+
+
 def productive_auth_requirement_keys() -> tuple[str, ...]:
     return tuple(requirement.key for requirement in PRODUCTIVE_AUTH_REQUIREMENTS)
 
 
 def local_auth_development_setting_names() -> tuple[str, ...]:
     return tuple(limit.setting_name for limit in LOCAL_AUTH_DEVELOPMENT_LIMITS)
+
+
+def local_role_boundary_keys() -> tuple[str, ...]:
+    return tuple(boundary.key for boundary in LOCAL_ROLE_PRODUCTION_BOUNDARIES)
