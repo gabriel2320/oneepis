@@ -7,7 +7,7 @@ from fastapi import APIRouter, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from oneepis_api.api.deps import MedicationActorDep, PatientReadActorDep
+from oneepis_api.api.deps import MedicationActorDep, ReadAccessDep
 from oneepis_api.models.clinical_record import Medication, RecordStatus
 from oneepis_api.models.hospitalization import HospitalIndication
 from oneepis_api.schemas.clinical_record import (
@@ -34,12 +34,14 @@ from oneepis_api.services.medication_draft_validation import (
     updated_dose_snapshot,
     validated_dose_snapshot,
 )
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -49,21 +51,37 @@ from .patient_shared import (
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
 
+def _enforce_read(session, patient_id, user, settings) -> None:
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
+
+
+def _audit_read(session, patient_id, user, action: str) -> None:
+    record_patient_scoped_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        action=action,
+    )
+
+
 @router.get("/{patient_id}/medications", response_model=list[MedicationRead])
 def list_medications(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[Medication]:
     require_patient(session, patient_id)
-    record_patient_scoped_read(
-        session,
-        patient_id=patient_id,
-        actor_id=actor,
-        action="medications.read",
-    )
+    _enforce_read(session, patient_id, user, settings)
+    _audit_read(session, patient_id, user, "medications.read")
     statement = (
         select(Medication)
         .options(selectinload(Medication.catalog_item))
@@ -117,15 +135,12 @@ def create_medication(
 def get_medication_drafting_context(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> MedicationDraftingContext:
     require_patient(session, patient_id)
-    record_patient_scoped_read(
-        session,
-        patient_id=patient_id,
-        actor_id=actor,
-        action="medication_drafting_context.read",
-    )
+    _enforce_read(session, patient_id, user, settings)
+    _audit_read(session, patient_id, user, "medication_drafting_context.read")
     medication_statement = (
         select(Medication)
         .options(selectinload(Medication.catalog_item))
@@ -178,9 +193,11 @@ def get_medication(
     patient_id: uuid.UUID,
     medication_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> Medication:
     require_patient(session, patient_id)
+    _enforce_read(session, patient_id, user, settings)
     medication = require_patient_child(
         session,
         Medication,
@@ -188,12 +205,7 @@ def get_medication(
         patient_id,
         "Medication not found",
     )
-    record_patient_scoped_read(
-        session,
-        patient_id=patient_id,
-        actor_id=actor,
-        action="medication.read",
-    )
+    _audit_read(session, patient_id, user, "medication.read")
     return medication
 
 
