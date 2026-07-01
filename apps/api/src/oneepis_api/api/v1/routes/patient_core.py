@@ -230,8 +230,21 @@ def create_patient_ai_suggestions(
     payload: PatientAiSuggestionRequest,
     session: SessionDep,
     settings: SettingsDep,
-    _user: AiAccessDep,
+    user: AiAccessDep,
 ) -> PatientAiSuggestionsResponse:
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     snapshot = _build_patient_record_snapshot(session, patient_id)
+    _record_patient_read_audit(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        action="ai.suggestions.read",
+    )
     provider = get_ai_provider(settings)
     return provider.create_patient_suggestions(str(patient_id), snapshot, payload)
