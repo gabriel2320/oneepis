@@ -8,11 +8,13 @@ from access_boundary_helpers import (
     create_care_team,
 )
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.main import app
+from oneepis_api.models.audit import AuditEvent
 from oneepis_api.models.patient import Patient
 
 
@@ -23,6 +25,7 @@ def test_appointments_are_persisted_listed_and_audited(
     audit_events_for_patient,
 ) -> None:
     auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     patient_id = create_patient_for_permissions(client, auth)
 
     create_response = client.post(
@@ -44,7 +47,7 @@ def test_appointments_are_persisted_listed_and_audited(
 
     list_response = client.get(
         "/api/v1/appointments?date_from=2026-06-24T00:00:00Z&date_to=2026-06-25T00:00:00Z",
-        headers=auth,
+        headers=admin_auth,
     )
     assert list_response.status_code == 200
     assert [item["id"] for item in list_response.json()] == [appointment["id"]]
@@ -97,6 +100,7 @@ def test_appointment_permissions_and_patient_ownership(
     create_patient_for_permissions,
 ) -> None:
     auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     first_patient_id = create_patient_for_permissions(client, auth)
     second_patient_id = create_patient_for_permissions(client, auth)
     appointment = client.post(
@@ -109,8 +113,16 @@ def test_appointment_permissions_and_patient_ownership(
     ).json()
 
     readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
-    list_response = client.get("/api/v1/appointments", headers=readonly_auth)
-    assert list_response.status_code == 200
+    readonly_list_response = client.get("/api/v1/appointments", headers=readonly_auth)
+    medico_list_response = client.get("/api/v1/appointments", headers=auth)
+    assert readonly_list_response.status_code == 403
+    assert medico_list_response.status_code == 403
+    assert _audit_actions("appointments_index.read") == []
+
+    admin_list_response = client.get("/api/v1/appointments", headers=admin_auth)
+    assert admin_list_response.status_code == 200
+    assert [item["id"] for item in admin_list_response.json()] == [appointment["id"]]
+    assert _audit_actions("appointments_index.read") == ["appointments_index.read"]
 
     readonly_create = client.post(
         f"/api/v1/patients/{first_patient_id}/appointments",
@@ -216,6 +228,14 @@ def _assign_patient_scope(*, patient_id: str, actor_id: str) -> None:
             patient=patient,
             care_team=care_team,
         )
+
+
+def _audit_actions(action: str) -> list[str]:
+    with _test_session() as session:
+        return [
+            event.action
+            for event in session.scalars(select(AuditEvent).where(AuditEvent.action == action))
+        ]
 
 
 @contextmanager

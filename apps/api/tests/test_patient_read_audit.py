@@ -508,6 +508,7 @@ def test_appointment_index_read_audit_is_minimized(
     create_patient_for_permissions,
 ) -> None:
     auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
     patient_id = create_patient_for_permissions(client, auth)
     appointment_response = client.post(
         f"/api/v1/patients/{patient_id}/appointments",
@@ -523,14 +524,14 @@ def test_appointment_index_read_audit_is_minimized(
 
     response = client.get(
         "/api/v1/appointments?date_from=2026-06-20T00:00:00Z&limit=10&offset=0",
-        headers={**auth, "X-OneEpis-Correlation-ID": "read-appointments-index-001"},
+        headers={**admin_auth, "X-OneEpis-Correlation-ID": "read-appointments-index-001"},
     )
 
     assert response.status_code == 200
     audit_event = _latest_audit_event("appointments_index.read")
     assert audit_event.entity_type == "appointment_index"
     assert audit_event.entity_id is None
-    assert audit_event.actor_id == "medico@oneepis.local"
+    assert audit_event.actor_id == "admin@oneepis.local"
     assert audit_event.correlation_id == "read-appointments-index-001"
     assert audit_event.extra_data == {
         "date_from_present": True,

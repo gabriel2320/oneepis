@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { useCurrentUser } from "@/components/auth/use-current-user";
 import { AppointmentCreatePanel } from "@/components/clinical/ambulatory-appointment-create-panel";
 import { AppointmentList } from "@/components/clinical/ambulatory-appointment-list";
 import { ClinicalSectionCard } from "@/components/clinical/cards";
@@ -13,26 +14,53 @@ import { listAppointments } from "@/lib/api/appointments";
 import { DEMO_MODE } from "@/lib/api/client";
 import { listPatients } from "@/lib/api/patients";
 import { demoAppointments, demoRecords } from "@/lib/demo-record";
+import { canReadGlobalClinicalIndex } from "@/lib/permissions";
 
 import { Field } from "./patient-page-shared";
 
 export function AmbulatoryAppointmentPage() {
+  const { user, isLoading: userLoading } = useCurrentUser();
+  const canReadGlobalIndex = canReadGlobalClinicalIndex(user);
   const [selectedDate, setSelectedDate] = useState(DEMO_MODE ? "2026-06-24" : todayDate());
   const { start, end } = dayRange(selectedDate);
   const appointmentsQuery = useQuery({
     queryKey: ["appointments", selectedDate],
     queryFn: () => listAppointments(start, end),
-    enabled: !DEMO_MODE,
+    enabled: !DEMO_MODE && canReadGlobalIndex,
   });
   const patientsQuery = useQuery({
     queryKey: ["patients", "agenda"],
     queryFn: () => listPatients(),
-    enabled: !DEMO_MODE,
+    enabled: !DEMO_MODE && canReadGlobalIndex,
   });
   const patients = DEMO_MODE ? demoRecords.map((record) => record.patient) : (patientsQuery.data ?? []);
   const appointments = DEMO_MODE
     ? demoAppointments.filter((appointment) => appointment.starts_at.startsWith(selectedDate))
     : (appointmentsQuery.data ?? []);
+
+  if (!DEMO_MODE && userLoading) {
+    return (
+      <DomainModulePage
+        domain="ambulatory"
+        title="Agenda"
+        description="Agenda ambulatoria persistida, con estados reales y enlace a atencion."
+      >
+        <LoadingRows rows={3} />
+      </DomainModulePage>
+    );
+  }
+
+  if (!DEMO_MODE && !canReadGlobalIndex) {
+    return (
+      <DomainModulePage
+        domain="ambulatory"
+        title="Agenda"
+        description="Agenda ambulatoria persistida, con estados reales y enlace a atencion."
+      >
+        <ErrorState description="Tu perfil no tiene permiso para ver la agenda global. Usa las citas desde la ficha del paciente." />
+      </DomainModulePage>
+    );
+  }
 
   return (
     <DomainModulePage
