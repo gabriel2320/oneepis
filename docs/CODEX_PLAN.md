@@ -96,16 +96,19 @@ estado no ejecutable.
 Estado al cierre:
 
 - `main` sincronizado con `origin/main`.
-- Sin PRs abiertos.
-- Ultimos PRs cerrados: #250 refresco handoff Codex, #251 AI suggestions ABAC
-  dev-only, #252 adelgazo `patient_ai.py`, #254 patient AI ABAC dev-only,
-  #255 Assistant Timeline ABAC dev-only, #256 Assistant Search/Chart ABAC
-  dev-only, #257 Assistant Correlation auth/audit/ABAC dev-only, #258 refresh
-  de estado ABAC y #259 indice global de appointments admin/dev-only. #253
-  quedo cerrado al eliminarse la rama base apilada y fue reemplazado por #254.
-- Avance ABAC dev-only actual: `GET patient`, `GET record`, appointments
-  patient-scoped, allergies, active problems, medications y medication drafting
-  context, AI patient-scoped y Assistant Read timeline/search/chart/correlation
+- PRs stale #265 y #272 cerrados y reemplazados desde `main` actual.
+- Ultimos PRs cerrados: #259 indice global de appointments admin/dev-only,
+  #263 UX no-demo de `/pacientes` con lista autorizada vacia, #267 clinical
+  risks ABAC dev-only, #268 vital signs ABAC dev-only, #269 labs ABAC dev-only,
+  #270 patient context ABAC dev-only, #271 encounters ABAC dev-only, #273
+  slimming de `patient_events.py`, #274 clinical events/timeline ABAC dev-only y
+  #275 clinical entries ABAC dev-only.
+- Avance ABAC dev-only actual: `GET /api/v1/patients`, `GET patient`,
+  `GET record`, appointments patient-scoped, allergies, active problems,
+  medications y medication drafting context, encounters, clinical entries,
+  clinical events/timeline, clinical risks, vital signs, lab panels/results,
+  patient context, AI patient-scoped, Assistant Read
+  timeline/search/chart/correlation y `GET /api/v1/hospitalization/active`
   detras de `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`.
 - `GET /api/v1/appointments` es indice global admin/dev-only. La UI de agenda
   global ya respeta esa frontera; las citas patient-scoped siguen siendo el
@@ -118,12 +121,12 @@ Estado al cierre:
 
 Retomar con PRs pequenos, en este orden:
 
-1. Auditar la experiencia UI no-demo de `/pacientes` con lista autorizada vacia
-   antes de cualquier nuevo endurecimiento visible.
-2. Auditar otros indices globales o pseudo-globales antes de aplicar scoping; no
-   reutilizar `GlobalClinicalIndexAccessDep` salvo que el indice sea
-   operacional admin/dev de verdad.
-3. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
+1. Aplicar ABAC dev-only a `GET /api/v1/patients/{patient_id}/clinical-orders`.
+2. Aplicar ABAC dev-only a `GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets`
+   y `GET /api/v1/hospitalization/patients/{patient_id}/indications`.
+3. Agregar gate ejecutable para detectar rutas con `record_patient_scoped_read`
+   sin enforcement de patient scope.
+4. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
    alcance hasta contrato especifico.
 
 Mantener fuera de alcance PHI real, piloto clinico, receta/firma/MAR, adjuntos

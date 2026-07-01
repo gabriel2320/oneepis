@@ -1,6 +1,6 @@
 # Current State
 
-Fecha: 2026-06-29
+Fecha: 2026-07-01
 
 Este documento es estado operativo vigente, no historial. El historial
 cronologico vive en `docs/ROADMAP.md`; los reportes fechados son snapshots y no
