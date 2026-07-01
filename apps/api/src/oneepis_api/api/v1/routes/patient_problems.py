@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import PatientReadActorDep, ProblemActorDep
+from oneepis_api.api.deps import ProblemActorDep, ReadAccessDep
 from oneepis_api.models.clinical_record import ActiveProblem, RecordStatus
 from oneepis_api.schemas.clinical_record import (
     ActiveProblemCreate,
@@ -14,12 +14,14 @@ from oneepis_api.schemas.clinical_record import (
 )
 from oneepis_api.schemas.clinical_record_contracts.diagnostics import validate_diagnosis_code_pair
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -47,15 +49,23 @@ def active_problem_audit_fields(fields: list[str]) -> list[str]:
 def list_active_problems(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ActiveProblem]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="problems.read",
     )
     statement = (
@@ -105,9 +115,17 @@ def get_active_problem(
     patient_id: uuid.UUID,
     problem_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> ActiveProblem:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     problem = require_patient_child(
         session,
         ActiveProblem,
@@ -118,7 +136,7 @@ def get_active_problem(
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="problem.read",
     )
     return problem
