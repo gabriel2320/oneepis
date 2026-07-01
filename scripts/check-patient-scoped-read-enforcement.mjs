@@ -11,25 +11,31 @@ const allowedHelperFiles = new Set([
 const allowedEnforcementMarkers = [
   "enforce_patient_scope_for_read",
   "enforce_assistant_read_scope",
+  "enforce_and_record_assistant_read",
+];
+const allowedReadAuditMarkers = [
+  "record_patient_scoped_read",
+  "record_read_audit_event",
+  "enforce_and_record_assistant_read",
+];
+const auditOnlyReadActions = [
+  "patient_audit.read",
 ];
 
 const errors = [];
-let checkedReadFiles = 0;
+let checkedReadHandlers = 0;
 
 for (const file of walk(routeRoot)) {
   const relativePath = toRepoPath(file);
   const content = readFileSync(file, "utf8");
-  if (!content.includes("record_patient_scoped_read")) {
-    continue;
-  }
   if (allowedHelperFiles.has(relativePath)) {
     continue;
   }
   const functions = functionsInFile(content);
   const auditMarkers = [
-    "record_patient_scoped_read",
+    ...allowedReadAuditMarkers,
     ...functions
-      .filter((fn) => fn.body.includes("record_patient_scoped_read"))
+      .filter((fn) => allowedReadAuditMarkers.some((marker) => fn.body.includes(marker)))
       .map((fn) => `${fn.name}(`),
   ];
   const enforcementMarkers = [
@@ -38,17 +44,20 @@ for (const file of walk(routeRoot)) {
       .filter((fn) => allowedEnforcementMarkers.some((marker) => fn.body.includes(marker)))
       .map((fn) => `${fn.name}(`),
   ];
-  const readHandlers = functions.filter(
-    (fn) => fn.isRouteHandler && firstMarkerIndex(fn.body, auditMarkers) >= 0,
-  );
-  if (readHandlers.length === 0) {
-    errors.push(`${relativePath} imports patient-scoped read audit but no route handler call was found.`);
-    continue;
-  }
-  checkedReadFiles += 1;
+  const readHandlers = functions.filter((fn) => isPatientScopedReadHandler(fn));
   for (const fn of readHandlers) {
     const firstReadAudit = firstMarkerIndex(fn.body, auditMarkers);
     const firstEnforcement = firstMarkerIndex(fn.body, enforcementMarkers);
+    checkedReadHandlers += 1;
+    if (firstReadAudit < 0 && !isAuditOnlyReadHandler(fn)) {
+      errors.push(
+        `${relativePath}:${fn.line} ${fn.name} is a patient-scoped read handler without patient-scoped read audit.`,
+      );
+      continue;
+    }
+    if (isAuditOnlyReadHandler(fn)) {
+      continue;
+    }
     if (firstEnforcement < 0 || firstEnforcement > firstReadAudit) {
       errors.push(
         `${relativePath}:${fn.line} ${fn.name} records patient-scoped reads before patient-scope enforcement.`,
@@ -57,8 +66,8 @@ for (const file of walk(routeRoot)) {
   }
 }
 
-if (checkedReadFiles === 0) {
-  errors.push("No patient-scoped read route files were checked.");
+if (checkedReadHandlers === 0) {
+  errors.push("No patient-scoped read route handlers were checked.");
 }
 
 if (errors.length > 0) {
@@ -70,7 +79,7 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Patient-scoped read enforcement guard passed: ${checkedReadFiles} route files checked.`,
+  `Patient-scoped read enforcement guard passed: ${checkedReadHandlers} route handlers checked.`,
 );
 
 function walk(root) {
@@ -110,18 +119,25 @@ function functionsInFile(content) {
     functions.push({
       name: match[1],
       line: index + 1,
-      isRouteHandler: hasRouterDecorator(lines, index),
+      routeDecorator: routeDecorator(lines, index),
       body: bodyLines.join("\n"),
     });
   }
   return functions;
 }
 
-function hasRouterDecorator(lines, functionIndex) {
+function routeDecorator(lines, functionIndex) {
+  const decoratorLines = [];
   for (let cursor = functionIndex - 1; cursor >= 0; cursor -= 1) {
     const line = lines[cursor];
     if (line.startsWith("@router.")) {
-      return true;
+      decoratorLines.unshift(line);
+      const text = decoratorLines.join("\n");
+      const methodMatch = text.match(/@router\.(get|post|put|patch|delete)\b/);
+      return {
+        method: methodMatch?.[1] ?? null,
+        text,
+      };
     }
     if (
       line.trim() === "" ||
@@ -129,11 +145,12 @@ function hasRouterDecorator(lines, functionIndex) {
       line.startsWith(" ") ||
       line.trim() === ")"
     ) {
+      decoratorLines.unshift(line);
       continue;
     }
-    return false;
+    return null;
   }
-  return false;
+  return null;
 }
 
 function firstMarkerIndex(content, markers) {
@@ -141,4 +158,12 @@ function firstMarkerIndex(content, markers) {
     .map((marker) => content.indexOf(marker))
     .filter((index) => index >= 0);
   return indexes.length === 0 ? -1 : Math.min(...indexes);
+}
+
+function isPatientScopedReadHandler(fn) {
+  return fn.routeDecorator?.method === "get" && fn.routeDecorator.text.includes("{patient_id}");
+}
+
+function isAuditOnlyReadHandler(fn) {
+  return auditOnlyReadActions.some((action) => fn.body.includes(action));
 }
