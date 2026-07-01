@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ClinicalEventWriteAccessDep, PatientReadActorDep
+from oneepis_api.api.deps import ClinicalEventWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEntryStatus,
@@ -28,12 +28,14 @@ from oneepis_api.services.clinical_event_validation import (
     validate_curated_antecedent_payload,
     validate_diagnostic_coding_payload,
 )
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -43,19 +45,28 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 
+
 @router.get("/{patient_id}/clinical-events", response_model=list[ClinicalEventRead])
 def list_clinical_events(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalEvent]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="clinical_events.read",
     )
     statement = (
@@ -115,9 +126,17 @@ def get_clinical_event(
     patient_id: uuid.UUID,
     event_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     event = require_patient_child(
         session,
         ClinicalEvent,
@@ -128,7 +147,7 @@ def get_clinical_event(
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="clinical_event.read",
     )
     return event
@@ -203,14 +222,22 @@ def update_clinical_event(
 def get_clinical_timeline(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
 ) -> ClinicalTimelineRead:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="timeline.read",
     )
     return ClinicalTimelineRead(
