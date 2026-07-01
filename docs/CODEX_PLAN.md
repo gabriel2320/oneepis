@@ -110,7 +110,7 @@ Estado al cierre:
   ejecutable de rutas/superficies patient-scoped, #285 write ABAC dev-only para
   signos vitales, #286 contrato de politica `security-report`, #287 refresh de
   handoff release, #288 write ABAC dev-only para clinical risks y #289 write
-  ABAC dev-only para clinical entries.
+  ABAC dev-only para clinical entries, #290 write ABAC dev-only para encounters.
 - Avance ABAC dev-only actual: `GET /api/v1/patients`, `GET patient`,
   `GET record`, appointments patient-scoped, allergies, active problems,
   medications y medication drafting context, encounters, clinical entries,
