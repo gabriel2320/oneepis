@@ -5,10 +5,14 @@ from oneepis_api.core.access_context_contract import (
     ACCESS_CONTEXT_REQUIREMENTS,
     ACCESS_CONTEXT_RUNTIME_STATUS,
     ACCESS_REASON_CONTRACTS,
+    BREAK_GLASS_REASON_CODES,
+    BREAK_GLASS_REVIEW_CONTROLS,
     CONTEXTUAL_ACCESS_HEADER_CONTRACTS,
     access_context_requirement_keys,
     access_reason_audit_metadata,
     access_reason_keys,
+    break_glass_reason_code_keys,
+    break_glass_review_control_keys,
     contextual_access_header_names,
 )
 from oneepis_api.core.access_context_runtime import (
@@ -56,11 +60,45 @@ def test_access_context_contract_does_not_claim_runtime_abac() -> None:
         "development_patient_read_enforcement_scope": "GET /api/v1/patients/{patient_id}",
         "contextual_headers_accepted": False,
         "break_glass_enabled": False,
+        "break_glass_review_runtime_enabled": False,
+        "break_glass_mfa_step_up_enabled": False,
+        "break_glass_post_access_review_enabled": False,
         "reason": (
             "Contextual ABAC production enforcement is disabled; development-only "
             "patient read enforcement is available behind ONEEPIS_ABAC_ENFORCEMENT_ENABLED."
         ),
     }
+
+
+def test_break_glass_review_contract_is_pre_runtime_only() -> None:
+    assert break_glass_reason_code_keys() == (
+        "urgent_patient_safety",
+        "temporary_clinical_coverage",
+        "audit_or_compliance_access",
+    )
+    assert break_glass_review_control_keys() == (
+        "curated_reason_code",
+        "bounded_expiration",
+        "future_mfa_step_up",
+        "post_access_review",
+        "high_severity_audit",
+    )
+
+    assert {code.status for code in BREAK_GLASS_REASON_CODES} == {
+        "future_review_required"
+    }
+    assert {code.free_text_retention for code in BREAK_GLASS_REASON_CODES} == {
+        "never_store_raw_reason_text"
+    }
+    assert all(code.requires_expiration for code in BREAK_GLASS_REASON_CODES)
+    assert all(code.requires_mfa_step_up for code in BREAK_GLASS_REASON_CODES)
+    assert all(code.requires_post_access_review for code in BREAK_GLASS_REASON_CODES)
+    assert {code.audit_severity for code in BREAK_GLASS_REASON_CODES} == {"high"}
+
+    assert {control.status for control in BREAK_GLASS_REVIEW_CONTROLS} == {
+        "required_before_runtime_break_glass"
+    }
+    assert all(control.criterion for control in BREAK_GLASS_REVIEW_CONTROLS)
 
 
 def test_access_reason_contract_declares_future_reviewed_reason_keys() -> None:
