@@ -84,9 +84,12 @@ def test_clinical_write_contract_tracks_dev_only_write_abac_surfaces() -> None:
     assert surfaces["vital_signs"].dev_write_abac is True
     assert surfaces["vital_signs"].runtime_write_abac is False
     assert surfaces["vital_signs"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["clinical_entries"].dev_write_abac is True
+    assert surfaces["clinical_entries"].runtime_write_abac is False
+    assert surfaces["clinical_entries"].current_guard == "rbac_semantic_and_dev_abac_guard"
     assert surfaces["clinical_risks"].dev_write_abac is True
     assert surfaces["clinical_risks"].runtime_write_abac is False
     assert surfaces["clinical_risks"].current_guard == "rbac_semantic_and_dev_abac_guard"
     assert {
         key for key, surface in surfaces.items() if surface.dev_write_abac
-    } == {"vital_signs", "clinical_risks"}
+    } == {"clinical_entries", "vital_signs", "clinical_risks"}

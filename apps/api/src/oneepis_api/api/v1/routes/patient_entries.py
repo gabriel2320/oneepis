@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ClinicalEntryActorDep, ReadAccessDep
+from oneepis_api.api.deps import ClinicalEntryWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEntryKind,
@@ -18,7 +18,10 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalEntryUpdate,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -149,13 +152,21 @@ def create_clinical_entry(
     patient_id: uuid.UUID,
     payload: ClinicalEntryCreate,
     session: SessionDep,
-    actor: ClinicalEntryActorDep,
+    user: ClinicalEntryWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     entry_data = payload.model_dump()
     _reject_entered_in_error_status(payload.status)
     validate_entry_encounter(session, patient_id, payload.kind, payload.encounter_id)
-    entry_data["created_by"] = actor
+    entry_data["created_by"] = user.actor_id
     entry = ClinicalEntry(patient_id=patient_id, **entry_data)
     session.add(entry)
     session.flush()
@@ -164,7 +175,7 @@ def create_clinical_entry(
         action="clinical_entry.created",
         entity_type="clinical_entry",
         entity_id=entry.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "kind": payload.kind.value},
         after=audit_snapshot(entry, CLINICAL_ENTRY_AUDIT_FIELDS),
     )
@@ -179,9 +190,17 @@ def update_clinical_entry(
     entry_id: uuid.UUID,
     payload: ClinicalEntryUpdate,
     session: SessionDep,
-    actor: ClinicalEntryActorDep,
+    user: ClinicalEntryWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     entry = require_patient_child(
         session,
         ClinicalEntry,
@@ -211,7 +230,7 @@ def update_clinical_entry(
         action="clinical_entry.updated",
         entity_type="clinical_entry",
         entity_id=entry.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "fields": fields},
         before=before_changed,
         after=after_changed,
@@ -226,9 +245,17 @@ def delete_draft_clinical_entry(
     patient_id: uuid.UUID,
     entry_id: uuid.UUID,
     session: SessionDep,
-    actor: ClinicalEntryActorDep,
+    user: ClinicalEntryWriteAccessDep,
+    settings: SettingsDep,
 ) -> Response:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     entry = require_patient_child(
         session,
         ClinicalEntry,
@@ -252,7 +279,7 @@ def delete_draft_clinical_entry(
         action="clinical_entry.entered_in_error",
         entity_type="clinical_entry",
         entity_id=entry.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "reason_code": "entered_in_error"},
         before=before,
         after={"status": ClinicalEntryStatus.ENTERED_IN_ERROR.value},
