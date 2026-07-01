@@ -97,27 +97,24 @@ Estado al cierre:
 
 - `main` sincronizado con `origin/main`.
 - Sin PRs abiertos.
-- Ultimos PRs cerrados: #242 formalizo frontera `admin/dev`, #243 preparo
-  contrato break-glass sin runtime, #244 enforcement dev-only de appointments
-  patient-scoped, #245 ownership gate, #246 allergies ABAC dev-only, #247
-  problems ABAC dev-only, #248 adelgazo rutas de medicacion y #249 medications
-  ABAC dev-only.
+- Ultimos PRs cerrados: #250 refresco handoff Codex, #251 AI suggestions ABAC
+  dev-only, #252 adelgazo `patient_ai.py`, #254 patient AI ABAC dev-only,
+  #255 Assistant Timeline ABAC dev-only, #256 Assistant Search/Chart ABAC
+  dev-only y #257 Assistant Correlation auth/audit/ABAC dev-only. #253 quedo
+  cerrado al eliminarse la rama base apilada y fue reemplazado por #254.
 - Avance ABAC dev-only actual: `GET patient`, `GET record`, appointments
   patient-scoped, allergies, active problems, medications y medication drafting
-  context detras de `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`.
+  context, AI patient-scoped y Assistant Read timeline/search/chart/correlation
+  detras de `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`.
 
 Retomar manana con PRs pequenos, en este orden:
 
-1. Aplicar ABAC dev-only a `POST /patients/{patient_id}/ai/suggestions` sin
-   cambiar payloads ni proveedor IA.
-2. Adelgazar `patient_ai.py` antes de sumar enforcement; no agregar
-   comportamiento a archivos sobre presupuesto.
-3. Migrar rutas patient-scoped de `patient_ai.py` una por una con tests
-   enfocados y sin IA nueva.
-4. Migrar Assistant Read: timeline, search, chart y correlation con helper
-   comun de enforcement/audit.
-5. Gobernar indices globales solo despues: primero `/appointments`, luego
-   disenar politica segura para `/patients` sin romper la navegacion clinica.
+1. Gobernar `GET /api/v1/appointments` como indice global admin/dev-only,
+   manteniendo lecturas patient-scoped para clinicos con relacion activa.
+2. Auditar `GET /api/v1/patients` antes de endurecerlo: esta ruta puede sostener
+   navegacion clinica visible y requiere politica compatible con la UI.
+3. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
+   alcance hasta contrato especifico.
 
 Mantener fuera de alcance PHI real, piloto clinico, receta/firma/MAR, adjuntos
 productivos, consentimientos productivos, IA externa, dashboards y break-glass
