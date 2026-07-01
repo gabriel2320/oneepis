@@ -26,7 +26,10 @@ from oneepis_api.services.ai.provider import get_ai_provider
 from oneepis_api.services.audit import record_audit_event
 from oneepis_api.services.clinical_context import build_event_context
 from oneepis_api.services.clinical_intent import resolve_clinical_intent
-from oneepis_api.services.clinical_intent_review import review_item_fingerprint
+from oneepis_api.services.clinical_intent_decision_metadata import (
+    clinical_action_decision_metadata,
+    review_item_decision_metadata,
+)
 from oneepis_api.services.clinical_intent_router import route_clinical_intent
 from oneepis_api.services.clinical_patch import confirm_clinical_patch as confirm_patch_service
 from oneepis_api.services.document_drafter import draft_soap_from_events
@@ -42,51 +45,6 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
-
-
-def _text_presence(value: str | None) -> dict[str, int | bool]:
-    text = value.strip() if value else ""
-    return {"present": bool(text), "length": len(text)}
-
-
-def _clinical_action_decision_metadata(
-    patient_id: uuid.UUID,
-    payload: ClinicalIntentActionDecisionRequest,
-) -> dict[str, object]:
-    return {
-        "patient_id": str(patient_id),
-        "decision": payload.decision,
-        "action_type": payload.action_type,
-        "action_id": payload.action_id,
-        "requires_confirmation": payload.requires_confirmation,
-        "label": _text_presence(payload.label),
-        "description": _text_presence(payload.description),
-        "note": _text_presence(payload.note),
-        "applies_changes": False,
-    }
-
-
-def _review_item_decision_metadata(
-    patient_id: uuid.UUID,
-    payload: ClinicalReviewItemDecisionRequest,
-) -> dict[str, object]:
-    return {
-        "patient_id": str(patient_id),
-        "decision": payload.decision,
-        "item_type": payload.item_type,
-        "item_fingerprint": review_item_fingerprint(
-            item_type=payload.item_type,
-            source_type=payload.source_type,
-            source_id=payload.source_id,
-            label=payload.label,
-        ),
-        "source_type": payload.source_type,
-        "source_id": str(payload.source_id) if payload.source_id else None,
-        "label": _text_presence(payload.label),
-        "detail": _text_presence(payload.detail),
-        "note": _text_presence(payload.note),
-        "applies_changes": False,
-    }
 
 
 @router.post(
@@ -277,7 +235,7 @@ def decide_clinical_intent_action(
         entity_type="patient",
         entity_id=patient_id,
         actor_id=user.actor_id,
-        metadata=_clinical_action_decision_metadata(patient_id, payload),
+        metadata=clinical_action_decision_metadata(patient_id, payload),
     )
     session.commit()
     return ClinicalIntentActionDecisionResponse(
@@ -303,7 +261,7 @@ def decide_clinical_review_item(
         entity_type="patient",
         entity_id=patient_id,
         actor_id=user.actor_id,
-        metadata=_review_item_decision_metadata(patient_id, payload),
+        metadata=review_item_decision_metadata(patient_id, payload),
     )
     session.commit()
     return ClinicalReviewItemDecisionResponse(
