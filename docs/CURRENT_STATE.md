@@ -37,8 +37,9 @@ fuente canonica viva.
   strings planos, con filtro de logging activo al arrancar la API; sin
   Sentry/OTel ni observabilidad productiva.
 - Guard PHI-safe frontend/CI (Dev-130): `check:web` bloquea `console.*` en
-  `apps/web/src`; CI bloquea OSV npm high/critical, mientras dependency review,
-  CodeQL y `pip-audit` siguen report-only hasta politica especifica.
+  `apps/web/src`; CI bloquea Gitleaks y OSV npm high/critical. Dependency
+  review, CodeQL y `pip-audit` siguen report-only con contrato de baseline,
+  owner, waiver y SLA antes de promoverlos a bloqueantes.
 - Contrato auth/sesion ejecutable (#111): tests de revocacion en lecturas
   clinicas y gate OpenAPI sobre rutas auth y GET protegidos de paciente.
 - ClinicalOrder borrador backend (#112): modelo, migracion, API y guards con
@@ -158,7 +159,8 @@ Criterio de no-hacer:
 CI agrega:
 
 - `security-report`: `gitleaks` y OSV npm high/critical bloqueantes;
-  dependency review, CodeQL y `pip-audit` report-only hasta politica explicita.
+  dependency review, CodeQL y `pip-audit` report-only hasta baseline/waiver/SLA
+  ejecutable.
 - `postgres-alembic`: PostgreSQL 15, `alembic upgrade head` desde cero y smoke
   `downgrade -1`/`upgrade head`.
 
