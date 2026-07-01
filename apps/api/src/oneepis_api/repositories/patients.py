@@ -55,7 +55,19 @@ def list_patients_for_active_care_relationship(
 ) -> list[Patient]:
     statement = (
         _patient_index_statement(search=search)
-        .join(PatientCareTeamRelationship, PatientCareTeamRelationship.patient_id == Patient.id)
+        .where(Patient.id.in_(active_care_relationship_patient_ids_statement(actor_id=actor_id)))
+        .distinct()
+    )
+    statement = _order_patient_index(statement, limit=limit, offset=offset)
+    return list(session.scalars(statement))
+
+
+def active_care_relationship_patient_ids_statement(
+    *,
+    actor_id: str,
+) -> Select[tuple[uuid.UUID]]:
+    return (
+        select(PatientCareTeamRelationship.patient_id)
         .join(CareTeam, PatientCareTeamRelationship.care_team_id == CareTeam.id)
         .join(ActorCareTeamMembership, ActorCareTeamMembership.care_team_id == CareTeam.id)
         .join(ClinicalService, CareTeam.service_id == ClinicalService.id)
@@ -72,8 +84,6 @@ def list_patients_for_active_care_relationship(
         )
         .distinct()
     )
-    statement = _order_patient_index(statement, limit=limit, offset=offset)
-    return list(session.scalars(statement))
 
 
 def _patient_index_statement(*, search: str | None = None) -> Select[tuple[Patient]]:
