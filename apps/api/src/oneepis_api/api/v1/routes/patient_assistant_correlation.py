@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter
 from sqlalchemy import select
 
+from oneepis_api.api.deps import ReadAccessDep
 from oneepis_api.models.clinical_record import ClinicalEvent, Medication, RecordStatus, VitalSign
 from oneepis_api.schemas.clinical_record import (
     AssistantCorrelationRequest,
@@ -18,7 +19,8 @@ from .patient_assistant_correlation_rules import (
     correlation_warnings,
 )
 from .patient_assistant_labs import fetch_lab_results_for_assistant
-from .patient_shared import SessionDep, require_patient
+from .patient_assistant_scope import enforce_and_record_assistant_read
+from .patient_shared import SessionDep, SettingsDep, require_patient
 
 router = APIRouter()
 
@@ -28,8 +30,17 @@ def correlate_assistant_read_layer(
     patient_id: uuid.UUID,
     payload: AssistantCorrelationRequest,
     session: SessionDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> AssistantCorrelationResponse:
     require_patient(session, patient_id)
+    enforce_and_record_assistant_read(
+        session,
+        patient_id=patient_id,
+        user=user,
+        settings=settings,
+        action="assistant_correlation.read",
+    )
     query_limit = payload.limit + 1
     vitals = list(
         session.scalars(

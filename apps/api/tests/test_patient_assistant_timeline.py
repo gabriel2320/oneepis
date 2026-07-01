@@ -790,7 +790,13 @@ def test_assistant_correlate_returns_explainable_sources_without_writing(
     )
     assert event_evidence["source_path"].endswith("/clinical-events/" + event_evidence["source_id"])
     after_audit = audit_events(client, auth, patient_id)
-    assert after_audit == before_audit
+    _assert_only_read_audit_added(
+        before_audit,
+        after_audit,
+        action="assistant_correlation.read",
+        method="POST",
+        path=f"/api/v1/patients/{patient_id}/assistant/correlate",
+    )
 
 
 def test_assistant_correlate_allows_readonly_user(
@@ -874,7 +880,13 @@ def test_assistant_correlate_reads_structured_labs_without_legacy_event(
     )
     assert "/lab-panels/" in lab_evidence["source_path"]
     after_audit = audit_events(client, auth, patient_id)
-    assert after_audit == before_audit
+    _assert_only_read_audit_added(
+        before_audit,
+        after_audit,
+        action="assistant_correlation.read",
+        method="POST",
+        path=f"/api/v1/patients/{patient_id}/assistant/correlate",
+    )
 
 
 def test_assistant_correlate_reports_limit_and_missing_evidence(
