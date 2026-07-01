@@ -117,8 +117,8 @@ reporte agregado interno de observabilidad ABAC y enforcement dev-only para
 `GET /api/v1/patients/{patient_id}`,
 `GET /api/v1/patients/{patient_id}/record`, lecturas patient-scoped de
 appointments, allergies, active problems, medications y medication drafting
-context, encounters, clinical entries, clinical events/timeline, clinical risks,
-vital signs, lab panels/results, patient context, AI patient-scoped y Assistant Read
+context, encounters, clinical entries, clinical events/timeline, clinical
+orders, clinical risks, vital signs, lab panels/results, patient context, AI patient-scoped y Assistant Read
 timeline/search/chart/correlation, y
 `GET /api/v1/hospitalization/active`
 detras de

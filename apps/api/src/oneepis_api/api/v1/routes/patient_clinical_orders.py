@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import EncounterActorDep, PatientReadActorDep
+from oneepis_api.api.deps import EncounterActorDep, ReadAccessDep
 from oneepis_api.models.clinical_order import ClinicalOrder, ClinicalOrderStatus
 from oneepis_api.models.clinical_record import ClinicalEncounter
 from oneepis_api.schemas.clinical_order import (
@@ -18,11 +18,13 @@ from oneepis_api.services.audit import (
     changed_field_snapshots,
     record_audit_event,
 )
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -48,14 +50,22 @@ def clinical_order_audit_fields(fields: list[str]) -> list[str]:
 def list_clinical_orders(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
 ) -> list[ClinicalOrder]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="clinical_orders.read",
     )
     statement = (
