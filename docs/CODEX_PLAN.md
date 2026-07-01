@@ -124,8 +124,8 @@ Retomar con PRs pequenos, en este orden:
 1. Aplicar ABAC dev-only a `GET /api/v1/patients/{patient_id}/clinical-orders`.
 2. Aplicar ABAC dev-only a `GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets`
    y `GET /api/v1/hospitalization/patients/{patient_id}/indications`.
-3. Agregar gate ejecutable para detectar rutas con `record_patient_scoped_read`
-   sin enforcement de patient scope.
+3. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
+   barrera para nuevas rutas con `record_patient_scoped_read` sin enforcement.
 4. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
    alcance hasta contrato especifico.
 
