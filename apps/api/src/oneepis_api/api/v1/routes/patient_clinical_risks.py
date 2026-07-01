@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import ClinicalRiskActorDep, PatientReadActorDep
+from oneepis_api.api.deps import ClinicalRiskActorDep, ReadAccessDep
 from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, RecordStatus, VitalSign
 from oneepis_api.models.clinical_risk import (
     ClinicalRisk,
@@ -20,12 +20,14 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalRiskUpdate,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -57,16 +59,24 @@ def clinical_risk_audit_fields(fields: list[str]) -> list[str]:
 def list_clinical_risks(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
     risk_status: RiskStatusQuery = None,
 ) -> list[ClinicalRisk]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="clinical_risks.read",
     )
     filters = [ClinicalRisk.patient_id == patient_id]
@@ -118,14 +128,22 @@ def get_clinical_risk(
     patient_id: uuid.UUID,
     risk_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalRisk:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     risk = _require_clinical_risk(session, patient_id, risk_id)
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="clinical_risk.read",
     )
     return risk
