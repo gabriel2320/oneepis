@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import ClinicalRiskActorDep, ReadAccessDep
+from oneepis_api.api.deps import ClinicalRiskWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_record import ClinicalEntry, ClinicalEvent, RecordStatus, VitalSign
 from oneepis_api.models.clinical_risk import (
     ClinicalRisk,
@@ -20,7 +20,10 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalRiskUpdate,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -101,12 +104,20 @@ def create_clinical_risk(
     patient_id: uuid.UUID,
     payload: ClinicalRiskCreate,
     session: SessionDep,
-    actor: ClinicalRiskActorDep,
+    user: ClinicalRiskWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalRisk:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     _validate_risk_source(session, patient_id, payload.source_kind, payload.source_ref)
-    risk = ClinicalRisk(patient_id=patient_id, created_by=actor, **payload.model_dump())
+    risk = ClinicalRisk(patient_id=patient_id, created_by=user.actor_id, **payload.model_dump())
     session.add(risk)
     session.flush()
     record_audit_event(
@@ -114,7 +125,7 @@ def create_clinical_risk(
         action="clinical_risk.created",
         entity_type="clinical_risk",
         entity_id=risk.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_risk_metadata(patient_id, risk),
         after=audit_snapshot(risk, CLINICAL_RISK_AUDIT_FIELDS),
     )
@@ -155,9 +166,17 @@ def update_clinical_risk(
     risk_id: uuid.UUID,
     payload: ClinicalRiskUpdate,
     session: SessionDep,
-    actor: ClinicalRiskActorDep,
+    user: ClinicalRiskWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalRisk:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     risk = _require_clinical_risk(session, patient_id, risk_id)
     update_data = payload.model_dump(exclude_unset=True)
     if "encounter_id" in update_data:
@@ -180,7 +199,7 @@ def update_clinical_risk(
         action="clinical_risk.updated",
         entity_type="clinical_risk",
         entity_id=risk.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_risk_metadata(patient_id, risk) | {"fields": fields},
         before=before_changed,
         after=after_changed,

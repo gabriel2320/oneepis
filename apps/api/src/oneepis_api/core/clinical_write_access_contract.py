@@ -103,7 +103,8 @@ CLINICAL_WRITE_SURFACES: tuple[ClinicalWriteSurface, ...] = (
     ClinicalWriteSurface(
         key="clinical_risks",
         label="Clinical risks create/update/delete",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
