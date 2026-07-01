@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import CurrentUserDep, EncounterActorDep, PatientReadActorDep
+from oneepis_api.api.deps import CurrentUserDep, EncounterActorDep, ReadAccessDep
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
     EncounterStatus,
@@ -19,12 +19,14 @@ from oneepis_api.schemas.clinical_record import (
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 from oneepis_api.services.auth import AuthenticatedUser, UserRole
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -52,15 +54,23 @@ def encounter_audit_fields(fields: list[str]) -> list[str]:
 def list_clinical_encounters(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalEncounter]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="encounters.read",
     )
     statement = (
@@ -136,9 +146,17 @@ def get_clinical_encounter(
     patient_id: uuid.UUID,
     encounter_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEncounter:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     encounter = require_patient_child(
         session,
         ClinicalEncounter,
@@ -149,7 +167,7 @@ def get_clinical_encounter(
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="encounter.read",
     )
     return encounter
