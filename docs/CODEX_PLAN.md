@@ -91,26 +91,37 @@ estado no ejecutable.
 5. Actualizar docs solo si cambia comportamiento o decision.
 6. Entregar resumen, pruebas y riesgos.
 
-## Handoff 2026-06-30
+## Handoff 2026-07-01
 
 Estado al cierre:
 
 - `main` sincronizado con `origin/main`.
-- Sin PRs abiertos y sin ramas `codex/*` o `fix/*` pendientes.
-- Ultimos PRs cerrados: #236 cadena activa ABAC, #237 guard recursivo de razones,
-  #238 contrato de motivo de acceso, #239 cobertura `GET patient`, #240
-  enforcement dev-only de `/record`, #241 reporte agregado ABAC.
+- Sin PRs abiertos.
+- Ultimos PRs cerrados: #242 formalizo frontera `admin/dev`, #243 preparo
+  contrato break-glass sin runtime, #244 enforcement dev-only de appointments
+  patient-scoped, #245 ownership gate, #246 allergies ABAC dev-only, #247
+  problems ABAC dev-only, #248 adelgazo rutas de medicacion y #249 medications
+  ABAC dev-only.
+- Avance ABAC dev-only actual: `GET patient`, `GET record`, appointments
+  patient-scoped, allergies, active problems, medications y medication drafting
+  context detras de `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`.
 
 Retomar manana con PRs pequenos, en este orden:
 
-1. Formalizar politica `admin/dev` de desarrollo: `dev` no existe en produccion;
-   admin tecnico no equivale a acceso PHI productivo.
-2. Preparar contrato de break-glass review sin runtime: reason codes, expiracion,
-   MFA futura, revision posterior y auditoria high severity.
-3. Elegir la siguiente familia patient-scoped para ABAC dev-only solo despues de
-   revisar eventos agregados: appointments patient-scoped o medications/allergies/problems.
-4. Mantener fuera de alcance PHI real, piloto clinico, receta/firma/MAR,
-   adjuntos productivos, consentimientos productivos, IA externa y dashboards.
+1. Aplicar ABAC dev-only a `POST /patients/{patient_id}/ai/suggestions` sin
+   cambiar payloads ni proveedor IA.
+2. Adelgazar `patient_ai.py` antes de sumar enforcement; no agregar
+   comportamiento a archivos sobre presupuesto.
+3. Migrar rutas patient-scoped de `patient_ai.py` una por una con tests
+   enfocados y sin IA nueva.
+4. Migrar Assistant Read: timeline, search, chart y correlation con helper
+   comun de enforcement/audit.
+5. Gobernar indices globales solo despues: primero `/appointments`, luego
+   disenar politica segura para `/patients` sin romper la navegacion clinica.
+
+Mantener fuera de alcance PHI real, piloto clinico, receta/firma/MAR, adjuntos
+productivos, consentimientos productivos, IA externa, dashboards y break-glass
+runtime.
 
 ## Criterio De Producto
 
