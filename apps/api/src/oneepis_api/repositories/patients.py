@@ -5,6 +5,15 @@ import uuid
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session, selectinload
 
+from oneepis_api.models.access_boundary import (
+    AccessBoundaryStatus,
+    ActorCareTeamMembership,
+    CareTeam,
+    ClinicalInstitution,
+    ClinicalService,
+    ClinicalTenant,
+    PatientCareTeamRelationship,
+)
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
@@ -31,6 +40,43 @@ def list_patients(
     limit: int = 25,
     offset: int = 0,
 ) -> list[Patient]:
+    statement = _patient_index_statement(search=search)
+    statement = _order_patient_index(statement, limit=limit, offset=offset)
+    return list(session.scalars(statement))
+
+
+def list_patients_for_active_care_relationship(
+    session: Session,
+    *,
+    actor_id: str,
+    search: str | None = None,
+    limit: int = 25,
+    offset: int = 0,
+) -> list[Patient]:
+    statement = (
+        _patient_index_statement(search=search)
+        .join(PatientCareTeamRelationship, PatientCareTeamRelationship.patient_id == Patient.id)
+        .join(CareTeam, PatientCareTeamRelationship.care_team_id == CareTeam.id)
+        .join(ActorCareTeamMembership, ActorCareTeamMembership.care_team_id == CareTeam.id)
+        .join(ClinicalService, CareTeam.service_id == ClinicalService.id)
+        .join(ClinicalTenant, ClinicalService.tenant_id == ClinicalTenant.id)
+        .join(ClinicalInstitution, ClinicalTenant.institution_id == ClinicalInstitution.id)
+        .where(
+            ActorCareTeamMembership.actor_id == actor_id,
+            ActorCareTeamMembership.status == AccessBoundaryStatus.ACTIVE,
+            PatientCareTeamRelationship.status == AccessBoundaryStatus.ACTIVE,
+            CareTeam.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalService.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalTenant.status == AccessBoundaryStatus.ACTIVE,
+            ClinicalInstitution.status == AccessBoundaryStatus.ACTIVE,
+        )
+        .distinct()
+    )
+    statement = _order_patient_index(statement, limit=limit, offset=offset)
+    return list(session.scalars(statement))
+
+
+def _patient_index_statement(*, search: str | None = None) -> Select[tuple[Patient]]:
     statement: Select[tuple[Patient]] = select(Patient)
     if search:
         like = f"%{search}%"
@@ -39,9 +85,16 @@ def list_patients(
             | Patient.last_name.ilike(like)
             | Patient.clinical_identifier.ilike(like)
         )
+    return statement
 
-    statement = statement.order_by(Patient.created_at.desc()).offset(offset).limit(limit)
-    return list(session.scalars(statement))
+
+def _order_patient_index(
+    statement: Select[tuple[Patient]],
+    *,
+    limit: int,
+    offset: int,
+) -> Select[tuple[Patient]]:
+    return statement.order_by(Patient.created_at.desc()).offset(offset).limit(limit)
 
 
 def get_recent_entries(

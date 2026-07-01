@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import APIRouter, status
 
-from oneepis_api.api.deps import AiAccessDep, PatientActorDep, PatientReadActorDep, ReadAccessDep
+from oneepis_api.api.deps import AiAccessDep, PatientActorDep, ReadAccessDep
 from oneepis_api.models.patient import Patient
 from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.ai import PatientAiSuggestionRequest, PatientAiSuggestionsResponse
@@ -23,7 +23,10 @@ from oneepis_api.services.audit import (
     record_read_audit_event,
 )
 from oneepis_api.services.historical_diagnoses import historical_diagnoses_from_events
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    PATIENT_SCOPE_BREAKOUT_ROLES,
+    enforce_patient_scope_for_read,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -94,23 +97,37 @@ def _record_patient_read_audit(
 @router.get("", response_model=list[PatientRead])
 def list_patients(
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     search: PatientSearch = None,
     limit: LimitQuery = 25,
     offset: OffsetQuery = 0,
 ) -> list[Patient]:
-    patients = patient_repo.list_patients(session, search=search, limit=limit, offset=offset)
+    scope_filtered = settings.abac_enforcement_enabled and not user.roles.intersection(
+        PATIENT_SCOPE_BREAKOUT_ROLES
+    )
+    if scope_filtered:
+        patients = patient_repo.list_patients_for_active_care_relationship(
+            session,
+            actor_id=user.actor_id,
+            search=search,
+            limit=limit,
+            offset=offset,
+        )
+    else:
+        patients = patient_repo.list_patients(session, search=search, limit=limit, offset=offset)
     record_read_audit_event(
         session,
         action="patient_index.read",
         entity_type="patient_index",
         entity_id=None,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={
             "search_present": search is not None,
             "limit": limit,
             "offset": offset,
             "result_count": len(patients),
+            "scope_filtered": scope_filtered,
         },
     )
     session.commit()

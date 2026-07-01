@@ -110,19 +110,19 @@ Estado al cierre:
 - `GET /api/v1/appointments` es indice global admin/dev-only. La UI de agenda
   global ya respeta esa frontera; las citas patient-scoped siguen siendo el
   carril clinico normal.
-- `GET /api/v1/patients` ya emite `patient_index.read` minimizado y sostiene
-  navegacion visible de `/pacientes` y selectores clinicos. No endurecerlo como
-  admin/dev global; el siguiente corte debe ser lista filtrada por relacion
-  asistencial o contrato de scoping, no bloqueo amplio.
+- `GET /api/v1/patients` ya emite `patient_index.read` minimizado. Con
+  `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`, admin/dev conservan indice global y
+  roles clinicos ven solo pacientes con relacion asistencial activa. Sin
+  enforcement, mantiene la navegacion visible de `/pacientes` y selectores
+  clinicos.
 
 Retomar con PRs pequenos, en este orden:
 
-1. Disenar contrato de patient index scoped: admin/dev ven indice global; roles
-   clinicos deben ver solo pacientes con relacion asistencial activa cuando el
-   enforcement dev-only este activo.
-2. Implementar el filtro dev-only de `GET /api/v1/patients` solo despues de
-   cubrir fixtures de care-team y UI vacia/autorizada. No usar
-   `GlobalClinicalIndexAccessDep` en esta ruta.
+1. Auditar la experiencia UI no-demo de `/pacientes` con lista autorizada vacia
+   antes de cualquier nuevo endurecimiento visible.
+2. Auditar otros indices globales o pseudo-globales antes de aplicar scoping; no
+   reutilizar `GlobalClinicalIndexAccessDep` salvo que el indice sea
+   operacional admin/dev de verdad.
 3. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
    alcance hasta contrato especifico.
 
