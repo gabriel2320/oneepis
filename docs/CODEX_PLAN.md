@@ -74,7 +74,8 @@ de vision. No crear snapshots nuevos.
 ## Handoff 2026-07-01
 
 - `main` sincronizado con `origin/main`.
-- No hay PRs abiertos al cierre de #290.
+- PR documental en curso: #291, consolidacion de documentos vivos y guard
+  `check-doc-canon`.
 - Ultimo PR sincronizado: #290, write ABAC dev-only para encounters.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
