@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ClinicalEntryActorDep, PatientReadActorDep
+from oneepis_api.api.deps import ClinicalEntryActorDep, ReadAccessDep
 from oneepis_api.models.clinical_record import (
     ClinicalEntry,
     ClinicalEntryKind,
@@ -18,12 +18,14 @@ from oneepis_api.schemas.clinical_record import (
     ClinicalEntryUpdate,
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_encounter_for_patient,
@@ -69,15 +71,23 @@ def _reject_entered_in_error_status(status_value: ClinicalEntryStatus | None) ->
 def list_clinical_entries(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 25,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalEntry]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="clinical_entries.read",
     )
     statement = (
@@ -98,9 +108,17 @@ def get_clinical_entry(
     patient_id: uuid.UUID,
     entry_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEntry:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     entry = require_patient_child(
         session,
         ClinicalEntry,
@@ -116,7 +134,7 @@ def get_clinical_entry(
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="clinical_entry.read",
     )
     return entry
