@@ -128,6 +128,9 @@ productivo: `patient_scoping_enabled`, `abac_runtime_enforced` y
 Ademas, `GET /api/v1/appointments` queda gobernado como indice global
 admin/dev-only; las lecturas patient-scoped de agenda siguen siendo el carril
 clinico normal.
+Las escrituras clinicas tienen contrato shadow de inventario y requisitos, pero
+siguen sin ABAC runtime: la cobertura de lectura no autoriza escrituras por
+relacion asistencial.
 
 Criterio de no-hacer:
 
@@ -165,8 +168,9 @@ CI agrega:
   observabilidad productiva PHI-safe formal.
 - Identidad: auth local sirve para desarrollo; usuarios persistentes, sesiones
   productivas, revocacion y recuperacion institucional siguen pendientes.
-- Permisos: RBAC global actual es minimo; ABAC contextual sigue futuro y debe
-  incluir motivo de acceso y break-glass auditado antes de piloto real.
+- Permisos: RBAC global actual es minimo; ABAC contextual productivo sigue
+  futuro y debe incluir motivo de acceso, escrituras clinicas por relacion
+  asistencial y break-glass auditado antes de piloto real.
 - Auditoria: read-audit, borrado logico y minimizacion de snapshots ya cubren
   las superficies P1 principales, pero falta politica medico-legal completa de
   retencion, exportacion, revision e inmutabilidad formal.

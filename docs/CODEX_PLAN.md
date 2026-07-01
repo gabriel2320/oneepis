@@ -103,8 +103,9 @@ Estado al cierre:
   #270 patient context ABAC dev-only, #271 encounters ABAC dev-only, #273
   slimming de `patient_events.py`, #274 clinical events/timeline ABAC dev-only y
   #275 clinical entries ABAC dev-only, #276 refresh docs seguridad/auditoria,
-  #277 clinical orders ABAC dev-only, #278 hospital drafts ABAC dev-only y #279
-  gate transversal de read-enforcement patient-scoped.
+  #277 clinical orders ABAC dev-only, #278 hospital drafts ABAC dev-only, #279
+  gate transversal de read-enforcement patient-scoped y #281 gate por handler
+  para read-enforcement patient-scoped.
 - Avance ABAC dev-only actual: `GET /api/v1/patients`, `GET patient`,
   `GET record`, appointments patient-scoped, allergies, active problems,
   medications y medication drafting context, encounters, clinical entries,
@@ -124,14 +125,12 @@ Estado al cierre:
 
 Retomar con PRs pequenos, en este orden:
 
-1. Endurecer `scripts/check-patient-scoped-read-enforcement.mjs` para validar
-   llamadas por handler, no solo por archivo.
-2. Crear contrato shadow de escrituras clinicas: inventario y politica
+1. Crear contrato shadow de escrituras clinicas: inventario y politica
    pre-runtime sin habilitar ABAC productivo.
-3. Ejecutar barrido release con `npm run check` y corregir solo drift real.
-4. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
+2. Ejecutar barrido release con `npm run check` y corregir solo drift real.
+3. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
    barrera para nuevas rutas con `record_patient_scoped_read` sin enforcement.
-5. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
+4. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
    alcance hasta contrato especifico.
 
 Mantener fuera de alcance PHI real, piloto clinico, receta/firma/MAR, adjuntos
