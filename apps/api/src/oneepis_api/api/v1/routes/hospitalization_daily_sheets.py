@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from oneepis_api.api.deps import (
     HospitalDailySheetActorDep,
-    PatientReadActorDep,
+    ReadAccessDep,
     require_patient_read_access,
 )
 from oneepis_api.api.v1.routes.patient_shared import (
@@ -17,6 +17,7 @@ from oneepis_api.api.v1.routes.patient_shared import (
     record_patient_scoped_read,
     require_patient,
 )
+from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
@@ -35,6 +36,7 @@ from oneepis_api.services.audit import (
     record_audit_event,
 )
 from oneepis_api.services.clinical_dates import clinical_local_date
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 router = APIRouter(
     prefix="/hospitalization",
@@ -42,6 +44,7 @@ router = APIRouter(
     dependencies=[Depends(require_patient_read_access)],
 )
 SessionDep = Annotated[Session, Depends(get_session)]
+SettingsDep = Annotated[Settings, Depends(get_settings)]
 LimitQuery = Annotated[int, Query(ge=1, le=100)]
 HOSPITAL_DAILY_SHEET_AUDIT_FIELDS = [
     "created_by",
@@ -56,14 +59,22 @@ HOSPITAL_DAILY_SHEET_AUDIT_FIELDS = [
 def list_hospital_daily_sheets(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 30,
 ) -> list[HospitalDailySheet]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="hospital_daily_sheets.read",
     )
     statement = (
