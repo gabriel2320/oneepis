@@ -125,9 +125,9 @@ Estado al cierre:
   roles clinicos ven solo pacientes con relacion asistencial activa. Sin
   enforcement, mantiene la navegacion visible de `/pacientes` y selectores
   clinicos.
-- Signos vitales y clinical risks son las primeras escrituras clinicas con write
-  ABAC dev-only. El resto de escrituras sigue sin write ABAC y ninguna escritura
-  tiene ABAC runtime productivo.
+- Signos vitales, clinical risks y clinical entries son las primeras escrituras
+  clinicas con write ABAC dev-only. El resto de escrituras sigue sin write ABAC
+  y ninguna escritura tiene ABAC runtime productivo.
 - `security-report` bloquea Gitleaks y OSV npm high/critical; dependency
   review, CodeQL y `pip-audit` siguen report-only con contrato de baseline,
   owner, waiver y SLA antes de promoverlos.
@@ -137,7 +137,7 @@ Estado al cierre:
 Retomar con PRs pequenos, en este orden:
 
 1. Continuar write ABAC dev-only por una siguiente superficie acotada,
-   idealmente clinical entries o encounters; no empezar por medicamentos ni
+   idealmente encounters o clinical events; no empezar por medicamentos ni
    ordenes.
 2. Mantener el inventario `patient_scoped_route_inventory.py` sincronizado con
    cualquier ruta/superficie nueva o cambio de cobertura.

@@ -43,7 +43,11 @@ def test_patient_scoped_route_inventory_matches_write_shadow_contract() -> None:
     assert {
         route.runtime_write_abac for route in PATIENT_SCOPED_ROUTE_INVENTORY if route.write_surface
     } == {False}
-    assert write_abac_dev_only_surface_keys() == ("vital_signs", "clinical_risks")
+    assert write_abac_dev_only_surface_keys() == (
+        "clinical_entries",
+        "vital_signs",
+        "clinical_risks",
+    )
 
 
 def test_read_abac_routes_require_read_audit() -> None:

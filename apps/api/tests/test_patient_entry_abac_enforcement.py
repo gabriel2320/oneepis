@@ -75,18 +75,120 @@ def test_patient_entries_abac_allows_active_relationship(
     assert detail_response.json()["id"] == entry["id"]
 
 
+def test_patient_entries_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    entry = _create_entry(client, auth, patient_id)
+    unknown_entry_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json=_entry_payload(title="Entrada sin relacion activa"),
+    )
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-entries/{entry['id']}",
+        headers=auth,
+        json={"title": "No debe actualizarse"},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-entries/{unknown_entry_id}",
+        headers=auth,
+        json={"title": "No debe revelar existencia"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/clinical-entries/{entry['id']}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    assert delete_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 4
+    assert actions.count("clinical_entry.created") == 1
+    assert "clinical_entry.updated" not in actions
+    assert "clinical_entry.entered_in_error" not in actions
+
+
+def test_patient_entries_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=auth,
+        json=_entry_payload(title="Entrada permitida por relacion activa"),
+    )
+    entry_id = create_response.json()["id"]
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-entries/{entry_id}",
+        headers=auth,
+        json={"title": "Entrada actualizada"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/clinical-entries/{entry_id}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["title"] == "Entrada actualizada"
+    assert delete_response.status_code == 204
+
+
+def test_patient_entries_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-entries",
+        headers=admin_auth,
+        json=_entry_payload(title="Entrada creada por breakout admin/dev"),
+    )
+
+    assert response.status_code == 201
+
+
 def _create_entry(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-entries",
         headers=auth,
-        json={
-            "kind": "progress",
-            "occurred_at": "2026-06-20T09:30:00Z",
-            "title": "Entrada ABAC",
-        },
+        json=_entry_payload(title="Entrada ABAC"),
     )
     assert response.status_code == 201
     return response.json()
+
+
+def _entry_payload(*, title: str) -> dict[str, str]:
+    return {
+        "kind": "progress",
+        "status": "draft",
+        "occurred_at": "2026-06-20T09:30:00Z",
+        "title": title,
+    }
 
 
 def _enable_development_abac_enforcement() -> None:

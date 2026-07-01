@@ -93,7 +93,12 @@ PATIENT_SCOPED_ROUTE_INVENTORY: tuple[PatientScopedRoute, ...] = (
         "active_hospitalization",
         patient_scoped=False,
     ),
-    _write("POST", "/api/v1/patients/{patient_id}/clinical-entries", "clinical_entries"),
+    _write(
+        "POST",
+        "/api/v1/patients/{patient_id}/clinical-entries",
+        "clinical_entries",
+        write_abac_dev_only=True,
+    ),
     _write("POST", "/api/v1/patients/{patient_id}/clinical-events", "clinical_events"),
     _write("POST", "/api/v1/patients/{patient_id}/clinical-orders", "clinical_orders"),
     _write(
