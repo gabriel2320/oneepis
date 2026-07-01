@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import EncounterActorDep, require_patient_read_access
+from oneepis_api.api.deps import EncounterActorDep, PatientReadActorDep, require_patient_read_access
 from oneepis_api.db.session import get_session
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
@@ -26,6 +26,7 @@ from oneepis_api.services.audit import (
     audit_snapshot,
     changed_field_snapshots,
     record_audit_event,
+    record_read_audit_event,
 )
 
 router = APIRouter(
@@ -145,6 +146,7 @@ def _bed_audit_metadata(
 @router.get("/beds", response_model=list[HospitalBedRead])
 def list_hospital_beds(
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 100,
 ) -> list[HospitalBed]:
     statement = (
@@ -152,7 +154,17 @@ def list_hospital_beds(
         .order_by(HospitalBed.ward.asc(), HospitalBed.room.asc(), HospitalBed.bed_label.asc())
         .limit(limit)
     )
-    return list(session.scalars(statement))
+    beds = list(session.scalars(statement))
+    record_read_audit_event(
+        session,
+        action="hospital_beds.read",
+        entity_type="hospital_bed_index",
+        entity_id=None,
+        actor_id=actor,
+        metadata={"limit": limit, "result_count": len(beds)},
+    )
+    session.commit()
+    return beds
 
 
 @router.post("/beds", response_model=HospitalBedRead, status_code=status.HTTP_201_CREATED)
@@ -221,6 +233,7 @@ def update_hospital_bed(
 @router.get("/active", response_model=list[HospitalizationBoardItem])
 def list_active_hospitalizations(
     session: SessionDep,
+    actor: PatientReadActorDep,
     limit: LimitQuery = 50,
 ) -> list[HospitalizationBoardItem]:
     statement = (
@@ -234,7 +247,17 @@ def list_active_hospitalizations(
         .order_by(ClinicalEncounter.started_at.desc())
         .limit(limit)
     )
-    return [
+    board_items = [
         HospitalizationBoardItem(patient=patient, encounter=encounter, bed=bed)
         for patient, encounter, bed in session.execute(statement).all()
     ]
+    record_read_audit_event(
+        session,
+        action="hospitalization_board.read",
+        entity_type="hospitalization_board",
+        entity_id=None,
+        actor_id=actor,
+        metadata={"limit": limit, "result_count": len(board_items)},
+    )
+    session.commit()
+    return board_items
