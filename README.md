@@ -209,7 +209,8 @@ npm run check
 ## Documentos clave
 
 - `docs/CURRENT_STATE.md`: estado operativo.
-- `docs/GOVERNANCE.md`: reglas anti-inflacion.
+- `docs/GOVERNANCE.md`: reglas anti-inflacion y frontera documental.
+- `docs/CODEX_PLAN.md`: handoff breve para agentes.
 - `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart.
 - `docs/SCREEN_TREE.md`: rutas y superficies.
 - `docs/ROADMAP.md`: historial.
