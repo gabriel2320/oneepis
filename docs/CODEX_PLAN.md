@@ -105,8 +105,10 @@ Estado al cierre:
   #275 clinical entries ABAC dev-only, #276 refresh docs seguridad/auditoria,
   #277 clinical orders ABAC dev-only, #278 hospital drafts ABAC dev-only, #279
   gate transversal de read-enforcement patient-scoped, #281 gate por handler
-  para read-enforcement patient-scoped y #282 contrato shadow de escrituras
-  clinicas.
+  para read-enforcement patient-scoped, #282 contrato shadow de escrituras
+  clinicas, #283 guard de lecturas patient-scoped sin audit, #284 inventario
+  ejecutable de rutas/superficies patient-scoped, #285 write ABAC dev-only para
+  signos vitales y #286 contrato de politica `security-report`.
 - Avance ABAC dev-only actual: `GET /api/v1/patients`, `GET patient`,
   `GET record`, appointments patient-scoped, allergies, active problems,
   medications y medication drafting context, encounters, clinical entries,
@@ -123,16 +125,25 @@ Estado al cierre:
   roles clinicos ven solo pacientes con relacion asistencial activa. Sin
   enforcement, mantiene la navegacion visible de `/pacientes` y selectores
   clinicos.
+- Signos vitales es la primera escritura clinica con write ABAC dev-only para
+  create/update/delete. El resto de escrituras sigue sin write ABAC y ninguna
+  escritura tiene ABAC runtime productivo.
+- `security-report` bloquea Gitleaks y OSV npm high/critical; dependency
+  review, CodeQL y `pip-audit` siguen report-only con contrato de baseline,
+  owner, waiver y SLA antes de promoverlos.
+- Barrido release post #286: `npm run check` completo paso fuera del sandbox
+  con API, web, contract y E2E verdes.
 
 Retomar con PRs pequenos, en este orden:
 
-1. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
+1. Continuar write ABAC dev-only por una segunda superficie acotada, idealmente
+   clinical risks o clinical entries; no empezar por medicamentos ni ordenes.
+2. Mantener el inventario `patient_scoped_route_inventory.py` sincronizado con
+   cualquier ruta/superficie nueva o cambio de cobertura.
+3. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
    barrera para nuevas lecturas patient-scoped sin audit ni enforcement.
-2. Crear inventario ejecutable de rutas patient-scoped para reducir drift entre
-   docs, contratos y handlers.
-3. Empezar write ABAC dev-only por una superficie acotada como signos vitales,
-   sin habilitar runtime productivo.
-4. Ejecutar barrido release con `npm run check` y corregir solo drift real.
+4. Convertir report-only security checks en bloqueantes solo despues de baseline,
+   owner, waiver y SLA revisados.
 5. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
    alcance hasta contrato especifico.
 
