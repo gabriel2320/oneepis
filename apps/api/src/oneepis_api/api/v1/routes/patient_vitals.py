@@ -5,11 +5,14 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ReadAccessDep, VitalSignActorDep
+from oneepis_api.api.deps import ReadAccessDep, VitalSignWriteAccessDep
 from oneepis_api.models.clinical_record import RecordStatus, VitalSign
 from oneepis_api.schemas.clinical_record import VitalSignCreate, VitalSignRead, VitalSignUpdate
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -72,9 +75,17 @@ def create_vital_sign(
     patient_id: uuid.UUID,
     payload: VitalSignCreate,
     session: SessionDep,
-    actor: VitalSignActorDep,
+    user: VitalSignWriteAccessDep,
+    settings: SettingsDep,
 ) -> VitalSign:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     vital = VitalSign(patient_id=patient_id, **payload.model_dump())
     _reject_entered_in_error_status(vital.status)
     session.add(vital)
@@ -84,7 +95,7 @@ def create_vital_sign(
         action="vital_sign.created",
         entity_type="vital_sign",
         entity_id=vital.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_vital_sign_audit_metadata(vital),
         after=audit_snapshot(vital, VITAL_SIGN_AUDIT_FIELDS),
     )
@@ -133,9 +144,17 @@ def update_vital_sign(
     vital_sign_id: uuid.UUID,
     payload: VitalSignUpdate,
     session: SessionDep,
-    actor: VitalSignActorDep,
+    user: VitalSignWriteAccessDep,
+    settings: SettingsDep,
 ) -> VitalSign:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     vital = require_patient_child(
         session,
         VitalSign,
@@ -164,7 +183,7 @@ def update_vital_sign(
         action="vital_sign.updated",
         entity_type="vital_sign",
         entity_id=vital.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_vital_sign_audit_metadata(vital, fields),
         before=before_changed,
         after=after_changed,
@@ -179,9 +198,17 @@ def delete_vital_sign(
     patient_id: uuid.UUID,
     vital_sign_id: uuid.UUID,
     session: SessionDep,
-    actor: VitalSignActorDep,
+    user: VitalSignWriteAccessDep,
+    settings: SettingsDep,
 ) -> Response:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     vital = require_patient_child(
         session,
         VitalSign,
@@ -196,7 +223,7 @@ def delete_vital_sign(
         action="vital_sign.entered_in_error",
         entity_type="vital_sign",
         entity_id=vital.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={**_vital_sign_audit_metadata(vital), "reason_code": "entered_in_error"},
         before=audit_snapshot(vital, ["status"]),
         after={"status": RecordStatus.ENTERED_IN_ERROR.value},

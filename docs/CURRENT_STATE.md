@@ -128,9 +128,10 @@ productivo: `patient_scoping_enabled`, `abac_runtime_enforced` y
 Ademas, `GET /api/v1/appointments` queda gobernado como indice global
 admin/dev-only; las lecturas patient-scoped de agenda siguen siendo el carril
 clinico normal.
-Las escrituras clinicas tienen contrato shadow de inventario y requisitos, pero
-siguen sin ABAC runtime: la cobertura de lectura no autoriza escrituras por
-relacion asistencial.
+Las escrituras clinicas tienen contrato shadow de inventario y requisitos. Los
+signos vitales son la primera superficie con write ABAC dev-only; el resto sigue
+sin write ABAC y ninguna escritura tiene ABAC runtime productivo. La cobertura
+de lectura no autoriza escrituras por relacion asistencial.
 La cobertura de rutas/superficies patient-scoped tambien queda reflejada en un
 inventario ejecutable backend para reducir drift documental.
 

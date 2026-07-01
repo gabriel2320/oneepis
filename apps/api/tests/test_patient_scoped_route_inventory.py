@@ -3,6 +3,7 @@ from oneepis_api.core.patient_scoped_route_inventory import (
     PATIENT_SCOPED_ROUTE_INVENTORY,
     patient_scoped_route_keys,
     read_abac_surface_keys,
+    write_abac_dev_only_surface_keys,
     write_surface_keys,
 )
 
@@ -42,6 +43,7 @@ def test_patient_scoped_route_inventory_matches_write_shadow_contract() -> None:
     assert {
         route.runtime_write_abac for route in PATIENT_SCOPED_ROUTE_INVENTORY if route.write_surface
     } == {False}
+    assert write_abac_dev_only_surface_keys() == ("vital_signs",)
 
 
 def test_read_abac_routes_require_read_audit() -> None:

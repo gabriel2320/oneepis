@@ -69,6 +69,115 @@ def test_patient_vitals_abac_allows_active_relationship(
     assert detail_response.json()["id"] == vital["id"]
 
 
+def test_patient_vitals_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    vital = _create_vital(client, auth, patient_id)
+    unknown_vital_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-21T12:00:00Z",
+            "systolic_bp": 120,
+            "heart_rate_bpm": 80,
+        },
+    )
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital['id']}",
+        headers=auth,
+        json={"heart_rate_bpm": 84},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/vital-signs/{unknown_vital_id}",
+        headers=auth,
+        json={"heart_rate_bpm": 84},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital['id']}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    assert delete_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 4
+    assert actions.count("vital_sign.created") == 1
+    assert "vital_sign.updated" not in actions
+    assert "vital_sign.entered_in_error" not in actions
+
+
+def test_patient_vitals_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        json={
+            "measured_at": "2026-06-21T12:00:00Z",
+            "systolic_bp": 120,
+            "heart_rate_bpm": 80,
+        },
+    )
+    vital_id = create_response.json()["id"]
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
+        headers=auth,
+        json={"heart_rate_bpm": 84},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/vital-signs/{vital_id}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["heart_rate_bpm"] == 84
+    assert delete_response.status_code == 204
+
+
+def test_patient_vitals_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=admin_auth,
+        json={
+            "measured_at": "2026-06-21T12:00:00Z",
+            "systolic_bp": 120,
+            "heart_rate_bpm": 80,
+        },
+    )
+
+    assert response.status_code == 201
+
+
 def _create_vital(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/vital-signs",
