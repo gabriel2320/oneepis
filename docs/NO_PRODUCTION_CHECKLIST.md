@@ -69,9 +69,10 @@ Evidencia actual de avance sin habilitacion productiva:
 - Las denegaciones emiten `access_context.denied` minimizado; las lecturas
   auditadas fuera de enforcement activo emiten decision pasiva cuando aplica.
 - Existe contrato shadow de escrituras clinicas para inventario y requisitos
-  pre-runtime; signos vitales, clinical risks, clinical entries y encounters
-  tienen write ABAC dev-only, las demas escrituras siguen sin write ABAC y
-  ninguna hereda autorizacion de la cobertura de lectura.
+  pre-runtime; signos vitales, clinical risks, clinical entries,
+  clinical events y encounters tienen write ABAC dev-only, las demas escrituras
+  siguen sin write ABAC y ninguna hereda autorizacion de la cobertura de
+  lectura.
 - Existe inventario ejecutable de rutas/superficies patient-scoped para alinear
   cobertura de lectura dev-only, superficies de escritura y checklist.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,

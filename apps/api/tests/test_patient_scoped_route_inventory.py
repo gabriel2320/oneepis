@@ -45,6 +45,7 @@ def test_patient_scoped_route_inventory_matches_write_shadow_contract() -> None:
     } == {False}
     assert write_abac_dev_only_surface_keys() == (
         "clinical_entries",
+        "clinical_events",
         "vital_signs",
         "clinical_risks",
         "encounters",

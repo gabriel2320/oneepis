@@ -80,14 +80,16 @@ de vision. No crear snapshots nuevos.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
-  `clinical_entries` y `encounters`.
+  `clinical_entries`, `clinical_events` y `encounters`.
 - Ninguna escritura tiene ABAC runtime productivo.
 - `security-report` bloquea Gitleaks y OSV npm high/critical; dependency
   review, CodeQL y `pip-audit` siguen report-only.
 
-Siguiente PR recomendado:
+Siguiente PR recomendado tras este cambio:
 
-1. Continuar write ABAC dev-only en `clinical_events`.
+1. Continuar write ABAC dev-only en una superficie acotada que no sea
+   medicamentos ni ordenes; candidatos: `allergies`, `active_problems` o
+   `appointments`.
 2. Mantener sincronizados contrato shadow, inventario patient-scoped, tests
    focales y documentos vivos.
 3. No empezar por medicamentos, ordenes, break-glass runtime ni ABAC productivo.

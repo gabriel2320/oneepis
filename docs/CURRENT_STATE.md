@@ -62,6 +62,7 @@ Superficies con write ABAC dev-only:
 - `vital_signs`
 - `clinical_risks`
 - `clinical_entries`
+- `clinical_events`
 - `encounters`
 
 El resto de escrituras sigue sin write ABAC. Ninguna escritura tiene ABAC
@@ -91,8 +92,7 @@ runtime productivo, motivo operacional de acceso ni break-glass runtime.
 
 No ampliar modulos clinicos. El siguiente trabajo debe reducir riesgo
 operacional o consolidar contrato. Prioridad actual: continuar write ABAC
-dev-only por superficies acotadas, con `clinical_events` como siguiente
-candidato natural; no empezar por medicamentos ni ordenes.
+dev-only por superficies acotadas; no empezar por medicamentos ni ordenes.
 
 ## Regla Documental
 
