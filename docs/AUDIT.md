@@ -24,8 +24,6 @@ El evento de auditoria guarda:
 - `created_at`
 - `extra_data`
 
-## Before / after
-
 ## Read audit
 
 Las lecturas patient-scoped deben registrar evento de lectura con actor,

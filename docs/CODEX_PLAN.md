@@ -102,13 +102,16 @@ Estado al cierre:
   risks ABAC dev-only, #268 vital signs ABAC dev-only, #269 labs ABAC dev-only,
   #270 patient context ABAC dev-only, #271 encounters ABAC dev-only, #273
   slimming de `patient_events.py`, #274 clinical events/timeline ABAC dev-only y
-  #275 clinical entries ABAC dev-only.
+  #275 clinical entries ABAC dev-only, #276 refresh docs seguridad/auditoria,
+  #277 clinical orders ABAC dev-only, #278 hospital drafts ABAC dev-only y #279
+  gate transversal de read-enforcement patient-scoped.
 - Avance ABAC dev-only actual: `GET /api/v1/patients`, `GET patient`,
   `GET record`, appointments patient-scoped, allergies, active problems,
   medications y medication drafting context, encounters, clinical entries,
-  clinical events/timeline, clinical risks, vital signs, lab panels/results,
-  patient context, AI patient-scoped, Assistant Read
-  timeline/search/chart/correlation y `GET /api/v1/hospitalization/active`
+  clinical events/timeline, clinical orders, clinical risks, vital signs,
+  lab panels/results, patient context, AI patient-scoped, Assistant Read
+  timeline/search/chart/correlation, hospital daily sheets, hospital
+  indications y `GET /api/v1/hospitalization/active`
   detras de `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`.
 - `GET /api/v1/appointments` es indice global admin/dev-only. La UI de agenda
   global ya respeta esa frontera; las citas patient-scoped siguen siendo el
@@ -121,12 +124,14 @@ Estado al cierre:
 
 Retomar con PRs pequenos, en este orden:
 
-1. Aplicar ABAC dev-only a `GET /api/v1/patients/{patient_id}/clinical-orders`.
-2. Aplicar ABAC dev-only a `GET /api/v1/hospitalization/patients/{patient_id}/daily-sheets`
-   y `GET /api/v1/hospitalization/patients/{patient_id}/indications`.
-3. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
+1. Endurecer `scripts/check-patient-scoped-read-enforcement.mjs` para validar
+   llamadas por handler, no solo por archivo.
+2. Crear contrato shadow de escrituras clinicas: inventario y politica
+   pre-runtime sin habilitar ABAC productivo.
+3. Ejecutar barrido release con `npm run check` y corregir solo drift real.
+4. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
    barrera para nuevas rutas con `record_patient_scoped_read` sin enforcement.
-4. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
+5. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
    alcance hasta contrato especifico.
 
 Mantener fuera de alcance PHI real, piloto clinico, receta/firma/MAR, adjuntos
