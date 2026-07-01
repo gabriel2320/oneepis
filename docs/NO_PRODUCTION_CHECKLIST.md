@@ -62,17 +62,18 @@ Evidencia actual de avance sin habilitacion productiva:
   medication drafting context, encounters, clinical entries, clinical
   events/timeline, clinical orders, clinical risks, vital signs,
   lab panels/results, patient context, AI patient-scoped, Assistant Read
-  timeline/search/chart/correlation y hospitalizaciones activas detras de
+  timeline/search/chart/correlation, hospital daily sheets, hospital indications
+  y hospitalizaciones activas detras de
   `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`.
 - Las denegaciones emiten `access_context.denied` minimizado; las lecturas
   auditadas fuera de enforcement activo emiten decision pasiva cuando aplica.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
-- Falta enforcement runtime productivo, cobertura dev-only en hospital daily
-  sheets e hospital indications, motivo de acceso operativo, revision
-  break-glass, UI/flujo institucional, ownership clinico/legal y pruebas E2E de
-  denegacion.
+- Falta enforcement runtime productivo, motivo de acceso operativo, revision
+  break-glass, UI/flujo institucional, ownership clinico/legal, pruebas E2E de
+  denegacion y un gate transversal que impida nuevas lecturas patient-scoped sin
+  enforcement.
 
 ## Proximo paso recomendado
 
