@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from oneepis_api.api.deps import LabResultActorDep, PatientReadActorDep
+from oneepis_api.api.deps import LabResultActorDep, ReadAccessDep
 from oneepis_api.models.lab import LabPanel, LabResult
 from oneepis_api.schemas.clinical_record import (
     LabPanelCreate,
@@ -17,12 +17,14 @@ from oneepis_api.schemas.clinical_record import (
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 from oneepis_api.services.lab_result_source import serialize_lab_panel, serialize_lab_result
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -59,19 +61,36 @@ def lab_result_audit_fields(fields: list[str]) -> list[str]:
     return [field for field in fields if field in allowed_fields]
 
 
+def _enforce_lab_read_scope(
+    session: Session,
+    patient_id: uuid.UUID,
+    user: ReadAccessDep,
+    settings: SettingsDep,
+) -> None:
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
+
+
 @router.get("/{patient_id}/lab-panels", response_model=list[LabPanelRead])
 def list_lab_panels(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[LabPanel]:
     require_patient(session, patient_id)
+    _enforce_lab_read_scope(session, patient_id, user, settings)
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="lab_panels.read",
     )
     statement = (
@@ -125,14 +144,16 @@ def get_lab_panel(
     patient_id: uuid.UUID,
     panel_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> LabPanelRead:
     require_patient(session, patient_id)
+    _enforce_lab_read_scope(session, patient_id, user, settings)
     panel = _require_lab_panel(session, patient_id, panel_id)
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="lab_panel.read",
     )
     return serialize_lab_panel(panel)
@@ -183,15 +204,17 @@ def get_lab_result(
     panel_id: uuid.UUID,
     result_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> LabResultRead:
     require_patient(session, patient_id)
+    _enforce_lab_read_scope(session, patient_id, user, settings)
     panel = _require_lab_panel(session, patient_id, panel_id)
     result = _require_lab_result(session, patient_id, panel_id, result_id)
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="lab_result.read",
     )
     return serialize_lab_result(panel, result)
