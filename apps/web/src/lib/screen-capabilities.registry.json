@@ -162,11 +162,11 @@
     "status": "completa",
     "truthSource": "clinical appointments",
     "writePolicy": "clinical_write",
-    "permissionPolicy": "medico/admin/dev",
-    "auditPolicy": "writes",
+    "permissionPolicy": "admin/dev indice global",
+    "auditPolicy": "read_and_write_audit",
     "paperPolicy": "none",
     "aiProfile": "none",
-    "futureComplexity": "preconsulta minima enlazada; agenda por equipos futura"
+    "futureComplexity": "vista patient-scoped para clinicos; agenda por equipos futura"
   },
   {
     "routePattern": "/consulta/pacientes/[patientId]/atencion",

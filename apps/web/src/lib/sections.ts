@@ -10,12 +10,24 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { canCreatePatient, canManageEncounters, canUseClinicalAi, hasAnyRole } from "@/lib/permissions";
+import {
+  canCreatePatient,
+  canManageEncounters,
+  canReadGlobalClinicalIndex,
+  canUseClinicalAi,
+  hasAnyRole,
+} from "@/lib/permissions";
 import type { AuthUser, UserRole } from "@/lib/types";
 
 export type SectionState = "available" | "development" | "blocked" | "disabled";
 export type SectionGroup = "Nucleo paciente" | "Ambulatorio" | "Hospitalizacion" | "Documentos" | "Configuracion";
-export type SectionPermission = "session" | "patient_read" | "patient_write" | "clinical_write" | "ai_access";
+export type SectionPermission =
+  | "session"
+  | "patient_read"
+  | "patient_write"
+  | "clinical_write"
+  | "global_index"
+  | "ai_access";
 
 export type OneEpisSection = {
   id: string;
@@ -31,7 +43,7 @@ export type OneEpisSection = {
 export const oneEpisSections: OneEpisSection[] = [
   section("patients", "Pacientes", "/pacientes", "Nucleo paciente", "patient_read", "available", "Mesa interna para seleccionar fichas autorizadas.", UserRound),
   section("new-patient", "Nuevo paciente", "/pacientes/nuevo", "Nucleo paciente", "patient_write", "available", "Registro administrativo minimo para abrir ficha.", ClipboardList),
-  section("appointments", "Agenda ambulatoria", "/consulta/agenda", "Ambulatorio", "clinical_write", "available", "Citas, check-in y enlace a atencion.", CalendarDays),
+  section("appointments", "Agenda ambulatoria", "/consulta/agenda", "Ambulatorio", "global_index", "available", "Citas, check-in y enlace a atencion.", CalendarDays),
   section("ambulatory", "Consulta", "/consulta", "Ambulatorio", "patient_read", "available", "Acceso a flujos ambulatorios autorizados.", Stethoscope),
   section("hospitalization", "Hospitalizacion", "/hospitalizacion", "Hospitalizacion", "patient_read", "available", "Ingreso, rondas, camas y documentos hospitalarios.", BedDouble),
   section("hospital-beds", "Camas", "/hospitalizacion/camas", "Hospitalizacion", "clinical_write", "available", "Administracion operativa de camas e ingresos.", BedDouble),
@@ -74,5 +86,6 @@ function hasSectionPermission(permission: SectionPermission, user: AuthUser | nu
   }
   if (permission === "patient_write") return canCreatePatient(user);
   if (permission === "clinical_write") return canManageEncounters(user);
+  if (permission === "global_index") return canReadGlobalClinicalIndex(user);
   return canUseClinicalAi(user);
 }

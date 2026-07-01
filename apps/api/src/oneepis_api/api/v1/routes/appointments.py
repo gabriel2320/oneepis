@@ -9,10 +9,10 @@ from sqlalchemy import select
 
 from oneepis_api.api.deps import (
     EncounterActorDep,
-    PatientReadActorDep,
     ReadAccessDep,
     require_patient_read_access,
 )
+from oneepis_api.api.global_index_deps import GlobalClinicalIndexAccessDep
 from oneepis_api.models.clinical_record import ClinicalAppointment
 from oneepis_api.schemas.clinical_record import (
     ClinicalAppointmentCreate,
@@ -59,7 +59,7 @@ def appointment_audit_fields(fields: list[str]) -> list[str]:
 @router.get("/appointments", response_model=list[ClinicalAppointmentRead])
 def list_appointments(
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: GlobalClinicalIndexAccessDep,
     date_from: DateFromQuery = None,
     date_to: DateToQuery = None,
     limit: LimitQuery = 100,
@@ -77,7 +77,7 @@ def list_appointments(
         action="appointments_index.read",
         entity_type="appointment_index",
         entity_id=None,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={
             "date_from_present": date_from is not None,
             "date_to_present": date_to is not None,

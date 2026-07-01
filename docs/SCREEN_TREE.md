@@ -68,7 +68,7 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/configuracion/api` | Acceso/configuracion | seguimiento | completa | config API/OpenAPI | none | sesion local | none | none | no | health y versionado |
 | `/configuracion/ia` | Acceso/configuracion | seguimiento | completa | AI status | none | sesion local | none | none | lectura contextual | IA externa bloqueada hasta gateway PHI |
 | `/consulta` | Ambulatorio | seguimiento | completa | App Router | none | lectura paciente | none | none | no | indice simple |
-| `/consulta/agenda` | Ambulatorio | episodio | completa | clinical appointments | clinical_write | medico/admin/dev | writes | none | no | preconsulta minima enlazada; agenda por equipos futura |
+| `/consulta/agenda` | Ambulatorio | episodio | completa | clinical appointments | clinical_write | admin/dev indice global | read_and_write_audit | none | no | vista patient-scoped para clinicos; agenda por equipos futura |
 | `/consulta/pacientes/[patientId]/atencion` | Ambulatorio | acto clinico | completa | encuentros + SOAP + preconsulta | clinical_write | medico/admin/dev; preconsulta enfermeria/medico/admin/dev | writes | none | borrador revisable | preconsulta minima con workflow_kind; diagnosticos finales futuros |
 | `/consulta/pacientes/[patientId]/resumen` | Ambulatorio | seguimiento | completa | record + appointments + encounters | none | lectura paciente | none | none | lectura resumida | seguimiento formal futuro |
 | `/hospitalizacion` | Hospitalizacion | seguimiento | completa/en expansion gobernada | App Router | none | lectura paciente | none | none | no | indice simple; firma/alta legal futuras |

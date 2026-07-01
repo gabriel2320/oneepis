@@ -121,6 +121,9 @@ timeline/search/chart/correlation detras de
 `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`. Esto no habilita PHI real ni ABAC
 productivo: `patient_scoping_enabled`, `abac_runtime_enforced` y
 `break_glass_enabled` siguen desactivados en el contrato productivo.
+Ademas, `GET /api/v1/appointments` queda gobernado como indice global
+admin/dev-only; las lecturas patient-scoped de agenda siguen siendo el carril
+clinico normal.
 
 Criterio de no-hacer:
 
