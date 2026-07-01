@@ -131,6 +131,8 @@ clinico normal.
 Las escrituras clinicas tienen contrato shadow de inventario y requisitos, pero
 siguen sin ABAC runtime: la cobertura de lectura no autoriza escrituras por
 relacion asistencial.
+La cobertura de rutas/superficies patient-scoped tambien queda reflejada en un
+inventario ejecutable backend para reducir drift documental.
 
 Criterio de no-hacer:
 
