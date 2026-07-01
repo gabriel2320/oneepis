@@ -7,7 +7,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import EncounterActorDep, PatientReadActorDep, require_patient_read_access
+from oneepis_api.api.deps import (
+    EncounterActorDep,
+    PatientReadActorDep,
+    ReadAccessDep,
+    require_patient_read_access,
+)
 from oneepis_api.models.clinical_record import ClinicalAppointment
 from oneepis_api.schemas.clinical_record import (
     ClinicalAppointmentCreate,
@@ -20,11 +25,13 @@ from oneepis_api.services.audit import (
     record_audit_event,
     record_read_audit_event,
 )
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -90,11 +97,19 @@ def list_appointments(
 def list_patient_appointments(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[ClinicalAppointment]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     statement = (
         select(ClinicalAppointment)
         .where(ClinicalAppointment.patient_id == patient_id)
@@ -106,7 +121,7 @@ def list_patient_appointments(
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="appointments.read",
     )
     return appointments
@@ -153,9 +168,17 @@ def get_patient_appointment(
     patient_id: uuid.UUID,
     appointment_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalAppointment:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     appointment = require_patient_child(
         session,
         ClinicalAppointment,
@@ -166,7 +189,7 @@ def get_patient_appointment(
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="appointment.read",
     )
     return appointment
