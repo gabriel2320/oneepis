@@ -14,8 +14,9 @@ class ClinicalWriteAccessRequirement:
 class ClinicalWriteSurface:
     key: str
     label: str
-    current_guard: Literal["rbac_and_semantic_guard_only"]
+    current_guard: Literal["rbac_and_semantic_guard_only", "rbac_semantic_and_dev_abac_guard"]
     runtime_write_abac: bool
+    dev_write_abac: bool = False
 
 
 CLINICAL_WRITE_ACCESS_REQUIREMENTS: tuple[ClinicalWriteAccessRequirement, ...] = (
@@ -95,7 +96,8 @@ CLINICAL_WRITE_SURFACES: tuple[ClinicalWriteSurface, ...] = (
     ClinicalWriteSurface(
         key="vital_signs",
         label="Vital signs create/update/delete",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(

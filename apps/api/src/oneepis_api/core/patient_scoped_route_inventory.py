@@ -11,6 +11,7 @@ class PatientScopedRoute:
     read_audit_required: bool
     read_abac_dev_only: bool
     write_surface: bool
+    write_abac_dev_only: bool
     runtime_write_abac: bool
 
 
@@ -21,7 +22,7 @@ def _read(
     patient_scoped: bool = True,
 ) -> PatientScopedRoute:
     return PatientScopedRoute(
-        method, path_template, surface, patient_scoped, True, True, False, False
+        method, path_template, surface, patient_scoped, True, True, False, False, False
     )
 
 
@@ -29,8 +30,19 @@ def _write(
     method: Literal["POST", "PATCH", "DELETE"],
     path_template: str,
     surface: str,
+    write_abac_dev_only: bool = False,
 ) -> PatientScopedRoute:
-    return PatientScopedRoute(method, path_template, surface, True, False, False, True, False)
+    return PatientScopedRoute(
+        method,
+        path_template,
+        surface,
+        True,
+        False,
+        False,
+        True,
+        write_abac_dev_only,
+        False,
+    )
 
 
 PATIENT_SCOPED_ROUTE_INVENTORY: tuple[PatientScopedRoute, ...] = (
@@ -84,7 +96,12 @@ PATIENT_SCOPED_ROUTE_INVENTORY: tuple[PatientScopedRoute, ...] = (
     _write("POST", "/api/v1/patients/{patient_id}/clinical-entries", "clinical_entries"),
     _write("POST", "/api/v1/patients/{patient_id}/clinical-events", "clinical_events"),
     _write("POST", "/api/v1/patients/{patient_id}/clinical-orders", "clinical_orders"),
-    _write("POST", "/api/v1/patients/{patient_id}/vital-signs", "vital_signs"),
+    _write(
+        "POST",
+        "/api/v1/patients/{patient_id}/vital-signs",
+        "vital_signs",
+        write_abac_dev_only=True,
+    ),
     _write("POST", "/api/v1/patients/{patient_id}/clinical-risks", "clinical_risks"),
     _write("POST", "/api/v1/patients/{patient_id}/medications", "medications"),
     _write("POST", "/api/v1/patients/{patient_id}/allergies", "allergies"),
@@ -123,5 +140,15 @@ def write_surface_keys() -> tuple[str, ...]:
     return tuple(
         dict.fromkeys(
             route.surface for route in PATIENT_SCOPED_ROUTE_INVENTORY if route.write_surface
+        )
+    )
+
+
+def write_abac_dev_only_surface_keys() -> tuple[str, ...]:
+    return tuple(
+        dict.fromkeys(
+            route.surface
+            for route in PATIENT_SCOPED_ROUTE_INVENTORY
+            if route.write_abac_dev_only
         )
     )

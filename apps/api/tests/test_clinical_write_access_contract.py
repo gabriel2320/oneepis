@@ -45,7 +45,8 @@ def test_clinical_write_surface_inventory_covers_core_write_families() -> None:
 
     assert all(surface.label for surface in CLINICAL_WRITE_SURFACES)
     assert {surface.current_guard for surface in CLINICAL_WRITE_SURFACES} == {
-        "rbac_and_semantic_guard_only"
+        "rbac_and_semantic_guard_only",
+        "rbac_semantic_and_dev_abac_guard",
     }
     assert {surface.runtime_write_abac for surface in CLINICAL_WRITE_SURFACES} == {
         False
@@ -75,3 +76,14 @@ def test_clinical_write_contract_keeps_ai_as_draft_only() -> None:
     assert CLINICAL_WRITE_ABAC_RUNTIME_STATUS[
         "ai_autonomous_write_finalization_enabled"
     ] is False
+
+
+def test_clinical_write_contract_tracks_dev_only_vital_sign_write_abac() -> None:
+    surfaces = {surface.key: surface for surface in CLINICAL_WRITE_SURFACES}
+
+    assert surfaces["vital_signs"].dev_write_abac is True
+    assert surfaces["vital_signs"].runtime_write_abac is False
+    assert surfaces["vital_signs"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert {
+        key for key, surface in surfaces.items() if surface.dev_write_abac
+    } == {"vital_signs"}
