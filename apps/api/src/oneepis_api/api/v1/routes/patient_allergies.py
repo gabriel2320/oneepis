@@ -5,16 +5,18 @@ import uuid
 from fastapi import APIRouter, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import AllergyActorDep, PatientReadActorDep
+from oneepis_api.api.deps import AllergyActorDep, ReadAccessDep
 from oneepis_api.models.clinical_record import Allergy, RecordStatus
 from oneepis_api.schemas.clinical_record import AllergyCreate, AllergyRead, AllergyUpdate
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
     LimitQuery,
     OffsetQuery,
     SessionDep,
+    SettingsDep,
     apply_update,
     record_patient_scoped_read,
     require_patient,
@@ -41,15 +43,23 @@ def allergy_audit_fields(fields: list[str]) -> list[str]:
 def list_allergies(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
 ) -> list[Allergy]:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="allergies.read",
     )
     statement = (
@@ -96,14 +106,22 @@ def get_allergy(
     patient_id: uuid.UUID,
     allergy_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> Allergy:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
     record_patient_scoped_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         action="allergy.read",
     )
     return allergy

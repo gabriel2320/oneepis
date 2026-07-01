@@ -113,8 +113,9 @@ relacion paciente-equipo, membresia actor-equipo, dry-run de relacion
 paciente/actor, entidad futura de break-glass, auditoria shadow
 `access_context.passive_decision`, evento minimizado `access_context.denied`,
 reporte agregado interno de observabilidad ABAC y enforcement dev-only para
-`GET /api/v1/patients/{patient_id}` y
-`GET /api/v1/patients/{patient_id}/record` detras de
+`GET /api/v1/patients/{patient_id}`,
+`GET /api/v1/patients/{patient_id}/record`, lecturas patient-scoped de
+appointments y lecturas patient-scoped de allergies detras de
 `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`. Esto no habilita PHI real ni ABAC
 productivo: `patient_scoping_enabled`, `abac_runtime_enforced` y
 `break_glass_enabled` siguen desactivados en el contrato productivo.
