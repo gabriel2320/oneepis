@@ -2,6 +2,14 @@
   "name": "@oneepis/web",
   "version": "0.1.0",
   "private": true,
+  "author": "Gabriel Tesser",
+  "license": "UNLICENSED",
+  "copyright": "Copyright © 2026 EPIONE. All rights reserved.",
+  "ownership": {
+    "creator": "Gabriel Tesser",
+    "owner": "EPIONE",
+    "notice": "OneEpis was created by Gabriel Tesser and is owned by EPIONE."
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

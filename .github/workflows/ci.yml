@@ -18,8 +18,19 @@ env:
   ONEEPIS_PYTHON_VERSION: "3.12"
 
 jobs:
+  ownership:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.ONEEPIS_NODE_VERSION }}
+      - run: npm i -g npm@${{ env.ONEEPIS_NPM_VERSION }}
+      - run: npm run check:ownership
+
   api:
     runs-on: ubuntu-latest
+    needs: ownership
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,6 +49,7 @@ jobs:
 
   web:
     runs-on: ubuntu-latest
+    needs: ownership
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,6 +66,7 @@ jobs:
 
   contracts-e2e:
     runs-on: ubuntu-latest
+    needs: ownership
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -76,6 +89,7 @@ jobs:
 
   postgres-alembic:
     runs-on: ubuntu-latest
+    needs: ownership
     env:
       ONEEPIS_DATABASE_URL: postgresql+psycopg://oneepis:oneepis@localhost:5432/oneepis
     steps:
@@ -118,6 +132,7 @@ jobs:
 
   security-report:
     runs-on: ubuntu-latest
+    needs: ownership
     steps:
       - uses: actions/checkout@v4
         with:

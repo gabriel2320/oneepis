@@ -7,6 +7,10 @@ name = "oneepis-api"
 version = "0.1.0"
 description = "Clinical API for OneEpis."
 requires-python = ">=3.12,<3.13"
+authors = [
+  { name = "Gabriel Tesser" }
+]
+license = { text = "Proprietary - OneEpis was created by Gabriel Tesser and is owned by EPIONE. Copyright © 2026 EPIONE. All rights reserved." }
 dependencies = [
   "alembic>=1.13,<2.0",
   "fastapi>=0.115,<1.0",
@@ -41,3 +45,9 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.oneepis.ownership]
+creator = "Gabriel Tesser"
+owner = "EPIONE"
+notice = "OneEpis was created by Gabriel Tesser and is owned by EPIONE."
+copyright = "Copyright © 2026 EPIONE. All rights reserved."

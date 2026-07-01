@@ -1,1 +1,10 @@
 * @gabriel2320
+
+/OWNERSHIP.md @gabriel2320
+/LICENSE.md @gabriel2320
+/README.md @gabriel2320
+/package.json @gabriel2320
+/apps/web/package.json @gabriel2320
+/apps/api/pyproject.toml @gabriel2320
+/scripts/check-ownership.mjs @gabriel2320
+/.github/workflows/ci.yml @gabriel2320

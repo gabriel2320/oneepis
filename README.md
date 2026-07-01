@@ -1,12 +1,20 @@
 # OneEpis
 
+> **Ownership Notice**
+>
+> OneEpis was created by Gabriel Tesser and is owned by EPIONE.
+> Copyright © 2026 EPIONE. All rights reserved.
+> Original creator: Gabriel Tesser.
+> Commercial and copyright owner: EPIONE.
+> No license or right of use is granted except by written agreement with EPIONE.
+
 ## Aviso de repositorio publico
 
 Este repositorio esta publico temporalmente para desarrollo temprano. No contiene datos reales y no debe recibir informacion clinica sensible, secretos, dumps, logs con PHI ni documentos de pacientes.
 
 OneEpis no esta listo para produccion sanitaria, no es consejo medico y no debe usarse como software clinico certificado.
 
-Licencia: sin licencia open source por ahora. Ver `LICENSE.md`.
+Licencia: propietaria, sin licencia open source por ahora. Ver `LICENSE.md` y `OWNERSHIP.md`.
 
 ## Stack decidido
 
@@ -205,5 +213,6 @@ npm run check
 - `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart.
 - `docs/SCREEN_TREE.md`: rutas y superficies.
 - `docs/ROADMAP.md`: historial.
+- `OWNERSHIP.md`: declaracion canonica de creador, titularidad y derechos reservados.
 
 Regla central: crecer por modulos clinicos bien nombrados, no por acumulacion indiscriminada de codigo.

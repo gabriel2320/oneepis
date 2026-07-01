@@ -45,6 +45,8 @@ Responsabilidades canonicas:
 - `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart, no historial.
 - `docs/AI_CHART_CORE.md`: contrato conceptual de AI-Chart.
 - `docs/VISUAL_INTELLIGENCE_COUPLING.md`: regla inteligencia -> UI visible.
+- `OWNERSHIP.md`: declaracion canonica de creador, titularidad patrimonial,
+  copyright y derechos reservados de OneEpis.
 - `apps/web/src/lib/screen-capabilities.registry.json`: fuente estructurada de
   rutas visibles, estado, permisos, papel e IA permitida.
 - `docs/SCREEN_TREE.md`: narrativa clinica y tabla generada de rutas reales.
@@ -71,6 +73,9 @@ Orden de verdad:
 Reglas:
 
 - Un PR no debe crear canon manual si puede crear memoria ejecutable.
+- La autoria y titularidad de OneEpis se protegen con `OWNERSHIP.md`,
+  `LICENSE.md`, metadata y gates transparentes; no se permiten bloqueos ocultos,
+  destructivos o dependientes de llamadas remotas.
 - `screen-capabilities.registry.json` gobierna la tabla de rutas reales; usar
   `npm run generate:screens` para actualizar `docs/SCREEN_TREE.md`.
 - Prohibido editar manualmente la tabla generada de `SCREEN_TREE.md`.
