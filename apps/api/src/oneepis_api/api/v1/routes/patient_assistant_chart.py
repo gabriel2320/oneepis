@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from oneepis_api.api.deps import PatientReadActorDep
+from oneepis_api.api.deps import ReadAccessDep
 from oneepis_api.models.clinical_record import (
     ClinicalEvent,
     ClinicalEventType,
@@ -21,7 +21,8 @@ from oneepis_api.schemas.clinical_record import (
 
 from .patient_assistant_common import VITAL_CHART_SERIES, normalize_series_key, numeric_value
 from .patient_assistant_labs import exam_chart_series, fetch_lab_results_for_assistant
-from .patient_shared import SessionDep, record_patient_scoped_read, require_patient
+from .patient_assistant_scope import enforce_and_record_assistant_read
+from .patient_shared import SessionDep, SettingsDep, require_patient
 
 router = APIRouter()
 
@@ -31,13 +32,15 @@ def get_assistant_chart_data(
     patient_id: uuid.UUID,
     payload: AssistantChartRequest,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
 ) -> AssistantChartResponse:
     require_patient(session, patient_id)
-    record_patient_scoped_read(
+    enforce_and_record_assistant_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        user=user,
+        settings=settings,
         action="assistant_chart.read",
     )
     selected = {normalize_series_key(series) for series in payload.series if series.strip()}
