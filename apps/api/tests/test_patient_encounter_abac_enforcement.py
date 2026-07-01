@@ -69,18 +69,119 @@ def test_patient_encounters_abac_allows_active_relationship(
     assert detail_response.json()["id"] == encounter["id"]
 
 
+def test_patient_encounters_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    encounter = _create_encounter(client, auth, patient_id)
+    unknown_encounter_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json=_encounter_payload(reason="Intento sin relacion activa"),
+    )
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter['id']}",
+        headers=auth,
+        json={"status": "completed", "ended_at": "2026-06-20T10:00:00Z"},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/encounters/{unknown_encounter_id}",
+        headers=auth,
+        json={"status": "completed", "ended_at": "2026-06-20T10:00:00Z"},
+    )
+    cancel_response = client.delete(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter['id']}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    assert cancel_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 4
+    assert actions.count("encounter.created") == 1
+    assert "encounter.updated" not in actions
+    assert "encounter.cancelled" not in actions
+
+
+def test_patient_encounters_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json=_encounter_payload(reason="Permitido por relacion activa"),
+    )
+    encounter_id = create_response.json()["id"]
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter_id}",
+        headers=auth,
+        json={"status": "completed", "ended_at": "2026-06-20T10:00:00Z"},
+    )
+    cancel_response = client.delete(
+        f"/api/v1/patients/{patient_id}/encounters/{encounter_id}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["status"] == "completed"
+    assert cancel_response.status_code == 204
+
+
+def test_patient_encounters_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=admin_auth,
+        json=_encounter_payload(reason="Breakout admin/dev"),
+    )
+
+    assert response.status_code == 201
+
+
 def _create_encounter(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/encounters",
         headers=auth,
-        json={
-            "type": "ambulatory",
-            "reason": "Control ABAC de encuentro",
-            "started_at": "2026-06-20T09:00:00Z",
-        },
+        json=_encounter_payload(reason="Control ABAC de encuentro"),
     )
     assert response.status_code == 201
     return response.json()
+
+
+def _encounter_payload(*, reason: str) -> dict[str, str]:
+    return {
+        "type": "ambulatory",
+        "reason": reason,
+        "started_at": "2026-06-20T09:00:00Z",
+    }
 
 
 def _enable_development_abac_enforcement() -> None:

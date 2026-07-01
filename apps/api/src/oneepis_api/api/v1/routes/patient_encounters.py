@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import CurrentUserDep, EncounterActorDep, ReadAccessDep
+from oneepis_api.api.deps import CurrentUserDep, EncounterWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
     EncounterStatus,
@@ -19,7 +19,10 @@ from oneepis_api.schemas.clinical_record import (
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 from oneepis_api.services.auth import AuthenticatedUser, UserRole
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -93,9 +96,17 @@ def create_clinical_encounter(
     payload: ClinicalEncounterCreate,
     session: SessionDep,
     user: CurrentUserDep,
+    settings: SettingsDep,
 ) -> ClinicalEncounter:
     require_patient(session, patient_id)
     actor = _authorize_encounter_creation(payload, user)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=actor,
+        roles=user.roles,
+        settings=settings,
+    )
     encounter = ClinicalEncounter(patient_id=patient_id, **payload.model_dump())
     session.add(encounter)
     session.flush()
@@ -179,9 +190,17 @@ def update_clinical_encounter(
     encounter_id: uuid.UUID,
     payload: ClinicalEncounterUpdate,
     session: SessionDep,
-    actor: EncounterActorDep,
+    user: EncounterWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEncounter:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     encounter = require_patient_child(
         session,
         ClinicalEncounter,
@@ -203,7 +222,7 @@ def update_clinical_encounter(
         action="encounter.updated",
         entity_type="encounter",
         entity_id=encounter.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "fields": fields},
         before=before_changed,
         after=after_changed,
@@ -218,9 +237,17 @@ def cancel_clinical_encounter(
     patient_id: uuid.UUID,
     encounter_id: uuid.UUID,
     session: SessionDep,
-    actor: EncounterActorDep,
+    user: EncounterWriteAccessDep,
+    settings: SettingsDep,
 ) -> Response:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     encounter = require_patient_child(
         session,
         ClinicalEncounter,
@@ -235,7 +262,7 @@ def cancel_clinical_encounter(
         action="encounter.cancelled",
         entity_type="encounter",
         entity_id=encounter.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id)},
         before=before,
         after=audit_snapshot(encounter, ["status"]),
