@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from oneepis_api.core.productive_auth_contract import DEVELOPMENT_ONLY_LOCAL_ROLE_VALUES
+
 DEFAULT_AUTH_SECRET = "oneepis-local-dev-secret-change-me"
 DEFAULT_AUTH_LOCAL_USERS = (
     "admin@oneepis.local|admin|Administrador Dev|admin,dev;"
@@ -77,6 +79,11 @@ class Settings(BaseSettings):
             errors.append(
                 "auth_local_users passwords must use pbkdf2_sha256 hashes outside development"
             )
+        for role_value in DEVELOPMENT_ONLY_LOCAL_ROLE_VALUES:
+            if _local_auth_contains_role(self.auth_local_users, role_value):
+                errors.append(
+                    f"auth_local_users cannot include {role_value!r} role outside development"
+                )
         if self.auth_allow_dev_actor_header:
             errors.append("auth_allow_dev_actor_header is development-only")
         if not self.auth_enabled:
@@ -114,6 +121,24 @@ def _contains_plain_local_password(raw_users: str) -> bool:
             continue
         password = parts[1]
         if password and not password.startswith("pbkdf2_sha256$"):
+            return True
+    return False
+
+
+def _local_auth_contains_role(raw_users: str, role_value: str) -> bool:
+    expected_role = role_value.strip().lower()
+    if not expected_role:
+        return False
+
+    for raw_item in raw_users.split(";"):
+        item = raw_item.strip()
+        if not item:
+            continue
+        parts = [part.strip() for part in item.split("|")]
+        if len(parts) != 4:
+            continue
+        role_values = {role.strip().lower() for role in parts[3].split(",")}
+        if expected_role in role_values:
             return True
     return False
 
