@@ -98,6 +98,7 @@ def test_patient_index_read_audit_is_minimized(
         "limit": 10,
         "offset": 0,
         "result_count": 1,
+        "scope_filtered": False,
     }
 
 

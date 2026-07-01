@@ -113,6 +113,7 @@ relacion paciente-equipo, membresia actor-equipo, dry-run de relacion
 paciente/actor, entidad futura de break-glass, auditoria shadow
 `access_context.passive_decision`, evento minimizado `access_context.denied`,
 reporte agregado interno de observabilidad ABAC y enforcement dev-only para
+`GET /api/v1/patients` con filtro por relacion asistencial activa,
 `GET /api/v1/patients/{patient_id}`,
 `GET /api/v1/patients/{patient_id}/record`, lecturas patient-scoped de
 appointments, allergies, active problems, medications y medication drafting
