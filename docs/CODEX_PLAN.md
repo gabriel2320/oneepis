@@ -100,19 +100,29 @@ Estado al cierre:
 - Ultimos PRs cerrados: #250 refresco handoff Codex, #251 AI suggestions ABAC
   dev-only, #252 adelgazo `patient_ai.py`, #254 patient AI ABAC dev-only,
   #255 Assistant Timeline ABAC dev-only, #256 Assistant Search/Chart ABAC
-  dev-only y #257 Assistant Correlation auth/audit/ABAC dev-only. #253 quedo
-  cerrado al eliminarse la rama base apilada y fue reemplazado por #254.
+  dev-only, #257 Assistant Correlation auth/audit/ABAC dev-only, #258 refresh
+  de estado ABAC y #259 indice global de appointments admin/dev-only. #253
+  quedo cerrado al eliminarse la rama base apilada y fue reemplazado por #254.
 - Avance ABAC dev-only actual: `GET patient`, `GET record`, appointments
   patient-scoped, allergies, active problems, medications y medication drafting
   context, AI patient-scoped y Assistant Read timeline/search/chart/correlation
   detras de `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`.
+- `GET /api/v1/appointments` es indice global admin/dev-only. La UI de agenda
+  global ya respeta esa frontera; las citas patient-scoped siguen siendo el
+  carril clinico normal.
+- `GET /api/v1/patients` ya emite `patient_index.read` minimizado y sostiene
+  navegacion visible de `/pacientes` y selectores clinicos. No endurecerlo como
+  admin/dev global; el siguiente corte debe ser lista filtrada por relacion
+  asistencial o contrato de scoping, no bloqueo amplio.
 
-Retomar manana con PRs pequenos, en este orden:
+Retomar con PRs pequenos, en este orden:
 
-1. Gobernar `GET /api/v1/appointments` como indice global admin/dev-only,
-   manteniendo lecturas patient-scoped para clinicos con relacion activa.
-2. Auditar `GET /api/v1/patients` antes de endurecerlo: esta ruta puede sostener
-   navegacion clinica visible y requiere politica compatible con la UI.
+1. Disenar contrato de patient index scoped: admin/dev ven indice global; roles
+   clinicos deben ver solo pacientes con relacion asistencial activa cuando el
+   enforcement dev-only este activo.
+2. Implementar el filtro dev-only de `GET /api/v1/patients` solo despues de
+   cubrir fixtures de care-team y UI vacia/autorizada. No usar
+   `GlobalClinicalIndexAccessDep` en esta ruta.
 3. Mantener ABAC productivo, break-glass runtime y headers contextuales fuera de
    alcance hasta contrato especifico.
 
