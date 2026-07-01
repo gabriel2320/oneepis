@@ -117,8 +117,9 @@ reporte agregado interno de observabilidad ABAC y enforcement dev-only para
 `GET /api/v1/patients/{patient_id}`,
 `GET /api/v1/patients/{patient_id}/record`, lecturas patient-scoped de
 appointments, allergies, active problems, medications y medication drafting
-context, clinical risks, vital signs, AI patient-scoped y Assistant Read
-timeline/search/chart/correlation, y `GET /api/v1/hospitalization/active`
+context, clinical risks, vital signs, lab panels/results, AI patient-scoped y
+Assistant Read timeline/search/chart/correlation, y
+`GET /api/v1/hospitalization/active`
 detras de
 `ONEEPIS_ABAC_ENFORCEMENT_ENABLED=true`. Esto no habilita PHI real ni ABAC
 productivo: `patient_scoping_enabled`, `abac_runtime_enforced` y
