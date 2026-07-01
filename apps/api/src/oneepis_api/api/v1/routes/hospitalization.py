@@ -7,7 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from oneepis_api.api.deps import EncounterActorDep, PatientReadActorDep, require_patient_read_access
+from oneepis_api.api.deps import (
+    EncounterActorDep,
+    PatientReadActorDep,
+    ReadAccessDep,
+    SettingsDep,
+    require_patient_read_access,
+)
 from oneepis_api.db.session import get_session
 from oneepis_api.models.clinical_record import (
     ClinicalEncounter,
@@ -16,6 +22,7 @@ from oneepis_api.models.clinical_record import (
 )
 from oneepis_api.models.hospitalization import HospitalBed, HospitalBedStatus
 from oneepis_api.models.patient import Patient
+from oneepis_api.repositories import patients as patient_repo
 from oneepis_api.schemas.hospitalization import (
     HospitalBedCreate,
     HospitalBedRead,
@@ -28,6 +35,7 @@ from oneepis_api.services.audit import (
     record_audit_event,
     record_read_audit_event,
 )
+from oneepis_api.services.patient_scope_enforcement import PATIENT_SCOPE_BREAKOUT_ROLES
 
 router = APIRouter(
     prefix="/hospitalization",
@@ -233,9 +241,13 @@ def update_hospital_bed(
 @router.get("/active", response_model=list[HospitalizationBoardItem])
 def list_active_hospitalizations(
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
 ) -> list[HospitalizationBoardItem]:
+    scope_filtered = settings.abac_enforcement_enabled and not user.roles.intersection(
+        PATIENT_SCOPE_BREAKOUT_ROLES
+    )
     statement = (
         select(Patient, ClinicalEncounter, HospitalBed)
         .join(ClinicalEncounter, ClinicalEncounter.patient_id == Patient.id)
@@ -247,6 +259,14 @@ def list_active_hospitalizations(
         .order_by(ClinicalEncounter.started_at.desc())
         .limit(limit)
     )
+    if scope_filtered:
+        statement = statement.where(
+            Patient.id.in_(
+                patient_repo.active_care_relationship_patient_ids_statement(
+                    actor_id=user.actor_id
+                )
+            )
+        )
     board_items = [
         HospitalizationBoardItem(patient=patient, encounter=encounter, bed=bed)
         for patient, encounter, bed in session.execute(statement).all()
@@ -256,7 +276,7 @@ def list_active_hospitalizations(
         action="hospitalization_board.read",
         entity_type="hospitalization_board",
         entity_id=None,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"limit": limit, "result_count": len(board_items)},
     )
     session.commit()
