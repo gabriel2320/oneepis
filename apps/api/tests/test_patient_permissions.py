@@ -7,6 +7,21 @@ def test_patient_routes_require_authentication(client: TestClient) -> None:
     assert response.status_code == 401
 
 
+def test_readonly_user_can_read_patient_index_for_navigation(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    readonly_auth = auth_headers(client, email="lector@oneepis.local", password="lector")
+
+    response = client.get("/api/v1/patients?limit=50", headers=readonly_auth)
+
+    assert response.status_code == 200
+    assert patient_id in [patient["id"] for patient in response.json()]
+
+
 def test_readonly_user_cannot_write_patient(
     client: TestClient,
     auth_headers,
