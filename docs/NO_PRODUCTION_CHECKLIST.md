@@ -76,7 +76,7 @@ Evidencia actual de avance sin habilitacion productiva:
 
 ## Proximo paso recomendado
 
-Cerrar primero los bypasses patient-scoped restantes y agregar un gate
-ejecutable que detecte rutas con lectura patient-scoped sin enforcement. Crear
+Mantener el gate de lectura patient-scoped, endurecerlo por handler y avanzar a
+contratos shadow de escrituras clinicas sin habilitar runtime productivo. Crear
 issues separados a partir de estos IDs solo despues de una revision humana del
 checklist. Hasta entonces, este documento es la fuente versionada.
