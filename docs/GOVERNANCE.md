@@ -39,9 +39,9 @@ Responsabilidades canonicas:
 - `README.md`: entrada operativa, stack, comandos y enlaces.
 - `AGENTS.md`: reglas raiz para agentes.
 - `docs/CURRENT_STATE.md`: verdad operativa actual.
-- `docs/ROADMAP.md`: historial y rumbo, no backlog detallado.
+- `docs/ROADMAP.md`: historial cronologico, no estado actual ni backlog.
 - `docs/GOVERNANCE.md`: criterios anti-inflacion y limites activos.
-- `docs/CODEX_PLAN.md`: quickstart corto para agentes, no backlog.
+- `docs/CODEX_PLAN.md`: handoff corto para agentes, no backlog.
 - `docs/PROGRESSIVE_DEVELOPMENT_PLAN.md`: fases AI-Chart, no historial.
 - `docs/AI_CHART_CORE.md`: contrato conceptual de AI-Chart.
 - `docs/VISUAL_INTELLIGENCE_COUPLING.md`: regla inteligencia -> UI visible.
@@ -50,11 +50,23 @@ Responsabilidades canonicas:
 - `apps/web/src/lib/screen-capabilities.registry.json`: fuente estructurada de
   rutas visibles, estado, permisos, papel e IA permitida.
 - `docs/SCREEN_TREE.md`: narrativa clinica y tabla generada de rutas reales.
-- reportes fechados como `docs/ONEEPIS_REPORT_*.md`: snapshots de auditoria,
-  no fuente canonica viva.
 
 Los documentos largos de vision son cantera conceptual. No son backlog directo
 si no pasan antes por el plan progresivo y la escalera OneEpis.
+
+### Sincronizacion Documental Obligatoria
+
+Al final de cada PR que cambie plan, avance, estado, seguridad o no-produccion,
+sincronizar juntos los documentos vivos afectados:
+
+- `docs/CURRENT_STATE.md`: estado vigente y proximo objetivo, sin cronica de PRs.
+- `docs/CODEX_PLAN.md`: handoff inmediato para agentes y ultimo PR sincronizado.
+- `docs/NO_PRODUCTION_CHECKLIST.md`: gates/evidencia no-produccion.
+- `docs/SCREEN_TREE.md`: solo si cambia registry, rutas o pantallas.
+- Doc de dominio: solo si cambia una regla persistente de ese dominio.
+
+No crear reportes fechados, revisiones canonicas paralelas ni snapshots que
+repitan estado vivo. Si hace falta historial, resumirlo en `docs/ROADMAP.md`.
 
 ## Politica Anti-Canonitis
 
@@ -81,6 +93,8 @@ Reglas:
 - Prohibido editar manualmente la tabla generada de `SCREEN_TREE.md`.
 - `CURRENT_STATE.md` debe mantenerse bajo 180 lineas y no debe funcionar como
   cronica de PRs.
+- `CODEX_PLAN.md` debe mantenerse bajo 140 lineas y exponer solo el handoff
+  operativo inmediato.
 - Docs-only solo entra si corrige seguridad, claim clinico/legal, setup roto,
   permisos contradictorios o produccion/no-produccion.
 - Docs-only no entra por reconciliacion cosmetica, historial de PR, copy no
