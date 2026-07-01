@@ -3,7 +3,7 @@
 > **Ownership Notice**
 >
 > OneEpis was created by Gabriel Tesser and is owned by EPIONE.
-> Copyright © 2026 EPIONE. All rights reserved.
+> Copyright (c) 2026 EPIONE. All rights reserved.
 > Original creator: Gabriel Tesser.
 > Commercial and copyright owner: EPIONE.
 > No license or right of use is granted except by written agreement with EPIONE.
