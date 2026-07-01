@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, status
 
 from oneepis_api.api.deps import AiAccessDep
+from oneepis_api.core.config import Settings as AppSettings
 from oneepis_api.models.clinical_record import ClinicalEntry
 from oneepis_api.schemas.clinical_record import (
     ClinicalIntentActionDecisionRequest,
@@ -24,6 +25,7 @@ from oneepis_api.schemas.clinical_record import (
 )
 from oneepis_api.services.ai.provider import get_ai_provider
 from oneepis_api.services.audit import record_audit_event
+from oneepis_api.services.auth import AuthenticatedUser as AiUser
 from oneepis_api.services.clinical_context import build_event_context
 from oneepis_api.services.clinical_intent import resolve_clinical_intent
 from oneepis_api.services.clinical_intent_decision_metadata import (
@@ -34,6 +36,7 @@ from oneepis_api.services.clinical_intent_router import route_clinical_intent
 from oneepis_api.services.clinical_patch import confirm_clinical_patch as confirm_patch_service
 from oneepis_api.services.document_drafter import draft_soap_from_events
 from oneepis_api.services.event_proposals import propose_events_from_entry
+from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -45,6 +48,18 @@ from .patient_shared import (
 )
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
+
+
+def _enforce_patient_ai_scope(
+    session: SessionDep, patient_id: uuid.UUID, user: AiUser, settings: AppSettings
+) -> None:
+    enforce_patient_scope_for_read(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
 
 
 @router.post(
@@ -59,6 +74,7 @@ def create_draft_soap_from_events(
     user: AiAccessDep,
 ) -> DraftSoapFromEventsResponse:
     require_patient(session, patient_id)
+    _enforce_patient_ai_scope(session, patient_id, user, settings)
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     context = build_event_context(session, patient_id, payload.clinical_event_ids)
     found_ids = {event.id for event in context.events}
@@ -105,9 +121,11 @@ def create_event_proposals_from_entry(
     patient_id: uuid.UUID,
     payload: EventProposalFromEntryRequest,
     session: SessionDep,
+    settings: SettingsDep,
     user: AiAccessDep,
 ) -> EventProposalsFromEntryResponse:
     require_patient(session, patient_id)
+    _enforce_patient_ai_scope(session, patient_id, user, settings)
     entry = require_patient_child(
         session,
         ClinicalEntry,
@@ -142,9 +160,11 @@ def confirm_clinical_patch(
     patient_id: uuid.UUID,
     payload: ConfirmClinicalPatchRequest,
     session: SessionDep,
+    settings: SettingsDep,
     user: AiAccessDep,
 ) -> ConfirmClinicalPatchResponse:
     require_patient(session, patient_id)
+    _enforce_patient_ai_scope(session, patient_id, user, settings)
     return confirm_patch_service(
         session=session,
         patient_id=patient_id,
@@ -166,9 +186,11 @@ def create_clinical_intent(
     patient_id: uuid.UUID,
     payload: ClinicalIntentRequest,
     session: SessionDep,
+    settings: SettingsDep,
     user: AiAccessDep,
 ) -> ClinicalIntentResponse:
     require_patient(session, patient_id)
+    _enforce_patient_ai_scope(session, patient_id, user, settings)
     response = resolve_clinical_intent(session, patient_id, payload)
     record_audit_event(
         session,
@@ -196,9 +218,11 @@ def route_patient_clinical_intent(
     patient_id: uuid.UUID,
     payload: ClinicalIntentRouteRequest,
     session: SessionDep,
+    settings: SettingsDep,
     user: AiAccessDep,
 ) -> ClinicalIntentRouteResponse:
     require_patient(session, patient_id)
+    _enforce_patient_ai_scope(session, patient_id, user, settings)
     response = route_clinical_intent(payload)
     record_audit_event(
         session,
@@ -226,9 +250,11 @@ def decide_clinical_intent_action(
     patient_id: uuid.UUID,
     payload: ClinicalIntentActionDecisionRequest,
     session: SessionDep,
+    settings: SettingsDep,
     user: AiAccessDep,
 ) -> ClinicalIntentActionDecisionResponse:
     require_patient(session, patient_id)
+    _enforce_patient_ai_scope(session, patient_id, user, settings)
     record_audit_event(
         session,
         action="ai.clinical_action.decided",
@@ -252,9 +278,11 @@ def decide_clinical_review_item(
     patient_id: uuid.UUID,
     payload: ClinicalReviewItemDecisionRequest,
     session: SessionDep,
+    settings: SettingsDep,
     user: AiAccessDep,
 ) -> ClinicalReviewItemDecisionResponse:
     require_patient(session, patient_id)
+    _enforce_patient_ai_scope(session, patient_id, user, settings)
     record_audit_event(
         session,
         action="ai.review_item.decided",
