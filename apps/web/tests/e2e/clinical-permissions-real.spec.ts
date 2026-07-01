@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
   ambulatoryPermissionsPatientId,
   mockAmbulatoryVisitApi,
+  mockPatientIndexApi,
   type MockAuthUser,
 } from "./helpers/clinical-api-mock";
 
@@ -26,6 +27,25 @@ test.skip(
   process.env.NEXT_PUBLIC_DEMO_MODE !== "false",
   "Clinical permissions real UI runs in the dedicated non-demo e2e command.",
 );
+
+test("solo_lectura sees authorized empty patient index", async ({ page }) => {
+  await mockPatientIndexApi(page, { authUser: readOnlyUser, patients: [] });
+
+  await page.goto("/pacientes");
+
+  await expect(page.getByRole("heading", { name: "Pacientes" })).toBeVisible();
+  await expect(page.getByText("0 fichas visibles")).toBeVisible();
+  await expect(page.getByText("Sin fichas visibles")).toBeVisible();
+  await expect(
+    page.getByText("No hay fichas visibles para tu relacion asistencial activa."),
+  ).toBeVisible();
+  const deniedActions = page.getByRole("button", { name: "Sin permiso" });
+  await expect(deniedActions).toHaveCount(2);
+  await expect(deniedActions.first()).toBeDisabled();
+  await expect(deniedActions.nth(1)).toBeDisabled();
+  await expect(page.getByText("Crea la primera ficha de desarrollo")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Crear paciente" })).toHaveCount(0);
+});
 
 test("solo_lectura reads ambulatory visit but cannot write", async ({ page }) => {
   await mockAmbulatoryVisitApi(page, { authUser: readOnlyUser });

@@ -141,8 +141,8 @@ export function PatientsIndexPage() {
         ) : null}
         {!isAnonymous && patients && patients.length === 0 ? (
           <EmptyState
-            title="Mesa de pacientes limpia"
-            description="Crea la primera ficha de desarrollo o inicia sesion con un rol autorizado para escribir."
+            title="Sin fichas visibles"
+            description="No hay fichas visibles para tu relacion asistencial activa."
             action={
               canCreate ? (
                 <Button asChild>

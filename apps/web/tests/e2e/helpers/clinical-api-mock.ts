@@ -12,6 +12,11 @@ export type AmbulatoryVisitMockOptions = {
   patientId?: string;
 };
 
+export type PatientIndexMockOptions = {
+  authUser: MockAuthUser;
+  patients?: unknown[];
+};
+
 const defaultPatientId = "11111111-1111-4111-8111-111111111111";
 const createdAt = "2026-06-20T10:00:00Z";
 
@@ -25,6 +30,16 @@ export async function mockAmbulatoryVisitApi(page: Page, options: AmbulatoryVisi
 
   await page.route("**/api/v1/**", async (route) => {
     await fulfillAmbulatoryVisitApi(route, { authUser, patientId });
+  });
+}
+
+export async function mockPatientIndexApi(page: Page, options: PatientIndexMockOptions) {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("oneepis.auth.session", "active");
+  });
+
+  await page.route("**/api/v1/**", async (route) => {
+    await fulfillPatientIndexApi(route, options);
   });
 }
 
@@ -70,6 +85,39 @@ async function fulfillAmbulatoryVisitApi(
   await route.fulfill({
     status: 404,
     json: { detail: `Unhandled permissions test route: ${path}` },
+    headers: corsHeaders,
+  });
+}
+
+async function fulfillPatientIndexApi(route: Route, options: PatientIndexMockOptions) {
+  const request = route.request();
+  const url = new URL(request.url());
+  const path = url.pathname;
+  const origin = request.headers().origin ?? "http://127.0.0.1:3002";
+  const corsHeaders = {
+    "access-control-allow-origin": origin,
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
+    "access-control-allow-headers": "authorization,content-type,x-oneepis-actor,x-oneepis-csrf",
+  };
+
+  if (request.method() === "OPTIONS") {
+    await route.fulfill({ status: 204, headers: corsHeaders });
+    return;
+  }
+
+  if (path === "/api/v1/auth/me") {
+    await route.fulfill({ json: options.authUser, headers: corsHeaders });
+    return;
+  }
+  if (path === "/api/v1/patients") {
+    await route.fulfill({ json: options.patients ?? [], headers: corsHeaders });
+    return;
+  }
+
+  await route.fulfill({
+    status: 404,
+    json: { detail: `Unhandled patient index permissions test route: ${path}` },
     headers: corsHeaders,
   });
 }
