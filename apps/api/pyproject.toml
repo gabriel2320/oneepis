@@ -10,7 +10,7 @@ requires-python = ">=3.12,<3.13"
 authors = [
   { name = "Gabriel Tesser" }
 ]
-license = { text = "Proprietary - OneEpis was created by Gabriel Tesser and is owned by EPIONE. Copyright © 2026 EPIONE. All rights reserved." }
+license = { text = "Proprietary - OneEpis was created by Gabriel Tesser and is owned by EPIONE. Copyright (c) 2026 EPIONE. All rights reserved." }
 dependencies = [
   "alembic>=1.13,<2.0",
   "fastapi>=0.115,<1.0",
@@ -50,4 +50,4 @@ select = ["E", "F", "I", "UP", "B"]
 creator = "Gabriel Tesser"
 owner = "EPIONE"
 notice = "OneEpis was created by Gabriel Tesser and is owned by EPIONE."
-copyright = "Copyright © 2026 EPIONE. All rights reserved."
+copyright = "Copyright (c) 2026 EPIONE. All rights reserved."

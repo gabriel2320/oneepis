@@ -8,7 +8,7 @@ const ownership = {
   creator: "Gabriel Tesser",
   owner: "EPIONE",
   notice: "OneEpis was created by Gabriel Tesser and is owned by EPIONE.",
-  copyright: "Copyright © 2026 EPIONE. All rights reserved.",
+  copyright: "Copyright (c) 2026 EPIONE. All rights reserved.",
   license: "UNLICENSED",
 };
 
@@ -41,6 +41,12 @@ const requiredTextPhrases = {
   ],
 };
 
+const ownershipEncodingCheckedFiles = [
+  ...Object.keys(requiredTextPhrases),
+  "package.json",
+  "apps/web/package.json",
+];
+
 const requiredCiJobs = [
   "api",
   "web",
@@ -59,6 +65,13 @@ for (const [relativePath, phrases] of Object.entries(requiredTextPhrases)) {
 
   for (const phrase of phrases) {
     requirePhrase(relativePath, content, phrase);
+  }
+}
+
+for (const relativePath of ownershipEncodingCheckedFiles) {
+  const content = readTextFile(relativePath);
+  if (content !== null) {
+    requireNoCopyrightEncodingDrift(relativePath, content);
   }
 }
 
@@ -130,6 +143,12 @@ function readJsonFile(relativePath) {
 function requirePhrase(relativePath, content, phrase) {
   if (!content.includes(phrase)) {
     errors.push(`${relativePath} is missing required phrase: "${phrase}"`);
+  }
+}
+
+function requireNoCopyrightEncodingDrift(relativePath, content) {
+  if (content.includes("\u00a9") || content.includes("\u00c2\u00a9")) {
+    errors.push(`${relativePath} must use ASCII copyright text: "${ownership.copyright}"`);
   }
 }
 
