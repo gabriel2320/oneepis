@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from oneepis_api.api.deps import PatientReadActorDep
+from oneepis_api.api.deps import ReadAccessDep
 from oneepis_api.models.clinical_record import (
     ActiveProblem,
     Allergy,
@@ -21,6 +21,7 @@ from oneepis_api.schemas.clinical_record import AssistantTimelineResponse
 from oneepis_api.services.historical_diagnoses import historical_diagnoses_from_events
 
 from .patient_assistant_lab_timeline import fetch_lab_results_for_timeline, lab_timeline_items
+from .patient_assistant_scope import enforce_and_record_assistant_read
 from .patient_assistant_timeline_items import (
     allergy_items,
     encounter_items,
@@ -33,7 +34,7 @@ from .patient_assistant_timeline_items import (
     timeline_warnings,
     vital_items,
 )
-from .patient_shared import LimitQuery, SessionDep, record_patient_scoped_read, require_patient
+from .patient_shared import LimitQuery, SessionDep, SettingsDep, require_patient
 
 router = APIRouter()
 
@@ -42,14 +43,16 @@ router = APIRouter()
 def get_assistant_timeline(
     patient_id: uuid.UUID,
     session: SessionDep,
-    actor: PatientReadActorDep,
+    user: ReadAccessDep,
+    settings: SettingsDep,
     limit: LimitQuery = 50,
 ) -> AssistantTimelineResponse:
     require_patient(session, patient_id)
-    record_patient_scoped_read(
+    enforce_and_record_assistant_read(
         session,
         patient_id=patient_id,
-        actor_id=actor,
+        user=user,
+        settings=settings,
         action="assistant_timeline.read",
     )
     query_limit = limit + 1
