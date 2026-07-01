@@ -28,7 +28,10 @@ from oneepis_api.services.clinical_event_validation import (
     validate_curated_antecedent_payload,
     validate_diagnostic_coding_payload,
 )
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -89,8 +92,16 @@ def create_clinical_event(
     payload: ClinicalEventCreate,
     session: SessionDep,
     user: ClinicalEventWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     validate_clinical_event_semantic_write_access(
         user=user,
@@ -160,8 +171,16 @@ def update_clinical_event(
     payload: ClinicalEventUpdate,
     session: SessionDep,
     user: ClinicalEventWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalEvent:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     event = require_patient_child(
         session,
         ClinicalEvent,

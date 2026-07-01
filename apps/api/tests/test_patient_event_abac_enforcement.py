@@ -75,18 +75,108 @@ def test_patient_events_abac_allows_active_relationship(
     assert [item["id"] for item in timeline_response.json()["events"]] == [event["id"]]
 
 
+def test_patient_events_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    event = _create_event(client, auth, patient_id)
+    unknown_event_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json=_event_payload(summary="Evento sin relacion activa"),
+    )
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{event['id']}",
+        headers=auth,
+        json={"summary": "No debe actualizarse"},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{unknown_event_id}",
+        headers=auth,
+        json={"summary": "No debe revelar existencia"},
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 3
+    assert actions.count("clinical_event.created") == 1
+    assert "clinical_event.updated" not in actions
+
+
+def test_patient_events_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=auth,
+        json=_event_payload(summary="Evento permitido por relacion activa"),
+    )
+    event_id = create_response.json()["id"]
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/clinical-events/{event_id}",
+        headers=auth,
+        json={"summary": "Evento actualizado"},
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["summary"] == "Evento actualizado"
+
+
+def test_patient_events_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/clinical-events",
+        headers=admin_auth,
+        json=_event_payload(summary="Evento creado por breakout admin/dev"),
+    )
+
+    assert response.status_code == 201
+
+
 def _create_event(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/clinical-events",
         headers=auth,
-        json={
-            "event_type": "clinical_note",
-            "occurred_at": "2026-06-20T09:30:00Z",
-            "summary": "Evento ABAC",
-        },
+        json=_event_payload(summary="Evento ABAC"),
     )
     assert response.status_code == 201
     return response.json()
+
+
+def _event_payload(*, summary: str) -> dict[str, str]:
+    return {
+        "event_type": "clinical_note",
+        "occurred_at": "2026-06-20T09:30:00Z",
+        "summary": summary,
+    }
 
 
 def _enable_development_abac_enforcement() -> None:
