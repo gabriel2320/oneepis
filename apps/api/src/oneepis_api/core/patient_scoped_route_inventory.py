@@ -116,7 +116,12 @@ PATIENT_SCOPED_ROUTE_INVENTORY: tuple[PatientScopedRoute, ...] = (
     _write("POST", "/api/v1/patients/{patient_id}/medications", "medications"),
     _write("POST", "/api/v1/patients/{patient_id}/allergies", "allergies"),
     _write("POST", "/api/v1/patients/{patient_id}/problems", "active_problems"),
-    _write("POST", "/api/v1/patients/{patient_id}/encounters", "encounters"),
+    _write(
+        "POST",
+        "/api/v1/patients/{patient_id}/encounters",
+        "encounters",
+        write_abac_dev_only=True,
+    ),
     _write("POST", "/api/v1/patients/{patient_id}/appointments", "appointments"),
     _write("POST", "/api/v1/patients/{patient_id}/lab-panels", "lab_panels_results"),
     _write(

@@ -47,6 +47,7 @@ def test_patient_scoped_route_inventory_matches_write_shadow_contract() -> None:
         "clinical_entries",
         "vital_signs",
         "clinical_risks",
+        "encounters",
     )
 
 

@@ -108,7 +108,9 @@ Estado al cierre:
   para read-enforcement patient-scoped, #282 contrato shadow de escrituras
   clinicas, #283 guard de lecturas patient-scoped sin audit, #284 inventario
   ejecutable de rutas/superficies patient-scoped, #285 write ABAC dev-only para
-  signos vitales y #286 contrato de politica `security-report`.
+  signos vitales, #286 contrato de politica `security-report`, #287 refresh de
+  handoff release, #288 write ABAC dev-only para clinical risks y #289 write
+  ABAC dev-only para clinical entries.
 - Avance ABAC dev-only actual: `GET /api/v1/patients`, `GET patient`,
   `GET record`, appointments patient-scoped, allergies, active problems,
   medications y medication drafting context, encounters, clinical entries,
@@ -125,9 +127,9 @@ Estado al cierre:
   roles clinicos ven solo pacientes con relacion asistencial activa. Sin
   enforcement, mantiene la navegacion visible de `/pacientes` y selectores
   clinicos.
-- Signos vitales, clinical risks y clinical entries son las primeras escrituras
-  clinicas con write ABAC dev-only. El resto de escrituras sigue sin write ABAC
-  y ninguna escritura tiene ABAC runtime productivo.
+- Signos vitales, clinical risks, clinical entries y encounters son las primeras
+  escrituras clinicas con write ABAC dev-only. El resto de escrituras sigue sin
+  write ABAC y ninguna escritura tiene ABAC runtime productivo.
 - `security-report` bloquea Gitleaks y OSV npm high/critical; dependency
   review, CodeQL y `pip-audit` siguen report-only con contrato de baseline,
   owner, waiver y SLA antes de promoverlos.
@@ -137,8 +139,7 @@ Estado al cierre:
 Retomar con PRs pequenos, en este orden:
 
 1. Continuar write ABAC dev-only por una siguiente superficie acotada,
-   idealmente encounters o clinical events; no empezar por medicamentos ni
-   ordenes.
+   idealmente clinical events; no empezar por medicamentos ni ordenes.
 2. Mantener el inventario `patient_scoped_route_inventory.py` sincronizado con
    cualquier ruta/superficie nueva o cambio de cobertura.
 3. Mantener el gate `scripts/check-patient-scoped-read-enforcement.mjs` como
