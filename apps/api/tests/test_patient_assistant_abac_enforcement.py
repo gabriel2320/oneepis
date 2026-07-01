@@ -66,6 +66,104 @@ def test_assistant_timeline_abac_allows_active_relationship(
     assert "access_context.passive_decision" in actions
 
 
+def test_assistant_search_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/search?q=ficha",
+        headers=auth,
+    )
+
+    assert response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 1
+    assert "assistant_search.read" not in actions
+    assert "access_context.passive_decision" not in actions
+
+
+def test_assistant_search_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    response = client.get(
+        f"/api/v1/patients/{patient_id}/assistant/search?q=ficha",
+        headers=auth,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["patient_id"] == patient_id
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert "assistant_search.read" in actions
+    assert "access_context.passive_decision" in actions
+
+
+def test_assistant_chart_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=auth,
+        json={"series": ["heart_rate"], "limit": 10},
+    )
+
+    assert response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 1
+    assert "assistant_chart.read" not in actions
+    assert "access_context.passive_decision" not in actions
+
+
+def test_assistant_chart_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/assistant/chart",
+        headers=auth,
+        json={"series": ["heart_rate"], "limit": 10},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["patient_id"] == patient_id
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert "assistant_chart.read" in actions
+    assert "access_context.passive_decision" in actions
+
+
 def _enable_development_abac_enforcement() -> None:
     app.dependency_overrides[get_settings] = lambda: Settings(
         ai_provider="local_rules",
