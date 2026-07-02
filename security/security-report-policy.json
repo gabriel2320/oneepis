@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-02",
+  "owner": "EPIONE security",
+  "signals": {
+    "pip_audit": {
+      "status": "blocking_high_critical",
+      "owner": "EPIONE security",
+      "minimumBlockingSeverity": "high",
+      "blockUnknownSeverity": true,
+      "baseline": [],
+      "waivers": []
+    },
+    "dependency_review": {
+      "status": "report_only",
+      "owner": "EPIONE security",
+      "baseline": [],
+      "promotionRequirement": "Requires reviewed baseline, severity SLA and waiver process before becoming blocking."
+    },
+    "codeql": {
+      "status": "report_only",
+      "owner": "EPIONE security",
+      "baseline": [],
+      "promotionRequirement": "Requires reviewed baseline, severity SLA and waiver process before becoming blocking."
+    }
+  }
+}

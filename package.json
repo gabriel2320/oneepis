@@ -32,6 +32,7 @@
     "check:patient-route-inventory": "node scripts/test-patient-scoped-route-inventory.mjs && node scripts/check-patient-scoped-route-inventory.mjs",
     "check:audit-snapshots": "node scripts/test-audit-snapshot-allowlists.mjs && node scripts/check-audit-snapshot-allowlists.mjs",
     "check:web-auth-contract": "node scripts/test-web-auth-contract.mjs && node scripts/check-web-auth-contract.mjs",
+    "check:python-advisories": "node scripts/test-python-advisories.mjs && node scripts/check-python-advisories.mjs",
     "generate:screens": "node scripts/generate-screen-tree.mjs",
     "check:screens": "node scripts/generate-screen-tree.mjs --check && node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
     "review:screens": "node scripts/screen-canon-review.mjs",
