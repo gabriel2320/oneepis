@@ -254,11 +254,11 @@ jobs:
         continue-on-error: true
       - name: CodeQL init report
         if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript, python
         continue-on-error: true
       - name: CodeQL analyze report
         if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         continue-on-error: true
