@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-02",
+  "acts": [
+    {
+      "key": "record_clinical_entry",
+      "label": "Record clinical entry",
+      "serviceKey": "clinical_entries",
+      "backendSurface": "clinical_entries",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "record_clinical_event",
+      "label": "Record clinical event",
+      "serviceKey": "clinical_events",
+      "backendSurface": "clinical_events",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "draft_clinical_order",
+      "label": "Draft clinical order",
+      "serviceKey": "clinical_orders",
+      "backendSurface": "clinical_orders",
+      "maturity": "draft_only",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "record_vital_sign",
+      "label": "Record vital sign",
+      "serviceKey": "vital_signs",
+      "backendSurface": "vital_signs",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "record_clinical_risk",
+      "label": "Record clinical risk",
+      "serviceKey": "clinical_risks",
+      "backendSurface": "clinical_risks",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "manage_medication",
+      "label": "Manage medication list",
+      "serviceKey": "medications",
+      "backendSurface": "medications",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "record_allergy",
+      "label": "Record allergy",
+      "serviceKey": "allergies",
+      "backendSurface": "allergies",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "manage_active_problem",
+      "label": "Manage active problem",
+      "serviceKey": "active_problems",
+      "backendSurface": "active_problems",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "record_encounter",
+      "label": "Record encounter",
+      "serviceKey": "encounters",
+      "backendSurface": "encounters",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "schedule_patient_appointment",
+      "label": "Schedule patient appointment",
+      "serviceKey": "appointments",
+      "backendSurface": "appointments",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "record_lab_panel_result",
+      "label": "Record lab panel/result",
+      "serviceKey": "lab_panels_results",
+      "backendSurface": "lab_panels_results",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "create_hospital_daily_sheet",
+      "label": "Create hospital daily sheet",
+      "serviceKey": "hospital_daily_sheets",
+      "backendSurface": "hospital_daily_sheets",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    },
+    {
+      "key": "create_hospital_indication",
+      "label": "Create hospital indication",
+      "serviceKey": "hospital_indications",
+      "backendSurface": "hospital_indications",
+      "maturity": "dev_write_abac",
+      "writesClinicalRecord": true,
+      "requiresHumanActor": true,
+      "autonomousAiAllowed": false
+    }
+  ]
+}
