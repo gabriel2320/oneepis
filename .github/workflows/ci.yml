@@ -248,10 +248,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e "apps/api[dev]"
           python -m pip install pip-audit
-      - name: pip-audit report
+      - name: pip-audit high+ gate
         if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
-        run: python -m pip_audit --progress-spinner off
-        continue-on-error: true
+        run: npm run check:python-advisories
       - name: CodeQL init report
         if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
         uses: github/codeql-action/init@v4

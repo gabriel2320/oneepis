@@ -32,6 +32,12 @@ SECURITY_REPORT_CHECKS: tuple[SecurityReportCheck, ...] = (
         promotion_requirement="Already blocks high and critical npm advisories.",
     ),
     SecurityReportCheck(
+        key="pip_audit_high",
+        ci_step_name="pip-audit high+ gate",
+        status="blocking",
+        promotion_requirement="Blocks high and critical Python advisories with reviewed waivers.",
+    ),
+    SecurityReportCheck(
         key="dependency_review",
         ci_step_name="Dependency review report",
         status="report_only",
@@ -40,12 +46,6 @@ SECURITY_REPORT_CHECKS: tuple[SecurityReportCheck, ...] = (
     SecurityReportCheck(
         key="codeql",
         ci_step_name="CodeQL analyze report",
-        status="report_only",
-        promotion_requirement="Needs reviewed baseline, owner, waiver process and severity SLA.",
-    ),
-    SecurityReportCheck(
-        key="pip_audit",
-        ci_step_name="pip-audit report",
         status="report_only",
         promotion_requirement="Needs reviewed baseline, owner, waiver process and severity SLA.",
     ),

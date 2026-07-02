@@ -41,8 +41,9 @@ en `docs/CODEX_PLAN.md`.
   de pantallas falla si un print con `[patientId]` queda con `auditPolicy: none`.
 - Logs PHI-safe backend y guard frontend contra `console.*` estan activos en
   checks. No hay observabilidad productiva formal.
-- `security-report` bloquea Gitleaks y OSV npm high/critical. Dependency
-  review, CodeQL y `pip-audit` siguen report-only hasta baseline/waiver/SLA.
+- `security-report` bloquea Gitleaks, OSV npm high/critical y `pip-audit`
+  high/critical. Dependency review y CodeQL siguen report-only con baseline,
+  owner y waiver versionados hasta SLA de bloqueo.
 - `GET /api/v1/appointments` es indice global admin/dev-only; agenda
   patient-scoped sigue como carril clinico normal.
 
@@ -93,6 +94,7 @@ break-glass runtime, firma, receta valida ni orden ejecutable.
 - Contrato shadow de escrituras: `apps/api/src/oneepis_api/core/clinical_write_access_contract.py`.
 - Registry visible de pantallas: `apps/web/src/lib/screen-capabilities.registry.json`.
 - Tabla generada de rutas: `docs/SCREEN_TREE.md`.
+- Baseline/waivers de security-report: `security/security-report-policy.json`.
 - Checklist versionado no-produccion: `docs/NO_PRODUCTION_CHECKLIST.md`.
 
 ## Riesgos Vivos
@@ -109,11 +111,22 @@ break-glass runtime, firma, receta valida ni orden ejecutable.
 
 ## Proximo Objetivo
 
-No ampliar modulos clinicos. El siguiente trabajo debe seguir la cola post-#297
-en reduccion de riesgo operacional:
+No ampliar modulos clinicos. El ultimo PR GitHub confirmado sigue siendo #292;
+los commits directos post-#292 no consumen numeracion de PR. El trabajo local
+actual corresponde a PR #293, security report fase 2. El siguiente trabajo debe
+seguir la cola post-#293 en reduccion de riesgo operacional:
 
-- PR #298: security report fase 2 con baseline, waiver y bloqueo gradual de
-  `pip-audit` high/critical.
+- PR #294: observabilidad PHI-safe formal.
+- PR #295: contratos no-produccion SEC-001/002/003 para secretos, cifrado y
+  backups/restore.
+- PR #296: auth productiva docs-only.
+- PR #297: integridad medico-legal de auditoria como contrato.
+- PR #298: reproducibilidad Python.
+- PR #299: HIS Service Catalog v0.
+- PR #300: Clinical Act Catalog v0.
+- PR #301: Screen-Service Matrix.
+- PR #302: AI Capability Catalog.
+- PR #303: Unit of Work para un acto clinico compuesto.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida,
 orden ejecutable, PHI real ni IA externa.

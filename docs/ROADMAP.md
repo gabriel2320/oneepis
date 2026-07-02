@@ -379,6 +379,19 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
   backups/restore.
 - PR-076: auth productiva docs-only; no implementar login productivo todavia.
 
+### Numeracion GitHub post-#292
+
+- Verdad GitHub al 2026-07-02: el ultimo PR real mergeado es #292.
+- Los commits directos `962162d`, `2635a58` y `52cdc4d` quedaron en
+  `origin/main` sin consumir numeros de PR.
+- La cola de PR reales vuelve a partir en #293: security report fase 2,
+  incluyendo baseline/waiver versionado y `pip-audit` high/critical bloqueante.
+- Los siguientes numeros reservados son #294 observabilidad PHI-safe formal,
+  #295 contratos SEC-001/002/003, #296 auth productiva docs-only, #297
+  integridad medico-legal de auditoria, #298 reproducibilidad Python, #299 HIS
+  Service Catalog v0, #300 Clinical Act Catalog v0, #301 Screen-Service Matrix,
+  #302 AI Capability Catalog y #303 Unit of Work para un acto clinico compuesto.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.
