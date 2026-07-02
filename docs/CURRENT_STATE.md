@@ -39,8 +39,9 @@ en `docs/CODEX_PLAN.md`.
   snapshots clinicos completos por accidente.
 - Las rutas print patient-scoped declaran `read_audit` en el registry; el guard
   de pantallas falla si un print con `[patientId]` queda con `auditPolicy: none`.
-- Logs PHI-safe backend y guard frontend contra `console.*` estan activos en
-  checks. No hay observabilidad productiva formal.
+- Logs PHI-safe backend, guard frontend contra `console.*` y contrato formal de
+  observabilidad PHI-safe estan activos. No hay exportadores ni dashboards
+  productivos.
 - `security-report` bloquea Gitleaks, OSV npm high/critical y `pip-audit`
   high/critical. Dependency review y CodeQL siguen report-only con baseline,
   owner y waiver versionados hasta SLA de bloqueo.
@@ -95,13 +96,15 @@ break-glass runtime, firma, receta valida ni orden ejecutable.
 - Registry visible de pantallas: `apps/web/src/lib/screen-capabilities.registry.json`.
 - Tabla generada de rutas: `docs/SCREEN_TREE.md`.
 - Baseline/waivers de security-report: `security/security-report-policy.json`.
+- Contrato PHI-safe de observabilidad: `apps/api/src/oneepis_api/core/observability_contract.py`.
 - Checklist versionado no-produccion: `docs/NO_PRODUCTION_CHECKLIST.md`.
 
 ## Riesgos Vivos
 
 - No produccion sanitaria, no piloto con PHI, no software clinico certificado.
 - Faltan secretos formales, cifrado, backups/restore, retencion, identidad
-  productiva, observabilidad PHI-safe formal y governance clinico/legal.
+  productiva, integracion productiva de observabilidad PHI-safe y governance
+  clinico/legal.
 - ABAC productivo requiere institucion/tenant, equipo/servicio tratante,
   relacion asistencial, motivo de acceso y break-glass revisable.
 - Auditoria medico-legal completa sigue pendiente: retencion, exportacion,
@@ -112,11 +115,11 @@ break-glass runtime, firma, receta valida ni orden ejecutable.
 ## Proximo Objetivo
 
 No ampliar modulos clinicos. El ultimo PR GitHub confirmado sigue siendo #292;
-los commits directos post-#292 no consumen numeracion de PR. El trabajo local
-actual corresponde a PR #293, security report fase 2. El siguiente trabajo debe
-seguir la cola post-#293 en reduccion de riesgo operacional:
+los commits directos post-#292 no consumen numeracion de PR. PR #293 corresponde
+a security report fase 2 y PR #294 corresponde a observabilidad PHI-safe formal.
+El siguiente trabajo debe seguir la cola post-#294 en reduccion de riesgo
+operacional:
 
-- PR #294: observabilidad PHI-safe formal.
 - PR #295: contratos no-produccion SEC-001/002/003 para secretos, cifrado y
   backups/restore.
 - PR #296: auth productiva docs-only.
