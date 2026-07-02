@@ -1,4 +1,7 @@
-from oneepis_api.core.clinical_write_access_contract import clinical_write_surface_keys
+from oneepis_api.core.clinical_write_access_contract import (
+    clinical_write_dev_abac_surface_keys,
+    clinical_write_surface_keys,
+)
 from oneepis_api.core.patient_scoped_route_inventory import (
     PATIENT_SCOPED_ROUTE_INVENTORY,
     patient_scoped_route_keys,
@@ -43,13 +46,7 @@ def test_patient_scoped_route_inventory_matches_write_shadow_contract() -> None:
     assert {
         route.runtime_write_abac for route in PATIENT_SCOPED_ROUTE_INVENTORY if route.write_surface
     } == {False}
-    assert write_abac_dev_only_surface_keys() == (
-        "clinical_entries",
-        "clinical_events",
-        "vital_signs",
-        "clinical_risks",
-        "encounters",
-    )
+    assert write_abac_dev_only_surface_keys() == clinical_write_dev_abac_surface_keys()
 
 
 def test_read_abac_routes_require_read_audit() -> None:
@@ -66,4 +63,16 @@ def test_patient_scoped_route_inventory_has_unique_route_keys() -> None:
     assert all(
         route.path_template.startswith("/api/v1/")
         for route in PATIENT_SCOPED_ROUTE_INVENTORY
+    )
+
+
+def test_patient_scoped_route_inventory_tracks_write_methods_beyond_post() -> None:
+    route_keys = patient_scoped_route_keys()
+
+    assert "PATCH /api/v1/patients/{patient_id}/allergies/{allergy_id}" in route_keys
+    assert "DELETE /api/v1/patients/{patient_id}/allergies/{allergy_id}" in route_keys
+    assert "PATCH /api/v1/patients/{patient_id}/appointments/{appointment_id}" in route_keys
+    assert (
+        "PATCH /api/v1/hospitalization/patients/{patient_id}/daily-sheets/{sheet_id}"
+        in route_keys
     )

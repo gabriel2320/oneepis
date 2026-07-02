@@ -1,6 +1,6 @@
 # Checklist Versionado de No Produccion
 
-Fecha: 2026-07-01
+Fecha: 2026-07-02
 
 OneEpis no esta listo para produccion sanitaria. Este checklist convierte los
 pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
@@ -13,7 +13,10 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 - Gitleaks y OSV npm advisory bloquean secretos y hallazgos npm
   high/critical; dependency review, CodeQL y `pip-audit` siguen report-only con
   contrato de baseline, waiver y SLA antes de volverse bloqueantes.
-- ABAC patient-scoped sigue en modo dev-only y parcial; no habilita PHI real,
+- Rutas print patient-scoped declaran politica de auditoria explicita en el
+  registry; el guard de pantallas bloquea `auditPolicy: none` en prints con
+  `[patientId]`.
+- ABAC patient-scoped sigue en modo dev-only amplio; no habilita PHI real,
   piloto clinico ni runtime productivo.
 
 ## Gates antes de produccion sanitaria
@@ -24,10 +27,10 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 | NOPROD-SEC-002 | Cifrado en reposo | pendiente | politica de cifrado para base, backups y almacenamiento documental | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/encryption_at_rest_contract.py`; `apps/api/tests/test_encryption_at_rest_contract.py` |
 | NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/backup_restore_contract.py`; `apps/api/tests/test_backup_restore_contract.py` |
 | NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental | `docs/AUDIT.md`; `apps/api/src/oneepis_api/core/audit_retention_contract.py`; `apps/api/src/oneepis_api/core/audit_integrity_contract.py`; `apps/api/tests/test_audit_retention_contract.py`; `apps/api/tests/test_audit_integrity_contract.py` |
-| NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con actor, ruta, correlacion, dedupe, minimizacion y cobertura E2E real de filtros lectura/escritura | `docs/AUDIT.md`; `apps/api/tests/test_patient_read_audit.py`; `apps/api/tests/test_patient_audit.py`; `apps/api/src/oneepis_api/services/access_context_audit.py` |
+| NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con actor, ruta, correlacion, dedupe, minimizacion y cobertura E2E real de filtros lectura/escritura | `docs/AUDIT.md`; `apps/api/tests/test_patient_read_audit.py`; `apps/api/tests/test_patient_audit.py`; `apps/api/tests/test_audit_snapshot.py`; `apps/api/src/oneepis_api/services/access_context_audit.py`; `apps/web/src/lib/screen-capabilities.registry.json`; `scripts/check-audit-snapshot-allowlists.mjs`; `scripts/screen-registry.mjs` |
 | NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo y guard frontend/CI bloquea `console.*` en `apps/web/src`; falta observabilidad productiva formal | `apps/api/tests/test_phi_logging.py`; `apps/api/src/oneepis_api/core/security_report_policy_contract.py`; `apps/api/tests/test_security_report_policy_contract.py`; `scripts/check-frontend-phi-logs.mjs` |
 | NOPROD-SEC-007 | Control de acceso contextual | en progreso | institucion/tenant, equipo o servicio tratante, relacion asistencial, motivo de acceso y break-glass auditado | `apps/api/src/oneepis_api/core/clinical_access.py`; `apps/api/src/oneepis_api/core/access_context_contract.py`; `apps/api/src/oneepis_api/core/access_boundary_contract.py`; `apps/api/src/oneepis_api/core/clinical_write_access_contract.py`; `apps/api/src/oneepis_api/core/patient_scoped_route_inventory.py`; `apps/api/src/oneepis_api/services/patient_access_relationship.py`; `apps/api/src/oneepis_api/services/patient_scope_enforcement.py`; `scripts/check-patient-scoped-read-enforcement.mjs`; `apps/api/tests/test_break_glass_guard.py`; `apps/api/tests/test_clinical_access_contract.py`; `apps/api/tests/test_access_context_contract.py`; `apps/api/tests/test_access_boundary_contract.py`; `apps/api/tests/test_clinical_write_access_contract.py`; `apps/api/tests/test_patient_scoped_route_inventory.py`; `apps/api/tests/test_patient_access_relationship.py`; `apps/api/tests/test_patient_abac_enforcement.py` |
-| NOPROD-SEC-008 | Auth productiva | pendiente | proveedor institucional, MFA, usuarios/roles persistentes, sesiones robustas, recuperacion y revocacion | `apps/api/src/oneepis_api/core/productive_auth_contract.py`; `apps/api/tests/test_auth_session_contract.py`; `apps/api/tests/test_productive_auth_contract.py` |
+| NOPROD-SEC-008 | Auth productiva | pendiente | proveedor institucional, MFA, usuarios/roles persistentes, sesiones robustas, recuperacion y revocacion | `apps/api/src/oneepis_api/core/productive_auth_contract.py`; `apps/api/tests/test_auth_session_contract.py`; `apps/api/tests/test_productive_auth_contract.py`; `scripts/check-web-auth-contract.mjs` |
 | NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones | `docs/GOVERNANCE.md`; `apps/api/src/oneepis_api/core/clinical_governance_contract.py`; `apps/api/tests/test_clinical_governance_contract.py`; sin aprobacion operacional |
 | NOPROD-SEC-010 | Politica IA externa | bloqueada | gateway PHI, anonimizacion, autorizacion, auditoria y opt-in explicito | `docs/OLLAMA_AND_TOOLS.md`; `apps/api/src/oneepis_api/core/external_ai_contract.py`; `apps/api/tests/test_external_ai_contract.py`; `apps/api/tests/test_config.py` bloquea Ollama externo fuera de desarrollo |
 | NOPROD-SEC-011 | Firma/receta/orden ejecutable | bloqueada | contrato legal, permisos, folio, actor, fecha clinica y auditoria | `docs/GOVERNANCE.md`; `apps/api/tests/test_clinical_orders.py`; `apps/api/tests/test_patient_medication_catalog.py` |
@@ -70,11 +73,17 @@ Evidencia actual de avance sin habilitacion productiva:
   auditadas fuera de enforcement activo emiten decision pasiva cuando aplica.
 - Existe contrato shadow de escrituras clinicas para inventario y requisitos
   pre-runtime; signos vitales, clinical risks, clinical entries,
-  clinical events y encounters tienen write ABAC dev-only, las demas escrituras
-  siguen sin write ABAC y ninguna hereda autorizacion de la cobertura de
-  lectura.
-- Existe inventario ejecutable de rutas/superficies patient-scoped para alinear
-  cobertura de lectura dev-only, superficies de escritura y checklist.
+  clinical events, clinical orders, encounters, medications, allergies, active
+  problems, appointments y lab panels/results, hospital daily sheets y hospital
+  indications tienen write ABAC dev-only. Ninguna escritura hereda autorizacion
+  de la cobertura de lectura ni tiene runtime write ABAC productivo.
+- Existe inventario ejecutable de rutas/superficies patient-scoped por metodo y
+  ruta, verificado contra OpenAPI para alinear cobertura de lectura dev-only,
+  superficies de escritura y checklist.
+- Los snapshots de auditoria requieren allowlist explicita y las rutas API
+  tienen guard contra `audit_snapshot(model)` sin fields.
+- La web usa cookie `HttpOnly` + CSRF, no lee bearer desde `localStorage`, y los
+  tokens firmados sin `sid` activo son rechazados con auth habilitada.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
@@ -84,7 +93,9 @@ Evidencia actual de avance sin habilitacion productiva:
 
 ## Proximo paso recomendado
 
-Mantener el gate de lectura patient-scoped por handler y usar el contrato shadow
-de escrituras clinicas como frontera pre-runtime sin habilitar ABAC productivo.
-Crear issues separados a partir de estos IDs solo despues de una revision humana
-del checklist. Hasta entonces, este documento es la fuente versionada.
+Mantener el gate de lectura patient-scoped por handler, el inventario OpenAPI
+por metodo/ruta y la politica explicita de auditoria para prints
+patient-scoped. El siguiente cierre recomendado es PR #298 security report fase
+2 con baseline/waiver y bloqueo gradual de `pip-audit` high/critical. Crear
+issues separados a partir de estos IDs solo despues de una revision humana del
+checklist. Hasta entonces, este documento es la fuente versionada.

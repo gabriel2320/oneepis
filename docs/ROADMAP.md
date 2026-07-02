@@ -359,6 +359,26 @@ solo cronologico y no debe mantener una segunda lista de estado actual.
 - Fuera de alcance: dashboard de seguridad, scores, aislamientos automaticos,
   IA nueva, `ClinicalPatch`, receta, firma u orden ejecutable.
 
+### PR-067 a PR-076: cierre de stack y seguridad operacional
+
+- PR-067: CI lanes y checks rapidos para reducir CI repetido sin relajar
+  ownership, Gitleaks ni OSV.
+- PR-068: inventario ABAC patient-scoped y write ABAC dev-only verificado contra
+  OpenAPI y contratos shadow.
+- PR-069: performance frontend medida y tipos TypeScript generados desde
+  OpenAPI, sin cambio runtime clinico.
+- PR-070: signos vitales con Unit of Work, rollback test, indice
+  `patient_id + measured_at`, evidencia `EXPLAIN` y cursor acotado.
+- PR-071: auditoria segura por defecto en snapshots/lecturas clinicas.
+- PR-072: cursor pagination en timeline clinica simple antes de tocar Assistant
+  Timeline.
+- PR-073: cursor estable para Assistant Timeline multi-fuente con contrato
+  compatible.
+- PR-074: observabilidad PHI-safe formal, sin PHI real ni integracion productiva.
+- PR-075: contratos no-produccion SEC-001/002/003 para secretos, cifrado y
+  backups/restore.
+- PR-076: auth productiva docs-only; no implementar login productivo todavia.
+
 ## Principios aprendidos
 
 - Una feature clinica entra solo si tiene flujo humano completo.

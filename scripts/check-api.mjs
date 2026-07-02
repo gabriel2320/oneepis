@@ -14,3 +14,11 @@ const guard = spawnSync("node", ["scripts/check-auth-session-contract.mjs"], {
 if (guard.status !== 0) {
   process.exit(guard.status ?? 1);
 }
+
+const auditSnapshotGuard = spawnSync("node", ["scripts/check-audit-snapshot-allowlists.mjs"], {
+  cwd: repoRoot,
+  stdio: "inherit",
+});
+if (auditSnapshotGuard.status !== 0) {
+  process.exit(auditSnapshotGuard.status ?? 1);
+}

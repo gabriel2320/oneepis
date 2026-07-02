@@ -1,8 +1,8 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 export const API_ACTOR = process.env.NEXT_PUBLIC_ONEEPIS_ACTOR;
 export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
-export const AUTH_TOKEN_STORAGE_KEY = "oneepis.auth.token";
 const AUTH_SESSION_STORAGE_KEY = "oneepis.auth.session";
+const LEGACY_BEARER_STORAGE_KEY = "oneepis.auth.token";
 const CSRF_COOKIE_NAME = "oneepis_csrf";
 
 const authListeners = new Set<() => void>();
@@ -21,10 +21,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   const headers = new Headers(init?.headers);
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
-  }
-  const token = getStoredBearerToken();
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
   }
   if (API_ACTOR && !headers.has("X-OneEpis-Actor")) {
     headers.set("X-OneEpis-Actor", API_ACTOR);
@@ -65,10 +61,10 @@ export function setStoredAuthToken(token: string | null) {
   }
   if (token) {
     window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, "active");
-    window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    window.localStorage.removeItem(LEGACY_BEARER_STORAGE_KEY);
   } else {
     window.localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-    window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    window.localStorage.removeItem(LEGACY_BEARER_STORAGE_KEY);
   }
   authListeners.forEach((listener) => listener());
 }
@@ -79,7 +75,7 @@ export function subscribeAuthToken(listener: () => void) {
   }
   authListeners.add(listener);
   const onStorage = (event: StorageEvent) => {
-    if (event.key === AUTH_TOKEN_STORAGE_KEY || event.key === AUTH_SESSION_STORAGE_KEY) {
+    if (event.key === AUTH_SESSION_STORAGE_KEY) {
       listener();
     }
   };
@@ -88,13 +84,6 @@ export function subscribeAuthToken(listener: () => void) {
     authListeners.delete(listener);
     window.removeEventListener("storage", onStorage);
   };
-}
-
-export function getStoredBearerToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
 }
 
 function isUnsafeMethod(method: string | undefined) {

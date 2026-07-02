@@ -28,7 +28,7 @@ test.skip(
   "Clinical permissions real UI runs in the dedicated non-demo e2e command.",
 );
 
-test("solo_lectura sees authorized empty patient index", async ({ page }) => {
+test("@auth @patient solo_lectura sees authorized empty patient index", async ({ page }) => {
   await mockPatientIndexApi(page, { authUser: readOnlyUser, patients: [] });
 
   await page.goto("/pacientes");
@@ -47,7 +47,7 @@ test("solo_lectura sees authorized empty patient index", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Crear paciente" })).toHaveCount(0);
 });
 
-test("solo_lectura reads ambulatory visit but cannot write", async ({ page }) => {
+test("@auth @patient solo_lectura reads ambulatory visit but cannot write", async ({ page }) => {
   await mockAmbulatoryVisitApi(page, { authUser: readOnlyUser });
 
   await page.goto(visitPath);
@@ -66,7 +66,7 @@ test("solo_lectura reads ambulatory visit but cannot write", async ({ page }) =>
   await expect(page.getByRole("button", { name: "Registrar preconsulta" })).toBeDisabled();
 });
 
-test("enfermeria can open preconsult but cannot save ambulatory visit", async ({ page }) => {
+test("@auth @patient enfermeria can open preconsult but cannot save ambulatory visit", async ({ page }) => {
   await mockAmbulatoryVisitApi(page, { authUser: nursingUser });
 
   await page.goto(visitPath);

@@ -38,7 +38,7 @@ def is_auth_session_active(
     now: datetime | None = None,
 ) -> bool:
     if not session_id:
-        return True
+        return not settings.auth_enabled
     auth_session = _get_auth_session(session, session_id)
     if auth_session is None or auth_session.revoked_at is not None:
         return False

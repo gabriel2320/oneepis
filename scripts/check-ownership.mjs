@@ -50,7 +50,8 @@ const ownershipEncodingCheckedFiles = [
 const requiredCiJobs = [
   "api",
   "web",
-  "contracts-e2e",
+  "contracts",
+  "e2e",
   "postgres-alembic",
   "security-report",
 ];
@@ -223,5 +224,27 @@ function jobDeclaresNeed(workflow, jobName, neededJobName) {
     "m",
   ).exec(workflow)?.groups?.body;
 
-  return Boolean(jobBlock?.includes(`needs: ${neededJobName}`));
+  if (!jobBlock) {
+    return false;
+  }
+
+  if (new RegExp(`^    needs:\\s*${escapeRegExp(neededJobName)}\\s*$`, "m").test(jobBlock)) {
+    return true;
+  }
+
+  if (
+    new RegExp(`^    needs:\\s*\\[[^\\]]*\\b${escapeRegExp(neededJobName)}\\b[^\\]]*\\]`, "m").test(
+      jobBlock,
+    )
+  ) {
+    return true;
+  }
+
+  const listNeeds = /^    needs:\r?\n(?<items>(?:      - .+\r?\n)+)/m.exec(jobBlock)?.groups?.items;
+  return Boolean(
+    listNeeds
+      ?.split(/\r?\n/)
+      .map((line) => line.replace(/^\s*-\s*/, "").trim())
+      .includes(neededJobName),
+  );
 }

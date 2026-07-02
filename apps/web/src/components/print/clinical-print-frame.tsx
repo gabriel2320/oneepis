@@ -1,8 +1,5 @@
-"use client";
-
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { careContextLabel, clinicalStatusLabel } from "@/lib/patient-display";
 import type { PatientRecordSnapshot } from "@/lib/types";
 
@@ -15,20 +12,6 @@ type ClinicalPaperMetadata = {
 
 export function PrintPage({ children }: { children: ReactNode }) {
   return <main className="min-h-screen bg-muted/40 p-4 print:bg-white print:p-0">{children}</main>;
-}
-
-export function PrintToolbar() {
-  return (
-    <div className="mx-auto mb-4 flex max-w-3xl items-center justify-between gap-3" data-print-hidden="true">
-      <div>
-        <p className="text-sm font-semibold">Vista papel</p>
-        <p className="text-xs text-muted-foreground">Hoja carta con footer de desarrollo.</p>
-      </div>
-      <Button type="button" onClick={() => window.print()}>
-        Imprimir
-      </Button>
-    </div>
-  );
 }
 
 export function ClinicalPaperSheet({

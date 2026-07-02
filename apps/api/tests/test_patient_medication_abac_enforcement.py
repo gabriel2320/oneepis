@@ -81,6 +81,118 @@ def test_patient_medications_abac_enforcement_allows_active_relationship(
     assert context_response.json()["active_medications"][0]["id"] == medication["id"]
 
 
+def test_patient_medications_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    medication = _create_medication(client, auth, patient_id)
+    unknown_medication_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={
+            "name": "Medicamento denegado",
+            "dose": "250 mg",
+            "route": "oral",
+            "frequency": "cada 12 horas",
+        },
+    )
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/medications/{medication['id']}",
+        headers=auth,
+        json={"frequency": "cada 24 horas"},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/medications/{unknown_medication_id}",
+        headers=auth,
+        json={"frequency": "cada 24 horas"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/medications/{medication['id']}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    assert delete_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 4
+    assert actions.count("medication.created") == 1
+    assert "medication.updated" not in actions
+    assert "medication.entered_in_error" not in actions
+
+
+def test_patient_medications_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=auth,
+        json={
+            "name": "Medicamento permitido",
+            "dose": "250 mg",
+            "route": "oral",
+            "frequency": "cada 12 horas",
+        },
+    )
+    medication_id = create_response.json()["id"]
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/medications/{medication_id}",
+        headers=auth,
+        json={"frequency": "cada 24 horas"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/medications/{medication_id}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["frequency"] == "cada 24 horas"
+    assert delete_response.status_code == 204
+
+
+def test_patient_medications_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/medications",
+        headers=admin_auth,
+        json={
+            "name": "Medicamento admin",
+            "dose": "250 mg",
+            "route": "oral",
+            "frequency": "cada 12 horas",
+        },
+    )
+
+    assert response.status_code == 201
+
+
 def _create_medication(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/medications",

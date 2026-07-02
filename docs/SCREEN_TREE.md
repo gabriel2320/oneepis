@@ -103,15 +103,15 @@ La navegacion actual se mantiene. El destino funcional queda agrupado asi:
 | `/pacientes/[patientId]/problemas/nuevo` | Nucleo paciente | acto clinico | completa | problemas activos | clinical_write | medico/admin/dev | read_and_write_audit | none | no | clasificacion diagnostica |
 | `/pacientes/[patientId]/signos-vitales` | Ordenes/resultados | seguimiento | completa | signos vitales | none | lectura paciente | read_audit | none | series | tabla/grafico amplio |
 | `/pacientes/[patientId]/signos-vitales/nuevo` | Ordenes/resultados | acto clinico | completa | signos vitales | clinical_write | enfermeria/medico/admin/dev | read_and_write_audit | none | no | escalas y monitoreo |
-| `/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry discharge_summary | none | lectura paciente | none | carta | no | borrador no firmado |
-| `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]` | Documentos/papel | documento | completa/en expansion gobernada | hoja diaria | none | lectura paciente | none | carta | no | firma real futura |
-| `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry intake | none | lectura paciente | none | carta | no | borrador no firmado |
-| `/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]` | Documentos/papel | documento | completa/en expansion gobernada | indicacion draft | none | lectura paciente | none | carta | no | no equivale a orden firmada |
+| `/print/hospitalizacion/pacientes/[patientId]/epicrisis/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry discharge_summary | none | lectura paciente | read_audit | carta | no | borrador no firmado |
+| `/print/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]` | Documentos/papel | documento | completa/en expansion gobernada | hoja diaria | none | lectura paciente | read_audit | carta | no | firma real futura |
+| `/print/hospitalizacion/pacientes/[patientId]/ingreso/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry intake | none | lectura paciente | read_audit | carta | no | borrador no firmado |
+| `/print/hospitalizacion/pacientes/[patientId]/indicacion/[indicationId]` | Documentos/papel | documento | completa/en expansion gobernada | indicacion draft | none | lectura paciente | read_audit | carta | no | no equivale a orden firmada |
 | `/print/hospitalizacion/rondas` | Documentos/papel | documento | completa/en expansion gobernada | rondas lectura | none | lectura paciente | none | carta | no | read-model si escala |
-| `/print/pacientes/[patientId]/evolucion/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry | none | lectura paciente | none | carta | no | firma real futura |
-| `/print/pacientes/[patientId]/ficha` | Documentos/papel | documento | completa/en expansion gobernada | record paciente | none | lectura paciente | none | carta | no | paridad con ficha expandida |
-| `/print/pacientes/[patientId]/receta` | Documentos/papel | documento | bloqueada | politica receta | none | lectura paciente | none | bloqueado | no | receta valida requiere firma/folio |
-| `/print/pacientes/[patientId]/resumen` | Documentos/papel | documento | completa/en expansion gobernada | record paciente | none | lectura paciente | none | carta | lectura resumida | resumen IA no persistido |
+| `/print/pacientes/[patientId]/evolucion/[entryId]` | Documentos/papel | documento | completa/en expansion gobernada | clinical entry | none | lectura paciente | read_audit | carta | no | firma real futura |
+| `/print/pacientes/[patientId]/ficha` | Documentos/papel | documento | completa/en expansion gobernada | record paciente | none | lectura paciente | read_audit | carta | no | paridad con ficha expandida |
+| `/print/pacientes/[patientId]/receta` | Documentos/papel | documento | bloqueada | politica receta | none | lectura paciente | read_audit | bloqueado | no | receta valida requiere firma/folio |
+| `/print/pacientes/[patientId]/resumen` | Documentos/papel | documento | completa/en expansion gobernada | record paciente | none | lectura paciente | read_audit | carta | lectura resumida | resumen IA no persistido |
 
 <!-- screen-routes:end -->
 

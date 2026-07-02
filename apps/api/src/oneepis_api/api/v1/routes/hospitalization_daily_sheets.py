@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from oneepis_api.api.deps import (
-    HospitalDailySheetActorDep,
+    HospitalDailySheetWriteAccessDep,
     ReadAccessDep,
     require_patient_read_access,
 )
@@ -36,7 +36,10 @@ from oneepis_api.services.audit import (
     record_audit_event,
 )
 from oneepis_api.services.clinical_dates import clinical_local_date
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 router = APIRouter(
     prefix="/hospitalization",
@@ -95,14 +98,23 @@ def create_hospital_daily_sheet(
     patient_id: uuid.UUID,
     payload: HospitalDailySheetCreate,
     session: SessionDep,
-    actor: HospitalDailySheetActorDep,
+    user: HospitalDailySheetWriteAccessDep,
+    settings: SettingsDep,
 ) -> HospitalDailySheet:
+    require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     encounter = _require_active_hospitalization(session, patient_id)
     sheet = HospitalDailySheet(
         **payload.model_dump(),
         patient_id=patient_id,
         encounter_id=encounter.id,
-        created_by=actor,
+        created_by=user.actor_id,
     )
     _validate_daily_sheet_date_for_encounter(sheet, encounter)
     _validate_daily_sheet_unique(session, sheet)
@@ -113,7 +125,7 @@ def create_hospital_daily_sheet(
         action="hospital_daily_sheet.created",
         entity_type="hospital_daily_sheet",
         entity_id=sheet.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_daily_sheet_audit_metadata(sheet),
         after=audit_snapshot(sheet, HOSPITAL_DAILY_SHEET_AUDIT_FIELDS),
     )
@@ -131,8 +143,17 @@ def update_hospital_daily_sheet(
     sheet_id: uuid.UUID,
     payload: HospitalDailySheetUpdate,
     session: SessionDep,
-    actor: HospitalDailySheetActorDep,
+    user: HospitalDailySheetWriteAccessDep,
+    settings: SettingsDep,
 ) -> HospitalDailySheet:
+    require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     sheet = _require_daily_sheet(session, patient_id, sheet_id)
     _validate_daily_sheet_editable(sheet)
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
@@ -155,7 +176,7 @@ def update_hospital_daily_sheet(
         action="hospital_daily_sheet.updated",
         entity_type="hospital_daily_sheet",
         entity_id=sheet.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_daily_sheet_audit_metadata(sheet, changed_fields),
         before=before_changed,
         after=after_changed,

@@ -129,19 +129,120 @@ def test_patient_allergies_abac_enforcement_allows_active_relationship(
     assert detail_response.json()["id"] == allergy["id"]
 
 
+def test_patient_allergies_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    allergy = _create_allergy(client, auth, patient_id)
+    unknown_allergy_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/allergies",
+        headers=auth,
+        json=_allergy_payload(substance="Alergeno sin relacion activa"),
+    )
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/allergies/{allergy['id']}",
+        headers=auth,
+        json={"severity": "severe"},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/allergies/{unknown_allergy_id}",
+        headers=auth,
+        json={"severity": "severe"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/allergies/{allergy['id']}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    assert delete_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 4
+    assert actions.count("allergy.created") == 1
+    assert "allergy.updated" not in actions
+    assert "allergy.entered_in_error" not in actions
+
+
+def test_patient_allergies_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/allergies",
+        headers=auth,
+        json=_allergy_payload(substance="Alergeno permitido por relacion activa"),
+    )
+    allergy_id = create_response.json()["id"]
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/allergies/{allergy_id}",
+        headers=auth,
+        json={"severity": "severe"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/allergies/{allergy_id}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["severity"] == "severe"
+    assert delete_response.status_code == 204
+
+
+def test_patient_allergies_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/allergies",
+        headers=admin_auth,
+        json=_allergy_payload(substance="Alergeno creado por breakout admin"),
+    )
+
+    assert response.status_code == 201
+
+
 def _create_allergy(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/allergies",
         headers=auth,
-        json={
-            "substance": "Alergeno ABAC allergy",
-            "reaction": "Reaccion ABAC allergy",
-            "severity": "moderate",
-            "recorded_at": "2026-06-20T10:30:00Z",
-        },
+        json=_allergy_payload(substance="Alergeno ABAC allergy"),
     )
     assert response.status_code == 201
     return response.json()
+
+
+def _allergy_payload(*, substance: str) -> dict[str, str]:
+    return {
+        "substance": substance,
+        "reaction": "Reaccion ABAC allergy",
+        "severity": "moderate",
+        "recorded_at": "2026-06-20T10:30:00Z",
+    }
 
 
 def _enable_development_abac_enforcement() -> None:

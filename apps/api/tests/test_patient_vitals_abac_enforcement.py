@@ -4,17 +4,21 @@ import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
 
+import pytest
 from access_boundary_helpers import (
     assign_actor_to_care_team,
     assign_patient_to_care_team,
     create_care_team,
 )
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from oneepis_api.api.v1.routes import patient_vitals
 from oneepis_api.core.config import Settings, get_settings
 from oneepis_api.db.session import get_session
 from oneepis_api.main import app
+from oneepis_api.models.clinical_record import VitalSign
 from oneepis_api.models.patient import Patient
 
 
@@ -176,6 +180,89 @@ def test_patient_vitals_write_abac_allows_admin_breakout(
     )
 
     assert response.status_code == 201
+
+
+def test_patient_vitals_list_accepts_before_measured_at_cursor(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    for index, measured_at in enumerate(
+        (
+            "2026-06-20T12:00:00Z",
+            "2026-06-21T12:00:00Z",
+            "2026-06-22T12:00:00Z",
+        ),
+        start=1,
+    ):
+        response = client.post(
+            f"/api/v1/patients/{patient_id}/vital-signs",
+            headers=auth,
+            json={
+                "measured_at": measured_at,
+                "heart_rate_bpm": 80 + index,
+            },
+        )
+        assert response.status_code == 201
+
+    first_page = client.get(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        params={"limit": 2},
+    )
+    assert first_page.status_code == 200
+    first_items = first_page.json()
+    assert [item["heart_rate_bpm"] for item in first_items] == [83, 82]
+
+    next_page = client.get(
+        f"/api/v1/patients/{patient_id}/vital-signs",
+        headers=auth,
+        params={
+            "limit": 2,
+            "before_measured_at": first_items[-1]["measured_at"],
+        },
+    )
+
+    assert next_page.status_code == 200
+    next_items = next_page.json()
+    assert [item["heart_rate_bpm"] for item in next_items] == [81]
+    assert {item["id"] for item in first_items}.isdisjoint(
+        {item["id"] for item in next_items}
+    )
+
+
+def test_patient_vitals_create_rolls_back_when_audit_write_fails(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+
+    def fail_audit_write(*args, **kwargs) -> None:
+        raise RuntimeError("audit write failed")
+
+    monkeypatch.setattr(patient_vitals, "record_audit_event", fail_audit_write)
+
+    with pytest.raises(RuntimeError, match="audit write failed"):
+        client.post(
+            f"/api/v1/patients/{patient_id}/vital-signs",
+            headers=auth,
+            json={
+                "measured_at": "2026-06-21T12:00:00Z",
+                "systolic_bp": 120,
+                "heart_rate_bpm": 80,
+            },
+        )
+
+    with _test_session() as session:
+        persisted_vital = session.scalar(
+            select(VitalSign).where(VitalSign.patient_id == uuid.UUID(patient_id))
+        )
+    assert persisted_vital is None
 
 
 def _create_vital(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:

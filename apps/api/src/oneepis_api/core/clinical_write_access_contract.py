@@ -92,7 +92,8 @@ CLINICAL_WRITE_SURFACES: tuple[ClinicalWriteSurface, ...] = (
     ClinicalWriteSurface(
         key="clinical_orders",
         label="Clinical orders draft/update/cancel",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
@@ -112,19 +113,22 @@ CLINICAL_WRITE_SURFACES: tuple[ClinicalWriteSurface, ...] = (
     ClinicalWriteSurface(
         key="medications",
         label="Medications create/update/delete",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
         key="allergies",
         label="Allergies create/update/delete",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
         key="active_problems",
         label="Active problems create/update/delete",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
@@ -137,25 +141,29 @@ CLINICAL_WRITE_SURFACES: tuple[ClinicalWriteSurface, ...] = (
     ClinicalWriteSurface(
         key="appointments",
         label="Patient-scoped appointments create/update",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
         key="lab_panels_results",
         label="Lab panels/results create/update",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
         key="hospital_daily_sheets",
         label="Hospital daily sheets create/update/close",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
     ClinicalWriteSurface(
         key="hospital_indications",
         label="Hospital indications create/update/close",
-        current_guard="rbac_and_semantic_guard_only",
+        current_guard="rbac_semantic_and_dev_abac_guard",
+        dev_write_abac=True,
         runtime_write_abac=False,
     ),
 )
@@ -179,3 +187,7 @@ def clinical_write_access_requirement_keys() -> tuple[str, ...]:
 
 def clinical_write_surface_keys() -> tuple[str, ...]:
     return tuple(surface.key for surface in CLINICAL_WRITE_SURFACES)
+
+
+def clinical_write_dev_abac_surface_keys() -> tuple[str, ...]:
+    return tuple(surface.key for surface in CLINICAL_WRITE_SURFACES if surface.dev_write_abac)

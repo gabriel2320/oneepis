@@ -60,7 +60,7 @@ const FORBIDDEN_POSITIVE_PRESCRIPTION_MAR_COPY = [
   "Ejecutable",
 ];
 
-test("patients index renders clinical work queue", async ({ page }) => {
+test("@smoke @patient patients index renders clinical work queue", async ({ page }) => {
   await page.goto("/pacientes");
 
   await expect(page.getByRole("heading", { name: "Pacientes" })).toBeVisible();
@@ -71,7 +71,7 @@ test("patients index renders clinical work queue", async ({ page }) => {
   await expect(page.getByText("Paciente Demo Alfa")).toBeVisible();
 });
 
-test("patient ficha renders clinical shell and AI draft area", async ({ page }) => {
+test("@smoke @patient patient ficha renders clinical shell and AI draft area", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
   const main = page.getByRole("main");
 
@@ -157,7 +157,7 @@ test("patient ficha renders clinical shell and AI draft area", async ({ page }) 
   await expectNoInternalTerms(main);
 });
 
-test("patient navigation groups clinical areas on desktop", async ({ page }, testInfo) => {
+test("@patient patient navigation groups clinical areas on desktop", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "desktop sidebar only");
 
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
@@ -189,7 +189,7 @@ test("patient navigation groups clinical areas on desktop", async ({ page }, tes
   await expect(hospitalNav.getByRole("link", { name: /Evolucion diaria/ })).toBeVisible();
 });
 
-test("patient navigation mobile selector changes sections", async ({ page }, testInfo) => {
+test("@patient patient navigation mobile selector changes sections", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "mobile selector only");
 
   await page.goto(`/pacientes/${demoPatientId}/ficha`);
@@ -259,7 +259,7 @@ test("patient support data routes stay secondary", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Guardar encuentro" })).toBeDisabled();
 });
 
-test("hospitalization home renders compact operational board", async ({ page }) => {
+test("@smoke hospitalization home renders compact operational board", async ({ page }) => {
   await page.goto("/hospitalizacion");
   const main = page.getByRole("main");
 
@@ -423,7 +423,7 @@ test("ambulatory agenda renders persisted appointment workflow", async ({ page }
   await expect(page.getByRole("button", { name: "Guardar cita" })).toBeDisabled();
 });
 
-test("ambulatory home renders operational entry without hospital navigation", async ({ page }) => {
+test("@smoke @patient ambulatory home renders operational entry without hospital navigation", async ({ page }) => {
   await page.goto("/consulta");
   const main = page.getByRole("main");
 
@@ -533,7 +533,7 @@ test("ambulatory summary renders real read-only patient context", async ({ page 
   await expect(page.getByText("ClinicalEncounter")).toHaveCount(0);
 });
 
-test("patient documents render paper index and blocked future documents", async ({ page }) => {
+test("@patient @print patient documents render paper index and blocked future documents", async ({ page }) => {
   await page.goto(`/pacientes/${demoPatientId}/documentos`);
   await expect(page.getByText("Documentos y papel")).toBeVisible();
   await expect(page.getByText("Ficha clinica")).toBeVisible();
@@ -569,7 +569,7 @@ test("SOAP editor exposes local assisted review without autosave", async ({ page
   await expect(page.getByText(/Ollama activo|Ollama pendiente/)).toHaveCount(0);
 });
 
-test("AI settings and print routes render", async ({ page }) => {
+test("@smoke @print AI settings and print routes render", async ({ page }) => {
   await page.goto("/configuracion/ia");
   await expect(page.getByRole("heading", { name: "IA local", exact: true })).toBeVisible();
   await expect(page.getByText("Estado IA local")).toBeVisible();
@@ -600,7 +600,7 @@ test("AI settings and print routes render", async ({ page }) => {
   await expect(page.getByText("Diagnosticos de egreso", { exact: true })).toBeVisible();
 });
 
-test("login route renders local auth form", async ({ page }) => {
+test("@smoke @auth login route renders local auth form", async ({ page }) => {
   await page.goto("/login");
 
   await expect(page.getByRole("heading", { name: "Ingresar" })).toBeVisible();
@@ -625,7 +625,7 @@ test("login route renders local auth form", async ({ page }) => {
   await expect(page.getByText(/inteligente|Ollama|IA/)).toHaveCount(0);
 });
 
-test("recovery and unlock routes render generic request forms", async ({ page }) => {
+test("@auth recovery and unlock routes render generic request forms", async ({ page }) => {
   await page.goto("/login/recuperar");
   await expect(page.getByRole("heading", { name: "Recuperar contraseña" })).toBeVisible();
   await expect(page.getByLabel("Usuario o correo")).toBeVisible();
@@ -683,7 +683,7 @@ test("legacy sections map redirects to hospital physical home", async ({ page })
   await expect(page).toHaveURL(/\/home$/);
 });
 
-test("root entry redirects to hospital physical home", async ({ page }) => {
+test("@smoke root entry redirects to hospital physical home", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/home$/);
   await expect(page.getByRole("heading", { name: "Mapa del hospital" })).toBeVisible();

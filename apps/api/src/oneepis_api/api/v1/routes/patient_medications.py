@@ -7,7 +7,7 @@ from fastapi import APIRouter, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from oneepis_api.api.deps import MedicationActorDep, ReadAccessDep
+from oneepis_api.api.deps import MedicationWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_record import Medication, RecordStatus
 from oneepis_api.models.hospitalization import HospitalIndication
 from oneepis_api.schemas.clinical_record import (
@@ -34,7 +34,10 @@ from oneepis_api.services.medication_draft_validation import (
     updated_dose_snapshot,
     validated_dose_snapshot,
 )
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -70,6 +73,16 @@ def _audit_read(session, patient_id, user, action: str) -> None:
     )
 
 
+def _enforce_write(session, patient_id, user, settings) -> None:
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
+
+
 @router.get("/{patient_id}/medications", response_model=list[MedicationRead])
 def list_medications(
     patient_id: uuid.UUID,
@@ -102,9 +115,11 @@ def create_medication(
     patient_id: uuid.UUID,
     payload: MedicationCreate,
     session: SessionDep,
-    actor: MedicationActorDep,
+    user: MedicationWriteAccessDep,
+    settings: SettingsDep,
 ) -> Medication:
     require_patient(session, patient_id)
+    _enforce_write(session, patient_id, user, settings)
     dose_check_snapshot = validated_dose_snapshot(session, payload)
     medication = Medication(
         patient_id=patient_id,
@@ -118,7 +133,7 @@ def create_medication(
         action="medication.created",
         entity_type="medication",
         entity_id=medication.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={
             "patient_id": str(patient_id),
             "status": medication.status.value,
@@ -215,9 +230,11 @@ def update_medication(
     medication_id: uuid.UUID,
     payload: MedicationUpdate,
     session: SessionDep,
-    actor: MedicationActorDep,
+    user: MedicationWriteAccessDep,
+    settings: SettingsDep,
 ) -> Medication:
     require_patient(session, patient_id)
+    _enforce_write(session, patient_id, user, settings)
     medication = require_patient_child(
         session,
         Medication,
@@ -256,7 +273,7 @@ def update_medication(
         action="medication.updated",
         entity_type="medication",
         entity_id=medication.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=metadata,
         before=before_changed,
         after=after_changed,
@@ -271,9 +288,11 @@ def delete_medication(
     patient_id: uuid.UUID,
     medication_id: uuid.UUID,
     session: SessionDep,
-    actor: MedicationActorDep,
+    user: MedicationWriteAccessDep,
+    settings: SettingsDep,
 ) -> Response:
     require_patient(session, patient_id)
+    _enforce_write(session, patient_id, user, settings)
     medication = require_patient_child(
         session,
         Medication,
@@ -288,7 +307,7 @@ def delete_medication(
         action="medication.entered_in_error",
         entity_type="medication",
         entity_id=medication.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id)},
         before=before,
         after=audit_snapshot(medication, ["status"]),

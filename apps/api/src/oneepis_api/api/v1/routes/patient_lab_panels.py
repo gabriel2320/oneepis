@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from oneepis_api.api.deps import LabResultActorDep, ReadAccessDep
+from oneepis_api.api.deps import LabResultWriteAccessDep, ReadAccessDep
 from oneepis_api.models.lab import LabPanel, LabResult
 from oneepis_api.schemas.clinical_record import (
     LabPanelCreate,
@@ -17,7 +17,10 @@ from oneepis_api.schemas.clinical_record import (
 )
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
 from oneepis_api.services.lab_result_source import serialize_lab_panel, serialize_lab_result
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -76,6 +79,21 @@ def _enforce_lab_read_scope(
     )
 
 
+def _enforce_lab_write_scope(
+    session: Session,
+    patient_id: uuid.UUID,
+    user: LabResultWriteAccessDep,
+    settings: SettingsDep,
+) -> None:
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
+
+
 @router.get("/{patient_id}/lab-panels", response_model=list[LabPanelRead])
 def list_lab_panels(
     patient_id: uuid.UUID,
@@ -113,12 +131,14 @@ def create_lab_panel(
     patient_id: uuid.UUID,
     payload: LabPanelCreate,
     session: SessionDep,
-    actor: LabResultActorDep,
+    user: LabResultWriteAccessDep,
+    settings: SettingsDep,
 ) -> LabPanel:
     require_patient(session, patient_id)
+    _enforce_lab_write_scope(session, patient_id, user, settings)
     validate_encounter_for_patient(session, patient_id, payload.encounter_id)
     panel_data = payload.model_dump(exclude={"results"})
-    panel_data["created_by"] = actor
+    panel_data["created_by"] = user.actor_id
     panel = LabPanel(patient_id=patient_id, **panel_data)
     panel.results = [
         LabResult(patient_id=patient_id, **result.model_dump()) for result in payload.results
@@ -130,7 +150,7 @@ def create_lab_panel(
         action="lab_panel.created",
         entity_type="lab_panel",
         entity_id=panel.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "result_count": len(panel.results)},
         after=audit_snapshot(panel, LAB_PANEL_AUDIT_FIELDS),
     )
@@ -165,9 +185,11 @@ def update_lab_panel(
     panel_id: uuid.UUID,
     payload: LabPanelUpdate,
     session: SessionDep,
-    actor: LabResultActorDep,
+    user: LabResultWriteAccessDep,
+    settings: SettingsDep,
 ) -> LabPanel:
     require_patient(session, patient_id)
+    _enforce_lab_write_scope(session, patient_id, user, settings)
     panel = _require_lab_panel(session, patient_id, panel_id)
     if "encounter_id" in payload.model_dump(exclude_unset=True):
         validate_encounter_for_patient(session, patient_id, payload.encounter_id)
@@ -185,7 +207,7 @@ def update_lab_panel(
         action="lab_panel.updated",
         entity_type="lab_panel",
         entity_id=panel.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "panel_id": str(panel.id), "fields": fields},
         before=before_changed,
         after=after_changed,
@@ -230,9 +252,11 @@ def update_lab_result(
     result_id: uuid.UUID,
     payload: LabResultUpdate,
     session: SessionDep,
-    actor: LabResultActorDep,
+    user: LabResultWriteAccessDep,
+    settings: SettingsDep,
 ) -> LabResult:
     require_patient(session, patient_id)
+    _enforce_lab_write_scope(session, patient_id, user, settings)
     _require_lab_panel(session, patient_id, panel_id)
     result = _require_lab_result(session, patient_id, panel_id, result_id)
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
@@ -249,7 +273,7 @@ def update_lab_result(
         action="lab_result.updated",
         entity_type="lab_result",
         entity_id=result.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={
             "patient_id": str(patient_id),
             "panel_id": str(panel_id),

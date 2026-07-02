@@ -83,6 +83,151 @@ def test_patient_labs_abac_allows_active_relationship(
     assert result_response.json()["id"] == result["id"]
 
 
+def test_patient_labs_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    panel = _create_lab_panel(client, auth, patient_id)
+    result = panel["results"][0]
+    unknown_panel_id = uuid.uuid4()
+    unknown_result_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "occurred_at": "2026-06-21T09:00:00Z",
+            "panel_name": "Panel denegado",
+            "results": [
+                {
+                    "code": "hb",
+                    "name": "Hemoglobina",
+                    "value": "13.8",
+                    "numeric_value": "13.8",
+                    "unit": "g/dL",
+                }
+            ],
+        },
+    )
+    update_panel_response = client.patch(
+        f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}",
+        headers=auth,
+        json={"summary": "No permitido"},
+    )
+    missing_panel_response = client.patch(
+        f"/api/v1/patients/{patient_id}/lab-panels/{unknown_panel_id}",
+        headers=auth,
+        json={"summary": "No revelar existencia"},
+    )
+    update_result_response = client.patch(
+        f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}/results/{result['id']}",
+        headers=auth,
+        json={"status": "entered_in_error"},
+    )
+    missing_result_response = client.patch(
+        f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}/results/{unknown_result_id}",
+        headers=auth,
+        json={"status": "entered_in_error"},
+    )
+
+    assert create_response.status_code == 403
+    assert update_panel_response.status_code == 403
+    assert missing_panel_response.status_code == 403
+    assert update_result_response.status_code == 403
+    assert missing_result_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 5
+    assert actions.count("lab_panel.created") == 1
+    assert "lab_panel.updated" not in actions
+    assert "lab_result.updated" not in actions
+
+
+def test_patient_labs_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=auth,
+        json={
+            "occurred_at": "2026-06-21T09:00:00Z",
+            "panel_name": "Panel permitido",
+            "results": [
+                {
+                    "code": "hb",
+                    "name": "Hemoglobina",
+                    "value": "13.8",
+                    "numeric_value": "13.8",
+                    "unit": "g/dL",
+                }
+            ],
+        },
+    )
+    panel = create_response.json()
+    result = panel["results"][0]
+    update_panel_response = client.patch(
+        f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}",
+        headers=auth,
+        json={"summary": "Control permitido"},
+    )
+    update_result_response = client.patch(
+        f"/api/v1/patients/{patient_id}/lab-panels/{panel['id']}/results/{result['id']}",
+        headers=auth,
+        json={"status": "entered_in_error"},
+    )
+
+    assert create_response.status_code == 201
+    assert update_panel_response.status_code == 200
+    assert update_panel_response.json()["summary"] == "Control permitido"
+    assert update_result_response.status_code == 200
+    assert update_result_response.json()["status"] == "entered_in_error"
+
+
+def test_patient_labs_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/lab-panels",
+        headers=admin_auth,
+        json={
+            "occurred_at": "2026-06-21T09:00:00Z",
+            "panel_name": "Panel admin",
+            "results": [
+                {
+                    "code": "hb",
+                    "name": "Hemoglobina",
+                    "value": "13.8",
+                    "numeric_value": "13.8",
+                    "unit": "g/dL",
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 201
+
+
 def _create_lab_panel(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/lab-panels",

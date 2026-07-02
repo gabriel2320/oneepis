@@ -3,6 +3,7 @@ from oneepis_api.core.clinical_write_access_contract import (
     CLINICAL_WRITE_ACCESS_REQUIREMENTS,
     CLINICAL_WRITE_SURFACES,
     clinical_write_access_requirement_keys,
+    clinical_write_dev_abac_surface_keys,
     clinical_write_surface_keys,
 )
 
@@ -45,7 +46,6 @@ def test_clinical_write_surface_inventory_covers_core_write_families() -> None:
 
     assert all(surface.label for surface in CLINICAL_WRITE_SURFACES)
     assert {surface.current_guard for surface in CLINICAL_WRITE_SURFACES} == {
-        "rbac_and_semantic_guard_only",
         "rbac_semantic_and_dev_abac_guard",
     }
     assert {surface.runtime_write_abac for surface in CLINICAL_WRITE_SURFACES} == {
@@ -90,18 +90,48 @@ def test_clinical_write_contract_tracks_dev_only_write_abac_surfaces() -> None:
     assert surfaces["clinical_events"].dev_write_abac is True
     assert surfaces["clinical_events"].runtime_write_abac is False
     assert surfaces["clinical_events"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["clinical_orders"].dev_write_abac is True
+    assert surfaces["clinical_orders"].runtime_write_abac is False
+    assert surfaces["clinical_orders"].current_guard == "rbac_semantic_and_dev_abac_guard"
     assert surfaces["encounters"].dev_write_abac is True
     assert surfaces["encounters"].runtime_write_abac is False
     assert surfaces["encounters"].current_guard == "rbac_semantic_and_dev_abac_guard"
     assert surfaces["clinical_risks"].dev_write_abac is True
     assert surfaces["clinical_risks"].runtime_write_abac is False
     assert surfaces["clinical_risks"].current_guard == "rbac_semantic_and_dev_abac_guard"
-    assert {
-        key for key, surface in surfaces.items() if surface.dev_write_abac
-    } == {
+    assert surfaces["medications"].dev_write_abac is True
+    assert surfaces["medications"].runtime_write_abac is False
+    assert surfaces["medications"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["allergies"].dev_write_abac is True
+    assert surfaces["allergies"].runtime_write_abac is False
+    assert surfaces["allergies"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["active_problems"].dev_write_abac is True
+    assert surfaces["active_problems"].runtime_write_abac is False
+    assert surfaces["active_problems"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["appointments"].dev_write_abac is True
+    assert surfaces["appointments"].runtime_write_abac is False
+    assert surfaces["appointments"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["lab_panels_results"].dev_write_abac is True
+    assert surfaces["lab_panels_results"].runtime_write_abac is False
+    assert surfaces["lab_panels_results"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["hospital_daily_sheets"].dev_write_abac is True
+    assert surfaces["hospital_daily_sheets"].runtime_write_abac is False
+    assert surfaces["hospital_daily_sheets"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert surfaces["hospital_indications"].dev_write_abac is True
+    assert surfaces["hospital_indications"].runtime_write_abac is False
+    assert surfaces["hospital_indications"].current_guard == "rbac_semantic_and_dev_abac_guard"
+    assert clinical_write_dev_abac_surface_keys() == (
         "clinical_entries",
         "clinical_events",
+        "clinical_orders",
         "vital_signs",
         "clinical_risks",
+        "medications",
+        "allergies",
+        "active_problems",
         "encounters",
-    }
+        "appointments",
+        "lab_panels_results",
+        "hospital_daily_sheets",
+        "hospital_indications",
+    )

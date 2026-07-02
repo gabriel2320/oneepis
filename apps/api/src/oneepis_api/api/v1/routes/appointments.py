@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 
 from oneepis_api.api.deps import (
-    EncounterActorDep,
+    PatientWriteAccessDep,
     ReadAccessDep,
     require_patient_read_access,
 )
@@ -25,7 +25,10 @@ from oneepis_api.services.audit import (
     record_audit_event,
     record_read_audit_event,
 )
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     LimitQuery,
@@ -136,12 +139,20 @@ def create_patient_appointment(
     patient_id: uuid.UUID,
     payload: ClinicalAppointmentCreate,
     session: SessionDep,
-    actor: EncounterActorDep,
+    user: PatientWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalAppointment:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     appointment = ClinicalAppointment(
         patient_id=patient_id,
-        created_by=actor,
+        created_by=user.actor_id,
         **payload.model_dump(),
     )
     session.add(appointment)
@@ -151,7 +162,7 @@ def create_patient_appointment(
         action="appointment.created",
         entity_type="appointment",
         entity_id=appointment.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "status": appointment.status.value},
         after=audit_snapshot(appointment, APPOINTMENT_AUDIT_FIELDS),
     )
@@ -204,9 +215,17 @@ def update_patient_appointment(
     appointment_id: uuid.UUID,
     payload: ClinicalAppointmentUpdate,
     session: SessionDep,
-    actor: EncounterActorDep,
+    user: PatientWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalAppointment:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     appointment = require_patient_child(
         session,
         ClinicalAppointment,
@@ -233,7 +252,7 @@ def update_patient_appointment(
         action="appointment.updated",
         entity_type="appointment",
         entity_id=appointment.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "fields": fields},
         before=before_changed,
         after=after_changed,

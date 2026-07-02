@@ -71,26 +71,38 @@ actualizar en conjunto los documentos vivos afectados:
 No mantener una segunda lista de estado en `ROADMAP`, reportes fechados ni docs
 de vision. No crear snapshots nuevos.
 
-## Handoff 2026-07-01
+## Handoff 2026-07-02
 
 - `main` sincronizado con `origin/main`.
-- Ultimo PR sincronizado: #292, write ABAC dev-only para clinical events.
+- Ultimo PR sincronizado: #297, print audit policy explicita para rutas print
+  patient-scoped.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
-  `clinical_entries`, `clinical_events` y `encounters`.
+  `clinical_entries`, `clinical_events`, `clinical_orders`, `encounters`,
+  `medications`, `allergies`, `active_problems`, `appointments`,
+  `lab_panels_results`, `hospital_daily_sheets` y `hospital_indications`.
+- El inventario patient-scoped se verifica contra OpenAPI para toda operacion
+  `GET/POST/PATCH/DELETE` con `{patient_id}`.
+- `audit_snapshot` exige allowlist explicita; `npm run check:audit-snapshots`
+  bloquea llamadas sin fields en rutas API.
+- Las rutas print patient-scoped declaran `read_audit`; `npm run check:screens`
+  falla si un print con `[patientId]` queda con `auditPolicy: none`.
+- La web ya no lee bearer desde `localStorage`; usa cookie `HttpOnly` + CSRF y
+  `npm run check:web-auth-contract` bloquea regresiones.
+- Con auth habilitada, un token firmado sin `sid` activo se rechaza antes de
+  acceder a rutas patient-scoped.
 - Ninguna escritura tiene ABAC runtime productivo.
 - `security-report` bloquea Gitleaks y OSV npm high/critical; dependency
   review, CodeQL y `pip-audit` siguen report-only.
 
-Siguiente PR recomendado tras este cambio:
+Secuencia recomendada desde el arbol local post-#297:
 
-1. Continuar write ABAC dev-only en una superficie acotada que no sea
-   medicamentos ni ordenes; candidatos: `allergies`, `active_problems` o
-   `appointments`.
-2. Mantener sincronizados contrato shadow, inventario patient-scoped, tests
-   focales y documentos vivos.
-3. No empezar por medicamentos, ordenes, break-glass runtime ni ABAC productivo.
+1. PR #298: security report fase 2; baseline versionado, waiver con owner,
+   motivo y expiracion, y `pip-audit` high/critical bloqueante.
+
+No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida ni
+orden ejecutable sin plan clinico/legal separado.
 
 ## Fuera De Alcance
 

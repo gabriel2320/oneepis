@@ -1,5 +1,9 @@
 from fastapi.testclient import TestClient
 
+from oneepis_api.core.config import get_settings
+from oneepis_api.main import app
+from oneepis_api.services.auth import authenticate_local_user, create_access_token
+
 
 def test_patient_detail_and_record_require_authentication(
     client: TestClient,
@@ -24,6 +28,26 @@ def test_invalid_bearer_rejects_patient_reads(
     patient_id = create_patient_for_permissions(client, auth_headers(client))
     client.cookies.clear()
     headers = {"Authorization": "Bearer invalid-token"}
+
+    detail_response = client.get(f"/api/v1/patients/{patient_id}", headers=headers)
+    record_response = client.get(f"/api/v1/patients/{patient_id}/record", headers=headers)
+
+    assert detail_response.status_code == 401
+    assert record_response.status_code == 401
+
+
+def test_signed_bearer_without_session_id_rejects_patient_reads(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    patient_id = create_patient_for_permissions(client, auth_headers(client))
+    settings = app.dependency_overrides[get_settings]()
+    user = authenticate_local_user(settings, "medico@oneepis.local", "medico")
+    assert user is not None
+    token, _expires_at = create_access_token(settings, user)
+    client.cookies.clear()
+    headers = {"Authorization": f"Bearer {token}"}
 
     detail_response = client.get(f"/api/v1/patients/{patient_id}", headers=headers)
     record_response = client.get(f"/api/v1/patients/{patient_id}/record", headers=headers)

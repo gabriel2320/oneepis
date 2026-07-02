@@ -79,6 +79,10 @@ de override, notas clinicas, textos de indicacion, resultados completos,
 prompts, respuestas IA y valores de headers no deben entrar a `extra_data` salvo
 contrato explicito, minimizacion y test.
 
+`audit_snapshot` exige allowlist explicita. Las rutas API no deben llamar
+`audit_snapshot(model)` sin segundo argumento; `npm run check:audit-snapshots`
+bloquea ese patron para evitar snapshots clinicos completos por accidente.
+
 ## Reglas
 
 - La auditoria no reemplaza control de permisos.

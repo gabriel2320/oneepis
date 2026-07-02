@@ -1,5 +1,3 @@
-"use client";
-
 import type { PatientRecordSnapshot } from "@/lib/types";
 
 import { PrintFooter, PrintHeader } from "./clinical-print-frame";

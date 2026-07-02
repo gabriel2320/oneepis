@@ -4,7 +4,7 @@ from oneepis_api.models.patient import Patient, SexAtBirth
 from oneepis_api.services.audit import audit_snapshot
 
 
-def test_audit_snapshot_empty_fields_returns_empty_snapshot() -> None:
+def test_audit_snapshot_requires_explicit_allowlist() -> None:
     patient = Patient(
         first_name="Campo",
         last_name="Seguro",
@@ -14,4 +14,4 @@ def test_audit_snapshot_empty_fields_returns_empty_snapshot() -> None:
 
     assert audit_snapshot(patient, []) == {}
     assert audit_snapshot(patient, ["first_name"]) == {"first_name": "Campo"}
-    assert "last_name" in audit_snapshot(patient)
+    assert "last_name" not in audit_snapshot(patient, ["first_name"])

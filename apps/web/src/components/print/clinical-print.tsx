@@ -12,15 +12,16 @@ import { demoHospitalDailySheets, demoRecords } from "@/lib/demo-record";
 import type { ClinicalEntry, HospitalDailySheet, PatientRecordSnapshot } from "@/lib/types";
 
 import { PrescriptionA5Sheet } from "./blocked-prescription-print";
-import { ClinicalPaperSheet, PrintPage, PrintToolbar } from "./clinical-print-frame";
+import { ClinicalPaperSheet, PrintPage } from "./clinical-print-frame";
+import { PrintToolbar } from "./print-toolbar";
 
 export {
   ClinicalPaperSheet,
   PrintFooter,
   PrintHeader,
   PrintPage,
-  PrintToolbar,
 } from "./clinical-print-frame";
+export { PrintToolbar } from "./print-toolbar";
 
 export function PrintPatientPage({ kind }: { kind: "ficha" | "resumen" | "receta" }) {
   const params = useParams<{ patientId: string }>();

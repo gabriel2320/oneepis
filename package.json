@@ -19,26 +19,41 @@
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
     "dev:api": "node scripts/dev-api.mjs",
+    "analyze:web": "npm --workspace apps/web run analyze --",
     "bootstrap:ubuntu": "bash scripts/bootstrap-ubuntu.sh",
     "bootstrap:windows": "powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
     "check:ownership": "node scripts/check-ownership.mjs",
     "check:toolchain": "node scripts/check-toolchain.mjs",
+    "check:ci-lanes": "node scripts/test-ci-lanes.mjs",
+    "check:fast": "npm run check:ownership && npm run check:toolchain && npm run check:ci-lanes && npm run check:doc-canon && npm run check:abac-contracts",
     "check:api": "node scripts/check-api.mjs",
     "check:api:target": "node scripts/check-api-target.mjs",
+    "check:abac-contracts": "npm run check:api:target -- apps/api/tests/test_clinical_write_access_contract.py apps/api/tests/test_patient_scoped_route_inventory.py",
+    "check:patient-route-inventory": "node scripts/test-patient-scoped-route-inventory.mjs && node scripts/check-patient-scoped-route-inventory.mjs",
+    "check:audit-snapshots": "node scripts/test-audit-snapshot-allowlists.mjs && node scripts/check-audit-snapshot-allowlists.mjs",
+    "check:web-auth-contract": "node scripts/test-web-auth-contract.mjs && node scripts/check-web-auth-contract.mjs",
     "generate:screens": "node scripts/generate-screen-tree.mjs",
     "check:screens": "node scripts/generate-screen-tree.mjs --check && node scripts/check-screen-tree.mjs && node scripts/check-screen-capabilities.mjs",
     "review:screens": "node scripts/screen-canon-review.mjs",
     "check:size": "node scripts/check-file-size.mjs && npm run check:screens",
-    "check:web": "npm run check:size && npm run check:frontend-phi-logs && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
-    "check:contract": "node scripts/export-openapi.mjs --check && node scripts/check-assistant-read-contract.mjs && node scripts/check-clinical-auth-contract.mjs && node scripts/check-no-production-checklist.mjs && node scripts/check-patient-scoped-read-enforcement.mjs && node scripts/check-doc-canon.mjs",
-    "check:e2e": "npm --workspace apps/web run test:e2e && npm --workspace apps/web run test:e2e:assistant-read",
+    "check:web": "npm run check:size && npm run check:frontend-phi-logs && npm run check:web-auth-contract && npm --workspace apps/web run typecheck && npm --workspace apps/web run lint && npm --workspace apps/web run build",
+    "check:contract": "node scripts/export-openapi.mjs --check && npm run check:openapi-types && npm run check:patient-route-inventory && npm run check:audit-snapshots && node scripts/check-assistant-read-contract.mjs && node scripts/check-clinical-auth-contract.mjs && node scripts/check-no-production-checklist.mjs && node scripts/check-patient-scoped-read-enforcement.mjs && node scripts/check-doc-canon.mjs",
+    "check:doc-canon": "node scripts/check-doc-canon.mjs",
+    "check:e2e:smoke": "npm --workspace apps/web run test:e2e:smoke --",
+    "check:e2e:full": "npm --workspace apps/web run test:e2e:full && npm --workspace apps/web run test:e2e:assistant-read",
+    "check:e2e": "npm run check:e2e:full",
     "check:npm-advisories": "node scripts/check-npm-advisories.mjs",
     "check:frontend-phi-logs": "node scripts/check-frontend-phi-logs.mjs",
     "export:openapi": "node scripts/export-openapi.mjs",
+    "generate:openapi-types": "openapi-typescript packages/contracts/openapi.json -o packages/contracts/openapi-types.ts",
+    "check:openapi-types": "npm run generate:openapi-types -- --check",
     "check": "npm run check:ownership && npm run check:toolchain && npm run check:api && npm run check:web && npm run check:contract && npm run check:e2e"
   },
   "engines": {
     "node": ">=22 <23",
     "npm": "11.13.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0"
   }
 }

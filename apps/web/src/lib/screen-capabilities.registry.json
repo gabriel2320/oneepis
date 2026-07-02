@@ -618,7 +618,7 @@
     "truthSource": "clinical entry discharge_summary",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "none",
     "futureComplexity": "borrador no firmado"
@@ -631,7 +631,7 @@
     "truthSource": "hoja diaria",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "none",
     "futureComplexity": "firma real futura"
@@ -644,7 +644,7 @@
     "truthSource": "clinical entry intake",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "none",
     "futureComplexity": "borrador no firmado"
@@ -657,7 +657,7 @@
     "truthSource": "indicacion draft",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "none",
     "futureComplexity": "no equivale a orden firmada"
@@ -683,7 +683,7 @@
     "truthSource": "clinical entry",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "none",
     "futureComplexity": "firma real futura"
@@ -696,7 +696,7 @@
     "truthSource": "record paciente",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "none",
     "futureComplexity": "paridad con ficha expandida"
@@ -709,7 +709,7 @@
     "truthSource": "politica receta",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "bloqueado",
     "aiProfile": "none",
     "futureComplexity": "receta valida requiere firma/folio"
@@ -722,7 +722,7 @@
     "truthSource": "record paciente",
     "writePolicy": "none",
     "permissionPolicy": "lectura paciente",
-    "auditPolicy": "none",
+    "auditPolicy": "read_audit",
     "paperPolicy": "carta",
     "aiProfile": "summary",
     "futureComplexity": "resumen IA no persistido"

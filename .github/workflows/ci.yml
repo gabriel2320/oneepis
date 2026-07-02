@@ -12,31 +12,68 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   ONEEPIS_NODE_VERSION: "22"
   ONEEPIS_NPM_VERSION: "11.13.0"
   ONEEPIS_PYTHON_VERSION: "3.12"
+  NPM_CONFIG_AUDIT: "false"
+  NPM_CONFIG_FUND: "false"
+  NPM_CONFIG_PROGRESS: "false"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
   ownership:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.ONEEPIS_NODE_VERSION }}
-      - run: npm i -g npm@${{ env.ONEEPIS_NPM_VERSION }}
       - run: npm run check:ownership
+
+  ci-lanes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      api: ${{ steps.classify.outputs.api }}
+      contracts: ${{ steps.classify.outputs.contracts }}
+      web: ${{ steps.classify.outputs.web }}
+      e2e: ${{ steps.classify.outputs.e2e }}
+      postgres: ${{ steps.classify.outputs.postgres }}
+      security: ${{ steps.classify.outputs.security }}
+      full: ${{ steps.classify.outputs.full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.ONEEPIS_NODE_VERSION }}
+      - id: classify
+        env:
+          ONEEPIS_CI_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          ONEEPIS_CI_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/ci-lanes.mjs --github-output
 
   api:
     runs-on: ubuntu-latest
-    needs: ownership
+    timeout-minutes: 20
+    needs: [ownership, ci-lanes]
+    if: needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.api == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.ONEEPIS_NODE_VERSION }}
-      - run: npm i -g npm@${{ env.ONEEPIS_NPM_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm install -g npm@${{ env.ONEEPIS_NPM_VERSION }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.ONEEPIS_PYTHON_VERSION }}
@@ -49,55 +86,116 @@ jobs:
 
   web:
     runs-on: ubuntu-latest
-    needs: ownership
+    timeout-minutes: 25
+    needs: [ownership, ci-lanes]
+    if: needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.web == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.ONEEPIS_NODE_VERSION }}
           cache: npm
-      - run: npm i -g npm@${{ env.ONEEPIS_NPM_VERSION }}
+          cache-dependency-path: package-lock.json
+      - run: npm install -g npm@${{ env.ONEEPIS_NPM_VERSION }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.ONEEPIS_PYTHON_VERSION }}
       - run: npm run check:toolchain
-      - run: npm ci
+      - run: npm ci --prefer-offline
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: apps/web/.next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('package-lock.json', 'apps/web/**/*.ts', 'apps/web/**/*.tsx', 'apps/web/**/*.css', 'apps/web/**/*.mjs', 'apps/web/**/*.json') }}
+          restore-keys: |
+            next-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
       - run: npm run check:web
 
-  contracts-e2e:
+  contracts:
     runs-on: ubuntu-latest
-    needs: ownership
+    timeout-minutes: 20
+    needs: [ownership, ci-lanes]
+    if: needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.contracts == 'true'
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.ONEEPIS_NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm install -g npm@${{ env.ONEEPIS_NPM_VERSION }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.ONEEPIS_PYTHON_VERSION }}
           cache: pip
           cache-dependency-path: apps/api/pyproject.toml
+      - run: npm run check:toolchain
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e "apps/api[dev]"
+      - run: npm run check:contract
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [ownership, ci-lanes]
+    if: needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.e2e == 'true' || needs.ci-lanes.outputs.web == 'true'
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.ONEEPIS_NODE_VERSION }}
           cache: npm
-      - run: npm i -g npm@${{ env.ONEEPIS_NPM_VERSION }}
+          cache-dependency-path: package-lock.json
+      - run: npm install -g npm@${{ env.ONEEPIS_NPM_VERSION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.ONEEPIS_PYTHON_VERSION }}
       - run: npm run check:toolchain
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e "apps/api[dev]"
-      - run: npm ci
-      - run: npm run check:contract
+      - run: npm ci --prefer-offline
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
       - run: npx playwright install --with-deps chromium
-      - run: npm run check:e2e
+      - name: Run Playwright smoke suite
+        if: needs.ci-lanes.outputs.full != 'true' && needs.ci-lanes.outputs.e2e != 'true'
+        run: npm run check:e2e:smoke
+      - name: Run Playwright full suite
+        if: needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.e2e == 'true'
+        run: npm run check:e2e:full
 
   postgres-alembic:
     runs-on: ubuntu-latest
-    needs: ownership
+    timeout-minutes: 20
+    needs: [ownership, ci-lanes]
+    if: needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.postgres == 'true'
     env:
       ONEEPIS_DATABASE_URL: postgresql+psycopg://oneepis:oneepis@localhost:5432/oneepis
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: oneepis
+          POSTGRES_USER: oneepis
+          POSTGRES_PASSWORD: oneepis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U oneepis -d oneepis"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.ONEEPIS_NODE_VERSION }}
-      - run: npm i -g npm@${{ env.ONEEPIS_NPM_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm install -g npm@${{ env.ONEEPIS_NPM_VERSION }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.ONEEPIS_PYTHON_VERSION }}
@@ -106,23 +204,6 @@ jobs:
       - run: npm run check:toolchain
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e "apps/api[dev]"
-      - name: Prepare local PostgreSQL database
-        run: |
-          if ! command -v psql >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y postgresql postgresql-client
-          fi
-
-          sudo systemctl start postgresql.service || sudo service postgresql start
-
-          sudo -u postgres psql --set ON_ERROR_STOP=1 <<'SQL'
-          DROP DATABASE IF EXISTS oneepis;
-          DROP ROLE IF EXISTS oneepis;
-          CREATE ROLE oneepis WITH LOGIN PASSWORD 'oneepis';
-          CREATE DATABASE oneepis OWNER oneepis;
-          SQL
-
-          PGPASSWORD=oneepis pg_isready -h localhost -p 5432 -U oneepis -d oneepis
       - name: Alembic upgrade head from empty PostgreSQL
         run: python -m alembic -c apps/api/alembic.ini upgrade head
       - name: Alembic downgrade/upgrade smoke
@@ -132,7 +213,8 @@ jobs:
 
   security-report:
     runs-on: ubuntu-latest
-    needs: ownership
+    timeout-minutes: 30
+    needs: [ownership, ci-lanes]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -141,36 +223,41 @@ jobs:
         with:
           node-version: ${{ env.ONEEPIS_NODE_VERSION }}
           cache: npm
-      - run: npm i -g npm@${{ env.ONEEPIS_NPM_VERSION }}
+          cache-dependency-path: package-lock.json
+      - run: npm install -g npm@${{ env.ONEEPIS_NPM_VERSION }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.ONEEPIS_PYTHON_VERSION }}
           cache: pip
           cache-dependency-path: apps/api/pyproject.toml
       - run: npm run check:toolchain
-      - run: npm ci
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e "apps/api[dev]"
       - name: Secret scan report
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: OSV npm advisory high+ gate
+        run: npm run check:npm-advisories
       - name: Dependency review report
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
         continue-on-error: true
+      - name: Install Python audit dependencies
+        if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "apps/api[dev]"
+          python -m pip install pip-audit
+      - name: pip-audit report
+        if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
+        run: python -m pip_audit --progress-spinner off
+        continue-on-error: true
       - name: CodeQL init report
+        if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
         uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript, python
         continue-on-error: true
       - name: CodeQL analyze report
+        if: github.event_name == 'pull_request' || needs.ci-lanes.outputs.full == 'true' || needs.ci-lanes.outputs.security == 'true'
         uses: github/codeql-action/analyze@v3
-        continue-on-error: true
-      - name: OSV npm advisory high+ gate
-        run: npm run check:npm-advisories
-      - name: pip-audit report
-        run: |
-          python -m pip install pip-audit
-          python -m pip_audit --progress-spinner off
         continue-on-error: true

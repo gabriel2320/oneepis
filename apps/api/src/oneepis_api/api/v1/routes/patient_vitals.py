@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Iterator
+from contextlib import contextmanager
+from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from oneepis_api.api.deps import ReadAccessDep, VitalSignWriteAccessDep
 from oneepis_api.models.clinical_record import RecordStatus, VitalSign
@@ -28,6 +33,7 @@ from .patient_shared import (
 
 router = APIRouter(**PATIENT_ROUTER_OPTIONS)
 VITAL_SIGN_AUDIT_FIELDS = ["patient_id", "measured_at", "status"]
+BeforeMeasuredAtQuery = Annotated[datetime | None, Query(alias="before_measured_at")]
 
 
 @router.get("/{patient_id}/vital-signs", response_model=list[VitalSignRead])
@@ -38,6 +44,7 @@ def list_vital_signs(
     settings: SettingsDep,
     limit: LimitQuery = 50,
     offset: OffsetQuery = 0,
+    before_measured_at: BeforeMeasuredAtQuery = None,
 ) -> list[VitalSign]:
     require_patient(session, patient_id)
     enforce_patient_scope_for_read(
@@ -53,16 +60,15 @@ def list_vital_signs(
         actor_id=user.actor_id,
         action="vital_signs.read",
     )
-    statement = (
-        select(VitalSign)
-        .where(
-            VitalSign.patient_id == patient_id,
-            VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
-        )
-        .order_by(VitalSign.measured_at.desc())
-        .offset(offset)
-        .limit(limit)
+    statement = select(VitalSign).where(
+        VitalSign.patient_id == patient_id,
+        VitalSign.status != RecordStatus.ENTERED_IN_ERROR,
     )
+    if before_measured_at is not None:
+        statement = statement.where(VitalSign.measured_at < before_measured_at)
+    else:
+        statement = statement.offset(offset)
+    statement = statement.order_by(VitalSign.measured_at.desc()).limit(limit)
     return list(session.scalars(statement))
 
 
@@ -86,20 +92,20 @@ def create_vital_sign(
         roles=user.roles,
         settings=settings,
     )
-    vital = VitalSign(patient_id=patient_id, **payload.model_dump())
-    _reject_entered_in_error_status(vital.status)
-    session.add(vital)
-    session.flush()
-    record_audit_event(
-        session,
-        action="vital_sign.created",
-        entity_type="vital_sign",
-        entity_id=vital.id,
-        actor_id=user.actor_id,
-        metadata=_vital_sign_audit_metadata(vital),
-        after=audit_snapshot(vital, VITAL_SIGN_AUDIT_FIELDS),
-    )
-    session.commit()
+    with _vital_sign_write_transaction(session):
+        vital = VitalSign(patient_id=patient_id, **payload.model_dump())
+        _reject_entered_in_error_status(vital.status)
+        session.add(vital)
+        session.flush()
+        record_audit_event(
+            session,
+            action="vital_sign.created",
+            entity_type="vital_sign",
+            entity_id=vital.id,
+            actor_id=user.actor_id,
+            metadata=_vital_sign_audit_metadata(vital),
+            after=audit_snapshot(vital, VITAL_SIGN_AUDIT_FIELDS),
+        )
     session.refresh(vital)
     return vital
 
@@ -155,40 +161,40 @@ def update_vital_sign(
         roles=user.roles,
         settings=settings,
     )
-    vital = require_patient_child(
-        session,
-        VitalSign,
-        vital_sign_id,
-        patient_id,
-        "Vital sign not found",
-    )
-    if _vital_sign_is_hidden(vital):
-        raise _vital_sign_not_found()
-    _reject_entered_in_error_status(payload.status)
-    update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
-    audit_fields = _vital_sign_audit_fields(update_fields)
-    before = audit_snapshot(vital, audit_fields) if audit_fields else {}
-    fields = apply_update(vital, payload)
-    changed_audit_fields = _vital_sign_audit_fields(fields)
-    if changed_audit_fields:
-        before_changed, after_changed = changed_field_snapshots(
-            before=before,
-            after_model=vital,
-            fields=changed_audit_fields,
+    with _vital_sign_write_transaction(session):
+        vital = require_patient_child(
+            session,
+            VitalSign,
+            vital_sign_id,
+            patient_id,
+            "Vital sign not found",
         )
-    else:
-        before_changed, after_changed = {}, {}
-    record_audit_event(
-        session,
-        action="vital_sign.updated",
-        entity_type="vital_sign",
-        entity_id=vital.id,
-        actor_id=user.actor_id,
-        metadata=_vital_sign_audit_metadata(vital, fields),
-        before=before_changed,
-        after=after_changed,
-    )
-    session.commit()
+        if _vital_sign_is_hidden(vital):
+            raise _vital_sign_not_found()
+        _reject_entered_in_error_status(payload.status)
+        update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
+        audit_fields = _vital_sign_audit_fields(update_fields)
+        before = audit_snapshot(vital, audit_fields) if audit_fields else {}
+        fields = apply_update(vital, payload)
+        changed_audit_fields = _vital_sign_audit_fields(fields)
+        if changed_audit_fields:
+            before_changed, after_changed = changed_field_snapshots(
+                before=before,
+                after_model=vital,
+                fields=changed_audit_fields,
+            )
+        else:
+            before_changed, after_changed = {}, {}
+        record_audit_event(
+            session,
+            action="vital_sign.updated",
+            entity_type="vital_sign",
+            entity_id=vital.id,
+            actor_id=user.actor_id,
+            metadata=_vital_sign_audit_metadata(vital, fields),
+            before=before_changed,
+            after=after_changed,
+        )
     session.refresh(vital)
     return vital
 
@@ -209,32 +215,41 @@ def delete_vital_sign(
         roles=user.roles,
         settings=settings,
     )
-    vital = require_patient_child(
-        session,
-        VitalSign,
-        vital_sign_id,
-        patient_id,
-        "Vital sign not found",
-    )
-    if _vital_sign_is_hidden(vital):
-        raise _vital_sign_not_found()
-    record_audit_event(
-        session,
-        action="vital_sign.entered_in_error",
-        entity_type="vital_sign",
-        entity_id=vital.id,
-        actor_id=user.actor_id,
-        metadata={**_vital_sign_audit_metadata(vital), "reason_code": "entered_in_error"},
-        before=audit_snapshot(vital, ["status"]),
-        after={"status": RecordStatus.ENTERED_IN_ERROR.value},
-    )
-    vital.status = RecordStatus.ENTERED_IN_ERROR
-    session.commit()
+    with _vital_sign_write_transaction(session):
+        vital = require_patient_child(
+            session,
+            VitalSign,
+            vital_sign_id,
+            patient_id,
+            "Vital sign not found",
+        )
+        if _vital_sign_is_hidden(vital):
+            raise _vital_sign_not_found()
+        record_audit_event(
+            session,
+            action="vital_sign.entered_in_error",
+            entity_type="vital_sign",
+            entity_id=vital.id,
+            actor_id=user.actor_id,
+            metadata={**_vital_sign_audit_metadata(vital), "reason_code": "entered_in_error"},
+            before=audit_snapshot(vital, ["status"]),
+            after={"status": RecordStatus.ENTERED_IN_ERROR.value},
+        )
+        vital.status = RecordStatus.ENTERED_IN_ERROR
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 def _vital_sign_audit_fields(fields: list[str]) -> list[str]:
     return [field for field in fields if field in VITAL_SIGN_AUDIT_FIELDS]
+
+
+@contextmanager
+def _vital_sign_write_transaction(session: Session) -> Iterator[None]:
+    if session.in_transaction():
+        # Auth/session checks can leave an implicit read transaction open.
+        session.rollback()
+    with session.begin():
+        yield
 
 
 def _vital_sign_is_hidden(vital: VitalSign) -> bool:

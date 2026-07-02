@@ -1,6 +1,6 @@
 # Current State
 
-Fecha: 2026-07-01
+Fecha: 2026-07-02
 
 Este documento es la verdad operativa vigente. No es historial ni changelog.
 El historial cronologico vive en `docs/ROADMAP.md`; el handoff para agentes vive
@@ -29,8 +29,16 @@ en `docs/CODEX_PLAN.md`.
 ## Seguridad Y Auditoria
 
 - Auth local y RBAC minimo sirven solo para desarrollo.
+- La web usa cookie `HttpOnly` y CSRF; `localStorage` solo conserva un marcador
+  no sensible de sesion y limpia la clave bearer legacy.
+- Con auth habilitada, los tokens firmados sin `sid` server-side activo son
+  rechazados.
 - Auditoria de lectura/escritura patient-scoped existe con actor, ruta,
   `correlation_id`, minimizacion por allowlists y eventos de denegacion.
+- `audit_snapshot` exige allowlist explicita y las rutas API tienen guard contra
+  snapshots clinicos completos por accidente.
+- Las rutas print patient-scoped declaran `read_audit` en el registry; el guard
+  de pantallas falla si un print con `[patientId]` queda con `auditPolicy: none`.
 - Logs PHI-safe backend y guard frontend contra `console.*` estan activos en
   checks. No hay observabilidad productiva formal.
 - `security-report` bloquea Gitleaks y OSV npm high/critical. Dependency
@@ -63,14 +71,25 @@ Superficies con write ABAC dev-only:
 - `clinical_risks`
 - `clinical_entries`
 - `clinical_events`
+- `clinical_orders`
 - `encounters`
+- `medications`
+- `allergies`
+- `active_problems`
+- `appointments`
+- `lab_panels_results`
+- `hospital_daily_sheets`
+- `hospital_indications`
 
-El resto de escrituras sigue sin write ABAC. Ninguna escritura tiene ABAC
-runtime productivo, motivo operacional de acceso ni break-glass runtime.
+Todas las superficies del contrato shadow tienen write ABAC dev-only. Ninguna
+escritura tiene ABAC runtime productivo, motivo operacional de acceso,
+break-glass runtime, firma, receta valida ni orden ejecutable.
 
 ## Fuentes Ejecutables
 
-- Rutas/superficies patient-scoped: `apps/api/src/oneepis_api/core/patient_scoped_route_inventory.py`.
+- Rutas/superficies patient-scoped por metodo/ruta:
+  `apps/api/src/oneepis_api/core/patient_scoped_route_inventory.py`, verificado
+  contra OpenAPI por `npm run check:patient-route-inventory`.
 - Contrato shadow de escrituras: `apps/api/src/oneepis_api/core/clinical_write_access_contract.py`.
 - Registry visible de pantallas: `apps/web/src/lib/screen-capabilities.registry.json`.
 - Tabla generada de rutas: `docs/SCREEN_TREE.md`.
@@ -90,9 +109,14 @@ runtime productivo, motivo operacional de acceso ni break-glass runtime.
 
 ## Proximo Objetivo
 
-No ampliar modulos clinicos. El siguiente trabajo debe reducir riesgo
-operacional o consolidar contrato. Prioridad actual: continuar write ABAC
-dev-only por superficies acotadas; no empezar por medicamentos ni ordenes.
+No ampliar modulos clinicos. El siguiente trabajo debe seguir la cola post-#297
+en reduccion de riesgo operacional:
+
+- PR #298: security report fase 2 con baseline, waiver y bloqueo gradual de
+  `pip-audit` high/critical.
+
+No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida,
+orden ejecutable, PHI real ni IA externa.
 
 ## Regla Documental
 

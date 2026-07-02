@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import EncounterActorDep, ReadAccessDep
+from oneepis_api.api.deps import EncounterWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_order import ClinicalOrder, ClinicalOrderStatus
 from oneepis_api.models.clinical_record import ClinicalEncounter
 from oneepis_api.schemas.clinical_order import (
@@ -18,7 +18,10 @@ from oneepis_api.services.audit import (
     changed_field_snapshots,
     record_audit_event,
 )
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -44,6 +47,21 @@ CLINICAL_ORDER_AUDIT_FIELDS = [
 def clinical_order_audit_fields(fields: list[str]) -> list[str]:
     allowed_fields = set(CLINICAL_ORDER_AUDIT_FIELDS)
     return [field for field in fields if field in allowed_fields]
+
+
+def _enforce_clinical_order_write(
+    session: SessionDep,
+    patient_id: uuid.UUID,
+    user: EncounterWriteAccessDep,
+    settings: SettingsDep,
+) -> None:
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
 
 
 @router.get("/{patient_id}/clinical-orders", response_model=list[ClinicalOrderRead])
@@ -86,8 +104,11 @@ def create_clinical_order(
     patient_id: uuid.UUID,
     payload: ClinicalOrderCreate,
     session: SessionDep,
-    actor: EncounterActorDep,
+    user: EncounterWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalOrder:
+    require_patient(session, patient_id)
+    _enforce_clinical_order_write(session, patient_id, user, settings)
     encounter = _require_patient_encounter(session, patient_id, payload.encounter_id)
     order = ClinicalOrder(
         patient_id=patient_id,
@@ -97,7 +118,7 @@ def create_clinical_order(
         title=payload.title,
         order_text=payload.order_text,
         rationale=payload.rationale,
-        created_by=actor,
+        created_by=user.actor_id,
     )
     session.add(order)
     session.flush()
@@ -106,7 +127,7 @@ def create_clinical_order(
         action="clinical_order.created",
         entity_type="clinical_order",
         entity_id=order.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_clinical_order_audit_metadata(order),
         after=audit_snapshot(order, CLINICAL_ORDER_AUDIT_FIELDS),
     )
@@ -124,8 +145,11 @@ def update_clinical_order(
     order_id: uuid.UUID,
     payload: ClinicalOrderUpdate,
     session: SessionDep,
-    actor: EncounterActorDep,
+    user: EncounterWriteAccessDep,
+    settings: SettingsDep,
 ) -> ClinicalOrder:
+    require_patient(session, patient_id)
+    _enforce_clinical_order_write(session, patient_id, user, settings)
     order = _require_clinical_order(session, patient_id, order_id)
     _validate_clinical_order_editable(order, payload)
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
@@ -142,7 +166,7 @@ def update_clinical_order(
         action="clinical_order.updated",
         entity_type="clinical_order",
         entity_id=order.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_clinical_order_audit_metadata(order, changed_fields),
         before=before_changed,
         after=after_changed,

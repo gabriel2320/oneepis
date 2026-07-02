@@ -114,5 +114,5 @@ export function hasAnyRole(user: AuthUser | null | undefined, allowedRoles: User
   if (!user) {
     return false;
   }
-  return user.roles.some((role) => allowedRoles.includes(role));
+  return user.roles.some((role: UserRole) => allowedRoles.includes(role));
 }

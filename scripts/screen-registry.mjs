@@ -64,6 +64,16 @@ export function validateScreenRegistryRows(rows) {
     if (typeof row?.aiProfile === "string" && !allowedAiProfiles.has(row.aiProfile)) {
       errors.push(`Fila ${index + 1} (${row.routePattern ?? "sin ruta"}): aiProfile no permitido '${row.aiProfile}'.`);
     }
+    if (
+      typeof row?.routePattern === "string" &&
+      row.routePattern.startsWith("/print/") &&
+      row.routePattern.includes("[patientId]") &&
+      row.auditPolicy === "none"
+    ) {
+      errors.push(
+        `Fila ${index + 1} (${row.routePattern}): ruta print patient-scoped debe declarar auditPolicy explicita.`,
+      );
+    }
   });
 
   if (errors.length > 0) {

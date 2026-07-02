@@ -77,6 +77,205 @@ def test_hospital_draft_reads_abac_allows_active_relationship(
     assert [item["id"] for item in indication_response.json()] == [indication["id"]]
 
 
+def test_hospital_daily_sheet_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _create_active_hospitalization(client, auth, patient_id)
+    daily_sheet = _create_daily_sheet(client, auth, patient_id, sheet_date="2026-06-20")
+    unknown_sheet_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": "2026-06-21",
+            "clinical_summary": "No debe crear sin relacion activa.",
+        },
+    )
+    update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{daily_sheet['id']}",
+        headers=auth,
+        json={"active_plan": "No debe actualizar sin relacion activa."},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{unknown_sheet_id}",
+        headers=auth,
+        json={"active_plan": "No debe revelar existencia."},
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 3
+    assert actions.count("hospital_daily_sheet.created") == 1
+    assert "hospital_daily_sheet.updated" not in actions
+
+
+def test_hospital_daily_sheet_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _create_active_hospitalization(client, auth, patient_id)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": "2026-06-20",
+            "clinical_summary": "Hoja diaria permitida.",
+        },
+    )
+    daily_sheet = create_response.json()
+    update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets/{daily_sheet['id']}",
+        headers=auth,
+        json={"active_plan": "Plan permitido."},
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["active_plan"] == "Plan permitido."
+
+
+def test_hospital_daily_sheet_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _create_active_hospitalization(client, auth, patient_id)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=admin_auth,
+        json={
+            "sheet_date": "2026-06-20",
+            "clinical_summary": "Hoja diaria admin.",
+        },
+    )
+
+    assert response.status_code == 201
+
+
+def test_hospital_indication_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _create_active_hospitalization(client, auth, patient_id)
+    indication = _create_hospital_indication(client, auth, patient_id)
+    unknown_indication_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications",
+        headers=auth,
+        json={
+            "indicated_at": "2026-06-20T11:00:00Z",
+            "title": "Indicacion denegada",
+            "indication_text": "No debe crear sin relacion activa.",
+        },
+    )
+    update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications/{indication['id']}",
+        headers=auth,
+        json={"title": "No debe actualizar sin relacion activa."},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications/{unknown_indication_id}",
+        headers=auth,
+        json={"title": "No debe revelar existencia."},
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 3
+    assert actions.count("hospital_indication.created") == 1
+    assert "hospital_indication.updated" not in actions
+
+
+def test_hospital_indication_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _create_active_hospitalization(client, auth, patient_id)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications",
+        headers=auth,
+        json={
+            "indicated_at": "2026-06-20T10:00:00Z",
+            "title": "Indicacion permitida",
+            "indication_text": "Indicacion permitida por relacion activa.",
+        },
+    )
+    indication = create_response.json()
+    update_response = client.patch(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications/{indication['id']}",
+        headers=auth,
+        json={"title": "Indicacion actualizada permitida"},
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["title"] == "Indicacion actualizada permitida"
+
+
+def test_hospital_indication_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _create_active_hospitalization(client, auth, patient_id)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications",
+        headers=admin_auth,
+        json={
+            "indicated_at": "2026-06-20T10:00:00Z",
+            "title": "Indicacion admin",
+            "indication_text": "Indicacion permitida por admin.",
+        },
+    )
+
+    assert response.status_code == 201
+
+
 def _create_hospital_drafts(
     client: TestClient,
     auth: dict[str, str],
@@ -113,6 +312,62 @@ def _create_hospital_drafts(
     )
     assert indication_response.status_code == 201
     return daily_response.json(), indication_response.json()
+
+
+def _create_active_hospitalization(
+    client: TestClient,
+    auth: dict[str, str],
+    patient_id: str,
+) -> dict:
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/encounters",
+        headers=auth,
+        json={
+            "type": "hospitalization",
+            "status": "in_progress",
+            "reason": "Ingreso ABAC hospitalario",
+            "started_at": "2026-06-20T07:00:00Z",
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
+def _create_daily_sheet(
+    client: TestClient,
+    auth: dict[str, str],
+    patient_id: str,
+    *,
+    sheet_date: str,
+) -> dict:
+    response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/daily-sheets",
+        headers=auth,
+        json={
+            "sheet_date": sheet_date,
+            "clinical_summary": "Hoja diaria ABAC.",
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
+def _create_hospital_indication(
+    client: TestClient,
+    auth: dict[str, str],
+    patient_id: str,
+) -> dict:
+    response = client.post(
+        f"/api/v1/hospitalization/patients/{patient_id}/indications",
+        headers=auth,
+        json={
+            "indicated_at": "2026-06-20T10:00:00Z",
+            "title": "Indicacion ABAC",
+            "indication_text": "Mantener observacion en borrador.",
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
 
 
 def _enable_development_abac_enforcement() -> None:

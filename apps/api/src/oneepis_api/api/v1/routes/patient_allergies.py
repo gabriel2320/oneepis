@@ -5,11 +5,14 @@ import uuid
 from fastapi import APIRouter, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import AllergyActorDep, ReadAccessDep
+from oneepis_api.api.deps import AllergyWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_record import Allergy, RecordStatus
 from oneepis_api.schemas.clinical_record import AllergyCreate, AllergyRead, AllergyUpdate
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -81,9 +84,17 @@ def create_allergy(
     patient_id: uuid.UUID,
     payload: AllergyCreate,
     session: SessionDep,
-    actor: AllergyActorDep,
+    user: AllergyWriteAccessDep,
+    settings: SettingsDep,
 ) -> Allergy:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     allergy = Allergy(patient_id=patient_id, **payload.model_dump())
     session.add(allergy)
     session.flush()
@@ -92,7 +103,7 @@ def create_allergy(
         action="allergy.created",
         entity_type="allergy",
         entity_id=allergy.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "severity": allergy.severity.value},
         after=audit_snapshot(allergy, ALLERGY_AUDIT_FIELDS),
     )
@@ -133,9 +144,17 @@ def update_allergy(
     allergy_id: uuid.UUID,
     payload: AllergyUpdate,
     session: SessionDep,
-    actor: AllergyActorDep,
+    user: AllergyWriteAccessDep,
+    settings: SettingsDep,
 ) -> Allergy:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
     update_fields = sorted(payload.model_dump(exclude_unset=True).keys())
     before = audit_snapshot(allergy, allergy_audit_fields(update_fields))
@@ -151,7 +170,7 @@ def update_allergy(
         action="allergy.updated",
         entity_type="allergy",
         entity_id=allergy.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "fields": fields},
         before=before_changed,
         after=after_changed,
@@ -166,9 +185,17 @@ def delete_allergy(
     patient_id: uuid.UUID,
     allergy_id: uuid.UUID,
     session: SessionDep,
-    actor: AllergyActorDep,
+    user: AllergyWriteAccessDep,
+    settings: SettingsDep,
 ) -> Response:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     allergy = require_patient_child(session, Allergy, allergy_id, patient_id, "Allergy not found")
     before = audit_snapshot(allergy, ["status"])
     allergy.status = RecordStatus.ENTERED_IN_ERROR
@@ -177,7 +204,7 @@ def delete_allergy(
         action="allergy.entered_in_error",
         entity_type="allergy",
         entity_id=allergy.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id)},
         before=before,
         after=audit_snapshot(allergy, ["status"]),

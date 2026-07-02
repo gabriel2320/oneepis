@@ -68,7 +68,9 @@ autenticar.
   habilita segun permisos efectivos ya autenticados.
 - La sesion web usa cookie `HttpOnly`; no se guarda bearer productivo en
   `localStorage`.
-- Las sesiones nuevas se registran server-side y `logout` revoca el `sid`.
+- Las sesiones nuevas se registran server-side; un token firmado sin `sid`
+  activo no autentica cuando auth esta habilitada.
+- `logout` revoca el `sid`.
 - `refresh` rota el token vigente y reemplaza el hash server-side de la sesion.
 - Las mutaciones con cookie requieren header `X-OneEpis-CSRF` pareado con la
   cookie CSRF no HttpOnly.

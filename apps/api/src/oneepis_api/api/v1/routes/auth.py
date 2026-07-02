@@ -28,6 +28,7 @@ from oneepis_api.schemas.auth import (
 )
 from oneepis_api.services.auth import (
     AuthError,
+    access_token_window,
     authenticate_local_user,
     create_access_token,
     verify_access_token,
@@ -94,9 +95,14 @@ def login(
         metadata=metadata,
     )
     session.commit()
-    _token_without_session, expires_at = create_access_token(settings, user)
+    issued_at, expires_at = access_token_window(settings)
     auth_session = create_auth_session(session, settings, user=user, expires_at=expires_at)
-    access_token, expires_at = create_access_token(settings, user, session_id=str(auth_session.id))
+    access_token, expires_at = create_access_token(
+        settings,
+        user,
+        session_id=str(auth_session.id),
+        now=issued_at,
+    )
     rotate_auth_session_token(
         session,
         settings,

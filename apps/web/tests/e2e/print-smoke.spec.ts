@@ -12,7 +12,7 @@ test.describe("print routes", () => {
     test.skip(testInfo.project.name !== "chromium", "desktop-only print smoke");
   });
 
-  test("renders patient paper sheets with development footer", async ({ page }) => {
+  test("@smoke @print renders patient paper sheets with development footer", async ({ page }) => {
     await page.goto(`/print/pacientes/${demoPatientId}/ficha`);
     await expect(page.getByRole("heading", { name: "Ficha clinica" })).toBeVisible();
     await expect(page.getByText("Paciente Demo Alfa - DEMO-001")).toBeVisible();

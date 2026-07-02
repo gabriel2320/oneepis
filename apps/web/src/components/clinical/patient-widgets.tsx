@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Activity, AlertTriangle, Sparkles } from "lucide-react";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { MetricCard, TimelineCard } from "@/components/clinical/cards";
 import { EmptyState } from "@/components/clinical/states";
@@ -22,6 +22,14 @@ import type {
 import { formatDateTime } from "./date-format";
 
 export { MedicationList } from "@/components/clinical/patient-medication-list";
+
+const LatestVitalsTrendChart = dynamic(
+  () => import("./patient-vitals-trend-chart").then((module) => module.LatestVitalsTrendChart),
+  {
+    loading: () => <div className="h-64 animate-pulse rounded-md border bg-muted/30" />,
+    ssr: false,
+  },
+);
 
 export function VitalsStrip({ vital }: { vital?: VitalSign | null }) {
   if (!vital) {
@@ -188,35 +196,11 @@ export function CriticalAlerts({ record }: { record: PatientRecordSnapshot }) {
 }
 
 export function LatestVitalsTrend({ vitals }: { vitals: VitalSign[] }) {
-  const data = vitals
-    .slice()
-    .reverse()
-    .map((vital) => ({
-      time: new Date(vital.measured_at).toLocaleTimeString("es-CL", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      fc: vital.heart_rate_bpm ?? null,
-      sat: vital.oxygen_saturation_pct ? Number(vital.oxygen_saturation_pct) : null,
-    }));
-
-  if (data.length < 2) {
+  if (vitals.length < 2) {
     return <EmptyState title="Tendencia insuficiente" description="Registra al menos dos controles." />;
   }
 
-  return (
-    <div className="h-64 rounded-md border p-3">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <XAxis dataKey="time" tickLine={false} axisLine={false} />
-          <YAxis tickLine={false} axisLine={false} width={32} />
-          <Tooltip />
-          <Line type="monotone" dataKey="fc" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="sat" stroke="hsl(var(--info))" strokeWidth={2} dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+  return <LatestVitalsTrendChart vitals={vitals} />;
 }
 
 export function PatientLongitudinalSummary({ record }: { record: PatientRecordSnapshot }) {

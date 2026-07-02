@@ -147,13 +147,13 @@ def _recent_duplicate_read_event(
     return session.scalar(statement)
 
 
-def audit_snapshot(model: object, fields: list[str] | None = None) -> dict[str, Any]:
+def audit_snapshot(model: object, fields: list[str]) -> dict[str, Any]:
     mapper = inspect(model).mapper
-    allowed_fields = set(fields) if fields is not None else None
+    allowed_fields = set(fields)
     snapshot: dict[str, Any] = {}
     for attr in mapper.column_attrs:
         field = attr.key
-        if allowed_fields is not None and field not in allowed_fields:
+        if field not in allowed_fields:
             continue
         snapshot[field] = _jsonable(getattr(model, field))
     return snapshot

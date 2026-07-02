@@ -69,21 +69,122 @@ def test_patient_problems_abac_enforcement_allows_active_relationship(
     assert detail_response.json()["id"] == problem["id"]
 
 
+def test_patient_problems_write_abac_denies_without_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+    audit_events_for_patient,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    problem = _create_problem(client, auth, patient_id)
+    unknown_problem_id = uuid.uuid4()
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=auth,
+        json=_problem_payload(title="Problema sin relacion activa", code="E10"),
+    )
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/problems/{problem['id']}",
+        headers=auth,
+        json={"code": "E10"},
+    )
+    missing_update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/problems/{unknown_problem_id}",
+        headers=auth,
+        json={"code": "E10"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/problems/{problem['id']}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 403
+    assert update_response.status_code == 403
+    assert missing_update_response.status_code == 403
+    assert delete_response.status_code == 403
+    actions = [event["action"] for event in audit_events_for_patient(patient_id)]
+    assert actions.count("access_context.denied") == 4
+    assert actions.count("problem.created") == 1
+    assert "problem.updated" not in actions
+    assert "problem.entered_in_error" not in actions
+
+
+def test_patient_problems_write_abac_allows_active_relationship(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    patient_id = create_patient_for_permissions(client, auth)
+    _assign_patient_scope(
+        patient_id=patient_id,
+        actor_id="medico@oneepis.local",
+    )
+    _enable_development_abac_enforcement()
+
+    create_response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=auth,
+        json=_problem_payload(title="Problema permitido por relacion activa", code="E11"),
+    )
+    problem_id = create_response.json()["id"]
+    update_response = client.patch(
+        f"/api/v1/patients/{patient_id}/problems/{problem_id}",
+        headers=auth,
+        json={"code": "E10"},
+    )
+    delete_response = client.delete(
+        f"/api/v1/patients/{patient_id}/problems/{problem_id}",
+        headers=auth,
+    )
+
+    assert create_response.status_code == 201
+    assert update_response.status_code == 200
+    assert update_response.json()["code"] == "E10"
+    assert delete_response.status_code == 204
+
+
+def test_patient_problems_write_abac_allows_admin_breakout(
+    client: TestClient,
+    auth_headers,
+    create_patient_for_permissions,
+) -> None:
+    auth = auth_headers(client)
+    admin_auth = auth_headers(client, email="admin@oneepis.local", password="admin")
+    patient_id = create_patient_for_permissions(client, auth)
+    _enable_development_abac_enforcement()
+
+    response = client.post(
+        f"/api/v1/patients/{patient_id}/problems",
+        headers=admin_auth,
+        json=_problem_payload(title="Problema creado por breakout admin", code="E11"),
+    )
+
+    assert response.status_code == 201
+
+
 def _create_problem(client: TestClient, auth: dict[str, str], patient_id: str) -> dict:
     response = client.post(
         f"/api/v1/patients/{patient_id}/problems",
         headers=auth,
-        json={
-            "title": "Problema ABAC activo",
-            "status": "active",
-            "code_system": "ICD-10",
-            "code": "E11",
-            "onset_date": "2026-06-01",
-            "notes": "Nota ABAC problema activo",
-        },
+        json=_problem_payload(title="Problema ABAC activo", code="E11"),
     )
     assert response.status_code == 201
     return response.json()
+
+
+def _problem_payload(*, title: str, code: str) -> dict[str, str]:
+    return {
+        "title": title,
+        "status": "active",
+        "code_system": "ICD-10",
+        "code": code,
+        "onset_date": "2026-06-01",
+        "notes": "Nota ABAC problema activo",
+    }
 
 
 def _enable_development_abac_enforcement() -> None:

@@ -1,36 +1,22 @@
-export type UserRole = "admin" | "medico" | "enfermeria" | "solo_lectura" | "dev";
+import type { components } from "@contracts/openapi-types";
 
-export type AuthUser = {
-  email: string;
-  name: string;
-  roles: UserRole[];
-  actor_id: string;
-};
+export type UserRole = components["schemas"]["UserRole"];
 
-export type LoginRequest = {
-  email: string;
-  password: string;
-};
+export type AuthUser = components["schemas"]["AuthUserRead"];
 
-export type LoginResponse = {
-  access_token: string;
+export type LoginRequest = components["schemas"]["LoginRequest"];
+
+export type LoginResponse = Omit<components["schemas"]["LoginResponse"], "token_type" | "user"> & {
   token_type: "bearer";
-  expires_at: string;
   user: AuthUser;
 };
 
-export type AuthRequestAccepted = {
+export type AuthRequestAccepted = components["schemas"]["AuthRequestAccepted"] & {
   accepted: true;
 };
 
-export type PasswordRecoveryRequest = {
-  email: string;
-};
+export type PasswordRecoveryRequest = components["schemas"]["PasswordRecoveryRequest"];
 
-export type UnlockRequest = {
-  email: string;
-};
+export type UnlockRequest = components["schemas"]["UnlockRequest"];
 
-export type UnlockConfirmationRequest = {
-  token: string;
-};
+export type UnlockConfirmationRequest = components["schemas"]["UnlockConfirmationRequest"];

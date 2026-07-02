@@ -4773,6 +4773,23 @@
             }
           },
           {
+            "name": "before_measured_at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Before Measured At"
+            }
+          },
+          {
             "name": "Authorization",
             "in": "header",
             "required": false,

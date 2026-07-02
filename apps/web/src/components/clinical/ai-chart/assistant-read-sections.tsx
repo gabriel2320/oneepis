@@ -1,13 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
-import {
-  Line,
-  LineChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 import { formatDateTime } from "@/components/clinical/date-format";
 import { EmptyState, ErrorState } from "@/components/clinical/states";
@@ -20,6 +14,14 @@ import type {
   AssistantSearchResult,
   AssistantTimelineItem,
 } from "@/lib/types";
+
+const AssistantSeriesChart = dynamic(
+  () => import("./assistant-series-chart").then((module) => module.AssistantSeriesChart),
+  {
+    loading: () => <div className="mb-3 h-48 animate-pulse rounded-md border bg-muted/30" />,
+    ssr: false,
+  },
+);
 
 export function PanelState({
   isLoading,
@@ -87,32 +89,10 @@ export function SearchList({ results }: { results: AssistantSearchResult[] }) {
 }
 
 export function SeriesChart({ series }: { series: AssistantChartSeries }) {
-  const data = series.points.map((point) => ({
-    time: new Date(point.occurred_at).toLocaleDateString("es-CL", {
-      day: "2-digit",
-      month: "2-digit",
-    }),
-    value: point.value,
-  }));
-  if (data.length < 2) {
+  if (series.points.length < 2) {
     return null;
   }
-  return (
-    <div className="mb-3 rounded-md border bg-background p-3">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium">{series.label}</p>
-        {series.unit ? <Badge variant="outline">{series.unit}</Badge> : null}
-      </div>
-      <div className="min-w-0 overflow-x-auto">
-        <LineChart width={520} height={160} data={data}>
-          <XAxis dataKey="time" tickLine={false} axisLine={false} />
-          <YAxis tickLine={false} axisLine={false} width={36} />
-          <Tooltip />
-          <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} />
-        </LineChart>
-      </div>
-    </div>
-  );
+  return <AssistantSeriesChart series={series} />;
 }
 
 export function SeriesList({ series }: { series: AssistantChartSeries[] }) {

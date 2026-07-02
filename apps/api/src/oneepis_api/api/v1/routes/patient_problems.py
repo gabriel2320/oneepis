@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from oneepis_api.api.deps import ProblemActorDep, ReadAccessDep
+from oneepis_api.api.deps import ProblemWriteAccessDep, ReadAccessDep
 from oneepis_api.models.clinical_record import ActiveProblem, RecordStatus
 from oneepis_api.schemas.clinical_record import (
     ActiveProblemCreate,
@@ -14,7 +14,10 @@ from oneepis_api.schemas.clinical_record import (
 )
 from oneepis_api.schemas.clinical_record_contracts.diagnostics import validate_diagnosis_code_pair
 from oneepis_api.services.audit import audit_snapshot, changed_field_snapshots, record_audit_event
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 from .patient_shared import (
     PATIENT_ROUTER_OPTIONS,
@@ -90,9 +93,17 @@ def create_active_problem(
     patient_id: uuid.UUID,
     payload: ActiveProblemCreate,
     session: SessionDep,
-    actor: ProblemActorDep,
+    user: ProblemWriteAccessDep,
+    settings: SettingsDep,
 ) -> ActiveProblem:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     problem = ActiveProblem(patient_id=patient_id, **payload.model_dump())
     session.add(problem)
     session.flush()
@@ -101,7 +112,7 @@ def create_active_problem(
         action="problem.created",
         entity_type="problem",
         entity_id=problem.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "status": problem.status.value},
         after=audit_snapshot(problem, ACTIVE_PROBLEM_AUDIT_FIELDS),
     )
@@ -148,9 +159,17 @@ def update_active_problem(
     problem_id: uuid.UUID,
     payload: ActiveProblemUpdate,
     session: SessionDep,
-    actor: ProblemActorDep,
+    user: ProblemWriteAccessDep,
+    settings: SettingsDep,
 ) -> ActiveProblem:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     problem = require_patient_child(
         session,
         ActiveProblem,
@@ -179,7 +198,7 @@ def update_active_problem(
         action="problem.updated",
         entity_type="problem",
         entity_id=problem.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id), "fields": fields},
         before=before_changed,
         after=after_changed,
@@ -194,9 +213,17 @@ def delete_active_problem(
     patient_id: uuid.UUID,
     problem_id: uuid.UUID,
     session: SessionDep,
-    actor: ProblemActorDep,
+    user: ProblemWriteAccessDep,
+    settings: SettingsDep,
 ) -> Response:
     require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     problem = require_patient_child(
         session,
         ActiveProblem,
@@ -211,7 +238,7 @@ def delete_active_problem(
         action="problem.entered_in_error",
         entity_type="problem",
         entity_id=problem.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata={"patient_id": str(patient_id)},
         before=before,
         after=audit_snapshot(problem, ["status"]),

@@ -5,7 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, Numeric, String
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from oneepis_api.db.base import Base
@@ -19,6 +19,9 @@ if TYPE_CHECKING:
 
 class VitalSign(Base, IdMixin, TimestampMixin):
     __tablename__ = "vital_signs"
+    __table_args__ = (
+        Index("ix_vital_signs_patient_id_measured_at", "patient_id", "measured_at"),
+    )
 
     patient_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("patients.id", ondelete="CASCADE"),

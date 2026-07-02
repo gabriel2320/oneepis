@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from oneepis_api.api.deps import (
-    HospitalIndicationActorDep,
+    HospitalIndicationWriteAccessDep,
     ReadAccessDep,
     require_patient_read_access,
 )
@@ -35,7 +35,10 @@ from oneepis_api.services.audit import (
     changed_field_snapshots,
     record_audit_event,
 )
-from oneepis_api.services.patient_scope_enforcement import enforce_patient_scope_for_read
+from oneepis_api.services.patient_scope_enforcement import (
+    enforce_patient_scope_for_read,
+    enforce_patient_scope_for_write,
+)
 
 router = APIRouter(
     prefix="/hospitalization",
@@ -94,14 +97,23 @@ def create_hospital_indication(
     patient_id: uuid.UUID,
     payload: HospitalIndicationCreate,
     session: SessionDep,
-    actor: HospitalIndicationActorDep,
+    user: HospitalIndicationWriteAccessDep,
+    settings: SettingsDep,
 ) -> HospitalIndication:
+    require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     encounter = _require_active_hospitalization(session, patient_id)
     indication = HospitalIndication(
         **payload.model_dump(),
         patient_id=patient_id,
         encounter_id=encounter.id,
-        created_by=actor,
+        created_by=user.actor_id,
     )
     session.add(indication)
     session.flush()
@@ -110,7 +122,7 @@ def create_hospital_indication(
         action="hospital_indication.created",
         entity_type="hospital_indication",
         entity_id=indication.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_indication_audit_metadata(indication),
         after=audit_snapshot(indication, HOSPITAL_INDICATION_AUDIT_FIELDS),
     )
@@ -128,8 +140,17 @@ def update_hospital_indication(
     indication_id: uuid.UUID,
     payload: HospitalIndicationUpdate,
     session: SessionDep,
-    actor: HospitalIndicationActorDep,
+    user: HospitalIndicationWriteAccessDep,
+    settings: SettingsDep,
 ) -> HospitalIndication:
+    require_patient(session, patient_id)
+    enforce_patient_scope_for_write(
+        session,
+        patient_id=patient_id,
+        actor_id=user.actor_id,
+        roles=user.roles,
+        settings=settings,
+    )
     indication = _require_indication(session, patient_id, indication_id)
     _validate_indication_editable(indication)
     fields = sorted(payload.model_dump(exclude_unset=True).keys())
@@ -150,7 +171,7 @@ def update_hospital_indication(
         action="hospital_indication.updated",
         entity_type="hospital_indication",
         entity_id=indication.id,
-        actor_id=actor,
+        actor_id=user.actor_id,
         metadata=_indication_audit_metadata(indication, changed_fields),
         before=before_changed,
         after=after_changed,

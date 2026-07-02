@@ -108,8 +108,7 @@ def create_access_token(
     session_id: str | None = None,
     now: datetime | None = None,
 ) -> tuple[str, datetime]:
-    issued_at = now or datetime.now(UTC)
-    expires_at = issued_at + timedelta(minutes=settings.auth_token_ttl_minutes)
+    issued_at, expires_at = access_token_window(settings, now)
     payload = {
         "sub": user.email,
         "name": user.name,
@@ -125,6 +124,15 @@ def create_access_token(
     )
     signature = _sign(settings.auth_secret, encoded_payload)
     return f"{encoded_payload}.{signature}", expires_at
+
+
+def access_token_window(
+    settings: Settings,
+    now: datetime | None = None,
+) -> tuple[datetime, datetime]:
+    issued_at = now or datetime.now(UTC)
+    expires_at = issued_at + timedelta(minutes=settings.auth_token_ttl_minutes)
+    return issued_at, expires_at
 
 
 def verify_access_token(
