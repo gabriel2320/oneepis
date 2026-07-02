@@ -105,6 +105,8 @@ Evidencia actual de avance sin habilitacion productiva:
   servicio, backend, madurez y acto humano si escribe ficha clinica.
 - AI Capability Catalog v0 cubre perfiles IA visibles y bloquea proveedor
   externo, escritura autonoma y persistencia clinica directa.
+- Unit of Work piloto prueba atomicidad para un acto compuesto interno sin
+  exponer API publica nueva ni habilitar firma/receta/orden ejecutable.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
@@ -116,7 +118,7 @@ Evidencia actual de avance sin habilitacion productiva:
 
 Mantener el gate de lectura patient-scoped por handler, el inventario OpenAPI
 por metodo/ruta, la politica explicita de auditoria para prints patient-scoped
-y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #303
-Unit of Work para un solo acto clinico compuesto.
+y el gate `pip-audit` high/critical. Tras PR #303, revisar/mergear el stack
+#293-#303 antes de abrir nuevas superficies.
 Crear issues separados a partir de estos IDs solo despues de una revision humana
 del checklist. Hasta entonces, este documento es la fuente versionada.

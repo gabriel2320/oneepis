@@ -80,8 +80,8 @@ de vision. No crear snapshots nuevos.
   contratos, auth web y print audit policy; `2635a58` corrige dependencias del
   carril contracts; `52cdc4d` actualiza CodeQL a v4. Estos commits no consumen
   numeracion de PR en GitHub.
-- PR #293-#301 quedan como draft/stack de seguridad, operaciones y catalogos.
-  El trabajo local actual apilado corresponde a PR #302, AI Capability Catalog.
+- PR #293-#302 quedan como draft/stack de seguridad, operaciones y catalogos.
+  El trabajo local actual apilado corresponde a PR #303, Unit of Work piloto.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
@@ -119,10 +119,11 @@ de vision. No crear snapshots nuevos.
   backend y madurez.
 - AI Capability Catalog v0 gobierna perfiles IA locales sin proveedor externo,
   escritura autonoma ni persistencia clinica directa.
+- Unit of Work piloto cierra atencion ambulatoria simple como encuentro +
+  evolucion SOAP en una transaccion interna.
 
-Secuencia recomendada desde el arbol local post-#302:
-
-1. PR #303: Unit of Work para un acto clinico compuesto.
+Secuencia post-#303: revisar CI, mergear #293-#303 en orden y no abrir mas
+alcance clinico hasta estabilizar `main`.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida ni
 orden ejecutable sin plan clinico/legal separado.
