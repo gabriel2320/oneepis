@@ -23,9 +23,9 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 
 | ID | Gate | Estado | Criterio minimo | Evidencia actual |
 | --- | --- | --- | --- | --- |
-| NOPROD-SEC-001 | Gestion formal de secretos | pendiente | secretos fuera del repo, rotacion, owners y procedimiento de incidente | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/secret_management_contract.py`; `apps/api/tests/test_secret_management_contract.py`; CI `security-report` bloquea Gitleaks |
-| NOPROD-SEC-002 | Cifrado en reposo | pendiente | politica de cifrado para base, backups y almacenamiento documental | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/encryption_at_rest_contract.py`; `apps/api/tests/test_encryption_at_rest_contract.py` |
-| NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/backup_restore_contract.py`; `apps/api/tests/test_backup_restore_contract.py` |
+| NOPROD-SEC-001 | Gestion formal de secretos | pendiente | secretos fuera del repo, rotacion, owners y procedimiento de incidente | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/secret_management_contract.py`; `apps/api/src/oneepis_api/core/no_production_security_contract.py`; `apps/api/tests/test_secret_management_contract.py`; `apps/api/tests/test_no_production_security_contract.py`; CI `security-report` bloquea Gitleaks |
+| NOPROD-SEC-002 | Cifrado en reposo | pendiente | politica de cifrado para base, backups y almacenamiento documental | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/encryption_at_rest_contract.py`; `apps/api/src/oneepis_api/core/no_production_security_contract.py`; `apps/api/tests/test_encryption_at_rest_contract.py`; `apps/api/tests/test_no_production_security_contract.py` |
+| NOPROD-SEC-003 | Backups y restore | pendiente | backup automatizado, prueba de restore y RPO/RTO definidos | `docs/SECURITY_PRIVACY.md`; `apps/api/src/oneepis_api/core/backup_restore_contract.py`; `apps/api/src/oneepis_api/core/no_production_security_contract.py`; `apps/api/tests/test_backup_restore_contract.py`; `apps/api/tests/test_no_production_security_contract.py` |
 | NOPROD-SEC-004 | Retencion y eliminacion | pendiente | politica versionada de retencion, borrado y custodia documental | `docs/AUDIT.md`; `apps/api/src/oneepis_api/core/audit_retention_contract.py`; `apps/api/src/oneepis_api/core/audit_integrity_contract.py`; `apps/api/tests/test_audit_retention_contract.py`; `apps/api/tests/test_audit_integrity_contract.py` |
 | NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con actor, ruta, correlacion, dedupe, minimizacion y cobertura E2E real de filtros lectura/escritura | `docs/AUDIT.md`; `apps/api/tests/test_patient_read_audit.py`; `apps/api/tests/test_patient_audit.py`; `apps/api/tests/test_audit_snapshot.py`; `apps/api/src/oneepis_api/services/access_context_audit.py`; `apps/web/src/lib/screen-capabilities.registry.json`; `scripts/check-audit-snapshot-allowlists.mjs`; `scripts/screen-registry.mjs` |
 | NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo, guard frontend/CI bloquea `console.*` en `apps/web/src` y contrato de observabilidad PHI-safe define logs/metricas sin PHI; faltan exportadores/dashboards productivos aprobados | `apps/api/tests/test_phi_logging.py`; `apps/api/src/oneepis_api/core/observability_contract.py`; `apps/api/tests/test_observability_contract.py`; `apps/api/src/oneepis_api/core/security_report_policy_contract.py`; `apps/api/tests/test_security_report_policy_contract.py`; `security/security-report-policy.json`; `scripts/check-frontend-phi-logs.mjs`; `scripts/check-python-advisories.mjs` |
@@ -87,6 +87,9 @@ Evidencia actual de avance sin habilitacion productiva:
 - El contrato de observabilidad PHI-safe exige `correlation_id`, logs JSON sin
   PHI, labels de metricas allowlisted y exportadores/dashboards productivos
   deshabilitados hasta aprobacion separada.
+- SEC-001/002/003 tienen contrato agregado que une secretos, cifrado y
+  backups/restore con sus contratos fuente, manteniendo runtime productivo y PHI
+  real deshabilitados.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
@@ -98,9 +101,9 @@ Evidencia actual de avance sin habilitacion productiva:
 
 Mantener el gate de lectura patient-scoped por handler, el inventario OpenAPI
 por metodo/ruta, la politica explicita de auditoria para prints patient-scoped
-y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #295
-contratos SEC-001/002/003. Despues, seguir con PR #296 auth productiva
-docs-only, PR #297 integridad medico-legal de auditoria, PR #298
+y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #296
+auth productiva docs-only, seguido por PR #297 integridad medico-legal de
+auditoria, PR #298
 reproducibilidad Python, PR #299 HIS Service Catalog, PR #300 Clinical Act
 Catalog, PR #301 Screen-Service Matrix, PR #302 AI Capability Catalog y PR #303
 Unit of Work para un solo acto clinico compuesto.
