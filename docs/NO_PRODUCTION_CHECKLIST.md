@@ -95,6 +95,8 @@ Evidencia actual de avance sin habilitacion productiva:
 - Integridad medico-legal de auditoria queda contratada para hash-chain,
   algoritmo versionado, verificacion, legal hold y export control; nada de esto
   esta habilitado en runtime.
+- Python queda con lock reproducible versionado y `check:toolchain` valida que
+  las dependencias directas de `pyproject.toml` esten pinneadas.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
@@ -106,9 +108,9 @@ Evidencia actual de avance sin habilitacion productiva:
 
 Mantener el gate de lectura patient-scoped por handler, el inventario OpenAPI
 por metodo/ruta, la politica explicita de auditoria para prints patient-scoped
-y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #298
-reproducibilidad Python, seguido por PR #299 HIS Service Catalog, PR #300
-Clinical Act Catalog, PR #301 Screen-Service Matrix, PR #302 AI Capability
-Catalog y PR #303 Unit of Work para un solo acto clinico compuesto.
+y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #299
+HIS Service Catalog, seguido por PR #300 Clinical Act Catalog, PR #301
+Screen-Service Matrix, PR #302 AI Capability Catalog y PR #303 Unit of Work para
+un solo acto clinico compuesto.
 Crear issues separados a partir de estos IDs solo despues de una revision humana
 del checklist. Hasta entonces, este documento es la fuente versionada.

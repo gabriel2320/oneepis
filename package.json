@@ -23,7 +23,7 @@
     "bootstrap:ubuntu": "bash scripts/bootstrap-ubuntu.sh",
     "bootstrap:windows": "powershell -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
     "check:ownership": "node scripts/check-ownership.mjs",
-    "check:toolchain": "node scripts/check-toolchain.mjs",
+    "check:toolchain": "node scripts/check-toolchain.mjs && node scripts/check-python-lock.mjs",
     "check:ci-lanes": "node scripts/test-ci-lanes.mjs",
     "check:fast": "npm run check:ownership && npm run check:toolchain && npm run check:ci-lanes && npm run check:doc-canon && npm run check:abac-contracts",
     "check:api": "node scripts/check-api.mjs",

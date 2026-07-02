@@ -83,8 +83,9 @@ de vision. No crear snapshots nuevos.
 - PR #293 queda como draft abierto para security report fase 2; PR #294 queda
   apilado para observabilidad PHI-safe formal; PR #295 queda apilado para
   contratos SEC-001/002/003; PR #296 queda apilado para auth productiva
-  docs-only. El trabajo local actual apilado corresponde a PR #297, integridad
-  medico-legal de auditoria.
+  docs-only; PR #297 queda apilado para integridad medico-legal de auditoria.
+  El trabajo local actual apilado corresponde a PR #298, reproducibilidad
+  Python.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
@@ -114,16 +115,16 @@ de vision. No crear snapshots nuevos.
   tocar login runtime ni usuarios productivos.
 - Integridad medico-legal de auditoria queda como contrato para hash-chain,
   version de algoritmo, verificacion, legal hold y export control, sin runtime.
+- Reproducibilidad Python usa `apps/api/requirements.lock`, validado desde
+  `check:toolchain`, y la cache CI de Python depende del lock.
 
-Secuencia recomendada desde el arbol local post-#297:
+Secuencia recomendada desde el arbol local post-#298:
 
-1. PR #298: reproducibilidad Python con lock y CI/cache, sin cambios clinicos.
-2. PR #299: HIS Service Catalog v0 para nombrar servicios/superficies.
-3. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto.
-4. PR #301: Screen-Service Matrix con service/act/backend/maturity.
-5. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
-6. PR #303: Unit of Work para un solo acto clinico compuesto, candidato
-    preconsulta o cierre ambulatorio simple.
+1. PR #299: HIS Service Catalog v0 para nombrar servicios/superficies.
+2. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto.
+3. PR #301: Screen-Service Matrix con service/act/backend/maturity.
+4. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
+5. PR #303: Unit of Work para un acto clinico compuesto.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida ni
 orden ejecutable sin plan clinico/legal separado.
