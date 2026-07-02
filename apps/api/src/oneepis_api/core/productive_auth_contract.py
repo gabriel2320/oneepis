@@ -26,6 +26,15 @@ class LocalRoleProductionBoundary:
     status: Literal["development_only", "not_productive_phi_access"]
 
 
+@dataclass(frozen=True)
+class ProductiveAuthProviderControl:
+    key: str
+    label: str
+    protocol_layer: Literal["identity_provider", "assurance", "session", "audit"]
+    criterion: str
+    runtime_enabled: bool
+
+
 PRODUCTIVE_AUTH_REQUIREMENTS: tuple[ProductiveAuthRequirement, ...] = (
     ProductiveAuthRequirement(
         key="persistent_user_store",
@@ -96,7 +105,54 @@ PRODUCTIVE_AUTH_REQUIREMENTS: tuple[ProductiveAuthRequirement, ...] = (
 )
 
 
+PRODUCTIVE_AUTH_PROVIDER_CONTROLS: tuple[ProductiveAuthProviderControl, ...] = (
+    ProductiveAuthProviderControl(
+        key="oidc_saml_adapter",
+        label="OIDC/SAML adapter",
+        protocol_layer="identity_provider",
+        criterion="Production auth must validate issuer, audience, expiry and signature.",
+        runtime_enabled=False,
+    ),
+    ProductiveAuthProviderControl(
+        key="mfa_assurance_claims",
+        label="MFA assurance claims",
+        protocol_layer="assurance",
+        criterion="Clinical access must map institutional MFA or equivalent assurance claims.",
+        runtime_enabled=False,
+    ),
+    ProductiveAuthProviderControl(
+        key="persistent_subject_link",
+        label="Persistent subject link",
+        protocol_layer="identity_provider",
+        criterion="External subject identifiers must link to a durable local user record.",
+        runtime_enabled=False,
+    ),
+    ProductiveAuthProviderControl(
+        key="role_group_sync",
+        label="Role and group sync",
+        protocol_layer="identity_provider",
+        criterion="Institutional groups must map to auditable role and membership records.",
+        runtime_enabled=False,
+    ),
+    ProductiveAuthProviderControl(
+        key="central_session_revocation",
+        label="Central session revocation",
+        protocol_layer="session",
+        criterion="Sessions must be revocable by institutional lifecycle or admin action.",
+        runtime_enabled=False,
+    ),
+    ProductiveAuthProviderControl(
+        key="identity_event_audit",
+        label="Identity event audit",
+        protocol_layer="audit",
+        criterion="Login, logout, recovery, role sync and revocation must emit minimized audit.",
+        runtime_enabled=False,
+    ),
+)
+
+
 PRODUCTIVE_AUTH_RUNTIME_STATUS = {
+    "oidc_saml_adapter_enabled": False,
     "institutional_identity_provider_enabled": False,
     "mfa_enforced": False,
     "persistent_user_store_enabled": False,
@@ -169,6 +225,10 @@ LOCAL_ROLE_PRODUCTION_BOUNDARIES: tuple[LocalRoleProductionBoundary, ...] = (
 
 def productive_auth_requirement_keys() -> tuple[str, ...]:
     return tuple(requirement.key for requirement in PRODUCTIVE_AUTH_REQUIREMENTS)
+
+
+def productive_auth_provider_control_keys() -> tuple[str, ...]:
+    return tuple(control.key for control in PRODUCTIVE_AUTH_PROVIDER_CONTROLS)
 
 
 def local_auth_development_setting_names() -> tuple[str, ...]:
