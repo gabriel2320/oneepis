@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-02",
+  "screenMappings": [
+    {
+      "routePattern": "/consulta/agenda",
+      "serviceKey": "appointments",
+      "clinicalActKey": "schedule_patient_appointment",
+      "backendSurface": "appointments",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/consulta/pacientes/[patientId]/atencion",
+      "serviceKey": "encounters",
+      "clinicalActKey": "record_encounter",
+      "backendSurface": "encounters",
+      "maturity": "composed_dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/hospitalizacion/camas",
+      "serviceKey": "hospital_beds",
+      "clinicalActKey": null,
+      "backendSurface": "hospital_beds",
+      "maturity": "operational_dev",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/hospitalizacion/camas/nueva",
+      "serviceKey": "hospital_beds",
+      "clinicalActKey": null,
+      "backendSurface": "hospital_beds",
+      "maturity": "operational_dev",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/hospitalizacion/pacientes/[patientId]/epicrisis",
+      "serviceKey": "clinical_entries",
+      "clinicalActKey": "record_clinical_entry",
+      "backendSurface": "clinical_entries",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/hospitalizacion/pacientes/[patientId]/ingreso",
+      "serviceKey": "clinical_entries",
+      "clinicalActKey": "record_clinical_entry",
+      "backendSurface": "clinical_entries",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/hospitalizacion/pacientes/[patientId]/hoja-diaria",
+      "serviceKey": "hospital_daily_sheets",
+      "clinicalActKey": "create_hospital_daily_sheet",
+      "backendSurface": "hospital_daily_sheets",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/hospitalizacion/pacientes/[patientId]/hoja-diaria/[sheetId]/editar",
+      "serviceKey": "hospital_daily_sheets",
+      "clinicalActKey": "create_hospital_daily_sheet",
+      "backendSurface": "hospital_daily_sheets",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/hospitalizacion/pacientes/[patientId]/indicaciones",
+      "serviceKey": "hospital_indications",
+      "clinicalActKey": "create_hospital_indication",
+      "backendSurface": "hospital_indications",
+      "maturity": "draft_dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/nuevo",
+      "serviceKey": "patient_registry",
+      "clinicalActKey": null,
+      "backendSurface": "patients",
+      "maturity": "dev_patient_write",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/ai-chart",
+      "serviceKey": "assistant_read",
+      "clinicalActKey": null,
+      "backendSurface": "assistant_read",
+      "maturity": "local_review_required",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/alergias/nueva",
+      "serviceKey": "allergies",
+      "clinicalActKey": "record_allergy",
+      "backendSurface": "allergies",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/encuentros/nuevo",
+      "serviceKey": "encounters",
+      "clinicalActKey": "record_encounter",
+      "backendSurface": "encounters",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/estado",
+      "serviceKey": "patient_registry",
+      "clinicalActKey": null,
+      "backendSurface": "patients",
+      "maturity": "dev_patient_write",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/eventos",
+      "serviceKey": "clinical_events",
+      "clinicalActKey": "record_clinical_event",
+      "backendSurface": "clinical_events",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/evoluciones/desde-eventos",
+      "serviceKey": "clinical_entries",
+      "clinicalActKey": "record_clinical_entry",
+      "backendSurface": "clinical_entries",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/evoluciones/nueva",
+      "serviceKey": "clinical_entries",
+      "clinicalActKey": "record_clinical_entry",
+      "backendSurface": "clinical_entries",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/medicacion/nueva",
+      "serviceKey": "medications",
+      "clinicalActKey": "manage_medication",
+      "backendSurface": "medications",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/problemas/nuevo",
+      "serviceKey": "active_problems",
+      "clinicalActKey": "manage_active_problem",
+      "backendSurface": "active_problems",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    },
+    {
+      "routePattern": "/pacientes/[patientId]/signos-vitales/nuevo",
+      "serviceKey": "vital_signs",
+      "clinicalActKey": "record_vital_sign",
+      "backendSurface": "vital_signs",
+      "maturity": "dev_write_abac",
+      "runtimeWriteAbac": false,
+      "autonomousAiAllowed": false
+    }
+  ]
+}

@@ -157,6 +157,17 @@
       "externalAiAllowed": false
     },
     {
+      "key": "hospital_beds",
+      "label": "Hospital bed board",
+      "domain": "hospitalization",
+      "maturity": "operational_dev",
+      "backendSurface": "hospital_beds",
+      "patientScoped": false,
+      "writesClinicalRecord": false,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
       "key": "assistant_read",
       "label": "Assistant Read",
       "domain": "ai",
