@@ -30,7 +30,7 @@ pendientes de seguridad, privacidad y gobernanza clinica en gates rastreables.
 | NOPROD-SEC-005 | Auditoria de accesos | en progreso | lecturas auditadas en backend con actor, ruta, correlacion, dedupe, minimizacion y cobertura E2E real de filtros lectura/escritura | `docs/AUDIT.md`; `apps/api/tests/test_patient_read_audit.py`; `apps/api/tests/test_patient_audit.py`; `apps/api/tests/test_audit_snapshot.py`; `apps/api/src/oneepis_api/services/access_context_audit.py`; `apps/web/src/lib/screen-capabilities.registry.json`; `scripts/check-audit-snapshot-allowlists.mjs`; `scripts/screen-registry.mjs` |
 | NOPROD-SEC-006 | Logs PHI-safe | en progreso | sanitizador backend activo, guard frontend/CI bloquea `console.*` en `apps/web/src` y contrato de observabilidad PHI-safe define logs/metricas sin PHI; faltan exportadores/dashboards productivos aprobados | `apps/api/tests/test_phi_logging.py`; `apps/api/src/oneepis_api/core/observability_contract.py`; `apps/api/tests/test_observability_contract.py`; `apps/api/src/oneepis_api/core/security_report_policy_contract.py`; `apps/api/tests/test_security_report_policy_contract.py`; `security/security-report-policy.json`; `scripts/check-frontend-phi-logs.mjs`; `scripts/check-python-advisories.mjs` |
 | NOPROD-SEC-007 | Control de acceso contextual | en progreso | institucion/tenant, equipo o servicio tratante, relacion asistencial, motivo de acceso y break-glass auditado | `apps/api/src/oneepis_api/core/clinical_access.py`; `apps/api/src/oneepis_api/core/access_context_contract.py`; `apps/api/src/oneepis_api/core/access_boundary_contract.py`; `apps/api/src/oneepis_api/core/clinical_write_access_contract.py`; `apps/api/src/oneepis_api/core/patient_scoped_route_inventory.py`; `apps/api/src/oneepis_api/services/patient_access_relationship.py`; `apps/api/src/oneepis_api/services/patient_scope_enforcement.py`; `scripts/check-patient-scoped-read-enforcement.mjs`; `apps/api/tests/test_break_glass_guard.py`; `apps/api/tests/test_clinical_access_contract.py`; `apps/api/tests/test_access_context_contract.py`; `apps/api/tests/test_access_boundary_contract.py`; `apps/api/tests/test_clinical_write_access_contract.py`; `apps/api/tests/test_patient_scoped_route_inventory.py`; `apps/api/tests/test_patient_access_relationship.py`; `apps/api/tests/test_patient_abac_enforcement.py` |
-| NOPROD-SEC-008 | Auth productiva | pendiente | proveedor institucional, MFA, usuarios/roles persistentes, sesiones robustas, recuperacion y revocacion | `apps/api/src/oneepis_api/core/productive_auth_contract.py`; `apps/api/tests/test_auth_session_contract.py`; `apps/api/tests/test_productive_auth_contract.py`; `scripts/check-web-auth-contract.mjs` |
+| NOPROD-SEC-008 | Auth productiva | pendiente | proveedor institucional OIDC/SAML, MFA/claims de assurance, usuarios/roles persistentes, sesiones robustas, recuperacion y revocacion | `apps/api/src/oneepis_api/core/productive_auth_contract.py`; `apps/api/tests/test_auth_session_contract.py`; `apps/api/tests/test_productive_auth_contract.py`; `scripts/check-web-auth-contract.mjs` |
 | NOPROD-SEC-009 | Gobernanza legal/clinica | pendiente | responsable clinico, revision legal, uso permitido y limitaciones | `docs/GOVERNANCE.md`; `apps/api/src/oneepis_api/core/clinical_governance_contract.py`; `apps/api/tests/test_clinical_governance_contract.py`; sin aprobacion operacional |
 | NOPROD-SEC-010 | Politica IA externa | bloqueada | gateway PHI, anonimizacion, autorizacion, auditoria y opt-in explicito | `docs/OLLAMA_AND_TOOLS.md`; `apps/api/src/oneepis_api/core/external_ai_contract.py`; `apps/api/tests/test_external_ai_contract.py`; `apps/api/tests/test_config.py` bloquea Ollama externo fuera de desarrollo |
 | NOPROD-SEC-011 | Firma/receta/orden ejecutable | bloqueada | contrato legal, permisos, folio, actor, fecha clinica y auditoria | `docs/GOVERNANCE.md`; `apps/api/tests/test_clinical_orders.py`; `apps/api/tests/test_patient_medication_catalog.py` |
@@ -90,6 +90,8 @@ Evidencia actual de avance sin habilitacion productiva:
 - SEC-001/002/003 tienen contrato agregado que une secretos, cifrado y
   backups/restore con sus contratos fuente, manteniendo runtime productivo y PHI
   real deshabilitados.
+- Auth productiva esta definida solo como contrato OIDC/SAML/MFA/claims/sesion;
+  el login local sigue siendo dev-only y no habilita usuarios productivos.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
@@ -101,9 +103,8 @@ Evidencia actual de avance sin habilitacion productiva:
 
 Mantener el gate de lectura patient-scoped por handler, el inventario OpenAPI
 por metodo/ruta, la politica explicita de auditoria para prints patient-scoped
-y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #296
-auth productiva docs-only, seguido por PR #297 integridad medico-legal de
-auditoria, PR #298
+y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #297
+integridad medico-legal de auditoria, seguido por PR #298
 reproducibilidad Python, PR #299 HIS Service Catalog, PR #300 Clinical Act
 Catalog, PR #301 Screen-Service Matrix, PR #302 AI Capability Catalog y PR #303
 Unit of Work para un solo acto clinico compuesto.

@@ -99,6 +99,8 @@ break-glass runtime, firma, receta valida ni orden ejecutable.
 - Contrato PHI-safe de observabilidad: `apps/api/src/oneepis_api/core/observability_contract.py`.
 - Contrato agregado SEC-001/002/003:
   `apps/api/src/oneepis_api/core/no_production_security_contract.py`.
+- Contrato auth productiva docs-only:
+  `apps/api/src/oneepis_api/core/productive_auth_contract.py`.
 - Checklist versionado no-produccion: `docs/NO_PRODUCTION_CHECKLIST.md`.
 
 ## Riesgos Vivos
@@ -118,11 +120,10 @@ break-glass runtime, firma, receta valida ni orden ejecutable.
 
 No ampliar modulos clinicos. El ultimo PR GitHub confirmado sigue siendo #292;
 los commits directos post-#292 no consumen numeracion de PR. PR #293 corresponde
-a security report fase 2, PR #294 a observabilidad PHI-safe formal y PR #295 a
-contratos no-produccion SEC-001/002/003. El siguiente trabajo debe seguir la
-cola post-#295 en reduccion de riesgo operacional:
+a security report fase 2, PR #294 a observabilidad PHI-safe formal, PR #295 a
+contratos SEC-001/002/003 y PR #296 a auth productiva docs-only. El siguiente
+trabajo debe seguir la cola post-#296 en reduccion de riesgo operacional:
 
-- PR #296: auth productiva docs-only.
 - PR #297: integridad medico-legal de auditoria como contrato.
 - PR #298: reproducibilidad Python.
 - PR #299: HIS Service Catalog v0.

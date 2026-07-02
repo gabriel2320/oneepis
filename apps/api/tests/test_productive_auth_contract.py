@@ -6,10 +6,12 @@ from oneepis_api.core.productive_auth_contract import (
     DEVELOPMENT_ONLY_LOCAL_ROLE_VALUES,
     LOCAL_AUTH_DEVELOPMENT_LIMITS,
     LOCAL_ROLE_PRODUCTION_BOUNDARIES,
+    PRODUCTIVE_AUTH_PROVIDER_CONTROLS,
     PRODUCTIVE_AUTH_REQUIREMENTS,
     PRODUCTIVE_AUTH_RUNTIME_STATUS,
     local_auth_development_setting_names,
     local_role_boundary_keys,
+    productive_auth_provider_control_keys,
     productive_auth_requirement_keys,
 )
 from oneepis_api.services.auth import hash_password
@@ -32,6 +34,26 @@ def test_productive_auth_contract_tracks_minimum_required_capabilities() -> None
     assert all(requirement.criterion for requirement in PRODUCTIVE_AUTH_REQUIREMENTS)
     assert {requirement.status for requirement in PRODUCTIVE_AUTH_REQUIREMENTS} == {
         "required_before_production"
+    }
+
+
+def test_productive_auth_provider_controls_are_docs_only_contract() -> None:
+    assert productive_auth_provider_control_keys() == (
+        "oidc_saml_adapter",
+        "mfa_assurance_claims",
+        "persistent_subject_link",
+        "role_group_sync",
+        "central_session_revocation",
+        "identity_event_audit",
+    )
+    assert all(control.label for control in PRODUCTIVE_AUTH_PROVIDER_CONTROLS)
+    assert all(control.criterion for control in PRODUCTIVE_AUTH_PROVIDER_CONTROLS)
+    assert {control.runtime_enabled for control in PRODUCTIVE_AUTH_PROVIDER_CONTROLS} == {False}
+    assert {control.protocol_layer for control in PRODUCTIVE_AUTH_PROVIDER_CONTROLS} == {
+        "identity_provider",
+        "assurance",
+        "session",
+        "audit",
     }
 
 
@@ -84,6 +106,7 @@ def test_non_development_rejects_local_dev_role() -> None:
 
 def test_productive_auth_contract_does_not_claim_runtime_identity_provider() -> None:
     assert PRODUCTIVE_AUTH_RUNTIME_STATUS == {
+        "oidc_saml_adapter_enabled": False,
         "institutional_identity_provider_enabled": False,
         "mfa_enforced": False,
         "persistent_user_store_enabled": False,
