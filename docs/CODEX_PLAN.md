@@ -80,8 +80,8 @@ de vision. No crear snapshots nuevos.
   contratos, auth web y print audit policy; `2635a58` corrige dependencias del
   carril contracts; `52cdc4d` actualiza CodeQL a v4. Estos commits no consumen
   numeracion de PR en GitHub.
-- El trabajo local actual corresponde al siguiente PR GitHub: #293, security
-  report fase 2.
+- PR #293 queda como draft abierto para security report fase 2; el trabajo local
+  actual apilado corresponde a PR #294, observabilidad PHI-safe formal.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
@@ -102,26 +102,27 @@ de vision. No crear snapshots nuevos.
 - `security-report` bloquea Gitleaks, OSV npm high/critical y `pip-audit`
   high/critical; dependency review y CodeQL siguen report-only con baseline y
   waiver versionados.
+- Observabilidad PHI-safe formal queda en contrato ejecutable: `correlation_id`,
+  logs JSON sin PHI, labels de metricas permitidos y exportadores/dashboards
+  productivos deshabilitados.
 
-Secuencia recomendada desde el arbol local post-#293:
+Secuencia recomendada desde el arbol local post-#294:
 
-1. PR #294: observabilidad PHI-safe formal, sin PHI real, exportadores
-   productivos ni dashboards.
-2. PR #295: contratos no-produccion SEC-001/002/003 para secretos, cifrado y
+1. PR #295: contratos no-produccion SEC-001/002/003 para secretos, cifrado y
    backups/restore.
-3. PR #296: auth productiva docs-only; no implementar login productivo todavia.
-4. PR #297: contrato de integridad medico-legal de auditoria, sin WORM ni
+2. PR #296: auth productiva docs-only; no implementar login productivo todavia.
+3. PR #297: contrato de integridad medico-legal de auditoria, sin WORM ni
    anchoring externo runtime.
-5. PR #298: reproducibilidad Python con lock y CI/cache ajustado, sin cambios
+4. PR #298: reproducibilidad Python con lock y CI/cache ajustado, sin cambios
    clinicos.
-6. PR #299: HIS Service Catalog v0 para nombrar servicios/superficies sin
+5. PR #299: HIS Service Catalog v0 para nombrar servicios/superficies sin
    implementarlos.
-7. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto
+6. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto
    clinico humano.
-8. PR #301: Screen-Service Matrix con `serviceKey`, `clinicalActKey`,
+7. PR #301: Screen-Service Matrix con `serviceKey`, `clinicalActKey`,
    `backendSurface` y `maturity`.
-9. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
-10. PR #303: Unit of Work para un solo acto clinico compuesto, candidato
+8. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
+9. PR #303: Unit of Work para un solo acto clinico compuesto, candidato
     preconsulta o cierre ambulatorio simple.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida ni
