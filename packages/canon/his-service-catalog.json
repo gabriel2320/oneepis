@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-02",
+  "services": [
+    {
+      "key": "patient_registry",
+      "label": "Patient registry",
+      "domain": "core_record",
+      "maturity": "dev_read_abac",
+      "backendSurface": "patients",
+      "patientScoped": true,
+      "writesClinicalRecord": false,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "clinical_entries",
+      "label": "Clinical entries",
+      "domain": "clinical_record",
+      "maturity": "dev_write_abac",
+      "backendSurface": "clinical_entries",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "clinical_events",
+      "label": "Clinical events",
+      "domain": "clinical_record",
+      "maturity": "dev_write_abac",
+      "backendSurface": "clinical_events",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "clinical_orders",
+      "label": "Clinical order drafts",
+      "domain": "orders",
+      "maturity": "dev_write_abac",
+      "backendSurface": "clinical_orders",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "vital_signs",
+      "label": "Vital signs",
+      "domain": "observations",
+      "maturity": "dev_write_abac",
+      "backendSurface": "vital_signs",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "clinical_risks",
+      "label": "Clinical risks",
+      "domain": "risk",
+      "maturity": "dev_write_abac",
+      "backendSurface": "clinical_risks",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "medications",
+      "label": "Medication list",
+      "domain": "medications",
+      "maturity": "dev_write_abac",
+      "backendSurface": "medications",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "allergies",
+      "label": "Allergies",
+      "domain": "antecedents",
+      "maturity": "dev_write_abac",
+      "backendSurface": "allergies",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "active_problems",
+      "label": "Active problems",
+      "domain": "problem_list",
+      "maturity": "dev_write_abac",
+      "backendSurface": "active_problems",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "encounters",
+      "label": "Clinical encounters",
+      "domain": "encounters",
+      "maturity": "dev_write_abac",
+      "backendSurface": "encounters",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "appointments",
+      "label": "Patient appointments",
+      "domain": "scheduling",
+      "maturity": "dev_write_abac",
+      "backendSurface": "appointments",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "lab_panels_results",
+      "label": "Lab panels and results",
+      "domain": "diagnostics",
+      "maturity": "dev_write_abac",
+      "backendSurface": "lab_panels_results",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "hospital_daily_sheets",
+      "label": "Hospital daily sheets",
+      "domain": "hospitalization",
+      "maturity": "dev_write_abac",
+      "backendSurface": "hospital_daily_sheets",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "hospital_indications",
+      "label": "Hospital indications",
+      "domain": "hospitalization",
+      "maturity": "dev_write_abac",
+      "backendSurface": "hospital_indications",
+      "patientScoped": true,
+      "writesClinicalRecord": true,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "assistant_read",
+      "label": "Assistant Read",
+      "domain": "ai",
+      "maturity": "local_read_only",
+      "backendSurface": "assistant_read",
+      "patientScoped": true,
+      "writesClinicalRecord": false,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    },
+    {
+      "key": "print_documents",
+      "label": "Clinical print documents",
+      "domain": "documents",
+      "maturity": "dev_read_audit",
+      "backendSurface": "print_documents",
+      "patientScoped": true,
+      "writesClinicalRecord": false,
+      "runtimeWriteAbac": false,
+      "externalAiAllowed": false
+    }
+  ]
+}
