@@ -84,8 +84,8 @@ de vision. No crear snapshots nuevos.
   apilado para observabilidad PHI-safe formal; PR #295 queda apilado para
   contratos SEC-001/002/003; PR #296 queda apilado para auth productiva
   docs-only; PR #297 queda apilado para integridad medico-legal de auditoria.
-  El trabajo local actual apilado corresponde a PR #298, reproducibilidad
-  Python.
+  PR #298 queda apilado para reproducibilidad Python. El trabajo local actual
+  apilado corresponde a PR #299, HIS Service Catalog v0.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
@@ -117,14 +117,14 @@ de vision. No crear snapshots nuevos.
   version de algoritmo, verificacion, legal hold y export control, sin runtime.
 - Reproducibilidad Python usa `apps/api/requirements.lock`, validado desde
   `check:toolchain`, y la cache CI de Python depende del lock.
+- HIS Service Catalog v0 nombra servicios y bloquea runtime ABAC/IA externa.
 
-Secuencia recomendada desde el arbol local post-#298:
+Secuencia recomendada desde el arbol local post-#299:
 
-1. PR #299: HIS Service Catalog v0 para nombrar servicios/superficies.
-2. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto.
-3. PR #301: Screen-Service Matrix con service/act/backend/maturity.
-4. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
-5. PR #303: Unit of Work para un acto clinico compuesto.
+1. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto.
+2. PR #301: Screen-Service Matrix con service/act/backend/maturity.
+3. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
+4. PR #303: Unit of Work para un acto clinico compuesto.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida ni
 orden ejecutable sin plan clinico/legal separado.
