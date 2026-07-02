@@ -80,8 +80,8 @@ de vision. No crear snapshots nuevos.
   contratos, auth web y print audit policy; `2635a58` corrige dependencias del
   carril contracts; `52cdc4d` actualiza CodeQL a v4. Estos commits no consumen
   numeracion de PR en GitHub.
-- PR #293-#300 quedan como draft/stack de seguridad, operaciones y catalogos.
-  El trabajo local actual apilado corresponde a PR #301, Screen-Service Matrix.
+- PR #293-#301 quedan como draft/stack de seguridad, operaciones y catalogos.
+  El trabajo local actual apilado corresponde a PR #302, AI Capability Catalog.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
@@ -117,11 +117,12 @@ de vision. No crear snapshots nuevos.
 - Clinical Act Catalog v0 mapea actos humanos a servicios HIS y bloquea IA autonoma.
 - Screen-Service Matrix v0 conecta pantallas escribibles con servicio, acto,
   backend y madurez.
+- AI Capability Catalog v0 gobierna perfiles IA locales sin proveedor externo,
+  escritura autonoma ni persistencia clinica directa.
 
-Secuencia recomendada desde el arbol local post-#301:
+Secuencia recomendada desde el arbol local post-#302:
 
-1. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
-2. PR #303: Unit of Work para un acto clinico compuesto.
+1. PR #303: Unit of Work para un acto clinico compuesto.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida ni
 orden ejecutable sin plan clinico/legal separado.

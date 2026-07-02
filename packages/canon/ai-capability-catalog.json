@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-02",
+  "capabilities": [
+    {
+      "key": "assistant_read.context",
+      "label": "Read existing clinical context",
+      "actions": ["read"],
+      "runtimeMode": "local_rules_or_local_model",
+      "inputPolicy": "existing_structured_sources_only",
+      "outputPolicy": "contextual_read_only",
+      "writesClinicalRecord": false,
+      "requiresHumanReview": true,
+      "externalProviderAllowed": false,
+      "autonomousWriteAllowed": false,
+      "promptRegistryVersion": "none"
+    },
+    {
+      "key": "assistant_read.summary",
+      "label": "Summarize patient context",
+      "actions": ["read", "summarize"],
+      "runtimeMode": "local_rules_or_local_model",
+      "inputPolicy": "minimized_snapshot_and_longitudinal_sources",
+      "outputPolicy": "reviewable_summary",
+      "writesClinicalRecord": false,
+      "requiresHumanReview": true,
+      "externalProviderAllowed": false,
+      "autonomousWriteAllowed": false,
+      "promptRegistryVersion": "v0-local-summary"
+    },
+    {
+      "key": "assistant_read.search",
+      "label": "Search longitudinal sources",
+      "actions": ["read", "search"],
+      "runtimeMode": "local_rules",
+      "inputPolicy": "structured_patient_sources",
+      "outputPolicy": "source_linked_results",
+      "writesClinicalRecord": false,
+      "requiresHumanReview": true,
+      "externalProviderAllowed": false,
+      "autonomousWriteAllowed": false,
+      "promptRegistryVersion": "none"
+    },
+    {
+      "key": "assistant_read.chart",
+      "label": "Prepare explainable chart context",
+      "actions": ["read", "search", "chart"],
+      "runtimeMode": "local_rules",
+      "inputPolicy": "observations_events_and_results",
+      "outputPolicy": "explainable_series_only",
+      "writesClinicalRecord": false,
+      "requiresHumanReview": true,
+      "externalProviderAllowed": false,
+      "autonomousWriteAllowed": false,
+      "promptRegistryVersion": "none"
+    },
+    {
+      "key": "local_validation.medication",
+      "label": "Validate medication draft locally",
+      "actions": ["read", "validate"],
+      "runtimeMode": "local_rules",
+      "inputPolicy": "curated_local_catalog",
+      "outputPolicy": "non_prescriptive_validation",
+      "writesClinicalRecord": false,
+      "requiresHumanReview": true,
+      "externalProviderAllowed": false,
+      "autonomousWriteAllowed": false,
+      "promptRegistryVersion": "none"
+    },
+    {
+      "key": "clinical_draft.soap",
+      "label": "Draft reviewable clinical text",
+      "actions": ["read", "summarize", "draft"],
+      "runtimeMode": "local_rules_or_local_model",
+      "inputPolicy": "selected_events_and_entries",
+      "outputPolicy": "unsigned_reviewable_draft",
+      "writesClinicalRecord": false,
+      "requiresHumanReview": true,
+      "externalProviderAllowed": false,
+      "autonomousWriteAllowed": false,
+      "promptRegistryVersion": "v0-local-draft"
+    },
+    {
+      "key": "clinical_patch.proposal",
+      "label": "Propose human-confirmed clinical patch",
+      "actions": ["read", "summarize", "search", "chart", "draft", "propose_patch"],
+      "runtimeMode": "local_rules_or_local_model",
+      "inputPolicy": "assistant_read_events_and_chart",
+      "outputPolicy": "proposal_only_until_human_confirmation",
+      "writesClinicalRecord": false,
+      "requiresHumanReview": true,
+      "externalProviderAllowed": false,
+      "autonomousWriteAllowed": false,
+      "clinicalPatchAllowed": true,
+      "promptRegistryVersion": "v0-local-patch"
+    }
+  ],
+  "profileCoverage": [
+    {
+      "aiProfile": "read",
+      "capabilityKeys": ["assistant_read.context"]
+    },
+    {
+      "aiProfile": "summary",
+      "capabilityKeys": ["assistant_read.context", "assistant_read.summary"]
+    },
+    {
+      "aiProfile": "chart",
+      "capabilityKeys": ["assistant_read.context", "assistant_read.search", "assistant_read.chart"]
+    },
+    {
+      "aiProfile": "validate",
+      "capabilityKeys": ["assistant_read.context", "local_validation.medication"]
+    },
+    {
+      "aiProfile": "draft",
+      "capabilityKeys": ["assistant_read.context", "assistant_read.summary", "clinical_draft.soap"]
+    },
+    {
+      "aiProfile": "patch",
+      "capabilityKeys": [
+        "assistant_read.context",
+        "assistant_read.summary",
+        "assistant_read.search",
+        "assistant_read.chart",
+        "clinical_draft.soap",
+        "clinical_patch.proposal"
+      ]
+    }
+  ]
+}

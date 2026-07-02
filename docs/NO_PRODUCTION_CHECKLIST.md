@@ -103,6 +103,8 @@ Evidencia actual de avance sin habilitacion productiva:
   bloquea IA autonoma para esos actos.
 - Screen-Service Matrix v0 exige que cada pantalla escribible del registry tenga
   servicio, backend, madurez y acto humano si escribe ficha clinica.
+- AI Capability Catalog v0 cubre perfiles IA visibles y bloquea proveedor
+  externo, escritura autonoma y persistencia clinica directa.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
@@ -114,8 +116,7 @@ Evidencia actual de avance sin habilitacion productiva:
 
 Mantener el gate de lectura patient-scoped por handler, el inventario OpenAPI
 por metodo/ruta, la politica explicita de auditoria para prints patient-scoped
-y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #302
-AI Capability Catalog, seguido por PR #303 Unit of Work para un solo acto
-clinico compuesto.
+y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #303
+Unit of Work para un solo acto clinico compuesto.
 Crear issues separados a partir de estos IDs solo despues de una revision humana
 del checklist. Hasta entonces, este documento es la fuente versionada.
