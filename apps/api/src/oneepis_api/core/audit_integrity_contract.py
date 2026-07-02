@@ -17,6 +17,14 @@ class AuditIntegrityField:
     reason: str
 
 
+@dataclass(frozen=True)
+class AuditMedicoLegalControl:
+    key: str
+    label: str
+    linked_requirement: str
+    runtime_enabled: bool
+
+
 AUDIT_INTEGRITY_REQUIREMENTS: tuple[AuditIntegrityRequirement, ...] = (
     AuditIntegrityRequirement(
         key="canonical_event_serialization",
@@ -62,6 +70,46 @@ AUDIT_INTEGRITY_REQUIREMENTS: tuple[AuditIntegrityRequirement, ...] = (
             "audit chain and report the first broken link."
         ),
         status="required_before_production",
+    ),
+)
+
+
+AUDIT_MEDICO_LEGAL_CONTROLS: tuple[AuditMedicoLegalControl, ...] = (
+    AuditMedicoLegalControl(
+        key="hash_chain",
+        label="Hash-chain tamper evidence",
+        linked_requirement="previous_digest_link",
+        runtime_enabled=False,
+    ),
+    AuditMedicoLegalControl(
+        key="algorithm_version",
+        label="Algorithm and canonicalization version",
+        linked_requirement="digest_algorithm_version",
+        runtime_enabled=False,
+    ),
+    AuditMedicoLegalControl(
+        key="verification_job",
+        label="Verification job",
+        linked_requirement="verification_procedure",
+        runtime_enabled=False,
+    ),
+    AuditMedicoLegalControl(
+        key="retention_policy_link",
+        label="Retention policy link",
+        linked_requirement="versioned_retention_policy",
+        runtime_enabled=False,
+    ),
+    AuditMedicoLegalControl(
+        key="legal_hold",
+        label="Legal hold",
+        linked_requirement="legal_hold",
+        runtime_enabled=False,
+    ),
+    AuditMedicoLegalControl(
+        key="controlled_export",
+        label="Controlled export",
+        linked_requirement="exportable_audit_log",
+        runtime_enabled=False,
     ),
 )
 
@@ -125,9 +173,11 @@ AUDIT_INTEGRITY_RUNTIME_STATUS = {
     "external_anchor_enabled": False,
     "worm_storage_enabled": False,
     "verification_job_enabled": False,
+    "legal_hold_enabled": False,
+    "controlled_export_enabled": False,
     "reason": (
         "Audit integrity is an executable production contract only; runtime "
-        "hash-chain or WORM storage is future work."
+        "hash-chain, WORM storage, legal hold and controlled export are future work."
     ),
 }
 
@@ -138,3 +188,7 @@ def audit_integrity_requirement_keys() -> tuple[str, ...]:
 
 def audit_integrity_digest_field_names() -> tuple[str, ...]:
     return tuple(field.field_name for field in AUDIT_INTEGRITY_DIGEST_FIELDS)
+
+
+def audit_medico_legal_control_keys() -> tuple[str, ...]:
+    return tuple(control.key for control in AUDIT_MEDICO_LEGAL_CONTROLS)

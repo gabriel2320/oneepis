@@ -82,8 +82,9 @@ de vision. No crear snapshots nuevos.
   numeracion de PR en GitHub.
 - PR #293 queda como draft abierto para security report fase 2; PR #294 queda
   apilado para observabilidad PHI-safe formal; PR #295 queda apilado para
-  contratos SEC-001/002/003. El trabajo local actual apilado corresponde a PR
-  #296, auth productiva docs-only.
+  contratos SEC-001/002/003; PR #296 queda apilado para auth productiva
+  docs-only. El trabajo local actual apilado corresponde a PR #297, integridad
+  medico-legal de auditoria.
 - Read ABAC dev-only cubre el core patient-scoped declarado en
   `docs/CURRENT_STATE.md`.
 - Write ABAC dev-only cubre `vital_signs`, `clinical_risks`,
@@ -111,16 +112,17 @@ de vision. No crear snapshots nuevos.
   backups/restore, sin habilitar runtime productivo ni PHI real.
 - Auth productiva queda definida como contrato OIDC/SAML/MFA/claims/sesion sin
   tocar login runtime ni usuarios productivos.
+- Integridad medico-legal de auditoria queda como contrato para hash-chain,
+  version de algoritmo, verificacion, legal hold y export control, sin runtime.
 
-Secuencia recomendada desde el arbol local post-#296:
+Secuencia recomendada desde el arbol local post-#297:
 
-1. PR #297: integridad medico-legal de auditoria, sin WORM ni anchoring runtime.
-2. PR #298: reproducibilidad Python con lock y CI/cache, sin cambios clinicos.
-3. PR #299: HIS Service Catalog v0 para nombrar servicios/superficies.
-4. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto.
-5. PR #301: Screen-Service Matrix con service/act/backend/maturity.
-6. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
-7. PR #303: Unit of Work para un solo acto clinico compuesto, candidato
+1. PR #298: reproducibilidad Python con lock y CI/cache, sin cambios clinicos.
+2. PR #299: HIS Service Catalog v0 para nombrar servicios/superficies.
+3. PR #300: Clinical Act Catalog v0 para separar pantalla/endpoints de acto.
+4. PR #301: Screen-Service Matrix con service/act/backend/maturity.
+5. PR #302: AI Capability Catalog local, sin IA externa ni escritura autonoma.
+6. PR #303: Unit of Work para un solo acto clinico compuesto, candidato
     preconsulta o cierre ambulatorio simple.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida ni
