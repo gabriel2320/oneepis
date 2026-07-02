@@ -99,6 +99,8 @@ Evidencia actual de avance sin habilitacion productiva:
   las dependencias directas de `pyproject.toml` esten pinneadas.
 - HIS Service Catalog v0 nombra servicios/superficies existentes sin crear
   modulos nuevos y bloquea runtime write ABAC o IA externa en el catalogo.
+- Clinical Act Catalog v0 separa actos clinicos humanos de pantallas/endpoints y
+  bloquea IA autonoma para esos actos.
 - Los headers contextuales siguen rechazados y auditados; `break_glass_enabled`,
   `patient_scoping_enabled` y `abac_runtime_enforced` productivo siguen en
   `False`.
@@ -110,8 +112,8 @@ Evidencia actual de avance sin habilitacion productiva:
 
 Mantener el gate de lectura patient-scoped por handler, el inventario OpenAPI
 por metodo/ruta, la politica explicita de auditoria para prints patient-scoped
-y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #300
-Clinical Act Catalog, seguido por PR #301 Screen-Service Matrix, PR #302 AI
-Capability Catalog y PR #303 Unit of Work para un solo acto clinico compuesto.
+y el gate `pip-audit` high/critical. El siguiente cierre recomendado es PR #301
+Screen-Service Matrix, seguido por PR #302 AI Capability Catalog y PR #303 Unit
+of Work para un solo acto clinico compuesto.
 Crear issues separados a partir de estos IDs solo despues de una revision humana
 del checklist. Hasta entonces, este documento es la fuente versionada.
