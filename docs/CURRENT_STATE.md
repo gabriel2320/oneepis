@@ -113,6 +113,8 @@ break-glass runtime, firma, receta valida ni orden ejecutable.
   validado por `scripts/check-screen-service-matrix.mjs`.
 - AI Capability Catalog v0: `packages/canon/ai-capability-catalog.json`,
   validado por `scripts/check-ai-capability-catalog.mjs`.
+- Unit of Work piloto para acto compuesto:
+  `oneepis_api.services.clinical_act_unit_of_work.complete_ambulatory_visit_with_soap`.
 - Checklist versionado no-produccion: `docs/NO_PRODUCTION_CHECKLIST.md`.
 
 ## Riesgos Vivos
@@ -136,9 +138,10 @@ a security report fase 2, PR #294 a observabilidad PHI-safe formal, PR #295 a
 contratos SEC-001/002/003, PR #296 a auth productiva docs-only, PR #297 a
 integridad medico-legal de auditoria, PR #298 a reproducibilidad Python, PR
 #299 a HIS Service Catalog v0, PR #300 a Clinical Act Catalog v0, PR #301 a
-Screen-Service Matrix y PR #302 a AI Capability Catalog. Siguiente:
+Screen-Service Matrix, PR #302 a AI Capability Catalog y PR #303 a Unit of Work
+piloto para cierre ambulatorio simple.
 
-- PR #303: Unit of Work para un acto clinico compuesto.
+Siguiente: revisar/mergear el stack #293-#303 antes de abrir mas alcance.
 
 No avanzar a runtime write ABAC, break-glass runtime, firma, receta valida,
 orden ejecutable, PHI real ni IA externa.
